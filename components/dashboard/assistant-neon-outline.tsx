@@ -11,8 +11,8 @@ type TAssistantNeonOutlineProps = {
 };
 
 const STROKE = 1.5;
-/** Keep the full stroke inside the card so corners are not clipped. */
-const INSET = 1;
+/** Pull the stroke in so rounded corners stay inside the card. */
+const INSET = 2;
 
 /**
  * Neon rim via SVG stroke only — cannot paint the transparent glass fill.
@@ -27,6 +27,7 @@ export function AssistantNeonOutline({
   return (
     <svg
       aria-hidden
+      overflow="visible"
       className={cn(
         "pointer-events-none absolute inset-0 z-10 size-full overflow-visible motion-reduce:hidden",
         className,

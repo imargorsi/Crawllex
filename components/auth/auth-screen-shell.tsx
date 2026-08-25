@@ -8,8 +8,9 @@ type AuthScreenShellProps = {
 };
 
 /**
- * Auth split layout — hero left, form right on desktop.
- * Both columns vertically center their content. Trust chips sit at the bottom of the hero.
+ * Auth split layout — hero left, form right from `lg`.
+ * On smaller screens the hero stays visible (tighter type) above the form.
+ * Trust chips wait until `xl`.
  *
  * Form centering uses the min-h-full + items-center scroll pattern so the card
  * stays vertically centered when it fits, and scrolls from a sensible start when
@@ -17,11 +18,11 @@ type AuthScreenShellProps = {
  */
 export function AuthScreenShell({ children }: AuthScreenShellProps) {
   return (
-    <main className="relative grid min-h-svh grid-cols-1 lg:h-svh lg:grid-cols-2 lg:overflow-hidden">
+    <main className="relative grid min-h-svh grid-cols-1 overflow-x-hidden lg:h-svh lg:grid-cols-2 lg:overflow-hidden">
       <AuthVideoBackground />
       <SignInHeroSection />
-      <div className="relative z-10 min-h-svh w-full overflow-y-auto lg:h-full lg:min-h-0">
-        <div className="flex min-h-full w-full items-center justify-center px-5 py-10 sm:px-10 lg:px-12 lg:py-12">
+      <div className="relative z-10 min-w-0 w-full overflow-y-auto overflow-x-hidden lg:h-full lg:min-h-0">
+        <div className="flex w-full min-w-0 items-center justify-center px-5 py-8 sm:px-10 lg:min-h-full lg:px-8 lg:py-12 xl:px-10">
           {children}
         </div>
       </div>

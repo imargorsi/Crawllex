@@ -152,12 +152,12 @@ export function DashboardHomeSection() {
     (canViewAnalytics && overviewQuery.isLoading);
 
   return (
-    <div className="relative flex h-full min-h-0 w-full min-w-0 flex-col overflow-y-auto">
+    <div className="relative flex w-full min-w-0 flex-col xl:h-full xl:min-h-0">
       <PageAmbientGlow />
 
-      <div className="relative flex min-h-0 w-full min-w-0 flex-1 flex-col px-4 py-2.5 sm:px-6 sm:py-3">
-        <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div className={cn(typeStackMdClass, "min-w-0")}>
+      <div className="relative flex w-full min-w-0 flex-col px-4 py-2.5 sm:px-6 sm:py-3 xl:min-h-0 xl:flex-1">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className={cn(typeStackMdClass, "min-w-0 max-w-xl")}>
             <Heading id="dashboard-home-title" pageTitle>
               {t("title")}
             </Heading>
@@ -188,8 +188,8 @@ export function DashboardHomeSection() {
           </div>
         </div>
 
-        <div className="mt-3 flex min-h-0 w-full flex-1 flex-col gap-8 pb-4">
-          <section aria-label={t("pulse.title")} className="shrink-0">
+        <div className="mt-3 flex w-full min-w-0 flex-col gap-6 pb-4 xl:min-h-0 xl:flex-1">
+          <section aria-label={t("pulse.title")} className="min-w-0 shrink-0">
             <DashboardSeoPulse
               variant="row"
               isLoading={pulseLoading}
@@ -201,30 +201,30 @@ export function DashboardHomeSection() {
 
           <div
             className={cn(
-              "grid min-h-0 w-full flex-1 gap-3",
+              "grid w-full min-w-0 gap-3",
               canViewAnalytics &&
-                "lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:items-stretch",
+                "xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] xl:items-stretch",
             )}
           >
-            <div className="flex min-h-0 min-w-0 w-full">
+            <div className="min-h-0 min-w-0 w-full xl:h-full">
               <DashboardAssistantPanel
                 projectId={projectId}
                 canViewLeads={canViewLeads}
                 canViewAnalytics={canViewAnalytics}
                 canViewSeo={canViewSeo}
                 compact
-                className="h-full w-full"
+                className="w-full xl:h-full"
               />
             </div>
 
             {canViewAnalytics ? (
-              <section aria-label={t("trend.title")} className="flex min-h-0 min-w-0 w-full">
+              <section aria-label={t("trend.title")} className="min-h-0 min-w-0 w-full xl:h-full">
                 <DashboardSeoTrendGrid
                   overview={overviewQuery.data}
                   isLoading={overviewQuery.isLoading}
                   from={from}
                   to={to}
-                  className="h-full w-full"
+                  className="w-full xl:h-full"
                 />
               </section>
             ) : null}

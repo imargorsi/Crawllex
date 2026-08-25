@@ -144,7 +144,7 @@ export function DashboardAssistantPanel({
     <section
       className={cn(
         glassPanelSurfaceClass,
-        "relative flex h-full w-full flex-col overflow-visible border-0 shadow-none",
+        "relative flex w-full min-w-0 flex-col overflow-visible border-0 shadow-none",
         "motion-reduce:border motion-reduce:border-border/50 dark:motion-reduce:border-text-primary/30",
         compact ? "rounded-2xl p-4 sm:p-5" : "rounded-3xl p-6 sm:p-7",
         className,
@@ -227,7 +227,7 @@ export function DashboardAssistantPanel({
           </div>
         </form>
 
-        <div className="flex min-h-0 flex-1 flex-col" aria-live="polite">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto" aria-live="polite">
           {answer ? (
             <DashboardAssistantAnswer answer={answer} />
           ) : historyQuery.isLoading ? (

@@ -13,7 +13,7 @@ export function PageAmbientGlow() {
         }}
       />
       <div
-        className="absolute left-1/3 top-0 h-40 w-2xl -translate-x-1/2 rounded-full blur-3xl motion-safe:animate-[page-ambient-drift-c_16s_ease-in-out_infinite]"
+        className="absolute left-1/3 top-0 h-40 w-[min(42rem,100%)] -translate-x-1/2 rounded-full blur-3xl motion-safe:animate-[page-ambient-drift-c_16s_ease-in-out_infinite]"
         style={{
           background: "color-mix(in srgb, var(--gradient-mid) 10%, transparent)",
         }}

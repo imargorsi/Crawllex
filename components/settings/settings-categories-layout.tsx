@@ -41,7 +41,7 @@ export function SettingsCategoriesLayout({
     <div
       className={cn(
         elevatedCardSurfaceClass,
-        "flex min-h-112 overflow-hidden rounded-xl",
+        "flex min-h-112 min-w-0 overflow-hidden rounded-xl",
       )}
     >
       <aside

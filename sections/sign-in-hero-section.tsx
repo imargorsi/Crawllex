@@ -94,8 +94,10 @@ function FeatureCard({
         <FeatureMark mark={feature.mark} />
       </span>
       <div className="flex min-w-0 flex-col gap-0.5">
-        <p className={cn("type-body-strong leading-snug", authHeroCopyClass)}>{title}</p>
-        <Paragraph smaller className={cn("leading-snug", authHeroMutedClass)}>
+        <p className={cn("type-body-strong leading-snug", authHeroCopyClass)}>
+          {title}
+        </p>
+        <Paragraph moreSmaller className={cn("leading-snug xl:text-sm", authHeroMutedClass)}>
           {body}
         </Paragraph>
       </div>
@@ -117,7 +119,7 @@ function SignInHeroTrustStrip() {
   const { t } = useTranslation("translation", { keyPrefix: "auth.signIn" });
 
   return (
-    <ul className="flex w-full max-w-xl list-none flex-wrap justify-start gap-1.5 p-0 sm:flex-nowrap">
+    <ul className="flex w-full min-w-0 max-w-xl list-none flex-wrap justify-start gap-1.5 p-0">
       {TRUST_ITEMS.map((item) => (
         <li key={item.labelKey} className={authHeroTrustChipClass}>
           <TrustMark item={item} />
@@ -130,18 +132,21 @@ function SignInHeroTrustStrip() {
   );
 }
 
-export function SignInHeroSection() {
+/** Login/register hero. `overlay` hides copy below `lg` so the 50vh reveal panel is not clipped. */
+export function SignInHeroSection({ overlay = false }: { overlay?: boolean }) {
   const { t } = useTranslation("translation", { keyPrefix: "auth.signIn" });
   const { t: tLayout } = useTranslation("translation", { keyPrefix: "layout" });
 
   return (
     <section
-      className={cn(authHeroPanelClass, "hidden lg:flex")}
+      className={cn(authHeroPanelClass, overlay && "hidden lg:flex")}
       aria-labelledby="sign-in-hero-heading"
     >
       <div
         className={cn(
-          "flex min-h-full w-full flex-col justify-center px-8 py-12 pb-24 lg:px-14 lg:py-12 lg:pb-24",
+          "flex w-full min-w-0 flex-col justify-center px-5 py-8 sm:px-8 sm:py-10",
+          "lg:min-h-full lg:px-8 lg:py-10 lg:pb-8",
+          "xl:px-10 xl:py-12 xl:pb-24 2xl:px-14",
           authHeroCopyClass,
         )}
       >
@@ -149,23 +154,27 @@ export function SignInHeroSection() {
           <AppLogo
             alt={tLayout("appName")}
             surface="onDark"
-            className="mb-8 block h-auto w-72 max-w-full"
+            className="mb-5 block h-auto w-48 max-w-full sm:mb-6 sm:w-56 xl:mb-8 xl:w-72"
             width={288}
             height={96}
             priority
           />
 
           <div className={typeStackMdClass}>
-            <Heading id="sign-in-hero-heading" heroTitle className={cn(authHeroCopyClass, "leading-tight")}>
+            <Heading
+              id="sign-in-hero-heading"
+              heroTitle
+              className={cn(authHeroCopyClass, "leading-tight text-2xl! sm:text-3xl! 2xl:text-4xl!")}
+            >
               {t("heroTitleStart")}{" "}
               <span className={authHeroAccentClass}>{t("heroTitleAccent")}</span>
             </Heading>
-            <Paragraph className={cn("max-w-lg leading-relaxed", authHeroMutedClass)}>
+            <Paragraph smaller className={cn("max-w-lg leading-relaxed", authHeroMutedClass)}>
               {t("heroLead")}
             </Paragraph>
           </div>
 
-          <ul className="mt-10 grid list-none grid-cols-1 gap-5 p-0">
+          <ul className="mt-6 grid list-none grid-cols-1 gap-3 p-0 sm:mt-8 sm:gap-4 xl:mt-10 xl:gap-5">
             {HERO_FEATURES.map((feature) => (
               <FeatureCard
                 key={feature.titleKey}
@@ -178,7 +187,7 @@ export function SignInHeroSection() {
         </div>
       </div>
 
-      <div className="absolute inset-s-8 inset-e-8 bottom-8 z-10 lg:inset-s-14 lg:inset-e-14 lg:bottom-10">
+      <div className="absolute inset-s-8 inset-e-8 bottom-8 z-10 hidden min-w-0 xl:block xl:inset-s-10 xl:inset-e-10 xl:bottom-10 2xl:inset-s-14 2xl:inset-e-14">
         <div className="mx-auto w-full max-w-xl">
           <SignInHeroTrustStrip />
         </div>
