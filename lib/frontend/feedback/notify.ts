@@ -6,7 +6,7 @@ import { formatFeedbackText } from "@/lib/frontend/feedback/format";
 import type { FeedbackMessage } from "@/lib/frontend/feedback/types";
 
 const DEFAULT_OPTIONS: TGlassToastOptions = {
-  position: "top-right",
+  position: "bottom-right",
   duration: 5000,
   /** Auto-dismiss only — no manual close control. */
   dismissible: false,
