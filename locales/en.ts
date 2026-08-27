@@ -10,6 +10,11 @@ export interface Translation {
     emptyLabel: string;
     selectPrompt: string;
   };
+  workspace: {
+    aria: string;
+    seo: string;
+    onboarding: string;
+  };
   nav: {
     aria: string;
     openMenu: string;
@@ -26,6 +31,7 @@ export interface Translation {
     analytics: string;
     seoActivities: string;
     leads: string;
+    clients: string;
     settings: string;
   };
   breadcrumb: {
@@ -889,6 +895,160 @@ export interface Translation {
         colUpdatedAt: string;
       };
     };
+    clients: {
+      title: string;
+      subtitle: string;
+      addClient: string;
+      copyLink: string;
+      editClient: string;
+      deleteClient: string;
+      createTitle: string;
+      createLead: string;
+      editTitle: string;
+      editLead: string;
+      notFoundTitle: string;
+      notFoundBody: string;
+      loadErrorTitle: string;
+      loadErrorBody: string;
+      statusFilter: {
+        ariaLabel: string;
+        all: string;
+        active: string;
+        inactive: string;
+        emptyTitle: string;
+        emptyBody: string;
+      };
+      viewMode: {
+        ariaLabel: string;
+        cards: string;
+        table: string;
+      };
+      cardActions: {
+        active: string;
+        inactive: string;
+        viewDetails: string;
+        editClient: string;
+        copyLink: string;
+        deleteClient: string;
+        errorFallback: string;
+        success: {
+          active: string;
+          inactive: string;
+        };
+      };
+      listCard: {
+        shareLabel: string;
+      };
+      createForm: {
+        sectionBusinessLead: string;
+        businessName: string;
+        businessNamePh: string;
+        companyLogoHint: string;
+        companyLogoUploadLabel: string;
+        websiteUrl: string;
+        websiteUrlPh: string;
+        businessAddress: string;
+        businessAddressPh: string;
+        pocContactNumber: string;
+        pocContactNumberPh: string;
+        pocEmail: string;
+        pocEmailPh: string;
+        sectionServiceLead: string;
+        servicesOffered: string;
+        servicesOfferedPh: string;
+        servicesOfferedHelp: string;
+        primaryServiceToPromote: string;
+        primaryServiceToPromotePh: string;
+        primaryServiceEmpty: string;
+        idealCustomerProfile: string;
+        idealCustomerProfilePh: string;
+        sectionOperationsLead: string;
+        targetLocations: string;
+        targetLocationsPh: string;
+        targetLocationsHelp: string;
+        sectionSeoLead: string;
+        sectionCompetitorsLead: string;
+        competitorUrls: string;
+        competitorUrlsPh: string;
+        competitorUrlsHelp: string;
+        submit: string;
+        submitting: string;
+        editSubmit: string;
+        editSubmitting: string;
+        successFallback: string;
+        errorFallback: string;
+        editSuccessFallback: string;
+        editErrorFallback: string;
+        nextStep: string;
+        previousStep: string;
+        stepBasicInformation: string;
+        stepServiceInformation: string;
+        stepSeo: string;
+        stepValidationError: string;
+        valRequired: string;
+        valMin: string;
+        valMax: string;
+        valUrl: string;
+        valEmail: string;
+        backToList: string;
+        backToClient: string;
+      };
+      detail: {
+        loading: string;
+        notFoundTitle: string;
+        notFoundBody: string;
+        loadErrorTitle: string;
+        loadErrorBody: string;
+        sectionBusinessTitle: string;
+        sectionBusinessLead: string;
+        sectionServicesTitle: string;
+        sectionServicesLead: string;
+        sectionIcpTitle: string;
+        sectionIcpLead: string;
+        sectionLocationsTitle: string;
+        sectionLocationsLead: string;
+        sectionSeoGoalsTitle: string;
+        sectionSeoGoalsLead: string;
+        sectionCompetitorsTitle: string;
+        sectionCompetitorsLead: string;
+        sectionShareTitle: string;
+        sectionShareLead: string;
+        noValue: string;
+        noServices: string;
+        noLocations: string;
+        noSeoGoals: string;
+        noCompetitors: string;
+      };
+      public: {
+        title: string;
+        lead: string;
+        notFoundTitle: string;
+        notFoundBody: string;
+        loadErrorTitle: string;
+        loadErrorBody: string;
+      };
+      table: {
+        accessDeniedBody: string;
+        loadErrorBody: string;
+        copySuccess: string;
+        copyError: string;
+        deleteSuccess: string;
+        deleteErrorFallback: string;
+        deleteTitle: string;
+        deleteBody: string;
+        deleteCancel: string;
+        deleteConfirm: string;
+        colClient: string;
+        colStatus: string;
+        colActions: string;
+        viewClient: string;
+        copyLink: string;
+        editClient: string;
+        deleteClient: string;
+        emptyTitle: string;
+        emptyBody: string;
+      };
+    };
     analytics: {
       title: string;
       subtitle: string;
@@ -1593,6 +1753,11 @@ const translation: Translation = {
     emptyLabel: "No Projects Available",
     selectPrompt: "Select A Project To Continue",
   },
+  workspace: {
+    aria: "Workspace",
+    seo: "SEO",
+    onboarding: "Onboarding",
+  },
   nav: {
     aria: "Main Navigation",
     openMenu: "Open Menu",
@@ -1609,6 +1774,7 @@ const translation: Translation = {
     analytics: "Analytics",
     seoActivities: "SEO Activities",
     leads: "Leads",
+    clients: "Clients",
     settings: "Settings",
   },
   breadcrumb: {
@@ -2489,6 +2655,162 @@ const translation: Translation = {
         colCmsPasswordSet: "CMS password set",
         colCreatedAt: "Created",
         colUpdatedAt: "Updated",
+      },
+    },
+    clients: {
+      title: "Clients",
+      subtitle: "Manage website, app, and SEO client intake separately from SEO projects.",
+      addClient: "Add Client",
+      copyLink: "Copy Link",
+      editClient: "Edit Client",
+      deleteClient: "Delete Client",
+      createTitle: "Add Client",
+      createLead: "Capture business details, SEO goals, and competitors for this client.",
+      editTitle: "Edit Client",
+      editLead: "Update this client's business details, SEO goals, and competitors.",
+      notFoundTitle: "Client Not Found",
+      notFoundBody: "This client is no longer available.",
+      loadErrorTitle: "Could Not Load Client",
+      loadErrorBody: "Could not load this client. Try again.",
+      statusFilter: {
+        ariaLabel: "Filter Clients By Status",
+        all: "All Clients",
+        active: "Active",
+        inactive: "Inactive",
+        emptyTitle: "No Clients Match This Filter",
+        emptyBody: "Try another status or view all clients.",
+      },
+      viewMode: {
+        ariaLabel: "Clients Layout",
+        cards: "Cards View",
+        table: "Table View",
+      },
+      cardActions: {
+        active: "Activate",
+        inactive: "Deactivate",
+        viewDetails: "View Details",
+        editClient: "Edit Client",
+        copyLink: "Copy Link",
+        deleteClient: "Delete Client",
+        errorFallback: "Could not update status.",
+        success: {
+          active: "Client activated.",
+          inactive: "Client deactivated.",
+        },
+      },
+      listCard: {
+        shareLabel: "Share Link",
+      },
+      createForm: {
+        sectionBusinessLead:
+          "Tell us about this business so the team can share an accurate onboarding snapshot.",
+        businessName: "Business Name",
+        businessNamePh: "E.g. Example Ltd",
+        companyLogoHint: "Upload Your Brand Logo. JPG, PNG, WEBP, Or GIF (Maximum 5 MB).",
+        companyLogoUploadLabel: "Upload Company Logo",
+        websiteUrl: "Website URL",
+        websiteUrlPh: "example.com",
+        businessAddress: "Business Address",
+        businessAddressPh: "Street Address, City, State/Province, Country",
+        pocContactNumber: "Contact Number",
+        pocContactNumberPh: "5X XXX XXXX",
+        pocEmail: "Business Email",
+        pocEmailPh: "contact@example.com",
+        sectionServiceLead:
+          "Define offerings and target audience so this snapshot reflects how the business wants to grow.",
+        servicesOffered: "Services / Products Offered",
+        servicesOfferedPh: "E.g. SEO, Web Design, PPC Advertising, Content Marketing",
+        servicesOfferedHelp: "Press Enter Or Comma To Add. Backspace Removes The Last Tag.",
+        primaryServiceToPromote: "Primary Service / Product",
+        primaryServiceToPromotePh: "Select A Primary Service / Product",
+        primaryServiceEmpty: "Add Services Above First",
+        idealCustomerProfile: "Ideal Customer",
+        idealCustomerProfilePh: "E.g. Small And Medium-Sized Businesses Looking To Grow Their Online Presence",
+        sectionOperationsLead: "Tell us where this business operates so local targeting stays clear.",
+        targetLocations: "Target Locations",
+        targetLocationsPh: "E.g. Riyadh, Jeddah, Dammam, Saudi Arabia",
+        targetLocationsHelp: "Press Enter Or Comma To Add. Backspace Removes The Last Tag.",
+        sectionSeoLead: "Choose SEO goals and competitors to capture this client's priorities.",
+        sectionCompetitorsLead: "Add competitor names or websites to keep in this snapshot.",
+        competitorUrls: "Competitor Names Or URLs",
+        competitorUrlsPh: "Enter Your Competitor Names Or URLs: https://competitor1.com, Competitor 2, https://competitor3.com",
+        competitorUrlsHelp: "Press Enter Or Comma To Add. Backspace Removes The Last Tag.",
+        submit: "Add Client",
+        submitting: "Saving…",
+        editSubmit: "Save Changes",
+        editSubmitting: "Saving…",
+        successFallback: "Client created.",
+        errorFallback: "Could not create client.",
+        editSuccessFallback: "Client updated.",
+        editErrorFallback: "Could not update client.",
+        nextStep: "Next Step",
+        previousStep: "Back",
+        stepBasicInformation: "Business Information",
+        stepServiceInformation: "Business Details",
+        stepSeo: "SEO Configuration",
+        stepValidationError: "Fix required fields.",
+        valRequired: "This Field Is Required.",
+        valMin: "Use At Least 2 Characters.",
+        valMax: "Use At Most 50 Characters.",
+        valUrl: "Enter A Valid Website URL (E.G. Example.Com).",
+        valEmail: "Enter A Valid Email Address.",
+        backToList: "Back To Clients",
+        backToClient: "Back To Client",
+      },
+      detail: {
+        loading: "Loading…",
+        notFoundTitle: "Client Not Found",
+        notFoundBody: "This client is no longer available.",
+        loadErrorTitle: "Could Not Load Client",
+        loadErrorBody: "Could not load this client. Try again.",
+        sectionBusinessTitle: "Business Information",
+        sectionBusinessLead: "Core contact and website details for this client.",
+        sectionServicesTitle: "Services And Products",
+        sectionServicesLead: "Offerings captured during intake.",
+        sectionIcpTitle: "Ideal Customer",
+        sectionIcpLead: "Who this business wants to reach.",
+        sectionLocationsTitle: "Target Locations",
+        sectionLocationsLead: "Markets this client wants to appear in.",
+        sectionSeoGoalsTitle: "SEO Goals",
+        sectionSeoGoalsLead: "Priorities selected during intake.",
+        sectionCompetitorsTitle: "Competitors",
+        sectionCompetitorsLead: "Names or websites used for comparison.",
+        sectionShareTitle: "Share Link",
+        sectionShareLead: "Anyone with this link can view a read-only snapshot of the intake.",
+        noValue: "—",
+        noServices: "No services added.",
+        noLocations: "No locations added.",
+        noSeoGoals: "No SEO goals selected.",
+        noCompetitors: "No competitors added.",
+      },
+      public: {
+        title: "Client Onboarding",
+        lead: "Read-only snapshot of this client's intake.",
+        notFoundTitle: "Page Not Available",
+        notFoundBody: "This onboarding page is not available.",
+        loadErrorTitle: "Could Not Load Page",
+        loadErrorBody: "Could not load this onboarding page. Try again later.",
+      },
+      table: {
+        accessDeniedBody: "You don't have permission to view clients.",
+        loadErrorBody: "Could not load clients.",
+        copySuccess: "Share link copied.",
+        copyError: "Could not copy the share link.",
+        deleteSuccess: "Client deleted.",
+        deleteErrorFallback: "Could not delete client.",
+        deleteTitle: "Delete Client?",
+        deleteBody: "This will permanently remove {{name}}.\nThis action cannot be undone.",
+        deleteCancel: "Cancel",
+        deleteConfirm: "Delete",
+        colClient: "Client",
+        colStatus: "Status",
+        colActions: "Actions",
+        viewClient: "View {{name}}",
+        copyLink: "Copy Link For {{name}}",
+        editClient: "Edit {{name}}",
+        deleteClient: "Delete {{name}}",
+        emptyTitle: "No Clients Found",
+        emptyBody: "Add a client to capture intake and share a read-only link.",
       },
     },
     analytics: {

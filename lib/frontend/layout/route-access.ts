@@ -19,6 +19,7 @@ export type RouteAccessRule = {
 export const ROUTE_ACCESS_RULES: readonly RouteAccessRule[] = [
   { pattern: /^\/users(?:\/|$)/, viewPermissions: ["admin.users.view"], scope: "platform" },
   { pattern: /^\/roles(?:\/|$)/, viewPermissions: ["admin.roles.view"], scope: "platform" },
+  { pattern: /^\/clients(?:\/|$)/, viewPermissions: ["clients.view"], scope: "platform" },
   { pattern: /^\/dashboard$/, viewPermissions: ["dashboard.view"], scope: "project" },
   { pattern: /^\/projects(?:\/|$)/, viewPermissions: ["projects.view"], scope: "project" },
   { pattern: /^\/analytics(?:\/|$)/, viewPermissions: ["analytics.view"], scope: "project" },

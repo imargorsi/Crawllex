@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  allSuperAdminPermissions,
   defaultProjectOwnerPermissions,
   defaultProjectUserPermissions,
   PROJECT_MODULE_SLUGS,
   PROJECT_PERMISSION_MODULES,
+  isKnownPermission,
 } from "@/lib/rbac/permission-catalog";
 import { PROJECT_OWNER_ROLE, PROJECT_USER_ROLE, SYSTEM_ROLE_SEEDS } from "@/lib/rbac/roles";
 import { seedSystemRoles } from "@/lib/rbac/seed-roles";
@@ -39,6 +41,7 @@ describe("RBAC permission catalog", () => {
     expect(permissions).toContain("integrations.refresh");
     expect(permissions).toContain("members.invite");
     expect(permissions).not.toContain("admin.companies.view");
+    expect(permissions).not.toContain("clients.view");
   });
 
   it("seeds project_user with view-only modules and members.view", () => {
@@ -52,6 +55,7 @@ describe("RBAC permission catalog", () => {
     expect(permissions).not.toContain("integrations.update");
     expect(permissions).not.toContain("members.invite");
     expect(permissions).toContain("members.view");
+    expect(permissions).not.toContain("clients.view");
   });
 
   it("defines matrix modules for the role UI", () => {
@@ -65,6 +69,16 @@ describe("RBAC permission catalog", () => {
       "Integrations",
       "Members",
     ]);
+    expect(PROJECT_PERMISSION_MODULES.map((module) => module.slug)).not.toContain("clients");
+  });
+
+  it("gives super_admin clients.* without making them known project permissions", () => {
+    const adminPermissions = allSuperAdminPermissions();
+    expect(adminPermissions).toEqual(
+      expect.arrayContaining(["clients.view", "clients.create", "clients.update", "clients.delete"]),
+    );
+    expect(isKnownPermission("clients.view")).toBe(false);
+    expect(isKnownPermission("admin.users.view")).toBe(true);
   });
 });
 

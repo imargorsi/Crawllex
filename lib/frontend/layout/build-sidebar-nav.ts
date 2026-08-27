@@ -3,6 +3,7 @@ import {
   SIDEBAR_NAV_DEFINITIONS,
   SIDEBAR_NAV_GROUP_ORDER,
 } from "@/lib/frontend/layout/sidebar-nav";
+import type { TDashboardWorkspace } from "@/lib/frontend/layout/workspace";
 import { hasAnyPermission } from "@/lib/rbac/access";
 import { permissionsForScope } from "@/lib/rbac/scope-permissions";
 
@@ -55,6 +56,23 @@ export function buildSidebarNavGroups(
     id: groupId,
     items: visible.filter((item) => item.group === groupId).map(toSidebarNavItem),
   })).filter((group) => group.items.length > 0);
+}
+
+export function filterSidebarNavGroupsForWorkspace(
+  groups: SidebarNavGroup[],
+  workspace: TDashboardWorkspace,
+): SidebarNavGroup[] {
+  return groups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        if (workspace === "onboarding") {
+          return item.path === "/clients" || item.path === "/settings";
+        }
+        return item.path !== "/clients";
+      }),
+    }))
+    .filter((group) => group.items.length > 0);
 }
 
 export function hasProjectWorkspace(
