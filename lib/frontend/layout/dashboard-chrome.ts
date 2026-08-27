@@ -184,7 +184,7 @@ export const sidebarShellCollapsedClass = "md:w-[4.5rem]";
 
 /** Crawllex wordmark in the sidebar header — same horizontal inset as project selector. */
 export const sidebarBrandRowClass =
-  "relative flex min-h-[4.75rem] shrink-0 items-center justify-center px-3 py-2";
+  "relative flex min-h-[4.25rem] shrink-0 items-center justify-center px-3 py-1.5";
 
 export const sidebarBrandRowCollapsedClass = "md:px-2";
 
