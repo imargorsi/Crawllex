@@ -213,7 +213,7 @@ export function UsersListSection() {
   return (
     <div className="w-full min-w-0">
       <div className="flex flex-col gap-6 px-4 py-6 sm:gap-7 sm:px-6 sm:py-7">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between xl:gap-6">
           <div className={cn(analyticsHeadingStackClass, "max-w-2xl")}>
             <Heading id="users-list-title" pageTitle>
               {t("title")}

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import mongoose from "mongoose";
 
 import { hashPassword } from "@/lib/auth/password";
+import { PENDING_PROJECT_LIMIT_MESSAGE } from "@/lib/projects/constants";
 import { buildCreateProjectResponse, createProject } from "@/lib/projects/create-project";
 import { PROJECT_OWNER_ROLE, SUPER_ADMIN_ROLE } from "@/lib/rbac/roles";
 import { seedSystemRoles } from "@/lib/rbac/seed-roles";
@@ -139,6 +140,72 @@ describe("POST /projects — createProject", () => {
     });
 
     expect(await Project.countDocuments()).toBe(0);
+  });
+
+  it("rejects a second pending project for the same owner", async () => {
+    await seedSystemRoles();
+
+    const user = await User.create({
+      name: "Pending Owner",
+      email: "pending-owner@example.com",
+      password: await hashPassword("password"),
+      emailVerifiedAt: new Date(),
+      roles: [],
+    });
+
+    await createProject(
+      authContextFor(user),
+      projectInput({
+        businessName: "First Pending",
+        websiteUrl: "https://first-pending.example.com",
+      }),
+    );
+
+    await expect(
+      createProject(
+        authContextFor(user),
+        projectInput({
+          businessName: "Second Pending",
+          websiteUrl: "https://second-pending.example.com",
+        }),
+      ),
+    ).rejects.toMatchObject({
+      message: PENDING_PROJECT_LIMIT_MESSAGE,
+    });
+
+    expect(await Project.countDocuments({ createdByUserId: user._id })).toBe(1);
+  });
+
+  it("allows another project after the pending one is approved", async () => {
+    await seedSystemRoles();
+
+    const user = await User.create({
+      name: "Active Owner",
+      email: "active-owner@example.com",
+      password: await hashPassword("password"),
+      emailVerifiedAt: new Date(),
+      roles: [],
+    });
+
+    const first = await createProject(
+      authContextFor(user),
+      projectInput({
+        businessName: "Now Active",
+        websiteUrl: "https://now-active.example.com",
+      }),
+    );
+    await Project.findByIdAndUpdate(first.project._id, { status: "active" });
+
+    const second = await createProject(
+      authContextFor(user),
+      projectInput({
+        businessName: "Next Pending",
+        websiteUrl: "https://next-pending.example.com",
+      }),
+    );
+
+    expect(second.project.status).toBe("pending");
+    expect(await Project.countDocuments({ createdByUserId: user._id })).toBe(2);
   });
 
   it("rejects invalid seo goals in the schema", () => {

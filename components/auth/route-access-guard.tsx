@@ -31,7 +31,7 @@ export function RequireRouteAccess({ children }: { children: ReactNode }) {
   const token = useAccessToken();
   const hasToken = isClient && Boolean(token);
   const { data: user, isPending, isError } = useAuthUserQuery({ enabled: hasToken });
-  const { selectedProject } = useSelectedProject();
+  const { selectedProject, isLoading: isSelectedProjectLoading } = useSelectedProject();
   const { projectPermissions, isLoading: isProjectAccessLoading } = useProjectAccess();
 
   const isPlatformAdmin = user ? isSuperAdmin(user.roles) : false;
@@ -66,7 +66,12 @@ export function RequireRouteAccess({ children }: { children: ReactNode }) {
     return <AuthSessionLoading />;
   }
 
-  if (!isAuthOnlyRoute(pathname) && !isPlatformAdmin && !selectedProject) {
+  if (
+    isSelectedProjectLoading &&
+    !isAuthOnlyRoute(pathname) &&
+    !isPlatformAdmin &&
+    !selectedProject
+  ) {
     return <AuthSessionLoading />;
   }
 

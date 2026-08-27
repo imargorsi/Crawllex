@@ -1,0 +1,85 @@
+.crawllex-lc-forms {
+  margin: 16px 0 20px;
+}
+
+.crawllex-lc-forms-title {
+  margin: 0 0 4px;
+}
+
+.crawllex-lc-forms-help {
+  margin: 0 0 12px;
+  color: #646970;
+}
+
+.crawllex-lc-forms-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.crawllex-lc-form-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  min-width: 240px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #c3c4c7;
+  border-radius: 8px;
+}
+
+.crawllex-lc-form-logo {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 44px;
+  height: 44px;
+  border-radius: 6px;
+  background: #f0f0f1;
+}
+
+.crawllex-lc-form-logo.is-wide {
+  width: 112px;
+}
+
+.crawllex-lc-form-logo.is-dark {
+  background: #111;
+}
+
+.crawllex-lc-form-logo img {
+  display: block;
+  max-width: 100%;
+  max-height: 40px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+
+.crawllex-lc-form-meta {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.crawllex-lc-form-name {
+  font-weight: 600;
+  color: #1d2327;
+}
+
+.crawllex-lc-form-state {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #646970;
+}
+
+.crawllex-lc-form-state.is-active {
+  color: #00a32a;
+}
+
+.crawllex-lc-form-state.is-warn {
+  color: #996800;
+}

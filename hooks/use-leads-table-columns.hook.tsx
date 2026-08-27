@@ -7,11 +7,11 @@ import { useTranslation } from "react-i18next";
 
 import type { TAppTableColumn } from "@/components/table/app-table";
 import { TableRowIconActions } from "@/components/table/table-row-icon-actions";
+import { LeadSourceBadge } from "@/components/leads/lead-source-badge";
 import { formatLeadDisplayName } from "@/lib/leads/serialize-lead";
 import type { TLeadDto } from "@/types/lead.types";
 
 type TUseLeadsTableColumnsOptions = {
-  rows: TLeadDto[];
   canUpdate?: boolean;
   canDelete?: boolean;
   onView?: (row: TLeadDto) => void;
@@ -32,7 +32,6 @@ function formatShortDate(isoDate: string): string {
 }
 
 export function useLeadsTableColumns({
-  rows,
   canUpdate = false,
   canDelete = false,
   onView,
@@ -40,7 +39,6 @@ export function useLeadsTableColumns({
   onDelete,
 }: TUseLeadsTableColumnsOptions) {
   const { t } = useTranslation("translation", { keyPrefix: "modules.leads.table" });
-  const showServices = rows.some((row) => Boolean(row.servicesInterestedIn?.trim()));
 
   return useMemo(() => {
     const columns: TAppTableColumn<TLeadDto>[] = [
@@ -61,6 +59,11 @@ export function useLeadsTableColumns({
         ),
       },
       {
+        key: "origin",
+        label: t("colSource"),
+        render: (item) => <LeadSourceBadge origin={item.origin} />,
+      },
+      {
         key: "email",
         label: t("colEmail"),
         render: (item) => <span className="type-body text-text-secondary">{item.email}</span>,
@@ -71,18 +74,6 @@ export function useLeadsTableColumns({
         render: (item) => <span className="type-body text-text-secondary">{item.phone}</span>,
       },
     ];
-
-    if (showServices) {
-      columns.push({
-        key: "servicesInterestedIn",
-        label: t("colServices"),
-        render: (item) => (
-          <span className="line-clamp-2 type-body text-text-secondary">
-            {item.servicesInterestedIn?.trim() || "—"}
-          </span>
-        ),
-      });
-    }
 
     columns.push({
       key: "message",
@@ -137,5 +128,5 @@ export function useLeadsTableColumns({
     });
 
     return columns;
-  }, [canDelete, canUpdate, onDelete, onEdit, onView, showServices, t]);
+  }, [canDelete, canUpdate, onDelete, onEdit, onView, t]);
 }

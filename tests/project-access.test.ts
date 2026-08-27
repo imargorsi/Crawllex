@@ -221,6 +221,37 @@ describe("GET /projects/{id}/access — getProjectAccessForUser", () => {
     expect(denied.status).toBe(403);
   });
 
+  it("returns limited permissions for inactive projects", async () => {
+    await seedSystemRoles();
+
+    const user = await User.create({
+      name: "Inactive Owner",
+      email: "inactive-access@example.com",
+      password: await hashPassword("password"),
+      emailVerifiedAt: new Date(),
+      roles: [],
+    });
+
+    const { project } = await createProject(
+      authContextFor(user),
+      projectInput({
+        businessName: "Inactive Project",
+        websiteUrl: "https://inactive.example.com",
+      }),
+    );
+
+    await Project.findByIdAndUpdate(project._id, { status: "inactive" });
+
+    const access = await getProjectAccessForUser(authContextFor(user), project._id.toString());
+
+    expect(access).not.toBeNull();
+    expect(access!.permissions).toEqual(
+      expect.arrayContaining(["projects.view", "projects.update", "members.invite", "members.view"]),
+    );
+    expect(access!.permissions).not.toContain("dashboard.view");
+    expect(access!.roles).toContain(PROJECT_OWNER_ROLE);
+  });
+
   it("allows projects.view on rejected projects but denies other module permissions", async () => {
     await seedSystemRoles();
 

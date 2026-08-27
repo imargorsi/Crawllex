@@ -20,6 +20,22 @@ export const ASSISTANT_CUSTOM_ENTITIES: CustomEntityExample[] = [
     patterns: ["[seo]", "seo activities", "seo activity", "seo work"],
   },
   {
+    name: "window.today",
+    patterns: ["[today]", "for today"],
+  },
+  {
+    name: "window.yesterday",
+    patterns: ["[yesterday]", "for yesterday"],
+  },
+  {
+    name: "window.this_week",
+    patterns: ["this week", "current week"],
+  },
+  {
+    name: "window.last_week",
+    patterns: ["last week", "past week", "previous week"],
+  },
+  {
     name: "window.this_month",
     patterns: ["this month", "current month"],
   },
@@ -37,7 +53,18 @@ export const ASSISTANT_CUSTOM_ENTITIES: CustomEntityExample[] = [
   },
   {
     name: "window.all",
-    patterns: ["all time", "all-time", "lifetime"],
+    patterns: [
+      "all time",
+      "all-time",
+      "lifetime",
+      "overall",
+      "in total",
+      "so far",
+      "till now",
+      "until now",
+      "up to now",
+      "to date",
+    ],
   },
   {
     name: "metric.clicks",

@@ -5,13 +5,12 @@ import { ValidationError } from "@/lib/api/http-errors";
 import { ApiResponse } from "@/lib/api/response";
 import type { AuthContext } from "@/lib/auth/guards";
 import { assertProjectActiveForLeads } from "@/lib/leads/assert-project-active";
+import { LEAD_DUPLICATE_MESSAGE } from "@/lib/leads/constants";
 import { normalizeLeadEmail, normalizeLeadPhone } from "@/lib/leads/normalize";
 import { serializeLead } from "@/lib/leads/serialize-lead";
 import { isDuplicateKeyError } from "@/lib/roles/role-mutation.utils";
 import { Lead, type LeadDocument } from "@/models";
 import type { CreateLeadInput } from "@/schemas/lead";
-
-const DUPLICATE_LEAD_MESSAGE = "A lead with this email and phone already exists.";
 
 export async function findDuplicateLead(
   projectId: string,
@@ -42,7 +41,7 @@ export async function createLead(
 
   const duplicate = await findDuplicateLead(projectId, normalizedEmail, normalizedPhone);
   if (duplicate) {
-    throw new ValidationError({ email: [DUPLICATE_LEAD_MESSAGE] }, DUPLICATE_LEAD_MESSAGE);
+    throw new ValidationError({ email: [LEAD_DUPLICATE_MESSAGE] }, LEAD_DUPLICATE_MESSAGE);
   }
 
   const userId = auth.user._id as Types.ObjectId;
@@ -66,7 +65,7 @@ export async function createLead(
     return { lead };
   } catch (error) {
     if (isDuplicateKeyError(error)) {
-      throw new ValidationError({ email: [DUPLICATE_LEAD_MESSAGE] }, DUPLICATE_LEAD_MESSAGE);
+      throw new ValidationError({ email: [LEAD_DUPLICATE_MESSAGE] }, LEAD_DUPLICATE_MESSAGE);
     }
     throw error;
   }

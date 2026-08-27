@@ -18,10 +18,17 @@ type AppLogoProps = {
   width?: number;
 };
 
-/** Intrinsic canvas: wordmark 951×186 (~5.11:1), mark 193×193. */
-const FULL_LOGO_WIDTH = 188;
-const FULL_LOGO_HEIGHT = 37;
+/** Wordmark PNG canvas: `public/crawllex-{light,dark}.png`. Mark: `public/favicon.png`. */
+const WORDMARK_INTRINSIC_WIDTH = 2172;
+const WORDMARK_INTRINSIC_HEIGHT = 724;
+const WORDMARK_ASPECT = `${WORDMARK_INTRINSIC_WIDTH} / ${WORDMARK_INTRINSIC_HEIGHT}`;
+/** Default display width — matches expanded sidebar content (`md:w-60` minus `px-3`). */
+const FULL_LOGO_WIDTH = 216;
 const MARK_SIZE = 32;
+
+function wordmarkHeightForWidth(width: number): number {
+  return Math.round((width * WORDMARK_INTRINSIC_HEIGHT) / WORDMARK_INTRINSIC_WIDTH);
+}
 
 export function AppLogo({
   alt = "",
@@ -49,7 +56,7 @@ export function AppLogo({
   }
 
   const fullWidth = width ?? FULL_LOGO_WIDTH;
-  const fullHeight = height ?? FULL_LOGO_HEIGHT;
+  const fullHeight = height ?? wordmarkHeightForWidth(fullWidth);
 
   if (surface === "onDark") {
     return (
@@ -81,10 +88,10 @@ export function AppLogo({
 
   return (
     <span
-      className={cn("relative inline-block shrink-0", className)}
-      style={{ width: fullWidth, height: fullHeight }}
+      className={cn("relative inline-block h-auto w-54 shrink-0", className)}
+      style={{ aspectRatio: WORDMARK_ASPECT }}
     >
-      {/* Black wordmark — light surfaces */}
+      {/* Dark wordmark — light surfaces */}
       <Image
         src="/crawllex-dark.png"
         alt={alt}
@@ -94,7 +101,7 @@ export function AppLogo({
         className="absolute inset-0 block h-full w-full object-contain dark:hidden"
         aria-hidden={alt ? undefined : true}
       />
-      {/* White wordmark — dark surfaces */}
+      {/* Light wordmark — dark surfaces */}
       <Image
         src="/crawllex-light.png"
         alt={alt}

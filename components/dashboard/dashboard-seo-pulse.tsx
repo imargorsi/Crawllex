@@ -53,7 +53,7 @@ function CardSkeleton({ isRow }: { isRow: boolean }) {
     <div
       className={cn(
         elevatedCardSurfaceClass,
-        "rounded-2xl",
+        "rounded-2xl min-w-0",
         isRow ? "flex items-center gap-3 p-3" : "flex h-full min-h-0 flex-col justify-between p-3.5",
       )}
     >
@@ -110,8 +110,10 @@ export function DashboardSeoPulse({
   ];
 
   const gridClass = cn(
-    "grid",
-    isRow ? "grid-cols-2 gap-2.5 lg:grid-cols-4" : cn("h-full min-h-0 grid-cols-2", compact ? "gap-2.5" : "gap-3 sm:gap-4"),
+    "grid min-w-0",
+    isRow
+      ? "grid-cols-2 gap-2.5 xl:grid-cols-4"
+      : cn("h-full min-h-0 grid-cols-2", compact ? "gap-2.5" : "gap-3 sm:gap-4"),
     className,
   );
 
@@ -154,10 +156,10 @@ export function DashboardSeoPulse({
           <div className="relative z-10 flex min-w-0 items-center gap-3">
             {iconWell}
             <div className="min-w-0">
-              <p className="type-caption font-medium text-text-secondary">
+              <p className="truncate type-caption font-medium text-text-secondary">
                 {t(`cards.${card.labelKey}`)}
               </p>
-              <p className="type-title font-semibold tracking-tight text-text-primary tabular-nums leading-tight">
+              <p className="truncate type-title font-semibold tracking-tight text-text-primary tabular-nums leading-tight">
                 {display}
               </p>
             </div>
@@ -198,7 +200,7 @@ export function DashboardSeoPulse({
 
         const shellClass = cn(
           elevatedCardSurfaceClass,
-          "group relative overflow-hidden rounded-2xl bg-bg-card/20 dark:bg-text-primary/5",
+          "group relative min-w-0 overflow-hidden rounded-2xl bg-bg-card/20 dark:bg-text-primary/5",
           isRow
             ? "p-3"
             : cn(

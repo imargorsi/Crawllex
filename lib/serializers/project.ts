@@ -14,6 +14,7 @@ export type ProjectDetailDto = TProjectDetail;
 const DEFAULT_LIST_INTEGRATIONS: TProjectListIntegrations = {
   gsc: "disconnected",
   ga4: "disconnected",
+  wordpress: "disconnected",
 };
 
 function serializeTimestamp(value: Date | null | undefined): string | null {

@@ -7,10 +7,11 @@ export type TProjectOwnerSummary = {
   profileImage: string | null;
 };
 
-/** Compact Google link state for project list — not the full Settings DTO. */
+/** Compact GSC / GA4 / WordPress link state for project list — not the full Settings DTO. */
 export type TProjectListIntegrations = {
   gsc: TIntegrationStatus;
   ga4: TIntegrationStatus;
+  wordpress: TIntegrationStatus;
 };
 
 export type TProjectInvitee = {

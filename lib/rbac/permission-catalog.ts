@@ -6,7 +6,7 @@
  * - Projects / SEO Activities: view, create, update, delete
  * - Leads: view, create, update, delete, import, export
  *   (system defaults: project_owner + project_user → view + export only; super_admin → full)
- * - Integrations (Settings → Google link for selected project): view, disconnect, refresh, update
+ * - Integrations (Settings → Google GSC/GA4 + WordPress lead sources): view, disconnect, refresh, update
  * - Members: view, invite, remove
  *
  * Platform `admin.*` keys are for `super_admin` evaluation only — never on project Role documents.

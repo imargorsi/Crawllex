@@ -4,10 +4,14 @@ import {
   LEAD_DATE_USE_TODAY,
   LEAD_EMAIL_MAX_LENGTH,
   LEAD_EXTRAS_MAX_KEYS,
+  LEAD_INGEST_IDEMPOTENCY_KEY_MAX_LENGTH,
+  LEAD_INGEST_IDEMPOTENCY_KEY_MIN_LENGTH,
+  LEAD_INGEST_PLUGIN_VERSION_MAX_LENGTH,
   LEAD_MESSAGE_MAX_LENGTH,
   LEAD_NAME_MAX_LENGTH,
   LEAD_PHONE_MAX_LENGTH,
   LEAD_SERVICES_MAX_LENGTH,
+  LEAD_SOURCE_SITE_URL_MAX_LENGTH,
 } from "@/lib/leads/constants";
 import {
   isValidLeadDate,
@@ -44,6 +48,17 @@ const leadPhoneSchema = z
   .max(LEAD_PHONE_MAX_LENGTH, `Use at most ${LEAD_PHONE_MAX_LENGTH} characters.`)
   .refine((value) => normalizeLeadPhone(value).length >= 7, "Enter a valid phone number.");
 
+const leadIngestPhoneSchema = z
+  .string()
+  .trim()
+  .max(LEAD_PHONE_MAX_LENGTH, `Use at most ${LEAD_PHONE_MAX_LENGTH} characters.`)
+  .optional()
+  .transform((value) => value ?? "")
+  .refine(
+    (value) => value === "" || normalizeLeadPhone(value).length >= 7,
+    "Enter a valid phone number.",
+  );
+
 const leadServicesSchema = z
   .string()
   .trim()
@@ -79,6 +94,62 @@ export const updateLeadSchema = leadFieldsSchema;
 
 export type CreateLeadInput = z.infer<typeof createLeadSchema>;
 export type UpdateLeadInput = z.infer<typeof updateLeadSchema>;
+
+const pluginVersionSchema = z
+  .string()
+  .trim()
+  .min(1, "Plugin version is required.")
+  .max(
+    LEAD_INGEST_PLUGIN_VERSION_MAX_LENGTH,
+    `Use at most ${LEAD_INGEST_PLUGIN_VERSION_MAX_LENGTH} characters.`,
+  );
+
+const idempotencyKeySchema = z
+  .string()
+  .trim()
+  .min(
+    LEAD_INGEST_IDEMPOTENCY_KEY_MIN_LENGTH,
+    `Use at least ${LEAD_INGEST_IDEMPOTENCY_KEY_MIN_LENGTH} characters.`,
+  )
+  .max(
+    LEAD_INGEST_IDEMPOTENCY_KEY_MAX_LENGTH,
+    `Use at most ${LEAD_INGEST_IDEMPOTENCY_KEY_MAX_LENGTH} characters.`,
+  )
+  .regex(/^[A-Za-z0-9._:-]+$/, "Use letters, numbers, dots, underscores, colons, or hyphens.");
+
+export const ingestVerifySchema = z.object({
+  pluginVersion: pluginVersionSchema,
+  siteUrl: z.string().trim().max(LEAD_SOURCE_SITE_URL_MAX_LENGTH).optional(),
+});
+
+export const ingestLeadSchema = z.object({
+  firstName: leadFirstNameSchema,
+  lastName: leadLastNameSchema,
+  email: leadEmailSchema,
+  phone: leadIngestPhoneSchema,
+  servicesInterestedIn: leadServicesSchema,
+  message: leadMessageSchema,
+  leadDate: z
+    .string()
+    .trim()
+    .optional()
+    .transform((value) => (value && value.length > 0 ? value : todayLeadDate()))
+    .refine((value) => isValidLeadDate(value), "Enter a valid date."),
+  extras: z
+    .record(z.string(), z.string())
+    .optional()
+    .default({})
+    .refine(
+      (value) => Object.keys(value).length <= LEAD_EXTRAS_MAX_KEYS,
+      `Keep at most ${LEAD_EXTRAS_MAX_KEYS} extra fields.`,
+    ),
+  idempotencyKey: idempotencyKeySchema,
+  pluginVersion: pluginVersionSchema,
+  siteUrl: z.string().trim().max(LEAD_SOURCE_SITE_URL_MAX_LENGTH).optional(),
+});
+
+export type IngestVerifyInput = z.infer<typeof ingestVerifySchema>;
+export type IngestLeadInput = z.infer<typeof ingestLeadSchema>;
 
 export const leadImportMappingSchema = z
   .object({

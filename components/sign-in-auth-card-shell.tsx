@@ -24,7 +24,7 @@ export function SignInAuthCardShell({
   showBrandMark = true,
 }: SignInAuthCardShellProps) {
   return (
-    <section className="relative w-full max-w-md" aria-labelledby={ariaLabelledBy}>
+    <section className="relative w-full min-w-0 max-w-md" aria-labelledby={ariaLabelledBy}>
       <div className={cn(authFormCardSurfaceClass, "relative px-7 py-8 sm:px-8 sm:py-10")}>
         {topToolbar ? (
           <div className="absolute end-5 top-5 z-10 sm:end-6 sm:top-6">{topToolbar}</div>

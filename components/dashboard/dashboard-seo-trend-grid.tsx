@@ -75,15 +75,17 @@ function seriesDirection(values: number[], invert: boolean): "up" | "down" | "fl
 
 function RowSkeleton() {
   return (
-    <div className="flex min-h-0 flex-1 items-center gap-4 py-4">
-      <div className="size-12 shrink-0 animate-pulse rounded-2xl bg-bg-hover/70" />
-      <div className="min-w-0 flex-1 space-y-2">
-        <div className="h-3 w-16 animate-pulse rounded bg-bg-hover/70" />
-        <div className="h-6 w-14 animate-pulse rounded-lg bg-bg-hover/80" />
+    <div className="flex min-w-0 items-center justify-between gap-3 py-3.5 sm:gap-4 xl:min-h-16 xl:flex-1">
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="size-10 shrink-0 animate-pulse rounded-2xl bg-bg-hover/70 sm:size-12" />
+        <div className="min-w-0 space-y-2">
+          <div className="h-3 w-16 animate-pulse rounded bg-bg-hover/70" />
+          <div className="h-5 w-14 animate-pulse rounded-lg bg-bg-hover/80" />
+        </div>
       </div>
-      <div className="w-40 shrink-0 space-y-2">
-        <div className="ms-auto h-3 w-36 animate-pulse rounded bg-bg-hover/60" />
-        <div className="ms-auto h-3 w-28 animate-pulse rounded bg-bg-hover/50" />
+      <div className="hidden min-w-0 max-w-44 space-y-2 sm:block">
+        <div className="ms-auto h-3 w-36 max-w-full animate-pulse rounded bg-bg-hover/60" />
+        <div className="ms-auto h-3 w-28 max-w-full animate-pulse rounded bg-bg-hover/50" />
       </div>
     </div>
   );
@@ -153,16 +155,16 @@ export function DashboardSeoTrendGrid({
 
   const panelClass = cn(
     elevatedCardSurfaceClass,
-    "flex h-full w-full flex-col rounded-2xl bg-bg-card/20 p-4 sm:p-5 dark:bg-text-primary/5",
+    "flex w-full min-w-0 flex-col rounded-2xl bg-bg-card/20 p-4 sm:p-5 dark:bg-text-primary/5",
     className,
   );
 
   if (isLoading && !overview) {
     return (
       <div className={panelClass}>
-        <div className="h-5 w-44 shrink-0 animate-pulse rounded bg-bg-hover/70" />
-        <div className="mt-2 h-3 w-64 shrink-0 animate-pulse rounded bg-bg-hover/50" />
-        <div className="mt-3 flex min-h-0 flex-1 flex-col divide-y divide-border/40 dark:divide-text-primary/12">
+        <div className="h-5 w-44 max-w-full shrink-0 animate-pulse rounded bg-bg-hover/70" />
+        <div className="mt-2 h-3 w-64 max-w-full shrink-0 animate-pulse rounded bg-bg-hover/50" />
+        <div className="mt-3 flex flex-col divide-y divide-border/40 dark:divide-text-primary/12 xl:min-h-0 xl:flex-1">
           {rows.map((row) => (
             <RowSkeleton key={row.id} />
           ))}
@@ -190,7 +192,7 @@ export function DashboardSeoTrendGrid({
         <p className="type-caption leading-snug text-text-secondary">{t("subtitle")}</p>
       </div>
       <div
-        className="mt-4 flex min-h-0 flex-1 flex-col divide-y divide-border/40 dark:divide-text-primary/12"
+        className="mt-3 flex flex-col divide-y divide-border/40 dark:divide-text-primary/12 xl:min-h-0 xl:flex-1"
         role="list"
       >
         {rows.map((row) => {
@@ -208,40 +210,39 @@ export function DashboardSeoTrendGrid({
               key={row.id}
               href={withDateRangeQuery("/analytics", from, to)}
               role="listitem"
-              className={cn(
-                "group flex min-h-0 flex-1 items-center gap-4 py-4",
-                "transition-colors",
-              )}
+              className="group flex min-w-0 items-center justify-between gap-3 py-3.5 sm:gap-4 xl:min-h-16 xl:flex-1"
             >
-              <span
-                className="inline-flex size-12 shrink-0 items-center justify-center rounded-2xl border backdrop-blur-md"
-                style={{
-                  color: row.accent,
-                  borderColor: `color-mix(in srgb, ${row.accent} 42%, transparent)`,
-                  background: `color-mix(in srgb, ${row.accent} 14%, transparent)`,
-                }}
-                aria-hidden
-              >
-                <Icon className="size-6" />
-              </span>
+              <div className="flex min-w-0 items-center gap-3">
+                <span
+                  className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border backdrop-blur-md sm:size-12 sm:rounded-2xl"
+                  style={{
+                    color: row.accent,
+                    borderColor: `color-mix(in srgb, ${row.accent} 42%, transparent)`,
+                    background: `color-mix(in srgb, ${row.accent} 14%, transparent)`,
+                  }}
+                  aria-hidden
+                >
+                  <Icon className="size-5 sm:size-6" />
+                </span>
 
-              <div className={cn(typeStackMdClass, "min-w-0 flex-1")}>
-                <p className="type-caption font-medium text-text-secondary">
-                  {t(`cards.${row.id}`)}
-                </p>
-                <p className="flex items-center gap-1 type-title font-semibold tracking-tight text-text-primary tabular-nums leading-none">
-                  {display}
-                  {direction === "up" ? (
-                    <Icons.arrowUp className="size-4 text-status-active" aria-hidden />
-                  ) : null}
-                  {direction === "down" ? (
-                    <Icons.arrowDown className="size-4 text-status-rejected" aria-hidden />
-                  ) : null}
-                </p>
+                <div className={cn(typeStackMdClass, "min-w-0")}>
+                  <p className="truncate type-caption font-medium text-text-secondary">
+                    {t(`cards.${row.id}`)}
+                  </p>
+                  <p className="flex min-w-0 items-center gap-1 type-title font-semibold tracking-tight text-text-primary tabular-nums leading-none">
+                    {display}
+                    {direction === "up" ? (
+                      <Icons.arrowUp className="size-4 shrink-0 text-status-active" aria-hidden />
+                    ) : null}
+                    {direction === "down" ? (
+                      <Icons.arrowDown className="size-4 shrink-0 text-status-rejected" aria-hidden />
+                    ) : null}
+                  </p>
+                </div>
               </div>
 
-              <div className={cn(typeStackMdClass, "max-w-56 shrink-0 text-end sm:max-w-64")}>
-                <p className="type-caption leading-snug text-text-secondary">{description}</p>
+              <div className={cn(typeStackMdClass, "min-w-0 max-w-[min(16rem,46%)] text-end")}>
+                <p className="line-clamp-2 type-caption leading-snug text-text-secondary">{description}</p>
                 <p className="type-caption leading-snug text-text-muted">
                   {t(`direction.${direction}`)}
                 </p>

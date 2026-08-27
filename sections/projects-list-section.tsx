@@ -38,6 +38,7 @@ import {
 } from "@/lib/projects/project-status-filter.utils";
 import type { ProjectStatus } from "@/lib/projects/constants";
 import { resolveProjectOwnerId } from "@/lib/projects/project-owner-id.utils";
+import { canCreateProject, listHasOwnedPendingProject } from "@/lib/projects/can-create-project.utils";
 import {
   canDeleteProjectCard,
   canEditProjectCard,
@@ -80,7 +81,14 @@ export function ProjectsListSection() {
 
   const permissions = mergePermissions(user?.permissions ?? [], projectPermissions);
   const userIsSuperAdmin = isSuperAdmin(user?.roles);
-  const canCreateProject = isVerified && (hasPermission(permissions, "projects.create") || !hasProjects);
+  const ownsPendingProject = listHasOwnedPendingProject(allProjects, user?.id);
+  const canCreateProjectAction = canCreateProject({
+    isVerified,
+    isSuperAdmin: userIsSuperAdmin,
+    hasProjects,
+    hasCreatePermission: hasPermission(permissions, "projects.create"),
+    ownsPendingProject,
+  });
   const platformPermissions = user?.permissions ?? [];
 
   const getProjectCardAccess = useCallback(
@@ -194,7 +202,7 @@ export function ProjectsListSection() {
               <ProjectListViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
             ) : null}
 
-            {canCreateProject && hasProjects ? (
+            {canCreateProjectAction && hasProjects ? (
               <CreateActionButton href={PROJECT_ROUTES.create}>
                 {t("table.createProject")}
               </CreateActionButton>
@@ -220,7 +228,7 @@ export function ProjectsListSection() {
         ) : !hasProjects ? (
           <NoProjectComponent
             variant={isVerified ? "no-projects" : "email-not-verified"}
-            canCreateProject={canCreateProject}
+            canCreateProject={canCreateProjectAction}
             onVerifyEmail={() => void onResendVerification()}
             isVerifyEmailPending={resendMutation.isPending}
           />

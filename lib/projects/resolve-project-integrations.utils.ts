@@ -4,12 +4,14 @@ import {
   GOOGLE_INTEGRATION_SERVICES,
   GOOGLE_PROVIDER,
 } from "@/lib/integrations/constants";
-import { ProjectIntegration } from "@/models";
+import { LEAD_SOURCE_PROVIDER } from "@/lib/leads/constants";
+import { LeadSource, ProjectIntegration } from "@/models";
 import type { TProjectListIntegrations } from "@/types/project.types";
 
 const DISCONNECTED: TProjectListIntegrations = {
   gsc: "disconnected",
   ga4: "disconnected",
+  wordpress: "disconnected",
 };
 
 /**
@@ -40,6 +42,20 @@ export async function resolveProjectIntegrationsMap(
     if (doc.service === "gsc" || doc.service === "ga4") {
       current[doc.service] = doc.status;
     }
+    map.set(key, current);
+  }
+
+  const leadSources = await LeadSource.find({
+    projectId: { $in: projectIds },
+    provider: LEAD_SOURCE_PROVIDER,
+  })
+    .select("projectId status")
+    .lean();
+
+  for (const doc of leadSources) {
+    const key = doc.projectId.toString();
+    const current = map.get(key) ?? { ...DISCONNECTED };
+    current.wordpress = doc.status === "error" ? "error" : "connected";
     map.set(key, current);
   }
 

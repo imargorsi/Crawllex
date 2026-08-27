@@ -871,11 +871,11 @@ code {
   gap: 0.5rem !important;
 }
 
-/* Clear the dashboard header (h-14) so toasts don't cover the navbar */
-.app-glass-toaster .toast-region--top-right,
-.app-glass-toaster .toast-region--top-left,
-.app-glass-toaster .toast-region--top-center {
-  top: 4.9rem !important;
+.app-glass-toaster .toast-region--bottom-right,
+.app-glass-toaster .toast-region--bottom-left,
+.app-glass-toaster .toast-region--bottom-center {
+  top: auto !important;
+  bottom: 1.25rem !important;
 }
 
 .app-glass-toaster .toast-card {
@@ -919,16 +919,15 @@ code {
   height: 0.7rem !important;
 }
 
-/* Caps sit low in the em box vs the icon well — nudge up to optical center */
 .app-glass-toaster .toast-message {
   margin: 0 !important;
   padding: 0 !important;
   font-size: 0.875rem !important;
-  line-height: 1 !important;
+  line-height: 1.35 !important;
   font-weight: 600 !important;
   letter-spacing: 0 !important;
-  transform: translateY(-0.1em) !important;
   overflow: hidden !important;
+  overflow-wrap: break-word !important;
   display: -webkit-box !important;
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: 3 !important;
@@ -963,9 +962,10 @@ code {
     right: 0.75rem !important;
   }
 
-  .app-glass-toaster .toast-region--top-right,
-  .app-glass-toaster .toast-region--top-left,
-  .app-glass-toaster .toast-region--top-center {
-    top: 4.9rem !important;
+  .app-glass-toaster .toast-region--bottom-right,
+  .app-glass-toaster .toast-region--bottom-left,
+  .app-glass-toaster .toast-region--bottom-center {
+    top: auto !important;
+    bottom: 1.25rem !important;
   }
 }

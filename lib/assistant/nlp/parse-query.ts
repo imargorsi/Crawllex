@@ -6,11 +6,18 @@ import {
   ASSISTANT_TERM_ENTITIES,
 } from "@/lib/assistant/nlp/lexicon";
 import { normalizeAssistantQuery } from "@/lib/assistant/nlp/normalize";
+import { parseAssistantOnDates } from "@/lib/assistant/nlp/parse-date";
+import { parseAssistantDurationWindow } from "@/lib/assistant/nlp/parse-duration";
+import {
+  assistantWindowSpec,
+  emptyAssistantWindow,
+} from "@/lib/assistant/nlp/windows";
 import type { TAnalyticsDimensionType, TAnalyticsSource } from "@/lib/integrations/constants";
 import type { TDateRangePresetId } from "@/lib/frontend/seo-activities/date-range.utils";
 import type { TSeoActivityType } from "@/types/seo-activity.types";
 import type {
   TAssistantAnalyticsMetric,
+  TAssistantNamedWindow,
   TAssistantParse,
   TAssistantWindowSpec,
 } from "@/types/assistant.types";
@@ -56,28 +63,28 @@ const WINDOW_PRESETS: Record<string, TDateRangePresetId> = {
   "window.all": "all",
 };
 
-const LAST_N_PRESETS: Record<number, TDateRangePresetId> = {
-  15: "last_15_days",
-  30: "last_30_days",
-  90: "last_90_days",
+const WINDOW_NAMED: Record<string, TAssistantNamedWindow> = {
+  "window.today": "today",
+  "window.yesterday": "yesterday",
+  "window.this_week": "this_week",
+  "window.last_week": "last_week",
 };
-
-function emptyWindow(): TAssistantWindowSpec {
-  return { preset: null, lastNDays: null };
-}
 
 function unique<T>(values: T[]): T[] {
   return [...new Set(values)];
 }
 
-function parseLastNDaysFromText(query: string): TAssistantWindowSpec | null {
-  const match = query.match(/\b(?:last|past|previous)\s+(\d+)\s+days?\b/i);
-  if (!match) return null;
-  const days = Number(match[1]);
-  if (!Number.isFinite(days) || days < 1) return null;
-  const preset = LAST_N_PRESETS[days];
-  if (preset) return { preset, lastNDays: null };
-  return { preset: null, lastNDays: days };
+function serializeWindow(window: TAssistantWindowSpec): string {
+  return `${window.preset ?? ""}:${window.lastNDays ?? ""}:${window.lastNWeeks ?? ""}:${window.lastNMonths ?? ""}:${window.named ?? ""}:${window.onDate ?? ""}`;
+}
+
+function applyAllTimeKeywords(query: string, slots: TParsedSlots): void {
+  if (/\b(?:overall|altogether)\b/i.test(query) || /\bin total\b/i.test(query)) {
+    slots.windows.push(assistantWindowSpec({ preset: "all" }));
+  }
+  if (/\btotal\b/i.test(query) && !/\btotal\s+(users?|visitors?)\b/i.test(query)) {
+    slots.windows.push(assistantWindowSpec({ preset: "all" }));
+  }
 }
 
 function applyEntity(slots: TParsedSlots, entityType: string): void {
@@ -98,14 +105,37 @@ function applyEntity(slots: TParsedSlots, entityType: string): void {
   }
 
   const preset = WINDOW_PRESETS[entityType];
-  if (preset) slots.windows.push({ preset, lastNDays: null });
+  if (preset) slots.windows.push(assistantWindowSpec({ preset }));
+
+  const named = WINDOW_NAMED[entityType];
+  if (named) slots.windows.push(assistantWindowSpec({ named }));
 
   if (entityType === "topic.top") slots.hasTop = true;
   if (entityType === "source.gsc") slots.source = "gsc";
   if (entityType === "source.ga4") slots.source = "ga4";
 }
 
-/** Fill slots from wink (best-effort), then lexicon tokens/phrases, then last-N regex. */
+function windowSpecificity(window: TAssistantWindowSpec): number {
+  if (window.onDate) return 100;
+  if (window.named === "today" || window.named === "yesterday") return 90;
+  if (window.named === "this_week" || window.named === "last_week") return 70;
+  if (window.lastNDays != null || window.lastNWeeks != null || window.lastNMonths != null) {
+    return 70;
+  }
+  if (
+    window.preset === "last_15_days" ||
+    window.preset === "last_30_days" ||
+    window.preset === "last_90_days"
+  ) {
+    return 60;
+  }
+  if (window.preset === "this_month" || window.preset === "last_month") return 50;
+  if (window.preset === "this_year" || window.preset === "last_year") return 30;
+  if (window.preset === "all") return 10;
+  return 0;
+}
+
+/** Fill slots from wink (best-effort), then lexicon tokens/phrases, then duration and calendar parsers. */
 function collectSlots(query: string): TParsedSlots {
   const slots: TParsedSlots = {
     domains: new Set(),
@@ -131,12 +161,18 @@ function collectSlots(query: string): TParsedSlots {
     if (lowered.includes(item.phrase)) applyEntity(slots, item.entity);
   }
 
-  const lastN = parseLastNDaysFromText(query);
-  if (lastN) slots.windows.push(lastN);
+  const duration = parseAssistantDurationWindow(query);
+  if (duration) slots.windows.push(duration);
+
+  for (const onDate of parseAssistantOnDates(query)) {
+    slots.windows.push(assistantWindowSpec({ onDate }));
+  }
+
+  applyAllTimeKeywords(query, slots);
 
   if (/\b(?:total|all)\s+leads\b/i.test(query)) {
     slots.domains.add("leads");
-    slots.windows.push({ preset: "all", lastNDays: null });
+    slots.windows.push(assistantWindowSpec({ preset: "all" }));
   }
 
   slots.metrics = unique(slots.metrics);
@@ -147,12 +183,27 @@ function collectSlots(query: string): TParsedSlots {
 }
 
 function pickWindow(windows: TAssistantWindowSpec[]): TAssistantWindowSpec | null {
-  if (windows.length === 0) return emptyWindow();
-  const serialized = unique(
-    windows.map((window) => `${window.preset ?? ""}:${window.lastNDays ?? ""}`),
-  );
-  if (serialized.length > 1) return null;
-  return windows[0] ?? emptyWindow();
+  if (windows.length === 0) return emptyAssistantWindow();
+
+  const uniqueWindows: TAssistantWindowSpec[] = [];
+  const seen = new Set<string>();
+  for (const window of windows) {
+    const key = serializeWindow(window);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    uniqueWindows.push(window);
+  }
+
+  if (uniqueWindows.length === 1) return uniqueWindows[0] ?? emptyAssistantWindow();
+
+  const ranked = uniqueWindows
+    .slice()
+    .sort((a, b) => windowSpecificity(b) - windowSpecificity(a));
+  const best = ranked[0];
+  const second = ranked[1];
+  if (!best || !second) return best ?? emptyAssistantWindow();
+  if (windowSpecificity(best) > windowSpecificity(second)) return best;
+  return null;
 }
 
 function inferDomain(slots: TParsedSlots): "leads" | "analytics" | "seo" | null {

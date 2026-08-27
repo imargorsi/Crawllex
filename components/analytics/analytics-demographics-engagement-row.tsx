@@ -15,7 +15,7 @@ type TAnalyticsDemographicsEngagementRowProps = {
 
 /**
  * Keeps the demographics panel the same height as the stacked engagement cards
- * on lg+ (CSS stretch is unreliable once percentage heights enter the tree).
+ * on xl+ (CSS stretch is unreliable once percentage heights enter the tree).
  */
 export function AnalyticsDemographicsEngagementRow({
   overview,
@@ -32,7 +32,7 @@ export function AnalyticsDemographicsEngagementRow({
     if (!demographicsCol || !engagementCol) return;
 
     const syncHeight = () => {
-      if (!window.matchMedia("(min-width: 1024px)").matches) {
+      if (!window.matchMedia("(min-width: 1280px)").matches) {
         demographicsCol.style.minHeight = "";
         return;
       }
@@ -51,7 +51,7 @@ export function AnalyticsDemographicsEngagementRow({
   }, [isLoading, overviewLoading, overview?.engagement]);
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[7fr_3fr] lg:gap-6">
+    <div className="grid gap-5 xl:grid-cols-[minmax(0,7fr)_minmax(0,3fr)] xl:gap-6">
       <div ref={demographicsColRef} className="min-h-0 min-w-0">
         <AnalyticsUserDemographicsCard
           rows={rows}

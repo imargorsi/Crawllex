@@ -56,6 +56,87 @@ describe("parseAssistantQuery", () => {
       kind: "leads_count",
       window: { lastNDays: 7 },
     });
+    expect(parseAssistantQuery("leads last 7")).toMatchObject({
+      kind: "leads_count",
+      window: { lastNDays: 7 },
+    });
+    expect(parseAssistantQuery("how many blogs i got in the last day")).toMatchObject({
+      kind: "seo_count",
+      activityType: "blogs",
+      window: { lastNDays: 1 },
+    });
+    expect(parseAssistantQuery("how many blogs i got in the last four months")).toMatchObject({
+      kind: "seo_count",
+      activityType: "blogs",
+      window: { lastNMonths: 4 },
+    });
+    expect(parseAssistantQuery("blogs last 4 months")).toMatchObject({
+      kind: "seo_count",
+      activityType: "blogs",
+      window: { lastNMonths: 4 },
+    });
+    expect(parseAssistantQuery("blogs last 2 weeks")).toMatchObject({
+      kind: "seo_count",
+      activityType: "blogs",
+      window: { lastNWeeks: 2 },
+    });
+  });
+
+  it("maps today, yesterday, weeks, and overall", () => {
+    expect(parseAssistantQuery("How many leads do I have today?")).toMatchObject({
+      kind: "leads_count",
+      window: { named: "today" },
+    });
+    expect(parseAssistantQuery("leads yesterday")).toMatchObject({
+      kind: "leads_count",
+      window: { named: "yesterday" },
+    });
+    expect(parseAssistantQuery("leads this week")).toMatchObject({
+      kind: "leads_count",
+      window: { named: "this_week" },
+    });
+    expect(parseAssistantQuery("leads last week")).toMatchObject({
+      kind: "leads_count",
+      window: { named: "last_week" },
+    });
+    expect(parseAssistantQuery("total impressions")).toMatchObject({
+      kind: "analytics_metric",
+      metric: "impressions",
+      window: { preset: "all" },
+    });
+    expect(parseAssistantQuery("overall clicks")).toMatchObject({
+      kind: "analytics_metric",
+      metric: "clicks",
+      window: { preset: "all" },
+    });
+    expect(parseAssistantQuery("total users")).toMatchObject({
+      kind: "analytics_metric",
+      metric: "totalUsers",
+      window: { preset: null },
+    });
+    expect(parseAssistantQuery("total leads this month")).toMatchObject({
+      kind: "leads_count",
+      window: { preset: "this_month" },
+    });
+  });
+
+  it("maps calendar dates and messy phrasing", () => {
+    expect(parseAssistantQuery("how many leads on 2026-08-01")).toMatchObject({
+      kind: "leads_count",
+      window: { onDate: "2026-08-01" },
+    });
+    expect(parseAssistantQuery("can you tell me how many leads today")).toMatchObject({
+      kind: "leads_count",
+      window: { named: "today" },
+    });
+    expect(parseAssistantQuery("how many leed I have got it today")).toMatchObject({
+      kind: "leads_count",
+      window: { named: "today" },
+    });
+    expect(parseAssistantQuery("yestreday leads")).toMatchObject({
+      kind: "leads_count",
+      window: { named: "yesterday" },
+    });
   });
 
   it("maps analytics overview and metrics", () => {

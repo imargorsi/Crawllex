@@ -11,7 +11,7 @@ import {
   resolveProjectOwnerEmail,
   sendProjectOwnerMail,
 } from "@/lib/projects/send-project-owner-mail";
-import { Lead, Project, ProjectMember, SeoActivity, type ProjectDocument } from "@/models";
+import { Lead, LeadSource, Project, ProjectIntegration, ProjectMember, SeoActivity, type ProjectDocument } from "@/models";
 
 async function findProjectOrThrow(projectId: string): Promise<ProjectDocument> {
   if (!mongoose.isValidObjectId(projectId)) {
@@ -28,7 +28,7 @@ async function findProjectOrThrow(projectId: string): Promise<ProjectDocument> {
 
 /**
  * Hard-delete a project. Allowed only when status is `inactive` or `rejected`.
- * Cascades members, SEO activities, leads, and removes the stored logo.
+ * Cascades members, SEO activities, leads, lead sources, Google integrations, and removes the stored logo.
  * Emails the owner after a successful delete (soft-fail SMTP).
  */
 export async function deleteProject(_auth: AuthContext, projectId: string): Promise<void> {
@@ -49,6 +49,8 @@ export async function deleteProject(_auth: AuthContext, projectId: string): Prom
   await ProjectMember.deleteMany({ projectId: id });
   await SeoActivity.deleteMany({ projectId: id });
   await Lead.deleteMany({ projectId: id });
+  await LeadSource.deleteMany({ projectId: id });
+  await ProjectIntegration.deleteMany({ projectId: id });
   await Project.deleteOne({ _id: id });
   await deleteStoredProjectLogo(logoPath).catch(() => undefined);
 

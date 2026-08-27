@@ -175,6 +175,7 @@ describe("GET /projects — listProjects", () => {
       integrations: {
         gsc: "disconnected",
         ga4: "disconnected",
+        wordpress: "disconnected",
       },
     });
   });
@@ -214,6 +215,7 @@ describe("GET /projects — listProjects", () => {
     expect(projects[0]!.integrations).toEqual({
       gsc: "connected",
       ga4: "disconnected",
+      wordpress: "disconnected",
     });
   });
 

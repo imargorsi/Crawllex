@@ -13,6 +13,7 @@ import {
 
 import { useProjectsQuery, type TProjectListItem } from "@/features/projects/projects.api";
 import { SELECTED_PROJECT_STORAGE_KEY } from "@/lib/frontend/auth/session";
+import { isSelectableProjectStatus } from "@/lib/projects/constants";
 
 const STORAGE_KEY = SELECTED_PROJECT_STORAGE_KEY;
 const EMPTY_PROJECTS: TProjectListItem[] = [];
@@ -63,9 +64,9 @@ function writeStoredProjectId(id: string | null) {
 export function SelectedProjectProvider({ children }: { children: ReactNode }) {
   const { data, isLoading } = useProjectsQuery();
   const allProjects: TProjectListItem[] = data ?? EMPTY_PROJECTS;
-  /** Rejected projects stay on the projects list but cannot be selected for module work. */
+  /** Inactive and rejected stay on the projects list but cannot be selected for module work. */
   const projects = useMemo(
-    () => allProjects.filter((project) => project.status !== "rejected"),
+    () => allProjects.filter((project) => isSelectableProjectStatus(project.status)),
     [allProjects],
   );
 
@@ -88,7 +89,7 @@ export function SelectedProjectProvider({ children }: { children: ReactNode }) {
     [projects, effectivePreferredId],
   );
 
-  // Drop a stored selection that points at a rejected (or missing) project.
+  // Drop a stored selection that points at an inactive, rejected, or missing project.
   useEffect(() => {
     if (isLoading || !effectivePreferredId || selectedProject) return;
     writeStoredProjectId(null);
@@ -104,10 +105,15 @@ export function SelectedProjectProvider({ children }: { children: ReactNode }) {
     [projects],
   );
 
-  const preferSelectedProjectId = useCallback((id: string) => {
-    writeStoredProjectId(id);
-    setPreferredId(id);
-  }, []);
+  const preferSelectedProjectId = useCallback(
+    (id: string) => {
+      const project = allProjects.find((item) => item.id === id);
+      if (project && !isSelectableProjectStatus(project.status)) return;
+      writeStoredProjectId(id);
+      setPreferredId(id);
+    },
+    [allProjects],
+  );
 
   const value = useMemo(
     () => ({

@@ -6,13 +6,23 @@ import { ValidationError } from "@/lib/api/http-errors";
 import type { AuthContext } from "@/lib/auth/guards";
 import { projectCreatedMailContent } from "@/lib/mail/client";
 import { assignProjectMember } from "@/lib/projects/assign-member";
+import { PENDING_PROJECT_LIMIT_MESSAGE } from "@/lib/projects/constants";
+import { mapCreateProjectFields } from "@/lib/projects/project-field-map.utils";
 import { projectListUrl, sendProjectOwnerMail } from "@/lib/projects/send-project-owner-mail";
+import { userOwnsPendingProject } from "@/lib/projects/user-owns-pending-project";
 import { serializeProject } from "@/lib/serializers/project";
 import { PROJECT_OWNER_ROLE, SUPER_ADMIN_ROLE } from "@/lib/rbac/roles";
 import { seedSystemRoles } from "@/lib/rbac/seed-roles";
 import { Project, User, type ProjectDocument } from "@/models";
-import { mapCreateProjectFields } from "@/lib/projects/project-field-map.utils";
 import type { CreateProjectInput } from "@/schemas/project";
+
+function isDuplicateKeyError(error: unknown): boolean {
+  return error instanceof Error && (error as Error & { code?: number }).code === 11000;
+}
+
+function pendingProjectLimitError(): ValidationError {
+  return new ValidationError({ status: [PENDING_PROJECT_LIMIT_MESSAGE] }, PENDING_PROJECT_LIMIT_MESSAGE);
+}
 
 type CreateActors = {
   ownerUserId: mongoose.Types.ObjectId;
@@ -77,15 +87,27 @@ export async function createProject(
   const { ownerUserId, pocEmail } = await resolveCreateActors(auth, input);
   const onboarding = mapCreateProjectFields(input);
 
-  const project = await Project.create({
-    ...onboarding,
-    logoImage: options?.logoImage ?? null,
-    pocEmail,
-    status: isAdmin ? "active" : "pending",
-    createdByUserId: ownerUserId,
-    approvedAt: isAdmin ? new Date() : null,
-    approvedByUserId: isAdmin ? auth.user._id : null,
-  });
+  if (!isAdmin && (await userOwnsPendingProject(auth.user._id))) {
+    throw pendingProjectLimitError();
+  }
+
+  let project: ProjectDocument;
+  try {
+    project = await Project.create({
+      ...onboarding,
+      logoImage: options?.logoImage ?? null,
+      pocEmail,
+      status: isAdmin ? "active" : "pending",
+      createdByUserId: ownerUserId,
+      approvedAt: isAdmin ? new Date() : null,
+      approvedByUserId: isAdmin ? auth.user._id : null,
+    });
+  } catch (error) {
+    if (!isAdmin && isDuplicateKeyError(error)) {
+      throw pendingProjectLimitError();
+    }
+    throw error;
+  }
 
   await assignProjectMember({
     projectId: project._id,

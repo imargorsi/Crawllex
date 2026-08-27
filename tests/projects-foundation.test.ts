@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { hashPassword } from "@/lib/auth/password";
 import { assignProjectMember } from "@/lib/projects/assign-member";
-import { isActiveProjectStatus } from "@/lib/projects/constants";
+import { isActiveProjectStatus, isSelectableProjectStatus } from "@/lib/projects/constants";
 import { resolveProjectRoleBySlug } from "@/lib/projects/resolve-role";
 import { PROJECT_OWNER_ROLE, PROJECT_USER_ROLE } from "@/lib/rbac/roles";
 import { seedSystemRoles } from "@/lib/rbac/seed-roles";
@@ -26,6 +26,7 @@ describe("Projects foundation", () => {
 
     expect(project.status).toBe("pending");
     expect(isActiveProjectStatus(project.status)).toBe(false);
+    expect(isSelectableProjectStatus(project.status)).toBe(true);
   });
 
   it("accepts active, inactive, and rejected status values", async () => {
@@ -46,6 +47,7 @@ describe("Projects foundation", () => {
       });
       expect(project.status).toBe(status);
       expect(isActiveProjectStatus(project.status)).toBe(status === "active");
+      expect(isSelectableProjectStatus(project.status)).toBe(status === "active");
     }
   });
 

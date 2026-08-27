@@ -4,7 +4,7 @@ import { Icons } from "@/lib/frontend/icons/app-icons";
 
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { Input } from "@/components/input";
@@ -23,8 +23,8 @@ import {
   LEAD_MESSAGE_MAX_LENGTH,
   LEAD_NAME_MAX_LENGTH,
   LEAD_PHONE_MAX_LENGTH,
-  LEAD_SERVICES_MAX_LENGTH,
 } from "@/lib/leads/constants";
+import { leadExtrasForDisplay } from "@/lib/leads/extras.utils";
 import { isValidLeadDate, isValidLeadEmail, normalizeLeadPhone } from "@/lib/leads/normalize";
 import type { TLeadDto } from "@/types/lead.types";
 import { cn } from "@/lib/utils";
@@ -49,11 +49,12 @@ export function LeadEditorModal({ open, target, onOpenChange, onSave }: TLeadEdi
   const titleId = useId();
   const descriptionId = useId();
   const isEdit = target.mode === "edit";
+  const extrasEntries =
+    target.mode === "edit" ? leadExtrasForDisplay(target.lead, t("fields.services")) : [];
   const [mounted, setMounted] = useState(false);
 
   const {
     register,
-    control,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -211,30 +212,6 @@ export function LeadEditorModal({ open, target, onOpenChange, onSave }: TLeadEdi
               />
             </div>
 
-            <Controller
-              control={control}
-              name="servicesInterestedIn"
-              rules={{
-                maxLength: {
-                  value: LEAD_SERVICES_MAX_LENGTH,
-                  message: t("validation.maxServices"),
-                },
-              }}
-              render={({ field }) => (
-                <Input
-                  id="lead-services"
-                  chips
-                  label={t("fields.services")}
-                  placeholder={t("fields.servicesPh")}
-                  startIcon={fieldStartIcons.tag}
-                  value={field.value}
-                  onChange={field.onChange}
-                  onBlur={field.onBlur}
-                  error={errors.servicesInterestedIn?.message}
-                />
-              )}
-            />
-
             <Input
               id="lead-message"
               type="textarea"
@@ -253,13 +230,13 @@ export function LeadEditorModal({ open, target, onOpenChange, onSave }: TLeadEdi
               })}
             />
 
-            {target.mode === "edit" && Object.keys(target.lead.extras).length > 0 ? (
+            {extrasEntries.length > 0 ? (
               <div className="space-y-3 border-t border-border pt-4">
                 <div className="type-stack-md">
                   <p className="type-label text-text-primary">{t("extrasTitle")}</p>
                   <p className="type-caption text-text-muted">{t("extrasHint")}</p>
                 </div>
-                {Object.entries(target.lead.extras).map(([key, value]) => (
+                {extrasEntries.map(([key, value]) => (
                   <Input
                     key={key}
                     id={`lead-extra-${key}`}

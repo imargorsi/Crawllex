@@ -11,9 +11,8 @@ import { Heading } from "@/components/heading";
 import { Paragraph } from "@/components/paragraph";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingState } from "@/components/ui/loading-state";
-import { useProjectAccess } from "@/context/project-access-context";
 import { useAuthUserQuery } from "@/features/auth/auth.api";
-import { useProjectQuery } from "@/features/projects/projects.api";
+import { useProjectAccessQuery, useProjectQuery } from "@/features/projects/projects.api";
 import { ApiError } from "@/lib/frontend/api/errors";
 import { mapProjectDetailToFormValues } from "@/lib/frontend/projects/map-project-to-form-values.utils";
 import { resolveProjectOwnerId } from "@/lib/projects/project-owner-id.utils";
@@ -28,13 +27,15 @@ export function ProjectsEditSection() {
   const { t: tForm } = useTranslation("translation", { keyPrefix: "modules.projects.createForm" });
   const { t: tDetail } = useTranslation("translation", { keyPrefix: "modules.projects.detail" });
   const { data: authUser, isLoading: isAuthLoading } = useAuthUserQuery();
-  const { projectPermissions } = useProjectAccess();
+  const userIsSuperAdmin = isSuperAdmin(authUser?.roles);
+  const { data: projectAccess, isPending: isAccessPending } = useProjectAccessQuery(projectId, {
+    enabled: Boolean(authUser && projectId) && !userIsSuperAdmin,
+  });
   const { data: project, isPending, isError, error } = useProjectQuery(projectId, {
     enabled: Boolean(authUser && projectId),
   });
 
-  const permissions = mergePermissions(authUser?.permissions ?? [], projectPermissions);
-  const userIsSuperAdmin = isSuperAdmin(authUser?.roles);
+  const permissions = mergePermissions(authUser?.permissions ?? [], projectAccess?.permissions ?? []);
 
   const canEdit = project
     ? canEditProjectCard({
@@ -68,7 +69,7 @@ export function ProjectsEditSection() {
     );
   }
 
-  if (isAuthLoading || isPending || !authUser) {
+  if (isAuthLoading || isPending || !authUser || (!userIsSuperAdmin && isAccessPending)) {
     return <LoadingState skeletonVariant="form" />;
   }
 

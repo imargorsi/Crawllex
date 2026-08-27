@@ -1,4 +1,5 @@
 import { LEAD_DATE_USE_TODAY, LEAD_FIELDS, LEAD_ORIGINS } from "@/lib/leads/constants";
+import type { TLeadSourceProvider } from "@/types/lead-source.types";
 
 export type TLeadOrigin = (typeof LEAD_ORIGINS)[number];
 
@@ -76,6 +77,19 @@ export type TLeadsImportResult = {
   imported: number;
   skippedDuplicates: number;
   skippedInvalid: number;
+};
+
+export type TLeadIngestVerifyDto = {
+  source: {
+    id: string;
+    name: string;
+    provider: TLeadSourceProvider;
+  };
+};
+
+export type TLeadIngestResultDto = {
+  lead: TLeadDto;
+  replayed: boolean;
 };
 
 export { LEAD_DATE_USE_TODAY };

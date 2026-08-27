@@ -147,9 +147,14 @@ export interface Translation {
       confirmRefreshTitle: string;
       confirmRefreshBody: string;
       confirmRefresh: string;
+      analyticsTitle: string;
+      analyticsLead: string;
+      leadsTitle: string;
+      leadsLead: string;
       services: {
         gsc: string;
         ga4: string;
+        wordpress: string;
       };
       serviceLead: {
         gsc: string;
@@ -159,6 +164,39 @@ export interface Translation {
         connected: string;
         disconnected: string;
         error: string;
+      };
+      wordpress: {
+        title: string;
+        lead: string;
+        connect: string;
+        viewKey: string;
+        viewKeyError: string;
+        disconnect: string;
+        downloadPlugin: string;
+        downloadError: string;
+        siteUrlPending: string;
+        connectedAt: string;
+        lastVerified: string;
+        ingestStats: string;
+        inactiveProject: string;
+        loadError: string;
+        connectSuccess: string;
+        connectError: string;
+        disconnectSuccess: string;
+        disconnectError: string;
+        confirmConnectTitle: string;
+        confirmConnectBody: string;
+        confirmConnect: string;
+        confirmDisconnectTitle: string;
+        confirmDisconnectBody: string;
+        confirmDisconnect: string;
+        keyDialogTitle: string;
+        keyDialogLead: string;
+        keyLabel: string;
+        copyKey: string;
+        keyCopied: string;
+        copyError: string;
+        done: string;
       };
     };
   };
@@ -489,6 +527,8 @@ export interface Translation {
       verifyEmailCta: string;
       listTitle: string;
       createProjectTitle: string;
+      pendingLimitTitle: string;
+      pendingLimitBody: string;
       statusFilter: {
         ariaLabel: string;
         all: string;
@@ -554,6 +594,7 @@ export interface Translation {
         short: {
           gsc: string;
           ga4: string;
+          wordpress: string;
         };
       };
       editProjectTitle: string;
@@ -1178,6 +1219,7 @@ export interface Translation {
         colPhone: string;
         colServices: string;
         colMessage: string;
+        colSource: string;
         colActions: string;
         viewLead: string;
         editLead: string;
@@ -1190,6 +1232,10 @@ export interface Translation {
         deleteErrorFallback: string;
         loadErrorBody: string;
       };
+      source: {
+        wordpress: string;
+        others: string;
+      };
       detail: {
         title: string;
         lead: string;
@@ -1197,6 +1243,7 @@ export interface Translation {
         leadTitle: string;
         leadSectionLead: string;
         leadDate: string;
+        source: string;
         services: string;
         message: string;
         extrasTitle: string;
@@ -1259,6 +1306,9 @@ export interface Translation {
         cancel: string;
         chooseFile: string;
         chooseFileHint: string;
+        downloadSample: string;
+        downloadSampleHint: string;
+        downloadSampleError: string;
         removeFile: string;
         nextMatching: string;
         nextImport: string;
@@ -1441,10 +1491,12 @@ export interface Translation {
       heroFeature2Body: string;
       heroFeature3Title: string;
       heroFeature3Body: string;
+      heroFeature4Title: string;
+      heroFeature4Body: string;
       trustSecure: string;
       trustUptime: string;
-      trustMultiClient: string;
-      trustInsights: string;
+      trustRoles: string;
+      trustGoogle: string;
       continueWith: string;
       continueGoogle: string;
       continueSso: string;
@@ -1644,10 +1696,10 @@ const translation: Translation = {
       interDescription: "Modern UI sans optimized for dense screens and long reading.",
     },
     integrations: {
-      lead: "Link Search Console and GA4 properties for the selected project. Only platform admins can manage these connections.",
+      lead: "Link Search Console, GA4, and WordPress lead capture for the selected project.",
       projectContext: "Selected Project: {{name}}",
       selectProjectTitle: "Select A Project",
-      selectProjectBody: "Choose a project from the sidebar before linking Google properties.",
+      selectProjectBody: "Choose a project from the sidebar before linking integrations.",
       refresh: "Refresh Data",
       connect: "Connect",
       update: "Update",
@@ -1681,9 +1733,14 @@ const translation: Translation = {
       confirmRefreshTitle: "Refresh Analytics Data?",
       confirmRefreshBody: "Pull The Latest Search Console And GA4 Metrics For This Project. Manual Refresh Is Limited To Once Per Hour.",
       confirmRefresh: "Refresh Data",
+      analyticsTitle: "Analytics",
+      analyticsLead: "Connect Search Console and GA4 for cached search and traffic metrics.",
+      leadsTitle: "Leads",
+      leadsLead: "Connect WordPress lead capture for the selected project.",
       services: {
         gsc: "Search Console",
         ga4: "Google Analytics 4",
+        wordpress: "WordPress",
       },
       serviceLead: {
         gsc: "Connect the Search Console property used for organic search performance.",
@@ -1693,6 +1750,41 @@ const translation: Translation = {
         connected: "Connected",
         disconnected: "Disconnected",
         error: "Error",
+      },
+      wordpress: {
+        title: "WordPress",
+        lead: "Download the WordPress plugin and connect a lead source key. The key stays hidden until you view or copy it.",
+        connect: "Connect",
+        viewKey: "View Key",
+        viewKeyError: "Could not load the lead source key.",
+        disconnect: "Disconnect",
+        downloadPlugin: "Download Plugin",
+        downloadError: "The plugin could not be downloaded.",
+        siteUrlPending: "Website URL will appear after the plugin tests the connection.",
+        connectedAt: "Connected {{value}}",
+        lastVerified: "Last Verified {{value}}",
+        ingestStats: "Ingested {{ingested}} · Failed {{failed}}",
+        inactiveProject: "WordPress can only be connected when the project is active.",
+        loadError: "Could not load the WordPress lead source.",
+        connectSuccess: "Lead source connected. Copy the key into the WordPress plugin.",
+        connectError: "Could not connect WordPress.",
+        disconnectSuccess: "WordPress disconnected.",
+        disconnectError: "Could not disconnect WordPress.",
+        confirmConnectTitle: "Connect WordPress?",
+        confirmConnectBody:
+          "Create a lead source key for this project. Paste it in the WordPress plugin. You can view it again from this card.",
+        confirmConnect: "Connect WordPress",
+        confirmDisconnectTitle: "Disconnect WordPress?",
+        confirmDisconnectBody:
+          "The WordPress plugin will no longer be able to send leads to this project.",
+        confirmDisconnect: "Disconnect",
+        keyDialogTitle: "Lead Source Key",
+        keyDialogLead: "Copy this key and paste it in the WordPress plugin. You can view it again from Integrations.",
+        keyLabel: "Lead Source Key",
+        copyKey: "Copy Key",
+        keyCopied: "Key copied.",
+        copyError: "Could not copy the key.",
+        done: "Done",
       },
     },
   },
@@ -2027,6 +2119,9 @@ const translation: Translation = {
       verifyEmailCta: "Verify Email",
       listTitle: "Projects",
       createProjectTitle: "Create A New Project",
+      pendingLimitTitle: "Project Awaiting Approval",
+      pendingLimitBody:
+        "You already have a project pending approval. Wait for a decision before creating another.",
       statusFilter: {
         ariaLabel: "Filter Projects By Status",
         all: "All Projects",
@@ -2087,11 +2182,12 @@ const translation: Translation = {
         projectOwnerFallback: "Project Owner",
       },
       listIntegrations: {
-        ariaLabel: "Google Integrations",
+        ariaLabel: "Project Integrations",
         tooltip: "{{service}}: {{status}}",
         short: {
           gsc: "GSC",
           ga4: "GA4",
+          wordpress: "WP",
         },
       },
       editProjectTitle: "Edit Project",
@@ -2704,7 +2800,7 @@ const translation: Translation = {
     },
     leads: {
       title: "Leads",
-      subtitle: "Review and manage project leads from imports and manual entry.",
+      subtitle: "Review and manage project leads from imports, manual entry, and WordPress.",
       selectProjectTitle: "Select A Project",
       selectProjectBody: "Choose a project from the sidebar to manage its leads.",
       summary: {
@@ -2715,7 +2811,7 @@ const translation: Translation = {
       },
       table: {
         emptyTitle: "No Leads Found",
-        emptyBody: "Import a CSV or add a lead to get started.",
+        emptyBody: "Import a CSV, add a lead, or capture from WordPress.",
         summary: "Showing {{shown}} Of {{total}} Leads",
         previousPage: "Previous Page",
         nextPage: "Next Page",
@@ -2728,6 +2824,7 @@ const translation: Translation = {
         colPhone: "Phone Number",
         colServices: "Services Interested In",
         colMessage: "Message",
+        colSource: "Source",
         colActions: "Actions",
         viewLead: "View Lead",
         editLead: "Edit Lead",
@@ -2740,13 +2837,18 @@ const translation: Translation = {
         deleteErrorFallback: "Could not delete lead.",
         loadErrorBody: "Could not load leads.",
       },
+      source: {
+        wordpress: "WordPress Integration",
+        others: "Others",
+      },
       detail: {
         title: "Lead Details",
-        lead: "Contact details, message, and any extra fields from import.",
+        lead: "Contact details, source, message, and any extra fields from import or WordPress.",
         unnamed: "Lead",
         leadTitle: "Lead Details",
-        leadSectionLead: "Date, services, and the original message.",
+        leadSectionLead: "Date, source, and the original message.",
         leadDate: "Date",
+        source: "Source",
         services: "Services Interested In",
         message: "Message",
         extrasTitle: "Additional Fields",
@@ -2809,6 +2911,9 @@ const translation: Translation = {
         cancel: "Cancel",
         chooseFile: "Choose CSV File",
         chooseFileHint: "Upload a .CSV export from Sheets or Excel.",
+        downloadSample: "Download Sample CSV",
+        downloadSampleHint: "Use this sheet to see the expected columns.",
+        downloadSampleError: "The sample CSV could not be downloaded.",
         removeFile: "Remove File",
         nextMatching: "Matching",
         nextImport: "Import",
@@ -2983,20 +3088,22 @@ const translation: Translation = {
       password: "Password",
       submit: "Log In",
       forgotPassword: "Forgot Password?",
-      heroTitleStart: "SEO Clarity For",
+      heroTitleStart: "SEO Operations For",
       heroTitleAccent: "Every Client",
       heroLead:
-        "Track rankings, spot opportunities, and keep stakeholders aligned from one calm workspace.",
-      heroFeature1Title: "Multi-Client Dashboards",
-      heroFeature1Body: "Run every client workspace without spreadsheet chaos.",
-      heroFeature2Title: "Scheduled Checks You Trust",
-      heroFeature2Body: "Reliable history and cadence your team can depend on.",
-      heroFeature3Title: "Insights Built For Accuracy",
-      heroFeature3Body: "Clear performance signals designed for SEO operators.",
+        "Run every client from one workspace — dashboard assistant, WordPress leads, search analytics, and SEO activity in the same place.",
+      heroFeature1Title: "Dashboard Assistant",
+      heroFeature1Body: "Ask in plain English and get answers from leads, analytics, and SEO activity.",
+      heroFeature2Title: "WordPress Integration",
+      heroFeature2Body: "Website forms land in Crawllex automatically with the official plugin.",
+      heroFeature3Title: "Search Performance",
+      heroFeature3Body: "Clicks, impressions, rankings, and engagement in one client-ready view.",
+      heroFeature4Title: "Multi-Client Dashboards",
+      heroFeature4Body: "Switch projects in a click and keep every client workspace separate.",
       trustSecure: "Secure Access",
       trustUptime: "Always On",
-      trustMultiClient: "Multi-Client",
-      trustInsights: "Live Insights",
+      trustRoles: "Team Roles",
+      trustGoogle: "Google Sign-In",
       continueWith: "Or Continue With",
       continueGoogle: "Continue With Google",
       continueSso: "SSO",

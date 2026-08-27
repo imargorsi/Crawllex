@@ -1,5 +1,7 @@
 import type { TDateRange } from "@/lib/frontend/seo-activities/date-range.utils";
 import { downloadBrowserFile } from "@/lib/frontend/seo-activities/export.utils";
+import { leadSourceGroup } from "@/lib/frontend/leads/origin-display";
+import { leadExtrasForDisplay } from "@/lib/leads/extras.utils";
 import type { TLeadDto } from "@/types/lead.types";
 
 export type TLeadExportLabels = {
@@ -10,6 +12,9 @@ export type TLeadExportLabels = {
   phone: string;
   servicesInterestedIn: string;
   message: string;
+  source: string;
+  sourceWordpress: string;
+  sourceOthers: string;
 };
 
 /** Prefix formula-like values so Excel/LibreOffice treat them as text. */
@@ -28,39 +33,45 @@ function escapeXml(value: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function collectExtrasKeys(rows: readonly TLeadDto[]): string[] {
+function collectExtrasKeys(rows: readonly TLeadDto[], servicesLabel: string): string[] {
   const keys = new Set<string>();
   for (const row of rows) {
-    for (const key of Object.keys(row.extras ?? {})) {
+    for (const [key] of leadExtrasForDisplay(row, servicesLabel)) {
       keys.add(key);
     }
   }
   return [...keys].sort((a, b) => a.localeCompare(b));
 }
 
+function extrasValueMap(row: TLeadDto, servicesLabel: string): Record<string, string> {
+  return Object.fromEntries(leadExtrasForDisplay(row, servicesLabel));
+}
+
 function buildExportTable(rows: readonly TLeadDto[], labels: TLeadExportLabels) {
-  const includeServices = rows.some((row) => Boolean(row.servicesInterestedIn?.trim()));
-  const extrasKeys = collectExtrasKeys(rows);
+  const extrasKeys = collectExtrasKeys(rows, labels.servicesInterestedIn);
   const headers = [
     labels.leadDate,
     labels.firstName,
     labels.lastName,
     labels.email,
     labels.phone,
-    ...(includeServices ? [labels.servicesInterestedIn] : []),
+    labels.source,
     labels.message,
     ...extrasKeys,
   ];
-  const values = rows.map((row) => [
-    row.leadDate,
-    row.firstName,
-    row.lastName,
-    row.email,
-    row.phone,
-    ...(includeServices ? [row.servicesInterestedIn ?? ""] : []),
-    row.message,
-    ...extrasKeys.map((key) => row.extras?.[key] ?? ""),
-  ]);
+  const values = rows.map((row) => {
+    const extras = extrasValueMap(row, labels.servicesInterestedIn);
+    return [
+      row.leadDate,
+      row.firstName,
+      row.lastName,
+      row.email,
+      row.phone,
+      leadSourceGroup(row.origin) === "wordpress" ? labels.sourceWordpress : labels.sourceOthers,
+      row.message,
+      ...extrasKeys.map((key) => extras[key] ?? ""),
+    ];
+  });
   return { headers, values };
 }
 

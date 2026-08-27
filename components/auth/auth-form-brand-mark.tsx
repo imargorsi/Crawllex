@@ -20,7 +20,7 @@ export function AuthFormBrandMark({ className, priority = false }: AuthFormBrand
     <div className={cn("flex justify-center", className)}>
       <span
         className={cn(
-          "inline-flex size-14 items-center justify-center rounded-xl border border-border/70 bg-transparent",
+          "inline-flex size-14 items-center justify-center rounded-2xl border border-border/70 bg-transparent",
           "dark:border-text-primary/45",
         )}
       >

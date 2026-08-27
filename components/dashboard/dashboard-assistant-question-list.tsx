@@ -40,7 +40,7 @@ export function DashboardAssistantQuestionList({
               disabled={disabled}
               onClick={() => onSelect(item.query)}
               className={cn(
-                "flex w-full items-center gap-2.5 rounded-xl border border-border/40 bg-transparent px-2.5 py-1.5 text-start",
+                "flex min-h-10 w-full items-center gap-2.5 rounded-xl border border-border/40 bg-transparent px-2.5 py-2.5 text-start",
                 "transition-colors hover:border-border hover:bg-bg-hover/40",
                 "disabled:opacity-50 dark:border-text-primary/20 dark:hover:border-text-primary/30",
               )}

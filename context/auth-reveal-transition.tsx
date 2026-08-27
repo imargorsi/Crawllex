@@ -41,7 +41,7 @@ function useCanUseDomPortal() {
 
 function AuthRevealFormPanel() {
   return (
-    <section className={cn(authFormPanelClass, "relative z-10 justify-center px-6 py-10 sm:px-10 lg:px-14 lg:py-12")}>
+    <section className={cn(authFormPanelClass, "relative z-10 justify-center px-6 py-10 sm:px-10 lg:px-8 lg:py-12 xl:px-10")}>
       <div className="mx-auto w-full max-w-[26rem]">
         <div className={cn(authFormCardSurfaceClass, "p-7 sm:p-8")}>
           <div className="h-8 w-32 rounded-md bg-border/60" aria-hidden />
@@ -62,7 +62,7 @@ function AuthRevealOverlay() {
     <div className="auth-reveal-overlay" aria-hidden>
       <div className="auth-reveal-panel auth-reveal-panel--hero">
         <AuthVideoBackground variant="viewport" anchor="start" />
-        <SignInHeroSection />
+        <SignInHeroSection overlay />
       </div>
       <div className="auth-reveal-panel auth-reveal-panel--form">
         <AuthVideoBackground variant="viewport" anchor="end" />

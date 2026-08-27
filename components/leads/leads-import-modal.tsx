@@ -12,6 +12,7 @@ import { DialogSectionDivider } from "@/components/ui/dialog-section-divider";
 import { Spinner } from "@/components/ui/spinner";
 import { commitLeadsImport, previewLeadsImport } from "@/features/leads/leads.api";
 import { ApiError } from "@/lib/frontend/api/errors";
+import { downloadHrefAsFile } from "@/lib/frontend/download-file";
 import { notify } from "@/lib/frontend/feedback/notify";
 import {
   dialogSurfaceClass,
@@ -24,6 +25,8 @@ import {
   LEAD_EXTRAS_KEEP,
   LEAD_FIELD_SKIP,
   LEAD_IMPORT_MAX_FILE_BYTES,
+  LEAD_IMPORT_SAMPLE_CSV_FILENAME,
+  LEAD_IMPORT_SAMPLE_CSV_HREF,
   LEAD_REQUIRED_FIELDS,
 } from "@/lib/leads/constants";
 import { coreMappedHeaders, reconcileExtrasHeaders } from "@/lib/leads/extras.utils";
@@ -338,6 +341,26 @@ export function LeadsImportModal({
                       </button>
                     </div>
                   )}
+
+                  <div className="flex flex-col items-center gap-1.5 text-center">
+                    <Button
+                      type="button"
+                      variant="outlined"
+                      size="md"
+                      onClick={() => {
+                        void downloadHrefAsFile(
+                          LEAD_IMPORT_SAMPLE_CSV_HREF,
+                          LEAD_IMPORT_SAMPLE_CSV_FILENAME,
+                        ).catch(() => {
+                          notify.error(t("downloadSampleError"));
+                        });
+                      }}
+                    >
+                      <Icons.cloudDownload className="size-4" aria-hidden />
+                      {t("downloadSample")}
+                    </Button>
+                    <p className="type-caption text-text-muted">{t("downloadSampleHint")}</p>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">

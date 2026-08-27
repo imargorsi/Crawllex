@@ -11,6 +11,8 @@ import { useUpdateUserPreferencesMutation } from "@/features/preferences/prefere
 import { ApiError } from "@/lib/frontend/api/errors";
 import { notify } from "@/lib/frontend/feedback/notify";
 import {
+  detailIconWellClass,
+  elevatedCardSurfaceClass,
   settingsInsetDividerClass,
   typeStackMdClass,
 } from "@/lib/frontend/layout/dashboard-chrome";
@@ -53,7 +55,7 @@ export function SettingsThemePanel() {
   return (
     <div className="flex flex-col gap-6">
       <PreferenceSection title={tTheme("sectionTitle")} lead={tTheme("lead")}>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3">
           {THEME_PACKS.map((pack) => (
             <ThemePackCard
               key={pack.id}
@@ -73,14 +75,13 @@ export function SettingsThemePanel() {
       <div className={settingsInsetDividerClass} aria-hidden />
 
       <PreferenceSection title={tFont("sectionTitle")} lead={tFont("lead")}>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3">
           {FONT_PACKS.map((pack) => (
             <FontPackCard
               key={pack.id}
               packId={pack.id}
               title={tFont(pack.nameKey)}
               description={tFont(pack.descriptionKey)}
-              sample={pack.sample}
               cssVariable={pack.cssVariable}
               isSelected={fontPack === pack.id}
               selectedLabel={tFont("selected")}
@@ -107,7 +108,7 @@ function PreferenceSection({
     <section className="flex flex-col gap-2.5">
       <div className={typeStackMdClass}>
         <h3 className="type-title text-text-primary">{title}</h3>
-        <p className="type-caption max-w-2xl text-text-muted">{lead}</p>
+        <p className="max-w-2xl type-body text-text-muted">{lead}</p>
       </div>
       {children}
     </section>
@@ -115,7 +116,7 @@ function PreferenceSection({
 }
 
 const preferenceCardClass = cn(
-  "flex w-full flex-col gap-0.5 rounded-xl border px-3 py-2.5 text-start",
+  "flex h-full min-w-0 w-full items-center gap-3.5 rounded-2xl px-4 py-3.5 text-start sm:gap-4 sm:px-5 sm:py-4",
   "transition-[border-color,background-color,box-shadow,opacity] duration-200",
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--accent-border)",
   "focus-visible:ring-offset-2 focus-visible:ring-offset-bg-card",
@@ -124,8 +125,16 @@ const preferenceCardClass = cn(
 
 function preferenceCardStateClass(isSelected: boolean) {
   return isSelected
-    ? "border-brand/55 bg-bg-selected shadow-sm"
-    : "border-border/50 bg-transparent hover:border-border hover:bg-bg-hover/45 dark:border-text-primary/15 dark:hover:border-text-primary/28";
+    ? "border border-brand/55 bg-bg-selected/50 text-text-primary shadow-sm backdrop-blur-md backdrop-saturate-125"
+    : elevatedCardSurfaceClass;
+}
+
+function PreferenceCardWell({ children }: { children: ReactNode }) {
+  return (
+    <span className={cn(detailIconWellClass, "size-12")} aria-hidden>
+      {children}
+    </span>
+  );
 }
 
 function ThemePackCard({
@@ -157,25 +166,27 @@ function ThemePackCard({
       data-theme-pack={packId}
       className={cn(preferenceCardClass, preferenceCardStateClass(isSelected))}
     >
-      <div className="flex items-center gap-2">
-        <div className="flex shrink-0 items-center" aria-hidden>
+      <PreferenceCardWell>
+        <span className="flex items-center">
           {swatches.map((hex, index) => (
             <span
               key={hex}
               className={cn(
-                "size-3.5 rounded-full border border-border/50 dark:border-text-primary/25",
-                index > 0 && "-ms-1",
+                "size-4 rounded-full border border-border/50 dark:border-text-primary/25",
+                index > 0 && "-ms-1.5",
               )}
               style={{ backgroundColor: hex, zIndex: swatches.length - index }}
             />
           ))}
-        </div>
-        <p className="min-w-0 flex-1 truncate type-label text-text-primary">{title}</p>
-        {isSelected ? (
-          <Icons.checkCircle className="size-3.5 shrink-0 text-brand" aria-hidden />
-        ) : null}
+        </span>
+      </PreferenceCardWell>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p className="type-body-strong text-text-primary">{title}</p>
+        <p className="type-body leading-snug text-text-muted">{description}</p>
       </div>
-      <p className="truncate type-caption text-text-muted">{description}</p>
+      {isSelected ? (
+        <Icons.checkCircle className="size-5 shrink-0 text-brand" aria-hidden />
+      ) : null}
     </button>
   );
 }
@@ -184,7 +195,6 @@ function FontPackCard({
   packId,
   title,
   description,
-  sample,
   cssVariable,
   isSelected,
   selectedLabel,
@@ -194,7 +204,6 @@ function FontPackCard({
   packId: TFontPackId;
   title: string;
   description: string;
-  sample: string;
   cssVariable: string;
   isSelected: boolean;
   selectedLabel: string;
@@ -211,20 +220,26 @@ function FontPackCard({
       data-font-pack={packId}
       className={cn(preferenceCardClass, preferenceCardStateClass(isSelected))}
     >
-      <div className="flex items-center gap-2">
-        <p className="min-w-0 flex-1 truncate type-label text-text-primary">{title}</p>
-        <p
-          className="shrink-0 type-caption text-text-secondary"
+      <PreferenceCardWell>
+        <span
+          className="type-title leading-none text-text-primary"
           style={{ fontFamily: `var(${cssVariable})` }}
-          aria-hidden
         >
-          {sample}
+          Aa
+        </span>
+      </PreferenceCardWell>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p
+          className="type-body-strong text-text-primary"
+          style={{ fontFamily: `var(${cssVariable})` }}
+        >
+          {title}
         </p>
-        {isSelected ? (
-          <Icons.checkCircle className="size-3.5 shrink-0 text-brand" aria-hidden />
-        ) : null}
+        <p className="type-body leading-snug text-text-muted">{description}</p>
       </div>
-      <p className="truncate type-caption text-text-muted">{description}</p>
+      {isSelected ? (
+        <Icons.checkCircle className="size-5 shrink-0 text-brand" aria-hidden />
+      ) : null}
     </button>
   );
 }

@@ -46,6 +46,11 @@ const projectSchema = new Schema(
 
 projectSchema.index({ status: 1, createdAt: -1 });
 projectSchema.index({ createdByUserId: 1 });
+/** At most one pending project per creator — backs the application-level cap under concurrent POSTs. */
+projectSchema.index(
+  { createdByUserId: 1 },
+  { unique: true, partialFilterExpression: { status: "pending" }, name: "uniq_createdBy_pending" },
+);
 
 export type ProjectDocument = InferSchemaType<typeof projectSchema> &
   mongoose.Document & {

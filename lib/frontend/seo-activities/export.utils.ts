@@ -1,3 +1,4 @@
+import { downloadBrowserBlob } from "@/lib/frontend/download-file";
 import type { TDateRange } from "@/lib/frontend/seo-activities/date-range.utils";
 import type {
   TSeoActivityBacklink,
@@ -132,16 +133,7 @@ export function buildSeoActivityExportFilename(
 }
 
 export function downloadBrowserFile(filename: string, content: string, mimeType: string) {
-  const blob = new Blob([content], { type: mimeType });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  anchor.rel = "noopener";
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
+  downloadBrowserBlob(filename, new Blob([content], { type: mimeType }));
 }
 
 export function downloadSeoActivitiesExcel(input: {

@@ -6,7 +6,13 @@ const STOPWORDS = new Set([
   "are",
   "did",
   "do",
+  "eight",
+  "eleven",
+  "fifteen",
+  "five",
   "for",
+  "four",
+  "fourteen",
   "got",
   "has",
   "have",
@@ -20,18 +26,32 @@ const STOPWORDS = new Set([
   "many",
   "me",
   "my",
+  "nine",
+  "ninety",
   "of",
   "on",
+  "one",
   "our",
   "past",
   "please",
   "previous",
+  "seven",
   "show",
+  "six",
+  "sixteen",
+  "sixty",
   "tell",
+  "ten",
   "that",
   "the",
+  "thirteen",
+  "thirty",
   "this",
+  "three",
   "to",
+  "twelve",
+  "twenty",
+  "two",
   "was",
   "we",
   "were",
@@ -68,7 +88,7 @@ function damerauLevenshtein(a: string, b: string): number {
 }
 
 function maxDistance(tokenLength: number): number {
-  if (tokenLength < 5) return 0;
+  if (tokenLength < 4) return 0;
   if (tokenLength <= 6) return 1;
   return 2;
 }

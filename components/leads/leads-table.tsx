@@ -37,7 +37,6 @@ export function LeadsTable({
 }: TLeadsTableProps) {
   const { t } = useTranslation("translation", { keyPrefix: "modules.leads" });
   const columns = useLeadsTableColumns({
-    rows,
     canUpdate,
     canDelete,
     onView,
