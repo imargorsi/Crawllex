@@ -23,9 +23,15 @@ export type TAssistantAnalyticsMetric =
   | "engagementRate"
   | "avgSessionDuration";
 
+export type TAssistantNamedWindow = "today" | "yesterday" | "this_week" | "last_week";
+
 export type TAssistantWindowSpec = {
   preset: TDateRangePresetId | null;
   lastNDays: number | null;
+  lastNWeeks: number | null;
+  lastNMonths: number | null;
+  named: TAssistantNamedWindow | null;
+  onDate: string | null;
 };
 
 export type TAssistantParse =

@@ -21,7 +21,12 @@ type TExpected = {
 
 type TCase = TExpected & { query: string };
 
-const WINDOWS: Array<{ phrase: string; preset: TDateRangePresetId | null; lastNDays?: number }> = [
+const WINDOWS: Array<{
+  phrase: string;
+  preset: TDateRangePresetId | null;
+  lastNDays?: number;
+  named?: TAssistantWindowSpec["named"];
+}> = [
   { phrase: "", preset: null },
   { phrase: "this month", preset: "this_month" },
   { phrase: "last month", preset: "last_month" },
@@ -32,6 +37,10 @@ const WINDOWS: Array<{ phrase: string; preset: TDateRangePresetId | null; lastND
   { phrase: "last 7 days", preset: null, lastNDays: 7 },
   { phrase: "all time", preset: "all" },
   { phrase: "ytd", preset: "this_year" },
+  { phrase: "today", preset: null, named: "today" },
+  { phrase: "yesterday", preset: null, named: "yesterday" },
+  { phrase: "this week", preset: null, named: "this_week" },
+  { phrase: "overall", preset: "all" },
 ];
 
 function withWindow(base: string, phrase: string): string {
@@ -43,7 +52,13 @@ function windowSpec(
   phrase: string,
 ): Partial<TAssistantWindowSpec> | undefined {
   const found = WINDOWS.find((item) => item.phrase === phrase);
-  if (!found || (!found.preset && found.lastNDays == null && phrase === "")) return undefined;
+  if (
+    !found ||
+    (!found.preset && found.lastNDays == null && found.named == null && phrase === "")
+  ) {
+    return undefined;
+  }
+  if (found.named) return { named: found.named };
   if (found.lastNDays != null) return { lastNDays: found.lastNDays };
   if (found.preset) return { preset: found.preset };
   return undefined;
@@ -60,7 +75,18 @@ function leadsCases(): TCase[] {
     "show $",
     "what's our $",
   ];
-  const windowPhrases = ["", "this month", "last month", "this year", "last 30 days", "all time"];
+  const windowPhrases = [
+    "",
+    "this month",
+    "last month",
+    "this year",
+    "last 30 days",
+    "all time",
+    "today",
+    "yesterday",
+    "this week",
+    "overall",
+  ];
   const cases: TCase[] = [];
 
   for (const stem of stems) {
@@ -89,6 +115,11 @@ function leadsCases(): TCase[] {
     { query: "leads last 7 days", kind: "leads_count", window: { lastNDays: 7 } },
     { query: "How many leads?", kind: "leads_count" },
     { query: "LEADS THIS MONTH", kind: "leads_count", window: { preset: "this_month" } },
+    { query: "How many leads do I have today?", kind: "leads_count", window: { named: "today" } },
+    { query: "can you tell me how many leads today", kind: "leads_count", window: { named: "today" } },
+    { query: "how many leed I have got it today", kind: "leads_count", window: { named: "today" } },
+    { query: "leads last 7", kind: "leads_count", window: { lastNDays: 7 } },
+    { query: "leads on 2026-08-01", kind: "leads_count", window: { onDate: "2026-08-01" } },
   );
 
   return cases;
@@ -130,6 +161,10 @@ function metricCases(): TCase[] {
     { query: "avg ctr", kind: "analytics_metric", metric: "ctr" },
     { query: "screen views", kind: "analytics_metric", metric: "pageViews" },
     { query: "how many users last month", kind: "analytics_metric", metric: "totalUsers", window: { preset: "last_month" } },
+    { query: "total impressions", kind: "analytics_metric", metric: "impressions", window: { preset: "all" } },
+    { query: "total positions", kind: "analytics_metric", metric: "position", window: { preset: "all" } },
+    { query: "overall clicks", kind: "analytics_metric", metric: "clicks", window: { preset: "all" } },
+    { query: "impressions last 7", kind: "analytics_metric", metric: "impressions", window: { lastNDays: 7 } },
   );
 
   return cases;
@@ -234,6 +269,11 @@ function seoCases(): TCase[] {
     { query: "how many blogss", kind: "seo_count", activityType: "blogs" },
     { query: "blog posts this year", kind: "seo_count", activityType: "blogs", window: { preset: "this_year" } },
     { query: "link building last month", kind: "seo_count", activityType: "backlinks", window: { preset: "last_month" } },
+    { query: "how many blogs overall", kind: "seo_count", activityType: "blogs", window: { preset: "all" } },
+    { query: "blogs today", kind: "seo_count", activityType: "blogs", window: { named: "today" } },
+    { query: "how many blogs i got in the last day", kind: "seo_count", activityType: "blogs", window: { lastNDays: 1 } },
+    { query: "how many blogs i got in the last four months", kind: "seo_count", activityType: "blogs", window: { lastNMonths: 4 } },
+    { query: "blogs last 4 months", kind: "seo_count", activityType: "blogs", window: { lastNMonths: 4 } },
   );
 
   return cases;
@@ -270,6 +310,18 @@ function assertWindow(
   }
   if (expected.lastNDays != null) {
     expect(parsed.window.lastNDays).toBe(expected.lastNDays);
+  }
+  if (expected.lastNWeeks != null) {
+    expect(parsed.window.lastNWeeks).toBe(expected.lastNWeeks);
+  }
+  if (expected.lastNMonths != null) {
+    expect(parsed.window.lastNMonths).toBe(expected.lastNMonths);
+  }
+  if (expected.named != null) {
+    expect(parsed.window.named).toBe(expected.named);
+  }
+  if (expected.onDate != null) {
+    expect(parsed.window.onDate).toBe(expected.onDate);
   }
 }
 

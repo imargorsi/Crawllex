@@ -6,6 +6,7 @@ import {
   rangeQuery,
   resolveAnalyticsWindow,
   resolveLeadsSeoWindow,
+  type TResolvedAssistantRange,
 } from "@/lib/assistant/nlp/windows";
 import { getSeoActivityCounts } from "@/lib/seo-activities/list-seo-activities";
 import type { TSeoActivityType } from "@/types/seo-activity.types";
@@ -115,8 +116,14 @@ function formatMetricValue(
 }
 
 function inWindow(label: string): string {
-  if (label.startsWith("the last") || label === "all time") return `in ${label}`;
+  if (label === "all time") return "in total";
+  if (label.startsWith("the last")) return `in ${label}`;
   return label;
+}
+
+function withNotice(range: TResolvedAssistantRange, message: string): string {
+  if (!range.notice) return message;
+  return `${range.notice} ${message}`;
 }
 
 function metricSentence(
@@ -125,13 +132,15 @@ function metricSentence(
   label: string,
 ): string {
   const window = inWindow(label);
-  if (metric === "ctr") return `CTR was ${formatted} ${window}.`;
-  if (metric === "engagementRate") return `Engagement rate was ${formatted} ${window}.`;
-  if (metric === "position") return `Average position was ${formatted} ${window}.`;
-  if (metric === "avgSessionDuration") {
-    return `Average session duration was ${formatted} ${window}.`;
+  if (metric === "ctr") return `Your CTR was ${formatted} ${window}.`;
+  if (metric === "engagementRate") {
+    return `Your engagement rate was ${formatted} ${window}.`;
   }
-  return `You had ${formatted} ${METRIC_LABELS[metric]} ${window}.`;
+  if (metric === "position") return `Your average position was ${formatted} ${window}.`;
+  if (metric === "avgSessionDuration") {
+    return `Your average session duration was ${formatted} ${window}.`;
+  }
+  return `Your site had ${formatted} ${METRIC_LABELS[metric]} ${window}.`;
 }
 
 const DIMENSION_LABELS: Record<string, string> = {
@@ -143,10 +152,25 @@ const DIMENSION_LABELS: Record<string, string> = {
   channel_group: "channels",
 };
 
-function activityLabel(type: TSeoActivityType, count: number): string {
-  if (type === "blogs") return noun(count, "blog", "blogs");
-  if (type === "backlinks") return noun(count, "backlink", "backlinks");
-  return noun(count, "technical work item", "technical work items");
+function activityPhrase(type: TSeoActivityType, count: number): string {
+  if (type === "blogs") {
+    return `${formatCount(count)} ${noun(count, "blog", "blogs")}`;
+  }
+  if (type === "backlinks") {
+    return `${formatCount(count)} ${noun(count, "backlink", "backlinks")}`;
+  }
+  return `${formatCount(count)} ${noun(count, "technical work item", "technical work items")}`;
+}
+
+function seoTypeSentence(type: TSeoActivityType, count: number, label: string): string {
+  const window = inWindow(label);
+  if (type === "blogs") {
+    return `We published ${activityPhrase("blogs", count)} on your website ${window}.`;
+  }
+  if (type === "backlinks") {
+    return `We built ${activityPhrase("backlinks", count)} to your website ${window}.`;
+  }
+  return `We completed ${activityPhrase("technical_work", count)} on your website ${window}.`;
 }
 
 export type TAssistantIntentAnswer = {
@@ -155,6 +179,18 @@ export type TAssistantIntentAnswer = {
   items?: TAssistantListItem[];
 };
 
+function emptyMetricValue(metric: TAssistantAnalyticsMetric): string {
+  if (metric === "ctr" || metric === "engagementRate") return "0.0%";
+  if (metric === "position") return "—";
+  if (metric === "avgSessionDuration") return "—";
+  return "0";
+}
+
+function emptyOverviewMessage(label: string): string {
+  const window = inWindow(label);
+  return `Your search performance ${window}: 0 clicks, 0 impressions, 0.0% CTR, average position —. Traffic: 0 sessions, 0 users, 0 page views.`;
+}
+
 export async function handleAssistantIntent(
   projectId: string,
   parsed: Exclude<TAssistantParse, { kind: "unknown" }>,
@@ -162,7 +198,8 @@ export async function handleAssistantIntent(
   if (parsed.kind === "leads_count") {
     const range = resolveLeadsSeoWindow(parsed.window, "this_month");
     const count = await countLeadsInRange(projectId, range.from, range.to);
-    const verb = range.from == null && range.to == null ? "have" : "got";
+    const isAllTime = range.from == null && range.to == null;
+    const verb = isAllTime ? "have received" : "received";
     const window = inWindow(range.label);
     return {
       message:
@@ -180,15 +217,18 @@ export async function handleAssistantIntent(
 
     if (parsed.activityType === "all") {
       const total = counts.blogs + counts.backlinks + counts.technical_work;
+      const summary = `We published ${activityPhrase("blogs", counts.blogs)}, built ${activityPhrase("backlinks", counts.backlinks)}, and completed ${activityPhrase("technical_work", counts.technical_work)} on your website ${inWindow(range.label)}`;
       return {
-        message: `You logged ${formatCount(counts.blogs)} ${activityLabel("blogs", counts.blogs)}, ${formatCount(counts.backlinks)} ${activityLabel("backlinks", counts.backlinks)}, and ${formatCount(counts.technical_work)} ${activityLabel("technical_work", counts.technical_work)} ${inWindow(range.label)} (${formatCount(total)} total).`,
+        message:
+          range.label === "all time"
+            ? `${summary}.`
+            : `${summary} (${formatCount(total)} ${noun(total, "item", "items")} overall).`,
         action,
       };
     }
 
-    const count = counts[parsed.activityType];
     return {
-      message: `You logged ${formatCount(count)} ${activityLabel(parsed.activityType, count)} ${inWindow(range.label)}.`,
+      message: seoTypeSentence(parsed.activityType, counts[parsed.activityType], range.label),
       action,
     };
   }
@@ -198,11 +238,34 @@ export async function handleAssistantIntent(
   const to = range.to ?? defaultAnalyticsDateRange().to;
   const action = analyticsCta(from, to);
 
+  if (range.isEmpty) {
+    if (parsed.kind === "analytics_overview") {
+      return { message: withNotice(range, emptyOverviewMessage(range.label)), action };
+    }
+    if (parsed.kind === "analytics_metric") {
+      return {
+        message: withNotice(
+          range,
+          metricSentence(parsed.metric, emptyMetricValue(parsed.metric), range.label),
+        ),
+        action,
+      };
+    }
+    const dimLabel = DIMENSION_LABELS[parsed.dimensionType] ?? parsed.dimensionType;
+    return {
+      message: withNotice(range, `No top ${dimLabel} are available for ${range.label} yet.`),
+      action,
+    };
+  }
+
   if (parsed.kind === "analytics_overview") {
     const overview = await getAnalyticsOverview(projectId, { from, to });
     const { clicks, impressions, ctr, position } = overview.cards;
     return {
-      message: `Search performance for ${range.label}: ${formatCount(clicks.value ?? 0)} clicks, ${formatCount(impressions.value ?? 0)} impressions, ${formatPct(ctr.value)} CTR, average position ${formatPosition(position.value)}. Traffic: ${formatCount(overview.ga4.sessions)} sessions, ${formatCount(overview.ga4.totalUsers)} users, ${overview.engagement.pageViews.value == null ? "—" : formatCount(overview.engagement.pageViews.value)} page views.`,
+      message: withNotice(
+        range,
+        `Your search performance for ${range.label}: ${formatCount(clicks.value ?? 0)} clicks, ${formatCount(impressions.value ?? 0)} impressions, ${formatPct(ctr.value)} CTR, average position ${formatPosition(position.value)}. Traffic: ${formatCount(overview.ga4.sessions)} sessions, ${formatCount(overview.ga4.totalUsers)} users, ${overview.engagement.pageViews.value == null ? "—" : formatCount(overview.engagement.pageViews.value)} page views.`,
+      ),
       action,
     };
   }
@@ -211,7 +274,7 @@ export async function handleAssistantIntent(
     const overview = await getAnalyticsOverview(projectId, { from, to });
     const formatted = formatMetricValue(parsed.metric, overview);
     return {
-      message: metricSentence(parsed.metric, formatted, range.label),
+      message: withNotice(range, metricSentence(parsed.metric, formatted, range.label)),
       action,
     };
   }
@@ -226,7 +289,7 @@ export async function handleAssistantIntent(
   const dimLabel = DIMENSION_LABELS[parsed.dimensionType] ?? parsed.dimensionType;
   if (dimensions.rows.length === 0) {
     return {
-      message: `No top ${dimLabel} are available for ${range.label} yet.`,
+      message: withNotice(range, `No top ${dimLabel} are available for ${range.label} yet.`),
       action,
     };
   }
@@ -240,7 +303,7 @@ export async function handleAssistantIntent(
     };
   });
   return {
-    message: `Top ${dimLabel} for ${range.label}:`,
+    message: withNotice(range, `Here are your top ${dimLabel} for ${range.label}:`),
     action,
     items,
   };
@@ -249,7 +312,7 @@ export async function handleAssistantIntent(
 export function unknownAssistantAnswer(): TAssistantIntentAnswer {
   return {
     message:
-      "I couldn’t understand that. Try asking about leads, analytics, or SEO activities for this project.",
+      "I couldn’t understand that. Try asking about leads, analytics, or SEO work for this project — for example today, yesterday, or last 30 days.",
   };
 }
 

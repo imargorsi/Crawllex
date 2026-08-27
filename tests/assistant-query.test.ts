@@ -65,6 +65,66 @@ describe("Dashboard assistant query", () => {
     expect(result.history[0]?.query).toBe("How many leads this month?");
   });
 
+  it("answers lead counts for today without including other days this month", async () => {
+    await seedSystemRoles();
+
+    const owner = await User.create({
+      name: "Today Owner",
+      email: "dash-today@example.com",
+      password: await hashPassword("password"),
+      emailVerifiedAt: new Date(),
+      roles: [],
+    });
+
+    const { project } = await createProject(
+      authContextFor(owner),
+      projectInput({
+        businessName: "Today Project",
+        websiteUrl: "https://dash-today.example.com",
+      }),
+    );
+    await Project.findByIdAndUpdate(project._id, { status: "active" });
+    const projectId = project._id.toString();
+    const auth = authContextFor(owner);
+    const today = todayLeadDate();
+    const [year, month] = today.split("-").map(Number);
+    const lastMonth = month === 1 ? 12 : month! - 1;
+    const lastMonthYear = month === 1 ? year! - 1 : year!;
+    const lastMonthDate = `${lastMonthYear}-${String(lastMonth).padStart(2, "0")}-15`;
+
+    await createLead(auth, projectId, {
+      firstName: "Today",
+      lastName: "Lead",
+      email: "today-lead@example.com",
+      phone: "+1 (555) 010-4001",
+      servicesInterestedIn: null,
+      message: "Hello",
+      leadDate: today,
+    });
+    await createLead(auth, projectId, {
+      firstName: "Older",
+      lastName: "Lead",
+      email: "older-lead@example.com",
+      phone: "+1 (555) 010-4002",
+      servicesInterestedIn: null,
+      message: "Hello",
+      leadDate: lastMonthDate,
+    });
+
+    const todayResult = await runAssistantQuery(auth, projectId, {
+      query: "How many leads do I have today?",
+    });
+    const monthResult = await runAssistantQuery(auth, projectId, {
+      query: "How many leads this month?",
+    });
+
+    expect(todayResult.intent).toBe("leads_count");
+    expect(todayResult.message).toMatch(/1 lead today/i);
+    expect(todayResult.action?.route).toContain(`from=${today}`);
+    expect(todayResult.action?.route).toContain(`to=${today}`);
+    expect(monthResult.message).toMatch(/1 lead this month/i);
+  });
+
   it("denies lead intents without leads.view and still records history", async () => {
     await seedSystemRoles();
 
@@ -244,6 +304,7 @@ describe("Dashboard assistant query", () => {
     });
 
     expect(result.intent).toBe("seo_count");
+    expect(result.message.toLowerCase()).toContain("published");
     expect(result.message.toLowerCase()).toContain("blog");
     expect(result.action?.label).toBe("View SEO Activities");
     expect(result.action?.route).toMatch(/^\/seo-activities/);
@@ -340,6 +401,7 @@ describe("Dashboard assistant query", () => {
 
     expect(result.intent).toBe("analytics_metric");
     expect(result.message).toContain("42");
+    expect(result.message.toLowerCase()).toContain("your site had");
     expect(result.action?.label).toBe("View Analytics");
     expect(result.action?.route).toMatch(/^\/analytics\?from=/);
   });
@@ -393,7 +455,7 @@ describe("Dashboard assistant query", () => {
     });
 
     expect(result.intent).toBe("analytics_top");
-    expect(result.message).toMatch(/^Top pages for /);
+    expect(result.message).toMatch(/^Here are your top pages for /);
     expect(result.items).toHaveLength(2);
     expect(result.items?.[0]).toEqual({
       label: "https://logicalcreations.net/",
