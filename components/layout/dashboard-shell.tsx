@@ -9,6 +9,7 @@ import { DashboardBreadcrumbProvider } from "@/context/dashboard-breadcrumb-cont
 import { ProjectAccessProvider } from "@/context/project-access-context";
 import { SelectedProjectProvider } from "@/context/selected-project-context";
 import { DashboardSidebarProvider } from "@/context/dashboard-sidebar-context";
+import { WorkspaceProvider } from "@/context/workspace-context";
 import { useIsAuthRevealing } from "@/context/auth-reveal-transition";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +31,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <DashboardBreadcrumbProvider>
         <SelectedProjectProvider>
           <ProjectAccessProvider>
-            <RequireRouteAccess>
+            <WorkspaceProvider>
+              <RequireRouteAccess>
               <div
                 className={cn(
                   "flex h-svh flex-col overflow-hidden bg-bg-main md:flex-row",
@@ -51,7 +53,8 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
                   </main>
                 </div>
               </div>
-            </RequireRouteAccess>
+              </RequireRouteAccess>
+            </WorkspaceProvider>
           </ProjectAccessProvider>
         </SelectedProjectProvider>
       </DashboardBreadcrumbProvider>

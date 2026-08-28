@@ -10,6 +10,11 @@ export interface Translation {
     emptyLabel: string;
     selectPrompt: string;
   };
+  workspace: {
+    aria: string;
+    crawllex: string;
+    onboarding: string;
+  };
   nav: {
     aria: string;
     openMenu: string;
@@ -26,6 +31,7 @@ export interface Translation {
     analytics: string;
     seoActivities: string;
     leads: string;
+    clients: string;
     settings: string;
   };
   breadcrumb: {
@@ -889,6 +895,230 @@ export interface Translation {
         colUpdatedAt: string;
       };
     };
+    clients: {
+      title: string;
+      subtitle: string;
+      addClient: string;
+      copyLink: string;
+      editClient: string;
+      deleteClient: string;
+      createTitle: string;
+      createLead: string;
+      editTitle: string;
+      editLead: string;
+      notFoundTitle: string;
+      notFoundBody: string;
+      loadErrorTitle: string;
+      loadErrorBody: string;
+      statusFilter: {
+        ariaLabel: string;
+        all: string;
+        active: string;
+        inactive: string;
+        emptyTitle: string;
+        emptyBody: string;
+      };
+      viewMode: {
+        ariaLabel: string;
+        cards: string;
+        table: string;
+      };
+      cardActions: {
+        active: string;
+        inactive: string;
+        viewDetails: string;
+        editClient: string;
+        copyLink: string;
+        deleteClient: string;
+        errorFallback: string;
+        success: {
+          active: string;
+          inactive: string;
+        };
+      };
+      listCard: {
+        shareLabel: string;
+      };
+      createForm: {
+        sectionClientLead: string;
+        businessName: string;
+        businessNamePh: string;
+        companyLogoHint: string;
+        companyLogoUploadLabel: string;
+        contactPerson: string;
+        contactPersonPh: string;
+        pocContactNumber: string;
+        pocContactNumberPh: string;
+        pocEmail: string;
+        pocEmailPh: string;
+        businessSummary: string;
+        businessSummaryPh: string;
+        idealCustomerProfile: string;
+        idealCustomerProfilePh: string;
+        sectionProjectLead: string;
+        projectTypesLabel: string;
+        projectTypes: {
+          website: string;
+          ecommerce: string;
+          web_application: string;
+          mobile_application: string;
+          saas: string;
+          custom_software: string;
+          other: string;
+        };
+        platformsWebsiteLabel: string;
+        platformsMobileLabel: string;
+        platformsWebAppLabel: string;
+        platformsLabel: string;
+        platforms: {
+          desktop: string;
+          mobile_responsive: string;
+          android: string;
+          ios: string;
+          both_mobile: string;
+          web: string;
+          admin_dashboard: string;
+          user_portal: string;
+          vendor_portal: string;
+        };
+        projectName: string;
+        projectNamePh: string;
+        projectDescription: string;
+        projectDescriptionPh: string;
+        sectionGoalsLead: string;
+        successLooksLike: string;
+        successLooksLikePh: string;
+        existingSystem: string;
+        existingSystemPh: string;
+        existingSystems: {
+          none: string;
+          website: string;
+          mobile_app: string;
+          software: string;
+          multiple: string;
+        };
+        websiteUrl: string;
+        websiteUrlPh: string;
+        changeNotes: string;
+        changeNotesPh: string;
+        sectionScopeLead: string;
+        launchMustHaves: string;
+        launchMustHavesPh: string;
+        laterFeatures: string;
+        laterFeaturesPh: string;
+        userRolesLabel: string;
+        userRoles: {
+          admin: string;
+          customer: string;
+          employee: string;
+          vendor: string;
+          other: string;
+        };
+        sectionDeliveryLead: string;
+        languagesLabel: string;
+        languages: {
+          english: string;
+          arabic: string;
+          other: string;
+        };
+        rtlRequired: string;
+        expectedLaunchDate: string;
+        hasFixedDeadline: string;
+        contentReady: string;
+        contentReadyPh: string;
+        contentReadyOptions: {
+          complete: string;
+          partial: string;
+          not_ready: string;
+        };
+        requirementsConfirmed: string;
+        yes: string;
+        no: string;
+        submit: string;
+        submitting: string;
+        editSubmit: string;
+        editSubmitting: string;
+        successFallback: string;
+        errorFallback: string;
+        editSuccessFallback: string;
+        editErrorFallback: string;
+        nextStep: string;
+        previousStep: string;
+        stepClient: string;
+        stepProject: string;
+        stepGoals: string;
+        stepScope: string;
+        stepDelivery: string;
+        stepperAria: string;
+        stepValidationError: string;
+        valRequired: string;
+        valMin: string;
+        valMax: string;
+        valUrl: string;
+        valEmail: string;
+        valSelectProjectType: string;
+        valWebsitePlatform: string;
+        valMobilePlatform: string;
+        valSelectUserRole: string;
+        valSelectLanguage: string;
+        valConfirm: string;
+        backToList: string;
+        backToClient: string;
+      };
+      detail: {
+        loading: string;
+        notFoundTitle: string;
+        notFoundBody: string;
+        loadErrorTitle: string;
+        loadErrorBody: string;
+        sectionClientTitle: string;
+        sectionClientLead: string;
+        sectionProjectTitle: string;
+        sectionProjectLead: string;
+        sectionGoalsTitle: string;
+        sectionGoalsLead: string;
+        sectionScopeTitle: string;
+        sectionScopeLead: string;
+        sectionDeliveryTitle: string;
+        sectionDeliveryLead: string;
+        sectionShareTitle: string;
+        sectionShareLead: string;
+        noValue: string;
+        noProjectTypes: string;
+        noPlatforms: string;
+        noUserRoles: string;
+        noLanguages: string;
+      };
+      public: {
+        title: string;
+        lead: string;
+        notFoundTitle: string;
+        notFoundBody: string;
+        loadErrorTitle: string;
+        loadErrorBody: string;
+      };
+      table: {
+        accessDeniedBody: string;
+        loadErrorBody: string;
+        copySuccess: string;
+        copyError: string;
+        deleteSuccess: string;
+        deleteErrorFallback: string;
+        deleteTitle: string;
+        deleteBody: string;
+        deleteCancel: string;
+        deleteConfirm: string;
+        colClient: string;
+        colStatus: string;
+        colActions: string;
+        viewClient: string;
+        copyLink: string;
+        editClient: string;
+        deleteClient: string;
+        emptyTitle: string;
+        emptyBody: string;
+      };
+    };
     analytics: {
       title: string;
       subtitle: string;
@@ -1593,6 +1823,11 @@ const translation: Translation = {
     emptyLabel: "No Projects Available",
     selectPrompt: "Select A Project To Continue",
   },
+  workspace: {
+    aria: "Workspace",
+    crawllex: "Crawllex",
+    onboarding: "Onboarding",
+  },
   nav: {
     aria: "Main Navigation",
     openMenu: "Open Menu",
@@ -1609,6 +1844,7 @@ const translation: Translation = {
     analytics: "Analytics",
     seoActivities: "SEO Activities",
     leads: "Leads",
+    clients: "Clients",
     settings: "Settings",
   },
   breadcrumb: {
@@ -2489,6 +2725,230 @@ const translation: Translation = {
         colCmsPasswordSet: "CMS password set",
         colCreatedAt: "Created",
         colUpdatedAt: "Updated",
+      },
+    },
+    clients: {
+      title: "Clients",
+      subtitle: "Manage website, app, and SEO client intake separately from SEO projects.",
+      addClient: "Add Client",
+      copyLink: "Copy Link",
+      editClient: "Edit Client",
+      deleteClient: "Delete Client",
+      createTitle: "Add Client",
+      createLead: "Capture client, project, goals, and delivery details for this onboarding record.",
+      editTitle: "Edit Client",
+      editLead: "Update this client's intake so the shared snapshot stays accurate.",
+      notFoundTitle: "Client Not Found",
+      notFoundBody: "This client is no longer available.",
+      loadErrorTitle: "Could Not Load Client",
+      loadErrorBody: "Could not load this client. Try again.",
+      statusFilter: {
+        ariaLabel: "Filter Clients By Status",
+        all: "All Clients",
+        active: "Active",
+        inactive: "Inactive",
+        emptyTitle: "No Clients Match This Filter",
+        emptyBody: "Try another status or view all clients.",
+      },
+      viewMode: {
+        ariaLabel: "Clients Layout",
+        cards: "Cards View",
+        table: "Table View",
+      },
+      cardActions: {
+        active: "Activate",
+        inactive: "Deactivate",
+        viewDetails: "View Details",
+        editClient: "Edit Client",
+        copyLink: "Copy Link",
+        deleteClient: "Delete Client",
+        errorFallback: "Could not update status.",
+        success: {
+          active: "Client activated.",
+          inactive: "Client deactivated.",
+        },
+      },
+      listCard: {
+        shareLabel: "Share Link",
+      },
+      createForm: {
+        sectionClientLead: "Tell us about this business and who we should contact.",
+        businessName: "Business Name",
+        businessNamePh: "E.g. Example Ltd",
+        companyLogoHint: "Upload your brand logo. JPG, PNG, WEBP, or GIF (maximum 5 MB).",
+        companyLogoUploadLabel: "Upload Company Logo",
+        contactPerson: "Contact Person",
+        contactPersonPh: "E.g. Jane Doe",
+        pocContactNumber: "Contact Number",
+        pocContactNumberPh: "5X XXX XXXX",
+        pocEmail: "Business Email",
+        pocEmailPh: "contact@example.com",
+        businessSummary: "Business Summary",
+        businessSummaryPh: "What does this business do, and who does it serve?",
+        idealCustomerProfile: "Target Customers",
+        idealCustomerProfilePh: "Who is the ideal customer for this project?",
+        sectionProjectLead: "Describe what we are building and where it needs to run.",
+        projectTypesLabel: "Project Types",
+        projectTypes: {
+          website: "Website",
+          ecommerce: "E-Commerce",
+          web_application: "Web Application",
+          mobile_application: "Mobile Application",
+          saas: "SaaS",
+          custom_software: "Custom Software",
+          other: "Other",
+        },
+        platformsWebsiteLabel: "Website Platforms",
+        platformsMobileLabel: "Mobile Platforms",
+        platformsWebAppLabel: "Web App Platforms",
+        platformsLabel: "Platforms",
+        platforms: {
+          desktop: "Desktop",
+          mobile_responsive: "Mobile Responsive",
+          android: "Android",
+          ios: "iOS",
+          both_mobile: "Both (Android And iOS)",
+          web: "Web",
+          admin_dashboard: "Admin Dashboard",
+          user_portal: "User Portal",
+          vendor_portal: "Vendor Portal",
+        },
+        projectName: "Project Name",
+        projectNamePh: "E.g. Example Marketing Site",
+        projectDescription: "Project Description",
+        projectDescriptionPh: "What should this project do for the client?",
+        sectionGoalsLead: "Capture what success looks like and whether something already exists.",
+        successLooksLike: "What Success Looks Like",
+        successLooksLikePh: "What should be true when this project is successful?",
+        existingSystem: "Existing System",
+        existingSystemPh: "Select Existing System",
+        existingSystems: {
+          none: "None",
+          website: "Website",
+          mobile_app: "Mobile App",
+          software: "Software",
+          multiple: "Multiple",
+        },
+        websiteUrl: "Website Or App URL",
+        websiteUrlPh: "example.com",
+        changeNotes: "What Should Change",
+        changeNotesPh: "What should stay, and what should change?",
+        sectionScopeLead: "Separate launch must-haves from later features, then mark who will use the product.",
+        launchMustHaves: "Launch Must-Haves",
+        launchMustHavesPh: "What must ship for the first launch?",
+        laterFeatures: "Later Features",
+        laterFeaturesPh: "What can wait until after launch?",
+        userRolesLabel: "User Roles",
+        userRoles: {
+          admin: "Admin",
+          customer: "Customer",
+          employee: "Employee",
+          vendor: "Vendor",
+          other: "Other",
+        },
+        sectionDeliveryLead: "Languages, launch timing, and whether content is ready.",
+        languagesLabel: "Languages",
+        languages: {
+          english: "English",
+          arabic: "Arabic",
+          other: "Other",
+        },
+        rtlRequired: "RTL Required",
+        expectedLaunchDate: "Expected Launch Date",
+        hasFixedDeadline: "Has A Fixed Deadline",
+        contentReady: "Content Ready",
+        contentReadyPh: "Select Content Readiness",
+        contentReadyOptions: {
+          complete: "Complete",
+          partial: "Partial",
+          not_ready: "Not Ready",
+        },
+        requirementsConfirmed: "I confirm this information is accurate and complete.",
+        yes: "Yes",
+        no: "No",
+        submit: "Add Client",
+        submitting: "Saving…",
+        editSubmit: "Save Changes",
+        editSubmitting: "Saving…",
+        successFallback: "Client created.",
+        errorFallback: "Could not create client.",
+        editSuccessFallback: "Client updated.",
+        editErrorFallback: "Could not update client.",
+        nextStep: "Next Step",
+        previousStep: "Back",
+        stepClient: "Client",
+        stepProject: "Project",
+        stepGoals: "Goals",
+        stepScope: "Scope",
+        stepDelivery: "Delivery",
+        stepperAria: "Client Form Steps",
+        stepValidationError: "Fix required fields.",
+        valRequired: "This field is required.",
+        valMin: "Use at least 2 characters.",
+        valMax: "Use at most 50 characters.",
+        valUrl: "Enter a valid website URL (e.g. example.com).",
+        valEmail: "Enter a valid email address.",
+        valSelectProjectType: "Select at least one project type.",
+        valWebsitePlatform: "Select at least one website platform.",
+        valMobilePlatform: "Select Android, iOS, or both.",
+        valSelectUserRole: "Select at least one user role.",
+        valSelectLanguage: "Select at least one language.",
+        valConfirm: "Confirm that the information is accurate.",
+        backToList: "Back To Clients",
+        backToClient: "Back To Client",
+      },
+      detail: {
+        loading: "Loading…",
+        notFoundTitle: "Client Not Found",
+        notFoundBody: "This client is no longer available.",
+        loadErrorTitle: "Could Not Load Client",
+        loadErrorBody: "Could not load this client. Try again.",
+        sectionClientTitle: "Client And Business",
+        sectionClientLead: "Who this client is and how to reach them.",
+        sectionProjectTitle: "What We Are Building",
+        sectionProjectLead: "Project type, platforms, and description.",
+        sectionGoalsTitle: "Goals And Current State",
+        sectionGoalsLead: "What success looks like and what already exists.",
+        sectionScopeTitle: "Scope And Users",
+        sectionScopeLead: "Launch must-haves, later work, and who will use the product.",
+        sectionDeliveryTitle: "Delivery",
+        sectionDeliveryLead: "Languages, timing, and content readiness.",
+        sectionShareTitle: "Share Link",
+        sectionShareLead: "Anyone with this link can view a read-only snapshot of the intake.",
+        noValue: "—",
+        noProjectTypes: "No project types selected.",
+        noPlatforms: "No platforms selected.",
+        noUserRoles: "No user roles selected.",
+        noLanguages: "No languages selected.",
+      },
+      public: {
+        title: "Client Onboarding",
+        lead: "Read-only snapshot of this client's intake.",
+        notFoundTitle: "Page Not Available",
+        notFoundBody: "This onboarding page is not available.",
+        loadErrorTitle: "Could Not Load Page",
+        loadErrorBody: "Could not load this onboarding page. Try again later.",
+      },
+      table: {
+        accessDeniedBody: "You don't have permission to view clients.",
+        loadErrorBody: "Could not load clients.",
+        copySuccess: "Share link copied.",
+        copyError: "Could not copy the share link.",
+        deleteSuccess: "Client deleted.",
+        deleteErrorFallback: "Could not delete client.",
+        deleteTitle: "Delete Client?",
+        deleteBody: "This will permanently remove {{name}}.\nThis action cannot be undone.",
+        deleteCancel: "Cancel",
+        deleteConfirm: "Delete",
+        colClient: "Client",
+        colStatus: "Status",
+        colActions: "Actions",
+        viewClient: "View {{name}}",
+        copyLink: "Copy Link For {{name}}",
+        editClient: "Edit {{name}}",
+        deleteClient: "Delete {{name}}",
+        emptyTitle: "No Clients Found",
+        emptyBody: "Add a client to capture intake and share a read-only link.",
       },
     },
     analytics: {

@@ -171,11 +171,11 @@ describe("Leads CRUD", () => {
       authContextFor(owner),
       projectInput({ businessName: "A", websiteUrl: "https://a-leads.example.com" }),
     );
+    await Project.findByIdAndUpdate(projectA._id, { status: "active" });
     const { project: projectB } = await createProject(
       authContextFor(owner),
       projectInput({ businessName: "B", websiteUrl: "https://b-leads.example.com" }),
     );
-    await Project.findByIdAndUpdate(projectA._id, { status: "active" });
     await Project.findByIdAndUpdate(projectB._id, { status: "active" });
 
     const auth = authContextFor(owner);

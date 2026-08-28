@@ -15,6 +15,9 @@
  * - Profile / edit-profile / change password (Module 12)
  *
  * Out of scope for this product: packaged Client Reports (handled separately — not a module here).
+ *
+ * Module 13 Client Onboarding uses platform keys `clients.*` (not this project matrix).
+ * Never add `clients` to PROJECT_MODULE_SLUGS. See doc/modules/13-client-onboarding.md.
  */
 
 export const PERMISSION_ACTIONS = ["view", "create", "update", "delete"] as const;
@@ -80,6 +83,13 @@ export const ADMIN_PERMISSION_MODULES: readonly PermissionModuleDefinition[] = [
   { slug: "roles", label: "Roles", actions: PERMISSION_ACTIONS },
 ];
 
+/** Platform Client Onboarding (Module 13) — never on project Role documents. */
+export const CLIENT_MODULE_SLUG = "clients" as const;
+
+export const CLIENT_PERMISSION_MODULES: readonly PermissionModuleDefinition[] = [
+  { slug: CLIENT_MODULE_SLUG, label: "Clients", actions: PERMISSION_ACTIONS },
+];
+
 export function projectPermission(module: CrudModuleSlug, action: PermissionAction): string {
   return `${module}.${action}`;
 }
@@ -100,6 +110,14 @@ export function adminPermission(module: AdminModuleSlug, action: PermissionActio
   return `admin.${module}.${action}`;
 }
 
+export function clientPermission(action: PermissionAction): string {
+  return `${CLIENT_MODULE_SLUG}.${action}`;
+}
+
+export function allClientPermissions(): string[] {
+  return PERMISSION_ACTIONS.map((action) => clientPermission(action));
+}
+
 export function allMemberPermissions(): string[] {
   return MEMBER_PERMISSION_ACTIONS.map((action) => memberPermission(action));
 }
@@ -114,9 +132,11 @@ export function allAdminPermissions(): string[] {
   return permissions;
 }
 
-/** Platform operator — all project modules + admin users/roles management. */
+/** Platform operator — all project modules + admin users/roles + Client Onboarding. */
 export function allSuperAdminPermissions(): string[] {
-  return [...new Set([...allAdminPermissions(), ...allProjectCatalogPermissions()])].sort();
+  return [
+    ...new Set([...allAdminPermissions(), ...allProjectCatalogPermissions(), ...allClientPermissions()]),
+  ].sort();
 }
 
 export function allProjectCatalogPermissions(): string[] {

@@ -35,11 +35,16 @@ export const SETTINGS_CATEGORIES: readonly TSettingsCategory[] = [
 export function resolveSettingsCategories(options: {
   isAdmin: boolean;
   canViewIntegrations: boolean;
+  /** GSC / GA4 / WordPress are project-scoped. Omit in the Onboarding workspace. */
+  includeIntegrations?: boolean;
 }): TSettingsCategory[] {
+  const includeIntegrations = options.includeIntegrations ?? true;
+
   return SETTINGS_CATEGORIES.filter((category) => {
     if (category.requiresSuperAdmin && !options.isAdmin) return false;
-    if (category.requiresIntegrationsView && !options.isAdmin && !options.canViewIntegrations) {
-      return false;
+    if (category.requiresIntegrationsView) {
+      if (!includeIntegrations) return false;
+      if (!options.isAdmin && !options.canViewIntegrations) return false;
     }
     return true;
   });

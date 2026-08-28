@@ -11,6 +11,7 @@ import { SettingsThemePanel } from "@/components/settings/settings-theme-panel";
 import { LoadingState } from "@/components/ui/loading-state";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useProjectAccess } from "@/context/project-access-context";
+import { useWorkspace } from "@/context/workspace-context";
 import { useAuthUserQuery } from "@/features/auth/auth.api";
 import { resolveSettingsCategories } from "@/lib/frontend/settings/categories";
 import { hasPermission, isSuperAdmin, mergePermissions } from "@/lib/rbac/access";
@@ -19,6 +20,7 @@ export function SettingsSection() {
   const { t } = useTranslation("translation", { keyPrefix: "settings" });
   const { data: authUser, isLoading } = useAuthUserQuery();
   const { projectPermissions } = useProjectAccess();
+  const { workspace } = useWorkspace();
   const userIsSuperAdmin = isSuperAdmin(authUser?.roles);
 
   const permissions = useMemo(
@@ -29,6 +31,7 @@ export function SettingsSection() {
   const categories = resolveSettingsCategories({
     isAdmin: userIsSuperAdmin,
     canViewIntegrations: hasPermission(permissions, "integrations.view"),
+    includeIntegrations: workspace !== "onboarding",
   });
 
   if (isLoading || !authUser) {

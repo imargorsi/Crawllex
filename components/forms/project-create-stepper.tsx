@@ -5,11 +5,16 @@ import { cn } from "@/lib/utils";
 type ProjectCreateStepperProps = {
   labels: string[];
   current: number;
+  ariaLabel?: string;
 };
 
-export function ProjectCreateStepper({ labels, current }: ProjectCreateStepperProps) {
+export function ProjectCreateStepper({
+  labels,
+  current,
+  ariaLabel = "Project Form Steps",
+}: ProjectCreateStepperProps) {
   return (
-    <nav aria-label="Project Form Steps">
+    <nav aria-label={ariaLabel}>
       <ol className="relative flex list-none items-start justify-between gap-2 p-0">
         <div
           className="pointer-events-none absolute left-4 right-4 top-4 h-px bg-border sm:top-4.5"

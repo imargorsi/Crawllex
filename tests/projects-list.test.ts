@@ -355,11 +355,20 @@ describe("GET /projects — listProjects", () => {
       }),
     );
 
+    const admin = await User.create({
+      name: "Reject Admin",
+      email: "reject-admin@example.com",
+      password: await hashPassword("password"),
+      emailVerifiedAt: new Date(),
+      roles: [SUPER_ADMIN_ROLE],
+    });
+
     const rejected = await createProject(
-      authContextFor(user),
+      authContextFor(admin),
       projectInput({
         businessName: "Rejected Co",
         websiteUrl: "https://rejected-list.example.com",
+        ownerUserId: user._id.toString(),
       }),
     );
 

@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import { hashPassword } from "@/lib/auth/password";
 import { createAccessToken } from "@/lib/auth/tokens";
 import { runApiGuards } from "@/lib/auth/run-api-guards";
-import { buildSidebarNavItems } from "@/lib/frontend/layout/build-sidebar-nav";
+import { buildSidebarNavItems, filterSidebarNavGroupsForWorkspace, buildSidebarNavGroups } from "@/lib/frontend/layout/build-sidebar-nav";
 import { canAccessRoute, resolveDefaultAccessiblePath } from "@/lib/frontend/layout/route-access";
+import { resolveDashboardWorkspace, workspaceFromPathname } from "@/lib/frontend/layout/workspace";
+import { resolveSettingsCategories } from "@/lib/frontend/settings/categories";
 import {
   allSuperAdminPermissions,
   defaultProjectOwnerPermissions,
@@ -92,6 +94,7 @@ describe("Access control", () => {
     expect(canAccessRoute("/users", platformPermissions, [], [SUPER_ADMIN_ROLE])).toBe(true);
     expect(canAccessRoute("/dashboard", platformPermissions, [], [SUPER_ADMIN_ROLE])).toBe(true);
     expect(canAccessRoute("/projects", platformPermissions, [], [SUPER_ADMIN_ROLE])).toBe(true);
+    expect(canAccessRoute("/clients", platformPermissions, [], [SUPER_ADMIN_ROLE])).toBe(true);
   });
 
   it("allows project routes when project permissions exist", () => {
@@ -100,6 +103,7 @@ describe("Access control", () => {
     expect(canAccessRoute("/dashboard", [], projectPermissions, [])).toBe(true);
     expect(canAccessRoute("/projects", [], projectPermissions, [])).toBe(true);
     expect(canAccessRoute("/users", [], projectPermissions, [])).toBe(false);
+    expect(canAccessRoute("/clients", [], projectPermissions, [])).toBe(false);
   });
 
   it("resolves default paths by role", () => {
@@ -127,6 +131,7 @@ describe("Access control", () => {
       ]),
     );
     expect(adminNav.map((item) => item.path)).not.toContain("/companies");
+    expect(adminNav.map((item) => item.path)).toContain("/clients");
 
     const projectNav = buildSidebarNavItems([], projectPermissions, []);
     expect(projectNav.map((item) => item.path)).toEqual(
@@ -134,8 +139,67 @@ describe("Access control", () => {
     );
     expect(projectNav.map((item) => item.path)).not.toContain("/users");
     expect(projectNav.map((item) => item.path)).not.toContain("/companies");
+    expect(projectNav.map((item) => item.path)).not.toContain("/clients");
 
     const plainNav = buildSidebarNavItems([], [], []);
     expect(plainNav.map((item) => item.path)).toEqual(["/projects", "/settings"]);
+    expect(plainNav.map((item) => item.path)).not.toContain("/clients");
+
+    const adminGroups = buildSidebarNavGroups(adminPermissions, [], [SUPER_ADMIN_ROLE]);
+    const seoPaths = filterSidebarNavGroupsForWorkspace(adminGroups, "seo").flatMap((group) =>
+      group.items.map((item) => item.path),
+    );
+    const onboardingPaths = filterSidebarNavGroupsForWorkspace(adminGroups, "onboarding").flatMap((group) =>
+      group.items.map((item) => item.path),
+    );
+    expect(seoPaths).not.toContain("/clients");
+    expect(onboardingPaths).toEqual(["/clients", "/settings"]);
+
+    const seoSettings = resolveSettingsCategories({
+      isAdmin: true,
+      canViewIntegrations: true,
+      includeIntegrations: true,
+    });
+    const onboardingSettings = resolveSettingsCategories({
+      isAdmin: true,
+      canViewIntegrations: true,
+      includeIntegrations: false,
+    });
+    expect(seoSettings.map((category) => category.id)).toEqual(["theme", "integrations"]);
+    expect(onboardingSettings.map((category) => category.id)).toEqual(["theme"]);
+  });
+
+  it("derives dashboard workspace from the URL before stored state", () => {
+    expect(workspaceFromPathname("/clients")).toBe("onboarding");
+    expect(workspaceFromPathname("/clients/create")).toBe("onboarding");
+    expect(workspaceFromPathname("/dashboard")).toBe("seo");
+    expect(workspaceFromPathname("/users")).toBe("seo");
+    expect(workspaceFromPathname("/roles")).toBe("seo");
+    expect(workspaceFromPathname("/settings")).toBeNull();
+
+    expect(
+      resolveDashboardWorkspace({
+        pathname: "/clients",
+        stored: "seo",
+        canSwitchWorkspace: false,
+      }),
+    ).toBe("onboarding");
+
+    expect(
+      resolveDashboardWorkspace({
+        pathname: "/dashboard",
+        stored: "seo",
+        canSwitchWorkspace: true,
+        optimistic: "onboarding",
+      }),
+    ).toBe("onboarding");
+
+    expect(
+      resolveDashboardWorkspace({
+        pathname: "/settings",
+        stored: "onboarding",
+        canSwitchWorkspace: true,
+      }),
+    ).toBe("onboarding");
   });
 });

@@ -4,6 +4,7 @@ import { Icons } from "@/lib/frontend/icons/app-icons";
 export type SidebarNavLabelKey =
   | "dashboard"
   | "projects"
+  | "clients"
   | "analytics"
   | "seoActivities"
   | "leads"
@@ -56,6 +57,14 @@ export const SIDEBAR_NAV_DEFINITIONS: readonly SidebarNavDefinition[] = [
     icon: Icons.briefcase,
     viewPermission: null,
     permissionScope: "project",
+    group: "general",
+  },
+  {
+    path: "/clients",
+    labelKey: "clients",
+    icon: Icons.building,
+    viewPermission: "clients.view",
+    permissionScope: "platform",
     group: "general",
   },
   {

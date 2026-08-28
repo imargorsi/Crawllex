@@ -1,4 +1,5 @@
 export { AccessToken } from "./AccessToken";
+export { Client, type ClientDocument } from "./Client";
 export {
   AnalyticsDailyMetric,
   type AnalyticsDailyMetricDocument,

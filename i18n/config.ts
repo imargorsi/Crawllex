@@ -18,7 +18,17 @@ export function applyDirLang(lng: string) {
 
 let initialized = false;
 
+function loadTranslationBundles() {
+  i18n.addResourceBundle("en", "translation", en, true, true);
+  i18n.addResourceBundle("ar", "translation", ar, true, true);
+}
+
 export function initI18n() {
+  if (i18n.isInitialized) {
+    loadTranslationBundles();
+    return i18n;
+  }
+
   if (initialized) return i18n;
   initialized = true;
 
@@ -40,6 +50,7 @@ export function initI18n() {
       },
     })
     .then(() => {
+      loadTranslationBundles();
       applyDirLang(i18n.resolvedLanguage ?? "en");
     });
 

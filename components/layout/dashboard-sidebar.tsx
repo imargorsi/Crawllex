@@ -13,8 +13,9 @@ import { ProjectSelector } from "@/components/layout/project-selector";
 import { useDashboardSidebar } from "@/context/dashboard-sidebar-context";
 import { useProjectAccess } from "@/context/project-access-context";
 import { useSelectedProject } from "@/context/selected-project-context";
+import { useWorkspace } from "@/context/workspace-context";
 import { useAuthUserQuery } from "@/features/auth/auth.api";
-import { buildSidebarNavGroups } from "@/lib/frontend/layout/build-sidebar-nav";
+import { buildSidebarNavGroups, filterSidebarNavGroupsForWorkspace } from "@/lib/frontend/layout/build-sidebar-nav";
 import {
   isSidebarNavItemActive,
   type SidebarNavGroupId,
@@ -109,23 +110,27 @@ export function DashboardSidebar({ onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
   const { data: user } = useAuthUserQuery();
   const { projects } = useSelectedProject();
+  const { workspace } = useWorkspace();
   const { projectPermissions, hasProjectContext, isLoading: isProjectAccessLoading } = useProjectAccess();
   const sidebar = useDashboardSidebar();
   const isCollapsed = Boolean(sidebar?.isSidebarCollapsed);
 
   const isPlatformAdmin = user ? isSuperAdmin(user.roles) : false;
-  const showProjectSelector = Boolean(user && (projects.length > 0 || isPlatformAdmin));
+  const showProjectSelector =
+    workspace === "seo" && Boolean(user && (projects.length > 0 || isPlatformAdmin));
 
   const canRenderNav = useMemo(() => {
     if (!user) return false;
     if (isPlatformAdmin) return true;
+    if (workspace === "onboarding") return false;
     return hasProjectContext && !isProjectAccessLoading;
-  }, [hasProjectContext, isPlatformAdmin, isProjectAccessLoading, user]);
+  }, [hasProjectContext, isPlatformAdmin, isProjectAccessLoading, user, workspace]);
 
   const navGroups = useMemo(() => {
     if (!user || !canRenderNav) return [];
-    return buildSidebarNavGroups(user.permissions, projectPermissions, user.roles);
-  }, [canRenderNav, projectPermissions, user]);
+    const groups = buildSidebarNavGroups(user.permissions, projectPermissions, user.roles);
+    return filterSidebarNavGroupsForWorkspace(groups, workspace);
+  }, [canRenderNav, projectPermissions, user, workspace]);
 
   const collapseLabel = isCollapsed ? tNav("expandSidebar") : tNav("collapseSidebar");
 
@@ -140,8 +145,8 @@ export function DashboardSidebar({ onClose }: DashboardSidebarProps) {
     >
       <div className={cn(sidebarBrandRowClass, isCollapsed && sidebarBrandRowCollapsedClass)}>
         <Link
-          href="/dashboard"
-          className="mx-auto inline-flex items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--accent-border) focus-visible:ring-offset-2 focus-visible:ring-offset-bg-sidebar"
+          href={workspace === "onboarding" ? "/clients" : "/dashboard"}
+          className="mx-auto inline-flex w-full max-w-full items-center justify-center px-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--accent-border) focus-visible:ring-offset-2 focus-visible:ring-offset-bg-sidebar"
           aria-label={tLayout("appName")}
         >
           <AppLogo
