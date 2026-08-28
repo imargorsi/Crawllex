@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAccessToken } from "@/hooks/use-access-token.hook";
 import { baseQuery } from "@/lib/frontend/api/base";
 import type { TClientStatus } from "@/lib/clients/constants";
-import type { TSeoGoal } from "@/lib/projects/constants";
+import type { CreateClientInput } from "@/schemas/client";
 import type { TClientDetail, TClientListItem, TPublicClientView } from "@/types/client.types";
 
 const clientsApi = {
@@ -19,19 +19,7 @@ export const clientKeys = {
   public: (shareToken: string) => [...clientKeys.all, "public", shareToken] as const,
 };
 
-export type TCreateClientPayload = {
-  businessName: string;
-  websiteUrl: string;
-  businessAddress?: string | null;
-  pocContactNumber?: string | null;
-  pocEmail?: string | null;
-  servicesOffered?: string[];
-  primaryServiceToPromote?: string | null;
-  idealCustomerProfile?: string | null;
-  targetLocations?: string[];
-  seoGoals?: TSeoGoal[];
-  competitorUrls?: string[];
-};
+export type TCreateClientPayload = CreateClientInput;
 
 export type TUpdateClientPayload = TCreateClientPayload;
 

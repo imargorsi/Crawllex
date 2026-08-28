@@ -48,7 +48,7 @@ export function useClientsTableColumns({
             <UserAvatar name={item.businessName} imageUrl={item.imageUrl} size="md" variant="logo" />
             <div className="min-w-0">
               <p className="truncate type-body-strong text-text-primary">{item.businessName}</p>
-              <p className="truncate type-caption text-text-muted">{item.websiteUrl}</p>
+              <p className="truncate type-caption text-text-muted">{item.projectName}</p>
             </div>
           </div>
         ),

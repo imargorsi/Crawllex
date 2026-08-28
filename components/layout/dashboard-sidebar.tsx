@@ -10,7 +10,6 @@ import { useTranslation } from "react-i18next";
 import { NavbarProfileMenu } from "@/components/layout/navbar-profile-menu";
 import { AppLogo } from "@/components/layout/app-logo";
 import { ProjectSelector } from "@/components/layout/project-selector";
-import { WorkspaceToggle } from "@/components/layout/workspace-toggle";
 import { useDashboardSidebar } from "@/context/dashboard-sidebar-context";
 import { useProjectAccess } from "@/context/project-access-context";
 import { useSelectedProject } from "@/context/selected-project-context";
@@ -111,7 +110,7 @@ export function DashboardSidebar({ onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
   const { data: user } = useAuthUserQuery();
   const { projects } = useSelectedProject();
-  const { workspace, canSwitchWorkspace } = useWorkspace();
+  const { workspace } = useWorkspace();
   const { projectPermissions, hasProjectContext, isLoading: isProjectAccessLoading } = useProjectAccess();
   const sidebar = useDashboardSidebar();
   const isCollapsed = Boolean(sidebar?.isSidebarCollapsed);
@@ -169,8 +168,6 @@ export function DashboardSidebar({ onClose }: DashboardSidebarProps) {
           </button>
         ) : null}
       </div>
-
-      {canSwitchWorkspace ? <WorkspaceToggle /> : null}
 
       {showProjectSelector ? <ProjectSelector isCollapsed={isCollapsed} /> : null}
 

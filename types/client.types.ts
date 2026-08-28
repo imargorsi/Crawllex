@@ -1,32 +1,55 @@
 import type { TClientStatus } from "@/lib/clients/constants";
-import type { TSeoGoal } from "@/lib/projects/constants";
+import type {
+  TClientContentReady,
+  TClientExistingSystem,
+  TClientLanguage,
+  TClientPlatform,
+  TClientProjectType,
+  TClientUserRole,
+} from "@/lib/clients/intake-constants";
 
 export type TClientListItem = {
   id: string;
   businessName: string;
+  projectName: string;
   status: TClientStatus;
-  websiteUrl: string;
+  websiteUrl: string | null;
   imageUrl: string | null;
   shareUrl: string;
   createdAt: string;
   updatedAt: string;
 };
 
-export type TClientDetail = {
+export type TClientIntakeFields = {
+  contactPerson: string;
+  pocEmail: string;
+  pocContactNumber: string;
+  businessSummary: string;
+  idealCustomerProfile: string;
+  projectTypes: TClientProjectType[];
+  platforms: TClientPlatform[];
+  projectName: string;
+  projectDescription: string;
+  successLooksLike: string;
+  existingSystem: TClientExistingSystem;
+  websiteUrl: string | null;
+  changeNotes: string | null;
+  launchMustHaves: string;
+  laterFeatures: string | null;
+  userRoles: TClientUserRole[];
+  languages: TClientLanguage[];
+  rtlRequired: boolean;
+  expectedLaunchDate: string | null;
+  hasFixedDeadline: boolean;
+  contentReady: TClientContentReady;
+  requirementsConfirmed: boolean;
+};
+
+export type TClientDetail = TClientIntakeFields & {
   id: string;
   businessName: string;
   status: TClientStatus;
-  websiteUrl: string;
-  businessAddress: string | null;
   logoImage: string | null;
-  pocContactNumber: string | null;
-  pocEmail: string | null;
-  servicesOffered: string[];
-  primaryServiceToPromote: string | null;
-  idealCustomerProfile: string | null;
-  targetLocations: string[];
-  seoGoals: TSeoGoal[];
-  competitorUrls: string[];
   shareToken: string;
   shareUrl: string;
   createdByUserId: string;
@@ -36,17 +59,7 @@ export type TClientDetail = {
 };
 
 /** Public read-only snapshot — no admin ids or share token. */
-export type TPublicClientView = {
+export type TPublicClientView = TClientIntakeFields & {
   businessName: string;
-  websiteUrl: string;
-  businessAddress: string | null;
   logoImage: string | null;
-  pocContactNumber: string | null;
-  pocEmail: string | null;
-  servicesOffered: string[];
-  primaryServiceToPromote: string | null;
-  idealCustomerProfile: string | null;
-  targetLocations: string[];
-  seoGoals: TSeoGoal[];
-  competitorUrls: string[];
 };

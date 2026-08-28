@@ -9,9 +9,8 @@ import {
 } from "@/components/projects/detail/project-detail-info-card";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { displayDetailValue } from "@/lib/frontend/projects/project-detail-display.utils";
-import { SEO_GOAL_ICONS } from "@/lib/frontend/projects/seo-goal-icons";
+import { clientHasExistingSystem } from "@/lib/clients/intake-constants";
 import { elevatedCardMutedClass, elevatedCardTitleClass } from "@/lib/frontend/layout/dashboard-chrome";
-import { SEO_GOALS } from "@/lib/projects/constants";
 import type { TPublicClientView } from "@/types/client.types";
 import { cn } from "@/lib/utils";
 
@@ -19,90 +18,141 @@ type TClientIntakeSnapshotProps = {
   client: TPublicClientView;
 };
 
+function LongText({ value, empty }: { value: string | null | undefined; empty: string }) {
+  return (
+    <p className={cn("type-body whitespace-pre-wrap", value ? elevatedCardTitleClass : elevatedCardMutedClass)}>
+      {displayDetailValue(value, empty)}
+    </p>
+  );
+}
+
 export function ClientIntakeSnapshot({ client }: TClientIntakeSnapshotProps) {
   const { t: tForm } = useTranslation("translation", { keyPrefix: "modules.clients.createForm" });
   const { t: tDetail } = useTranslation("translation", { keyPrefix: "modules.clients.detail" });
-  const { t: tSeoGoals } = useTranslation("translation", { keyPrefix: "modules.projects.seoGoals" });
-  const selectedGoals = new Set(client.seoGoals);
+  const yesNo = (value: boolean) => (value ? tForm("yes") : tForm("no"));
 
   return (
     <div className="space-y-4">
       <ProjectDetailInfoCard
-        title={tDetail("sectionBusinessTitle")}
-        lead={tDetail("sectionBusinessLead")}
+        title={tDetail("sectionClientTitle")}
+        lead={tDetail("sectionClientLead")}
         icon={<Icons.briefcase className="size-4 shrink-0" aria-hidden />}
       >
         <div className="grid gap-5 sm:grid-cols-2">
-          <ProjectDetailField label={tForm("websiteUrl")} value={displayDetailValue(client.websiteUrl)} />
-          <ProjectDetailField label={tForm("businessAddress")} value={displayDetailValue(client.businessAddress)} />
-          <ProjectDetailField label={tForm("pocContactNumber")} value={displayDetailValue(client.pocContactNumber)} />
+          <ProjectDetailField label={tForm("contactPerson")} value={displayDetailValue(client.contactPerson)} />
           <ProjectDetailField label={tForm("pocEmail")} value={displayDetailValue(client.pocEmail)} />
+          <ProjectDetailField label={tForm("pocContactNumber")} value={displayDetailValue(client.pocContactNumber)} />
+        </div>
+        <div className="mt-5 space-y-4">
           <ProjectDetailField
-            label={tForm("primaryServiceToPromote")}
-            value={displayDetailValue(client.primaryServiceToPromote)}
+            label={tForm("businessSummary")}
+            value={<LongText value={client.businessSummary} empty={tDetail("noValue")} />}
+          />
+          <ProjectDetailField
+            label={tForm("idealCustomerProfile")}
+            value={<LongText value={client.idealCustomerProfile} empty={tDetail("noValue")} />}
           />
         </div>
       </ProjectDetailInfoCard>
 
       <ProjectDetailInfoCard
-        title={tDetail("sectionServicesTitle")}
-        lead={tDetail("sectionServicesLead")}
+        title={tDetail("sectionProjectTitle")}
+        lead={tDetail("sectionProjectLead")}
         icon={<Icons.grid className="size-4 shrink-0" aria-hidden />}
       >
-        <ProjectDetailTagList items={client.servicesOffered} emptyLabel={tDetail("noServices")} />
+        <div className="grid gap-5 sm:grid-cols-2">
+          <ProjectDetailField label={tForm("projectName")} value={displayDetailValue(client.projectName)} />
+        </div>
+        <div className="mt-5 space-y-4">
+          <p className="type-caption text-text-secondary">{tForm("projectTypesLabel")}</p>
+          <ProjectDetailTagList
+            items={client.projectTypes.map((type) => tForm(`projectTypes.${type}`))}
+            emptyLabel={tDetail("noProjectTypes")}
+          />
+          <p className="type-caption text-text-secondary">{tForm("platformsLabel")}</p>
+          <ProjectDetailTagList
+            items={client.platforms.map((platform) => tForm(`platforms.${platform}`))}
+            emptyLabel={tDetail("noPlatforms")}
+          />
+          <ProjectDetailField
+            label={tForm("projectDescription")}
+            value={<LongText value={client.projectDescription} empty={tDetail("noValue")} />}
+          />
+        </div>
       </ProjectDetailInfoCard>
 
       <ProjectDetailInfoCard
-        title={tDetail("sectionIcpTitle")}
-        lead={tDetail("sectionIcpLead")}
-        icon={<Icons.user className="size-4 shrink-0" aria-hidden />}
-      >
-        <p className={cn("type-body", client.idealCustomerProfile ? elevatedCardTitleClass : elevatedCardMutedClass)}>
-          {displayDetailValue(client.idealCustomerProfile, tDetail("noValue"))}
-        </p>
-      </ProjectDetailInfoCard>
-
-      <ProjectDetailInfoCard
-        title={tDetail("sectionLocationsTitle")}
-        lead={tDetail("sectionLocationsLead")}
-        icon={<Icons.location className="size-4 shrink-0" aria-hidden />}
-      >
-        <ProjectDetailTagList items={client.targetLocations} emptyLabel={tDetail("noLocations")} />
-      </ProjectDetailInfoCard>
-
-      <ProjectDetailInfoCard
-        title={tDetail("sectionSeoGoalsTitle")}
-        lead={tDetail("sectionSeoGoalsLead")}
+        title={tDetail("sectionGoalsTitle")}
+        lead={tDetail("sectionGoalsLead")}
         icon={<Icons.flag className="size-4 shrink-0" aria-hidden />}
       >
-        {client.seoGoals.length === 0 ? (
-          <p className={cn("type-body", elevatedCardMutedClass)}>{tDetail("noSeoGoals")}</p>
-        ) : (
-          <ul className="space-y-2">
-            {SEO_GOALS.filter((goal) => selectedGoals.has(goal)).map((goal) => {
-              const Icon = SEO_GOAL_ICONS[goal];
-              return (
-                <li
-                  key={goal}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-bg-input px-4 py-3"
-                >
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand/15 text-brand">
-                    <Icon className="size-5" aria-hidden />
-                  </span>
-                  <span className="type-body-strong text-text-primary">{tSeoGoals(goal)}</span>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <div className="space-y-4">
+          <ProjectDetailField
+            label={tForm("successLooksLike")}
+            value={<LongText value={client.successLooksLike} empty={tDetail("noValue")} />}
+          />
+          <ProjectDetailField
+            label={tForm("existingSystem")}
+            value={tForm(`existingSystems.${client.existingSystem}`)}
+          />
+          {clientHasExistingSystem(client.existingSystem) ? (
+            <>
+              <ProjectDetailField label={tForm("websiteUrl")} value={displayDetailValue(client.websiteUrl)} />
+              <ProjectDetailField
+                label={tForm("changeNotes")}
+                value={<LongText value={client.changeNotes} empty={tDetail("noValue")} />}
+              />
+            </>
+          ) : null}
+        </div>
       </ProjectDetailInfoCard>
 
       <ProjectDetailInfoCard
-        title={tDetail("sectionCompetitorsTitle")}
-        lead={tDetail("sectionCompetitorsLead")}
-        icon={<Icons.link className="size-4 shrink-0" aria-hidden />}
+        title={tDetail("sectionScopeTitle")}
+        lead={tDetail("sectionScopeLead")}
+        icon={<Icons.file className="size-4 shrink-0" aria-hidden />}
       >
-        <ProjectDetailTagList items={client.competitorUrls} emptyLabel={tDetail("noCompetitors")} />
+        <div className="space-y-4">
+          <ProjectDetailField
+            label={tForm("launchMustHaves")}
+            value={<LongText value={client.launchMustHaves} empty={tDetail("noValue")} />}
+          />
+          <ProjectDetailField
+            label={tForm("laterFeatures")}
+            value={<LongText value={client.laterFeatures} empty={tDetail("noValue")} />}
+          />
+          <p className="type-caption text-text-secondary">{tForm("userRolesLabel")}</p>
+          <ProjectDetailTagList
+            items={client.userRoles.map((role) => tForm(`userRoles.${role}`))}
+            emptyLabel={tDetail("noUserRoles")}
+          />
+        </div>
+      </ProjectDetailInfoCard>
+
+      <ProjectDetailInfoCard
+        title={tDetail("sectionDeliveryTitle")}
+        lead={tDetail("sectionDeliveryLead")}
+        icon={<Icons.calendar className="size-4 shrink-0" aria-hidden />}
+      >
+        <div className="grid gap-5 sm:grid-cols-2">
+          <ProjectDetailField label={tForm("rtlRequired")} value={yesNo(client.rtlRequired)} />
+          <ProjectDetailField
+            label={tForm("expectedLaunchDate")}
+            value={displayDetailValue(client.expectedLaunchDate)}
+          />
+          <ProjectDetailField label={tForm("hasFixedDeadline")} value={yesNo(client.hasFixedDeadline)} />
+          <ProjectDetailField
+            label={tForm("contentReady")}
+            value={tForm(`contentReadyOptions.${client.contentReady}`)}
+          />
+        </div>
+        <div className="mt-5 space-y-4">
+          <p className="type-caption text-text-secondary">{tForm("languagesLabel")}</p>
+          <ProjectDetailTagList
+            items={client.languages.map((language) => tForm(`languages.${language}`))}
+            emptyLabel={tDetail("noLanguages")}
+          />
+        </div>
       </ProjectDetailInfoCard>
     </div>
   );

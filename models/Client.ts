@@ -1,7 +1,14 @@
 import mongoose, { Schema, type InferSchemaType, type Model, type Types } from "mongoose";
 
 import { CLIENT_STATUSES, DEFAULT_CLIENT_STATUS } from "@/lib/clients/constants";
-import { SEO_GOALS } from "@/lib/projects/constants";
+import {
+  CLIENT_CONTENT_READY,
+  CLIENT_EXISTING_SYSTEMS,
+  CLIENT_LANGUAGES,
+  CLIENT_PLATFORMS,
+  CLIENT_PROJECT_TYPES,
+  CLIENT_USER_ROLES,
+} from "@/lib/clients/intake-constants";
 
 const clientSchema = new Schema(
   {
@@ -11,22 +18,30 @@ const clientSchema = new Schema(
       enum: [...CLIENT_STATUSES],
       default: DEFAULT_CLIENT_STATUS,
     },
-    websiteUrl: { type: String, required: true, trim: true },
-    businessAddress: { type: String, default: null, trim: true },
+    contactPerson: { type: String, required: true, trim: true },
+    pocEmail: { type: String, required: true, trim: true, lowercase: true },
+    pocContactNumber: { type: String, required: true, trim: true },
+    businessSummary: { type: String, required: true, trim: true },
+    idealCustomerProfile: { type: String, required: true, trim: true },
+    projectTypes: { type: [String], enum: [...CLIENT_PROJECT_TYPES], default: [] },
+    platforms: { type: [String], enum: [...CLIENT_PLATFORMS], default: [] },
+    projectName: { type: String, required: true, trim: true },
+    projectDescription: { type: String, required: true, trim: true },
+    successLooksLike: { type: String, required: true, trim: true },
+    existingSystem: { type: String, enum: [...CLIENT_EXISTING_SYSTEMS], required: true },
+    websiteUrl: { type: String, default: null, trim: true },
+    changeNotes: { type: String, default: null, trim: true },
+    launchMustHaves: { type: String, required: true, trim: true },
+    laterFeatures: { type: String, default: null, trim: true },
+    userRoles: { type: [String], enum: [...CLIENT_USER_ROLES], default: [] },
+    languages: { type: [String], enum: [...CLIENT_LANGUAGES], default: [] },
+    rtlRequired: { type: Boolean, default: false },
+    expectedLaunchDate: { type: String, default: null, trim: true },
+    hasFixedDeadline: { type: Boolean, default: false },
+    contentReady: { type: String, enum: [...CLIENT_CONTENT_READY], required: true },
+    requirementsConfirmed: { type: Boolean, default: false },
     /** Company logo — R2 private object path stored as `blob:{pathname}`. */
     logoImage: { type: String, default: null, trim: true },
-    pocContactNumber: { type: String, default: null, trim: true },
-    pocEmail: { type: String, default: null, trim: true, lowercase: true },
-    servicesOffered: { type: [String], default: [] },
-    primaryServiceToPromote: { type: String, default: null, trim: true },
-    idealCustomerProfile: { type: String, default: null, trim: true },
-    targetLocations: { type: [String], default: [] },
-    seoGoals: {
-      type: [String],
-      enum: [...SEO_GOALS],
-      default: [],
-    },
-    competitorUrls: { type: [String], default: [] },
     shareToken: { type: String, required: true, trim: true },
     createdByUserId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     updatedByUserId: { type: Schema.Types.ObjectId, ref: "User", default: null },
@@ -43,17 +58,29 @@ export type ClientDocument = InferSchemaType<typeof clientSchema> &
   mongoose.Document & {
     businessName: string;
     status: (typeof CLIENT_STATUSES)[number];
-    websiteUrl: string;
-    businessAddress: string | null;
+    contactPerson: string;
+    pocEmail: string;
+    pocContactNumber: string;
+    businessSummary: string;
+    idealCustomerProfile: string;
+    projectTypes: (typeof CLIENT_PROJECT_TYPES)[number][];
+    platforms: (typeof CLIENT_PLATFORMS)[number][];
+    projectName: string;
+    projectDescription: string;
+    successLooksLike: string;
+    existingSystem: (typeof CLIENT_EXISTING_SYSTEMS)[number];
+    websiteUrl: string | null;
+    changeNotes: string | null;
+    launchMustHaves: string;
+    laterFeatures: string | null;
+    userRoles: (typeof CLIENT_USER_ROLES)[number][];
+    languages: (typeof CLIENT_LANGUAGES)[number][];
+    rtlRequired: boolean;
+    expectedLaunchDate: string | null;
+    hasFixedDeadline: boolean;
+    contentReady: (typeof CLIENT_CONTENT_READY)[number];
+    requirementsConfirmed: boolean;
     logoImage: string | null;
-    pocContactNumber: string | null;
-    pocEmail: string | null;
-    servicesOffered: string[];
-    primaryServiceToPromote: string | null;
-    idealCustomerProfile: string | null;
-    targetLocations: string[];
-    seoGoals: (typeof SEO_GOALS)[number][];
-    competitorUrls: string[];
     shareToken: string;
     createdByUserId: Types.ObjectId;
     updatedByUserId: Types.ObjectId | null;

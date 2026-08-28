@@ -7,14 +7,13 @@ import { ImageUploadAvatar } from "@/components/ui/image-upload-avatar";
 import { PhoneNumberInput } from "@/components/ui/phone-number-input";
 import type { TUseClientCreateFormResult } from "@/components/forms/hooks/use-client-create-form.hook";
 import { fieldStartIcons } from "@/lib/frontend/forms/input-start-icons";
-import { WEBSITE_URL_PATTERN } from "@/lib/projects/website-url.utils";
 import { DISPLAY_NAME_MAX_LENGTH } from "@/lib/validation/display-name";
 
-type ClientCreateStepBusinessProps = {
+type TClientCreateStepClientProps = {
   hook: TUseClientCreateFormResult;
 };
 
-export function ClientCreateStepBusiness({ hook }: ClientCreateStepBusinessProps) {
+export function ClientCreateStepClient({ hook }: TClientCreateStepClientProps) {
   const {
     t,
     form: {
@@ -29,7 +28,7 @@ export function ClientCreateStepBusiness({ hook }: ClientCreateStepBusinessProps
 
   return (
     <div className="space-y-6">
-      <p className="type-body text-text-muted">{t("sectionBusinessLead")}</p>
+      <p className="type-body text-text-muted">{t("sectionClientLead")}</p>
       <ImageUploadAvatar
         name={businessName || t("businessName")}
         imageUrl={logoPreviewUrl}
@@ -57,52 +56,70 @@ export function ClientCreateStepBusiness({ hook }: ClientCreateStepBusinessProps
           })}
         />
         <Input
-          id="websiteUrl"
-          type="url"
-          label={t("websiteUrl")}
-          placeholder={t("websiteUrlPh")}
+          id="contactPerson"
+          label={t("contactPerson")}
+          placeholder={t("contactPersonPh")}
           required
-          error={errors.websiteUrl?.message}
-          {...register("websiteUrl", {
+          maxLength={DISPLAY_NAME_MAX_LENGTH}
+          startIcon={fieldStartIcons.person}
+          error={errors.contactPerson?.message}
+          {...register("contactPerson", {
             required: t("valRequired"),
-            validate: (value) => WEBSITE_URL_PATTERN.test(value.trim()) || t("valUrl"),
+            minLength: { value: 2, message: t("valMin") },
+            maxLength: { value: DISPLAY_NAME_MAX_LENGTH, message: t("valMax") },
           })}
-        />
-        <Input
-          id="businessAddress"
-          label={t("businessAddress")}
-          placeholder={t("businessAddressPh")}
-          startIcon={fieldStartIcons.location}
-          className="sm:col-span-2"
-          {...register("businessAddress")}
-        />
-        <Controller
-          control={control}
-          name="pocContactNumber"
-          render={({ field }) => (
-            <PhoneNumberInput
-              id="pocContactNumber"
-              label={t("pocContactNumber")}
-              placeholder={t("pocContactNumberPh")}
-              value={field.value}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-            />
-          )}
         />
         <Input
           id="pocEmail"
           type="email"
           label={t("pocEmail")}
           placeholder={t("pocEmailPh")}
+          required
+          startIcon={fieldStartIcons.mail}
           error={errors.pocEmail?.message}
           {...register("pocEmail", {
-            validate: (value) => {
-              const trimmed = value.trim();
-              if (!trimmed) return true;
-              return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed) || t("valEmail");
-            },
+            required: t("valRequired"),
+            validate: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) || t("valEmail"),
           })}
+        />
+        <Controller
+          control={control}
+          name="pocContactNumber"
+          rules={{ required: t("valRequired") }}
+          render={({ field }) => (
+            <PhoneNumberInput
+              id="pocContactNumber"
+              label={t("pocContactNumber")}
+              placeholder={t("pocContactNumberPh")}
+              required
+              value={field.value}
+              onChange={field.onChange}
+              onBlur={field.onBlur}
+              error={errors.pocContactNumber?.message}
+            />
+          )}
+        />
+        <Input
+          id="businessSummary"
+          type="textarea"
+          rows={4}
+          label={t("businessSummary")}
+          placeholder={t("businessSummaryPh")}
+          required
+          className="sm:col-span-2"
+          error={errors.businessSummary?.message}
+          {...register("businessSummary", { required: t("valRequired") })}
+        />
+        <Input
+          id="idealCustomerProfile"
+          type="textarea"
+          rows={3}
+          label={t("idealCustomerProfile")}
+          placeholder={t("idealCustomerProfilePh")}
+          required
+          className="sm:col-span-2"
+          error={errors.idealCustomerProfile?.message}
+          {...register("idealCustomerProfile", { required: t("valRequired") })}
         />
       </div>
     </div>

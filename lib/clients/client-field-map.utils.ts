@@ -1,5 +1,5 @@
 import type { CreateClientInput, UpdateClientInput } from "@/schemas/client";
-import { normalizeWebsiteUrl } from "@/lib/projects/website-url.utils";
+import { clientHasExistingSystem } from "@/lib/clients/intake-constants";
 
 function emptyToNull(value: string | null | undefined): string | null {
   if (value == null) return null;
@@ -8,18 +8,32 @@ function emptyToNull(value: string | null | undefined): string | null {
 }
 
 export function mapCreateClientFields(input: CreateClientInput) {
+  const websiteUrl = clientHasExistingSystem(input.existingSystem) ? (input.websiteUrl ?? null) : null;
+
   return {
     businessName: input.businessName.trim(),
-    websiteUrl: normalizeWebsiteUrl(input.websiteUrl),
-    businessAddress: emptyToNull(input.businessAddress),
-    pocContactNumber: emptyToNull(input.pocContactNumber),
-    pocEmail: emptyToNull(input.pocEmail)?.toLowerCase() ?? null,
-    servicesOffered: input.servicesOffered ?? [],
-    primaryServiceToPromote: emptyToNull(input.primaryServiceToPromote),
-    idealCustomerProfile: emptyToNull(input.idealCustomerProfile),
-    targetLocations: input.targetLocations ?? [],
-    seoGoals: input.seoGoals ?? [],
-    competitorUrls: input.competitorUrls ?? [],
+    contactPerson: input.contactPerson.trim(),
+    pocEmail: input.pocEmail.toLowerCase(),
+    pocContactNumber: input.pocContactNumber.trim(),
+    businessSummary: input.businessSummary.trim(),
+    idealCustomerProfile: input.idealCustomerProfile.trim(),
+    projectTypes: input.projectTypes,
+    platforms: input.platforms ?? [],
+    projectName: input.projectName.trim(),
+    projectDescription: input.projectDescription.trim(),
+    successLooksLike: input.successLooksLike.trim(),
+    existingSystem: input.existingSystem,
+    websiteUrl,
+    changeNotes: clientHasExistingSystem(input.existingSystem) ? emptyToNull(input.changeNotes) : null,
+    launchMustHaves: input.launchMustHaves.trim(),
+    laterFeatures: emptyToNull(input.laterFeatures),
+    userRoles: input.userRoles,
+    languages: input.languages,
+    rtlRequired: input.rtlRequired,
+    expectedLaunchDate: emptyToNull(input.expectedLaunchDate),
+    hasFixedDeadline: input.hasFixedDeadline,
+    contentReady: input.contentReady,
+    requirementsConfirmed: input.requirementsConfirmed,
   };
 }
 
@@ -32,45 +46,75 @@ export function mapUpdateClientFields(
   if (presentFields.has("businessName") && input.businessName !== undefined) {
     update.businessName = input.businessName.trim();
   }
-
-  if (presentFields.has("websiteUrl") && input.websiteUrl !== undefined) {
-    update.websiteUrl = normalizeWebsiteUrl(input.websiteUrl);
+  if (presentFields.has("contactPerson") && input.contactPerson !== undefined) {
+    update.contactPerson = input.contactPerson.trim();
   }
-
-  if (presentFields.has("businessAddress")) {
-    update.businessAddress = emptyToNull(input.businessAddress);
+  if (presentFields.has("pocEmail") && input.pocEmail !== undefined) {
+    update.pocEmail = input.pocEmail.toLowerCase();
   }
-
-  if (presentFields.has("pocContactNumber")) {
-    update.pocContactNumber = emptyToNull(input.pocContactNumber);
+  if (presentFields.has("pocContactNumber") && input.pocContactNumber !== undefined) {
+    update.pocContactNumber = input.pocContactNumber.trim();
   }
-
-  if (presentFields.has("pocEmail")) {
-    update.pocEmail = emptyToNull(input.pocEmail)?.toLowerCase() ?? null;
+  if (presentFields.has("businessSummary") && input.businessSummary !== undefined) {
+    update.businessSummary = input.businessSummary.trim();
   }
-
-  if (presentFields.has("servicesOffered")) {
-    update.servicesOffered = input.servicesOffered ?? [];
+  if (presentFields.has("idealCustomerProfile") && input.idealCustomerProfile !== undefined) {
+    update.idealCustomerProfile = input.idealCustomerProfile.trim();
   }
-
-  if (presentFields.has("primaryServiceToPromote")) {
-    update.primaryServiceToPromote = emptyToNull(input.primaryServiceToPromote);
+  if (presentFields.has("projectTypes") && input.projectTypes !== undefined) {
+    update.projectTypes = input.projectTypes;
   }
-
-  if (presentFields.has("idealCustomerProfile")) {
-    update.idealCustomerProfile = emptyToNull(input.idealCustomerProfile);
+  if (presentFields.has("platforms") && input.platforms !== undefined) {
+    update.platforms = input.platforms;
   }
-
-  if (presentFields.has("targetLocations")) {
-    update.targetLocations = input.targetLocations ?? [];
+  if (presentFields.has("projectName") && input.projectName !== undefined) {
+    update.projectName = input.projectName.trim();
   }
-
-  if (presentFields.has("seoGoals")) {
-    update.seoGoals = input.seoGoals ?? [];
+  if (presentFields.has("projectDescription") && input.projectDescription !== undefined) {
+    update.projectDescription = input.projectDescription.trim();
   }
-
-  if (presentFields.has("competitorUrls")) {
-    update.competitorUrls = input.competitorUrls ?? [];
+  if (presentFields.has("successLooksLike") && input.successLooksLike !== undefined) {
+    update.successLooksLike = input.successLooksLike.trim();
+  }
+  if (presentFields.has("existingSystem") && input.existingSystem !== undefined) {
+    update.existingSystem = input.existingSystem;
+    if (!clientHasExistingSystem(input.existingSystem)) {
+      update.websiteUrl = null;
+      update.changeNotes = null;
+    }
+  }
+  if (presentFields.has("websiteUrl") && !("websiteUrl" in update)) {
+    update.websiteUrl = emptyToNull(input.websiteUrl);
+  }
+  if (presentFields.has("changeNotes") && !("changeNotes" in update)) {
+    update.changeNotes = emptyToNull(input.changeNotes);
+  }
+  if (presentFields.has("launchMustHaves") && input.launchMustHaves !== undefined) {
+    update.launchMustHaves = input.launchMustHaves.trim();
+  }
+  if (presentFields.has("laterFeatures")) {
+    update.laterFeatures = emptyToNull(input.laterFeatures);
+  }
+  if (presentFields.has("userRoles") && input.userRoles !== undefined) {
+    update.userRoles = input.userRoles;
+  }
+  if (presentFields.has("languages") && input.languages !== undefined) {
+    update.languages = input.languages;
+  }
+  if (presentFields.has("rtlRequired") && input.rtlRequired !== undefined) {
+    update.rtlRequired = input.rtlRequired;
+  }
+  if (presentFields.has("expectedLaunchDate")) {
+    update.expectedLaunchDate = emptyToNull(input.expectedLaunchDate);
+  }
+  if (presentFields.has("hasFixedDeadline") && input.hasFixedDeadline !== undefined) {
+    update.hasFixedDeadline = input.hasFixedDeadline;
+  }
+  if (presentFields.has("contentReady") && input.contentReady !== undefined) {
+    update.contentReady = input.contentReady;
+  }
+  if (presentFields.has("requirementsConfirmed") && input.requirementsConfirmed !== undefined) {
+    update.requirementsConfirmed = input.requirementsConfirmed;
   }
 
   return update;

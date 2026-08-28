@@ -13,38 +13,36 @@ export function WorkspaceToggle() {
   if (!canSwitchWorkspace) return null;
 
   const options: { id: TDashboardWorkspace; label: string }[] = [
-    { id: "seo", label: t("seo") },
+    { id: "seo", label: t("crawllex") },
     { id: "onboarding", label: t("onboarding") },
   ];
 
   return (
-    <div className="px-3 pb-2 pt-1">
-      <div
-        role="tablist"
-        aria-label={t("aria")}
-        className="grid grid-cols-2 gap-1 rounded-full border border-border/50 bg-bg-card/20 p-1 dark:border-text-primary/30 dark:bg-text-primary/[0.05]"
-      >
-        {options.map((option) => {
-          const isActive = workspace === option.id;
-          return (
-            <button
-              key={option.id}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              onClick={() => setWorkspace(option.id)}
-              className={cn(
-                "rounded-full px-2 py-1.5 type-caption font-semibold transition-colors",
-                isActive
-                  ? "bg-brand text-text-on-brand shadow-xs"
-                  : "text-text-muted hover:bg-bg-hover hover:text-text-primary",
-              )}
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
+    <div
+      role="tablist"
+      aria-label={t("aria")}
+      className="grid h-9 shrink-0 grid-cols-2 gap-0.5 rounded-full border border-border/50 bg-bg-card/20 p-0.5 dark:border-text-primary/30 dark:bg-text-primary/[0.05]"
+    >
+      {options.map((option) => {
+        const isActive = workspace === option.id;
+        return (
+          <button
+            key={option.id}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => setWorkspace(option.id)}
+            className={cn(
+              "rounded-full px-2.5 type-caption font-semibold transition-colors",
+              isActive
+                ? "bg-brand text-text-on-brand shadow-xs"
+                : "text-text-muted hover:bg-bg-hover hover:text-text-primary",
+            )}
+          >
+            {option.label}
+          </button>
+        );
+      })}
     </div>
   );
 }

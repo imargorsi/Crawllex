@@ -17,19 +17,33 @@ import { Client, Project, ProjectMember, User } from "@/models";
 import { createClientSchema } from "@/schemas/client";
 import { authContextFor, projectInput } from "@/tests/helpers/project-test-utils";
 
-function clientInput(
-  overrides: Partial<{
-    businessName: string;
-    websiteUrl: string;
-    pocEmail: string | null;
-    seoGoals: Array<"get_more_calls">;
-  }> = {},
-) {
-  return createClientSchema.parse({
+function rawClientInput(overrides: Record<string, unknown> = {}) {
+  return {
     businessName: "Acme Agency",
-    websiteUrl: "https://acme.example.com",
+    contactPerson: "Jane Doe",
+    pocEmail: "jane@acme.example.com",
+    pocContactNumber: "+966500000000",
+    businessSummary: "We sell widgets to regional retailers.",
+    idealCustomerProfile: "Mid-size retailers in the GCC.",
+    projectTypes: ["website"],
+    platforms: ["desktop", "mobile_responsive"],
+    projectName: "Acme Website",
+    projectDescription: "Marketing site with contact forms.",
+    successLooksLike: "Leads from the new site within 90 days.",
+    existingSystem: "none",
+    launchMustHaves: "Home, about, and contact pages.",
+    userRoles: ["admin", "customer"],
+    languages: ["english"],
+    rtlRequired: false,
+    hasFixedDeadline: false,
+    contentReady: "partial",
+    requirementsConfirmed: true,
     ...overrides,
-  });
+  };
+}
+
+function clientInput(overrides: Record<string, unknown> = {}) {
+  return createClientSchema.parse(rawClientInput(overrides));
 }
 
 async function createAdmin() {
@@ -58,6 +72,7 @@ describe("Client onboarding isolation", () => {
     const { client } = await createClient(authContextFor(admin), clientInput());
 
     expect(client.businessName).toBe("Acme Agency");
+    expect(client.projectName).toBe("Acme Website");
     expect(client.status).toBe("active");
     expect(client.shareToken.startsWith("clx_ob_")).toBe(true);
     expect(client.createdByUserId.toString()).toBe(admin._id.toString());
@@ -89,11 +104,11 @@ describe("Client onboarding isolation", () => {
     const admin = await createAdmin();
     const { client: activeClient } = await createClient(
       authContextFor(admin),
-      clientInput({ businessName: "Active Co", websiteUrl: "https://active.example.com" }),
+      clientInput({ businessName: "Active Co" }),
     );
     const { client: inactiveClient } = await createClient(
       authContextFor(admin),
-      clientInput({ businessName: "Inactive Co", websiteUrl: "https://inactive.example.com" }),
+      clientInput({ businessName: "Inactive Co" }),
     );
 
     await deactivateClient(inactiveClient._id.toString());
@@ -115,15 +130,58 @@ describe("Client onboarding isolation", () => {
     expect(reactivated.status).toBe("active");
   });
 
-  it("rejects empty POC email as null and does not require SEO goals", () => {
-    const parsed = createClientSchema.parse({
-      businessName: "No Goals Co",
-      websiteUrl: "https://nogoals.example.com",
-      pocEmail: "",
-    });
+  it("requires confirmation, contact email, and website platforms when a website is selected", () => {
+    expect(() =>
+      createClientSchema.parse(
+        rawClientInput({
+          requirementsConfirmed: false,
+        }),
+      ),
+    ).toThrow();
 
-    expect(parsed.pocEmail).toBeNull();
-    expect(parsed.seoGoals).toEqual([]);
+    expect(() =>
+      createClientSchema.parse(
+        rawClientInput({
+          pocEmail: "",
+        }),
+      ),
+    ).toThrow();
+
+    expect(() =>
+      createClientSchema.parse(
+        rawClientInput({
+          projectTypes: ["website"],
+          platforms: [],
+        }),
+      ),
+    ).toThrow();
+
+    const parsed = createClientSchema.parse(rawClientInput({ existingSystem: "none", websiteUrl: "" }));
+    expect(parsed.websiteUrl).toBeNull();
+    expect(parsed.pocEmail).toBe("jane@acme.example.com");
+  });
+
+  it("clears website fields when the existing system is none", async () => {
+    const admin = await createAdmin();
+    const { client } = await createClient(
+      authContextFor(admin),
+      clientInput({
+        existingSystem: "website",
+        websiteUrl: "https://old.example.com",
+        changeNotes: "Rebuild the homepage.",
+      }),
+    );
+
+    const { client: updated } = await updateClient(
+      authContextFor(admin),
+      client._id.toString(),
+      { existingSystem: "none" },
+      new Set(["existingSystem"]),
+    );
+
+    expect(updated.existingSystem).toBe("none");
+    expect(updated.websiteUrl).toBeNull();
+    expect(updated.changeNotes).toBeNull();
   });
 
   it("blocks project members from authenticated client APIs", async () => {
@@ -166,7 +224,7 @@ describe("Client onboarding isolation", () => {
     const admin = await createAdmin();
     const { client } = await createClient(
       authContextFor(admin),
-      clientInput({ businessName: "Public Co", websiteUrl: "https://public.example.com" }),
+      clientInput({ businessName: "Public Co" }),
     );
 
     const publicClient = await getPublicClientByShareToken(client.shareToken);
@@ -216,7 +274,7 @@ describe("Client onboarding isolation", () => {
 
     const { client } = await createClient(
       authContextFor(admin),
-      clientInput({ businessName: "Keep Me", websiteUrl: "https://keep-me.example.com" }),
+      clientInput({ businessName: "Keep Me" }),
     );
 
     await deleteProject(authContextFor(admin), project._id.toString());

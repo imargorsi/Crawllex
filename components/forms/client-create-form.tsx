@@ -51,7 +51,7 @@ export function ClientCreateForm({
     <form className="space-y-5" onSubmit={onSubmit} noValidate>
       <section className={cn(elevatedCardSurfaceClass, "rounded-2xl p-6 sm:p-8")}>
         <div className="space-y-6">
-          <ProjectCreateStepper labels={stepLabels} current={currentStep} />
+          <ProjectCreateStepper labels={stepLabels} current={currentStep} ariaLabel={t("stepperAria")} />
           <ClientCreateStepContent hook={hook} />
         </div>
       </section>

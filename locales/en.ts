@@ -12,7 +12,7 @@ export interface Translation {
   };
   workspace: {
     aria: string;
-    seo: string;
+    crawllex: string;
     onboarding: string;
   };
   nav: {
@@ -940,37 +940,100 @@ export interface Translation {
         shareLabel: string;
       };
       createForm: {
-        sectionBusinessLead: string;
+        sectionClientLead: string;
         businessName: string;
         businessNamePh: string;
         companyLogoHint: string;
         companyLogoUploadLabel: string;
-        websiteUrl: string;
-        websiteUrlPh: string;
-        businessAddress: string;
-        businessAddressPh: string;
+        contactPerson: string;
+        contactPersonPh: string;
         pocContactNumber: string;
         pocContactNumberPh: string;
         pocEmail: string;
         pocEmailPh: string;
-        sectionServiceLead: string;
-        servicesOffered: string;
-        servicesOfferedPh: string;
-        servicesOfferedHelp: string;
-        primaryServiceToPromote: string;
-        primaryServiceToPromotePh: string;
-        primaryServiceEmpty: string;
+        businessSummary: string;
+        businessSummaryPh: string;
         idealCustomerProfile: string;
         idealCustomerProfilePh: string;
-        sectionOperationsLead: string;
-        targetLocations: string;
-        targetLocationsPh: string;
-        targetLocationsHelp: string;
-        sectionSeoLead: string;
-        sectionCompetitorsLead: string;
-        competitorUrls: string;
-        competitorUrlsPh: string;
-        competitorUrlsHelp: string;
+        sectionProjectLead: string;
+        projectTypesLabel: string;
+        projectTypes: {
+          website: string;
+          ecommerce: string;
+          web_application: string;
+          mobile_application: string;
+          saas: string;
+          custom_software: string;
+          other: string;
+        };
+        platformsWebsiteLabel: string;
+        platformsMobileLabel: string;
+        platformsWebAppLabel: string;
+        platformsLabel: string;
+        platforms: {
+          desktop: string;
+          mobile_responsive: string;
+          android: string;
+          ios: string;
+          both_mobile: string;
+          web: string;
+          admin_dashboard: string;
+          user_portal: string;
+          vendor_portal: string;
+        };
+        projectName: string;
+        projectNamePh: string;
+        projectDescription: string;
+        projectDescriptionPh: string;
+        sectionGoalsLead: string;
+        successLooksLike: string;
+        successLooksLikePh: string;
+        existingSystem: string;
+        existingSystemPh: string;
+        existingSystems: {
+          none: string;
+          website: string;
+          mobile_app: string;
+          software: string;
+          multiple: string;
+        };
+        websiteUrl: string;
+        websiteUrlPh: string;
+        changeNotes: string;
+        changeNotesPh: string;
+        sectionScopeLead: string;
+        launchMustHaves: string;
+        launchMustHavesPh: string;
+        laterFeatures: string;
+        laterFeaturesPh: string;
+        userRolesLabel: string;
+        userRoles: {
+          admin: string;
+          customer: string;
+          employee: string;
+          vendor: string;
+          other: string;
+        };
+        sectionDeliveryLead: string;
+        languagesLabel: string;
+        languages: {
+          english: string;
+          arabic: string;
+          other: string;
+        };
+        rtlRequired: string;
+        expectedLaunchDate: string;
+        hasFixedDeadline: string;
+        contentReady: string;
+        contentReadyPh: string;
+        contentReadyOptions: {
+          complete: string;
+          partial: string;
+          not_ready: string;
+        };
+        requirementsConfirmed: string;
+        yes: string;
+        no: string;
         submit: string;
         submitting: string;
         editSubmit: string;
@@ -981,15 +1044,24 @@ export interface Translation {
         editErrorFallback: string;
         nextStep: string;
         previousStep: string;
-        stepBasicInformation: string;
-        stepServiceInformation: string;
-        stepSeo: string;
+        stepClient: string;
+        stepProject: string;
+        stepGoals: string;
+        stepScope: string;
+        stepDelivery: string;
+        stepperAria: string;
         stepValidationError: string;
         valRequired: string;
         valMin: string;
         valMax: string;
         valUrl: string;
         valEmail: string;
+        valSelectProjectType: string;
+        valWebsitePlatform: string;
+        valMobilePlatform: string;
+        valSelectUserRole: string;
+        valSelectLanguage: string;
+        valConfirm: string;
         backToList: string;
         backToClient: string;
       };
@@ -999,25 +1071,23 @@ export interface Translation {
         notFoundBody: string;
         loadErrorTitle: string;
         loadErrorBody: string;
-        sectionBusinessTitle: string;
-        sectionBusinessLead: string;
-        sectionServicesTitle: string;
-        sectionServicesLead: string;
-        sectionIcpTitle: string;
-        sectionIcpLead: string;
-        sectionLocationsTitle: string;
-        sectionLocationsLead: string;
-        sectionSeoGoalsTitle: string;
-        sectionSeoGoalsLead: string;
-        sectionCompetitorsTitle: string;
-        sectionCompetitorsLead: string;
+        sectionClientTitle: string;
+        sectionClientLead: string;
+        sectionProjectTitle: string;
+        sectionProjectLead: string;
+        sectionGoalsTitle: string;
+        sectionGoalsLead: string;
+        sectionScopeTitle: string;
+        sectionScopeLead: string;
+        sectionDeliveryTitle: string;
+        sectionDeliveryLead: string;
         sectionShareTitle: string;
         sectionShareLead: string;
         noValue: string;
-        noServices: string;
-        noLocations: string;
-        noSeoGoals: string;
-        noCompetitors: string;
+        noProjectTypes: string;
+        noPlatforms: string;
+        noUserRoles: string;
+        noLanguages: string;
       };
       public: {
         title: string;
@@ -1755,7 +1825,7 @@ const translation: Translation = {
   },
   workspace: {
     aria: "Workspace",
-    seo: "SEO",
+    crawllex: "Crawllex",
     onboarding: "Onboarding",
   },
   nav: {
@@ -2665,9 +2735,9 @@ const translation: Translation = {
       editClient: "Edit Client",
       deleteClient: "Delete Client",
       createTitle: "Add Client",
-      createLead: "Capture business details, SEO goals, and competitors for this client.",
+      createLead: "Capture client, project, goals, and delivery details for this onboarding record.",
       editTitle: "Edit Client",
-      editLead: "Update this client's business details, SEO goals, and competitors.",
+      editLead: "Update this client's intake so the shared snapshot stays accurate.",
       notFoundTitle: "Client Not Found",
       notFoundBody: "This client is no longer available.",
       loadErrorTitle: "Could Not Load Client",
@@ -2702,39 +2772,100 @@ const translation: Translation = {
         shareLabel: "Share Link",
       },
       createForm: {
-        sectionBusinessLead:
-          "Tell us about this business so the team can share an accurate onboarding snapshot.",
+        sectionClientLead: "Tell us about this business and who we should contact.",
         businessName: "Business Name",
         businessNamePh: "E.g. Example Ltd",
-        companyLogoHint: "Upload Your Brand Logo. JPG, PNG, WEBP, Or GIF (Maximum 5 MB).",
+        companyLogoHint: "Upload your brand logo. JPG, PNG, WEBP, or GIF (maximum 5 MB).",
         companyLogoUploadLabel: "Upload Company Logo",
-        websiteUrl: "Website URL",
-        websiteUrlPh: "example.com",
-        businessAddress: "Business Address",
-        businessAddressPh: "Street Address, City, State/Province, Country",
+        contactPerson: "Contact Person",
+        contactPersonPh: "E.g. Jane Doe",
         pocContactNumber: "Contact Number",
         pocContactNumberPh: "5X XXX XXXX",
         pocEmail: "Business Email",
         pocEmailPh: "contact@example.com",
-        sectionServiceLead:
-          "Define offerings and target audience so this snapshot reflects how the business wants to grow.",
-        servicesOffered: "Services / Products Offered",
-        servicesOfferedPh: "E.g. SEO, Web Design, PPC Advertising, Content Marketing",
-        servicesOfferedHelp: "Press Enter Or Comma To Add. Backspace Removes The Last Tag.",
-        primaryServiceToPromote: "Primary Service / Product",
-        primaryServiceToPromotePh: "Select A Primary Service / Product",
-        primaryServiceEmpty: "Add Services Above First",
-        idealCustomerProfile: "Ideal Customer",
-        idealCustomerProfilePh: "E.g. Small And Medium-Sized Businesses Looking To Grow Their Online Presence",
-        sectionOperationsLead: "Tell us where this business operates so local targeting stays clear.",
-        targetLocations: "Target Locations",
-        targetLocationsPh: "E.g. Riyadh, Jeddah, Dammam, Saudi Arabia",
-        targetLocationsHelp: "Press Enter Or Comma To Add. Backspace Removes The Last Tag.",
-        sectionSeoLead: "Choose SEO goals and competitors to capture this client's priorities.",
-        sectionCompetitorsLead: "Add competitor names or websites to keep in this snapshot.",
-        competitorUrls: "Competitor Names Or URLs",
-        competitorUrlsPh: "Enter Your Competitor Names Or URLs: https://competitor1.com, Competitor 2, https://competitor3.com",
-        competitorUrlsHelp: "Press Enter Or Comma To Add. Backspace Removes The Last Tag.",
+        businessSummary: "Business Summary",
+        businessSummaryPh: "What does this business do, and who does it serve?",
+        idealCustomerProfile: "Target Customers",
+        idealCustomerProfilePh: "Who is the ideal customer for this project?",
+        sectionProjectLead: "Describe what we are building and where it needs to run.",
+        projectTypesLabel: "Project Types",
+        projectTypes: {
+          website: "Website",
+          ecommerce: "E-Commerce",
+          web_application: "Web Application",
+          mobile_application: "Mobile Application",
+          saas: "SaaS",
+          custom_software: "Custom Software",
+          other: "Other",
+        },
+        platformsWebsiteLabel: "Website Platforms",
+        platformsMobileLabel: "Mobile Platforms",
+        platformsWebAppLabel: "Web App Platforms",
+        platformsLabel: "Platforms",
+        platforms: {
+          desktop: "Desktop",
+          mobile_responsive: "Mobile Responsive",
+          android: "Android",
+          ios: "iOS",
+          both_mobile: "Both (Android And iOS)",
+          web: "Web",
+          admin_dashboard: "Admin Dashboard",
+          user_portal: "User Portal",
+          vendor_portal: "Vendor Portal",
+        },
+        projectName: "Project Name",
+        projectNamePh: "E.g. Example Marketing Site",
+        projectDescription: "Project Description",
+        projectDescriptionPh: "What should this project do for the client?",
+        sectionGoalsLead: "Capture what success looks like and whether something already exists.",
+        successLooksLike: "What Success Looks Like",
+        successLooksLikePh: "What should be true when this project is successful?",
+        existingSystem: "Existing System",
+        existingSystemPh: "Select Existing System",
+        existingSystems: {
+          none: "None",
+          website: "Website",
+          mobile_app: "Mobile App",
+          software: "Software",
+          multiple: "Multiple",
+        },
+        websiteUrl: "Website Or App URL",
+        websiteUrlPh: "example.com",
+        changeNotes: "What Should Change",
+        changeNotesPh: "What should stay, and what should change?",
+        sectionScopeLead: "Separate launch must-haves from later features, then mark who will use the product.",
+        launchMustHaves: "Launch Must-Haves",
+        launchMustHavesPh: "What must ship for the first launch?",
+        laterFeatures: "Later Features",
+        laterFeaturesPh: "What can wait until after launch?",
+        userRolesLabel: "User Roles",
+        userRoles: {
+          admin: "Admin",
+          customer: "Customer",
+          employee: "Employee",
+          vendor: "Vendor",
+          other: "Other",
+        },
+        sectionDeliveryLead: "Languages, launch timing, and whether content is ready.",
+        languagesLabel: "Languages",
+        languages: {
+          english: "English",
+          arabic: "Arabic",
+          other: "Other",
+        },
+        rtlRequired: "RTL Required",
+        expectedLaunchDate: "Expected Launch Date",
+        hasFixedDeadline: "Has A Fixed Deadline",
+        contentReady: "Content Ready",
+        contentReadyPh: "Select Content Readiness",
+        contentReadyOptions: {
+          complete: "Complete",
+          partial: "Partial",
+          not_ready: "Not Ready",
+        },
+        requirementsConfirmed: "I confirm this information is accurate and complete.",
+        yes: "Yes",
+        no: "No",
         submit: "Add Client",
         submitting: "Saving…",
         editSubmit: "Save Changes",
@@ -2745,15 +2876,24 @@ const translation: Translation = {
         editErrorFallback: "Could not update client.",
         nextStep: "Next Step",
         previousStep: "Back",
-        stepBasicInformation: "Business Information",
-        stepServiceInformation: "Business Details",
-        stepSeo: "SEO Configuration",
+        stepClient: "Client",
+        stepProject: "Project",
+        stepGoals: "Goals",
+        stepScope: "Scope",
+        stepDelivery: "Delivery",
+        stepperAria: "Client Form Steps",
         stepValidationError: "Fix required fields.",
-        valRequired: "This Field Is Required.",
-        valMin: "Use At Least 2 Characters.",
-        valMax: "Use At Most 50 Characters.",
-        valUrl: "Enter A Valid Website URL (E.G. Example.Com).",
-        valEmail: "Enter A Valid Email Address.",
+        valRequired: "This field is required.",
+        valMin: "Use at least 2 characters.",
+        valMax: "Use at most 50 characters.",
+        valUrl: "Enter a valid website URL (e.g. example.com).",
+        valEmail: "Enter a valid email address.",
+        valSelectProjectType: "Select at least one project type.",
+        valWebsitePlatform: "Select at least one website platform.",
+        valMobilePlatform: "Select Android, iOS, or both.",
+        valSelectUserRole: "Select at least one user role.",
+        valSelectLanguage: "Select at least one language.",
+        valConfirm: "Confirm that the information is accurate.",
         backToList: "Back To Clients",
         backToClient: "Back To Client",
       },
@@ -2763,25 +2903,23 @@ const translation: Translation = {
         notFoundBody: "This client is no longer available.",
         loadErrorTitle: "Could Not Load Client",
         loadErrorBody: "Could not load this client. Try again.",
-        sectionBusinessTitle: "Business Information",
-        sectionBusinessLead: "Core contact and website details for this client.",
-        sectionServicesTitle: "Services And Products",
-        sectionServicesLead: "Offerings captured during intake.",
-        sectionIcpTitle: "Ideal Customer",
-        sectionIcpLead: "Who this business wants to reach.",
-        sectionLocationsTitle: "Target Locations",
-        sectionLocationsLead: "Markets this client wants to appear in.",
-        sectionSeoGoalsTitle: "SEO Goals",
-        sectionSeoGoalsLead: "Priorities selected during intake.",
-        sectionCompetitorsTitle: "Competitors",
-        sectionCompetitorsLead: "Names or websites used for comparison.",
+        sectionClientTitle: "Client And Business",
+        sectionClientLead: "Who this client is and how to reach them.",
+        sectionProjectTitle: "What We Are Building",
+        sectionProjectLead: "Project type, platforms, and description.",
+        sectionGoalsTitle: "Goals And Current State",
+        sectionGoalsLead: "What success looks like and what already exists.",
+        sectionScopeTitle: "Scope And Users",
+        sectionScopeLead: "Launch must-haves, later work, and who will use the product.",
+        sectionDeliveryTitle: "Delivery",
+        sectionDeliveryLead: "Languages, timing, and content readiness.",
         sectionShareTitle: "Share Link",
         sectionShareLead: "Anyone with this link can view a read-only snapshot of the intake.",
         noValue: "—",
-        noServices: "No services added.",
-        noLocations: "No locations added.",
-        noSeoGoals: "No SEO goals selected.",
-        noCompetitors: "No competitors added.",
+        noProjectTypes: "No project types selected.",
+        noPlatforms: "No platforms selected.",
+        noUserRoles: "No user roles selected.",
+        noLanguages: "No languages selected.",
       },
       public: {
         title: "Client Onboarding",

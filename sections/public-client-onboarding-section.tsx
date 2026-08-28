@@ -70,8 +70,8 @@ export function PublicClientOnboardingSection() {
             </Heading>
             <div className={cn(typeMetaRowClass, "sm:flex-nowrap")}>
               <span className={cn(typeIconTextClass, "type-caption", elevatedCardBodyClass)}>
-                <Icons.globe className="size-3.5 shrink-0 text-text-muted" aria-hidden />
-                <span className="truncate">{displayDetailValue(client.websiteUrl)}</span>
+                <Icons.file className="size-3.5 shrink-0 text-text-muted" aria-hidden />
+                <span className="truncate">{displayDetailValue(client.projectName)}</span>
               </span>
               <span className={cn(typeIconTextClass, "type-caption", elevatedCardBodyClass)}>
                 <Icons.call className="size-3.5 shrink-0 text-text-muted" aria-hidden />
