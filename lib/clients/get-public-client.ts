@@ -3,12 +3,12 @@ import { NextResponse } from "next/server";
 import { NotFoundError } from "@/lib/api/http-errors";
 import { ApiResponse } from "@/lib/api/response";
 import { CLIENT_SHARE_TOKEN_UNAVAILABLE_MESSAGE, resolveClientStatus } from "@/lib/clients/constants";
-import { isClientShareTokenFormat } from "@/lib/clients/share-token";
+import { isClientSharePathFormat } from "@/lib/clients/share-token";
 import { serializePublicClient } from "@/lib/serializers/client";
 import { Client } from "@/models";
 
 export async function getPublicClientByShareToken(shareToken: string) {
-  if (!isClientShareTokenFormat(shareToken)) {
+  if (!isClientSharePathFormat(shareToken)) {
     throw new NotFoundError("Client");
   }
 

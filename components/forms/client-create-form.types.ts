@@ -1,11 +1,20 @@
 import type {
-  TClientContentReady,
-  TClientExistingSystem,
-  TClientLanguage,
-  TClientPlatform,
-  TClientProjectType,
-  TClientUserRole,
-} from "@/lib/clients/intake-constants";
+  TIntakeBuildType,
+  TIntakeIntegration,
+  TIntakeMobilePlatform,
+  TIntakeWebAppType,
+  TIntakeWebsiteFocus,
+} from "@/lib/frontend/clients/intake-ui.constants";
+
+export type TClientIntakeFeatureRow = {
+  name: string;
+  whatItDoes: string;
+};
+
+export type TClientIntakeLinkRow = {
+  linkName: string;
+  url: string;
+};
 
 export type TClientCreateFormValues = {
   businessName: string;
@@ -14,21 +23,19 @@ export type TClientCreateFormValues = {
   pocContactNumber: string;
   businessSummary: string;
   idealCustomerProfile: string;
-  projectTypes: TClientProjectType[];
-  platforms: TClientPlatform[];
-  projectName: string;
   projectDescription: string;
-  successLooksLike: string;
-  existingSystem: TClientExistingSystem | "";
-  websiteUrl: string;
-  changeNotes: string;
-  launchMustHaves: string;
-  laterFeatures: string;
-  userRoles: TClientUserRole[];
-  languages: TClientLanguage[];
-  rtlRequired: boolean;
+  projectTypes: TIntakeBuildType[];
+  projectTypeOther: string;
+  websiteFocus: TIntakeWebsiteFocus[];
+  mobilePlatforms: TIntakeMobilePlatform[];
+  webAppTypes: TIntakeWebAppType[];
+  webAppTypeOther: string;
+  features: TClientIntakeFeatureRow[];
+  integrations: TIntakeIntegration[];
+  integrationOther: string;
+  links: TClientIntakeLinkRow[];
   expectedLaunchDate: string;
-  hasFixedDeadline: boolean;
-  contentReady: TClientContentReady | "";
+  launchMustHaves: string;
+  notes: string;
   requirementsConfirmed: boolean;
 };

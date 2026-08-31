@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAccessToken } from "@/hooks/use-access-token.hook";
 import { baseQuery } from "@/lib/frontend/api/base";
 import type { TClientStatus } from "@/lib/clients/constants";
-import type { CreateClientInput } from "@/schemas/client";
+import type { CreateClientInput, UpdateClientInput } from "@/schemas/client";
 import type { TClientDetail, TClientListItem, TPublicClientView } from "@/types/client.types";
 
 const clientsApi = {
@@ -21,26 +21,35 @@ export const clientKeys = {
 
 export type TCreateClientPayload = CreateClientInput;
 
-export type TUpdateClientPayload = TCreateClientPayload;
+export type TUpdateClientPayload = UpdateClientInput;
 
 export type TCreateClientMutationInput = {
   payload: TCreateClientPayload;
   companyLogoFile?: File | null;
+  assetFiles?: File[];
 };
 
 export type TUpdateClientMutationInput = {
   clientId: string;
   payload: TUpdateClientPayload;
   companyLogoFile?: File | null;
+  assetFiles?: File[];
 };
 
 export type TClientStatusAction = "activate" | "deactivate";
 
-function toClientFormData(payload: TCreateClientPayload, companyLogoFile?: File | null): FormData {
+function toClientFormData(
+  payload: TCreateClientPayload | TUpdateClientPayload,
+  companyLogoFile?: File | null,
+  assetFiles: File[] = [],
+): FormData {
   const formData = new FormData();
   formData.set("data", JSON.stringify(payload));
   if (companyLogoFile) {
     formData.set("company_logo", companyLogoFile);
+  }
+  for (const file of assetFiles) {
+    formData.append("assets", file);
   }
   return formData;
 }
@@ -98,10 +107,10 @@ export function usePublicClientQuery(shareToken: string, options?: { enabled?: b
 export function useCreateClientMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ payload, companyLogoFile }: TCreateClientMutationInput) => {
+    mutationFn: async ({ payload, companyLogoFile, assetFiles }: TCreateClientMutationInput) => {
       const envelope = await baseQuery.post<TClientDetail>(
         "clients",
-        toClientFormData(payload, companyLogoFile),
+        toClientFormData(payload, companyLogoFile, assetFiles),
       );
       return envelope.data;
     },
@@ -114,10 +123,10 @@ export function useCreateClientMutation() {
 export function useUpdateClientMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ clientId, payload, companyLogoFile }: TUpdateClientMutationInput) => {
+    mutationFn: async ({ clientId, payload, companyLogoFile, assetFiles }: TUpdateClientMutationInput) => {
       const envelope = await baseQuery.patch<TClientDetail>(
         `clients/${clientId}`,
-        toClientFormData(payload, companyLogoFile),
+        toClientFormData(payload, companyLogoFile, assetFiles),
       );
       return envelope.data;
     },

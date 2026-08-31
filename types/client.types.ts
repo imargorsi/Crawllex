@@ -1,23 +1,40 @@
 import type { TClientStatus } from "@/lib/clients/constants";
 import type {
-  TClientContentReady,
-  TClientExistingSystem,
-  TClientLanguage,
-  TClientPlatform,
+  TClientFileKind,
+  TClientIntegration,
+  TClientMobilePlatform,
   TClientProjectType,
-  TClientUserRole,
+  TClientWebAppType,
+  TClientWebsiteFocus,
 } from "@/lib/clients/intake-constants";
 
 export type TClientListItem = {
   id: string;
   businessName: string;
-  projectName: string;
+  contactPerson: string;
   status: TClientStatus;
-  websiteUrl: string | null;
   imageUrl: string | null;
   shareUrl: string;
   createdAt: string;
   updatedAt: string;
+};
+
+export type TClientFeature = {
+  name: string;
+  whatItDoes: string;
+};
+
+export type TClientLink = {
+  linkName: string;
+  url: string;
+};
+
+/** Admin-visible file metadata — no blob path or download URL. */
+export type TClientFilePublic = {
+  id: string;
+  originalName: string;
+  sizeBytes: number;
+  kind: TClientFileKind;
 };
 
 export type TClientIntakeFields = {
@@ -26,22 +43,20 @@ export type TClientIntakeFields = {
   pocContactNumber: string;
   businessSummary: string;
   idealCustomerProfile: string;
-  projectTypes: TClientProjectType[];
-  platforms: TClientPlatform[];
-  projectName: string;
   projectDescription: string;
-  successLooksLike: string;
-  existingSystem: TClientExistingSystem;
-  websiteUrl: string | null;
-  changeNotes: string | null;
-  launchMustHaves: string;
-  laterFeatures: string | null;
-  userRoles: TClientUserRole[];
-  languages: TClientLanguage[];
-  rtlRequired: boolean;
+  projectTypes: TClientProjectType[];
+  projectTypeOther: string | null;
+  websiteFocus: TClientWebsiteFocus[];
+  mobilePlatforms: TClientMobilePlatform[];
+  webAppTypes: TClientWebAppType[];
+  webAppTypeOther: string | null;
+  features: TClientFeature[];
+  integrations: TClientIntegration[];
+  integrationOther: string | null;
+  links: TClientLink[];
+  notes: string | null;
   expectedLaunchDate: string | null;
-  hasFixedDeadline: boolean;
-  contentReady: TClientContentReady;
+  launchMustHaves: string;
   requirementsConfirmed: boolean;
 };
 
@@ -50,6 +65,7 @@ export type TClientDetail = TClientIntakeFields & {
   businessName: string;
   status: TClientStatus;
   logoImage: string | null;
+  files: TClientFilePublic[];
   shareToken: string;
   shareUrl: string;
   createdByUserId: string;
@@ -58,7 +74,7 @@ export type TClientDetail = TClientIntakeFields & {
   updatedAt: string;
 };
 
-/** Public read-only snapshot — no admin ids or share token. */
+/** Public read-only snapshot — no admin ids, share token, or file URLs. */
 export type TPublicClientView = TClientIntakeFields & {
   businessName: string;
   logoImage: string | null;

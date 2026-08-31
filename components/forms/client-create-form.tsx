@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ProjectCreateStepper } from "@/components/forms/project-create-stepper";
 import { ClientCreateStepContent } from "@/components/forms/client-create-steps";
-import { useClientCreateForm } from "@/components/forms/hooks/use-client-create-form.hook";
+import { EMPTY_CLIENT_FILES, useClientCreateForm } from "@/components/forms/hooks/use-client-create-form.hook";
 import { CLIENT_ROUTES } from "@/lib/frontend/clients/client-routes.utils";
-import { elevatedCardSurfaceClass } from "@/lib/frontend/layout/dashboard-chrome";
+import { intakeFillSurfaceClass } from "@/lib/frontend/layout/dashboard-chrome";
 import { cn } from "@/lib/utils";
 
 export function ClientCreateForm({
@@ -17,12 +17,14 @@ export function ClientCreateForm({
   clientId,
   initialValues,
   initialLogoUrl = null,
+  initialFiles = EMPTY_CLIENT_FILES,
 }: TClientFormProps) {
   const hook = useClientCreateForm({
     isEdit,
     clientId,
     initialValues,
     initialLogoUrl,
+    initialFiles,
   });
   const {
     t,
@@ -48,9 +50,9 @@ export function ClientCreateForm({
       : t("submit");
 
   return (
-    <form className="space-y-5" onSubmit={onSubmit} noValidate>
-      <section className={cn(elevatedCardSurfaceClass, "rounded-2xl p-6 sm:p-8")}>
-        <div className="space-y-6">
+    <form className="space-y-8" onSubmit={onSubmit} noValidate>
+      <section className={cn(intakeFillSurfaceClass, "rounded-2xl p-8 sm:p-10")}>
+        <div className="space-y-12">
           <ProjectCreateStepper labels={stepLabels} current={currentStep} ariaLabel={t("stepperAria")} />
           <ClientCreateStepContent hook={hook} />
         </div>

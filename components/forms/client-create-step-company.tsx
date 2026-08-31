@@ -1,19 +1,19 @@
 "use client";
 
-import { Controller } from "react-hook-form";
-
 import { Input } from "@/components/input";
 import { ImageUploadAvatar } from "@/components/ui/image-upload-avatar";
 import { PhoneNumberInput } from "@/components/ui/phone-number-input";
+import { Controller } from "react-hook-form";
 import type { TUseClientCreateFormResult } from "@/components/forms/hooks/use-client-create-form.hook";
 import { fieldStartIcons } from "@/lib/frontend/forms/input-start-icons";
+import { INTAKE_TEXTAREA_MAX } from "@/lib/frontend/clients/intake-ui.constants";
 import { DISPLAY_NAME_MAX_LENGTH } from "@/lib/validation/display-name";
 
-type TClientCreateStepClientProps = {
+type TClientCreateStepCompanyProps = {
   hook: TUseClientCreateFormResult;
 };
 
-export function ClientCreateStepClient({ hook }: TClientCreateStepClientProps) {
+export function ClientCreateStepCompany({ hook }: TClientCreateStepCompanyProps) {
   const {
     t,
     form: {
@@ -27,8 +27,7 @@ export function ClientCreateStepClient({ hook }: TClientCreateStepClientProps) {
   } = hook;
 
   return (
-    <div className="space-y-6">
-      <p className="type-body text-text-muted">{t("sectionClientLead")}</p>
+    <div className="space-y-12">
       <ImageUploadAvatar
         name={businessName || t("businessName")}
         imageUrl={logoPreviewUrl}
@@ -38,9 +37,8 @@ export function ClientCreateStepClient({ hook }: TClientCreateStepClientProps) {
         accept="image/jpeg,image/png,image/webp,image/gif"
         maxSizeMb={5}
         variant="logo"
-        className="sm:col-span-2 mt-4"
       />
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-8 sm:grid-cols-2">
         <Input
           id="businessName"
           label={t("businessName")}
@@ -106,6 +104,7 @@ export function ClientCreateStepClient({ hook }: TClientCreateStepClientProps) {
           label={t("businessSummary")}
           placeholder={t("businessSummaryPh")}
           required
+          maxLength={INTAKE_TEXTAREA_MAX}
           className="sm:col-span-2"
           error={errors.businessSummary?.message}
           {...register("businessSummary", { required: t("valRequired") })}
@@ -117,6 +116,7 @@ export function ClientCreateStepClient({ hook }: TClientCreateStepClientProps) {
           label={t("idealCustomerProfile")}
           placeholder={t("idealCustomerProfilePh")}
           required
+          maxLength={INTAKE_TEXTAREA_MAX}
           className="sm:col-span-2"
           error={errors.idealCustomerProfile?.message}
           {...register("idealCustomerProfile", { required: t("valRequired") })}

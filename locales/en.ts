@@ -940,7 +940,6 @@ export interface Translation {
         shareLabel: string;
       };
       createForm: {
-        sectionClientLead: string;
         businessName: string;
         businessNamePh: string;
         companyLogoHint: string;
@@ -955,85 +954,69 @@ export interface Translation {
         businessSummaryPh: string;
         idealCustomerProfile: string;
         idealCustomerProfilePh: string;
-        sectionProjectLead: string;
-        projectTypesLabel: string;
+        buildingLabel: string;
+        pleaseSpecify: string;
+        projectTypeOtherPh: string;
         projectTypes: {
           website: string;
-          ecommerce: string;
           web_application: string;
           mobile_application: string;
-          saas: string;
-          custom_software: string;
           other: string;
         };
-        platformsWebsiteLabel: string;
+        websiteFocusLabel: string;
+        websiteFocus: {
+          business_website: string;
+          landing_page: string;
+          ecommerce: string;
+        };
         platformsMobileLabel: string;
-        platformsWebAppLabel: string;
-        platformsLabel: string;
-        platforms: {
-          desktop: string;
-          mobile_responsive: string;
+        mobilePlatforms: {
           android: string;
           ios: string;
-          both_mobile: string;
-          web: string;
-          admin_dashboard: string;
-          user_portal: string;
-          vendor_portal: string;
         };
-        projectName: string;
-        projectNamePh: string;
+        webAppTypeLabel: string;
+        webAppTypes: {
+          saas: string;
+          cms: string;
+          dashboard: string;
+          other: string;
+        };
         projectDescription: string;
         projectDescriptionPh: string;
-        sectionGoalsLead: string;
-        successLooksLike: string;
-        successLooksLikePh: string;
-        existingSystem: string;
-        existingSystemPh: string;
-        existingSystems: {
-          none: string;
-          website: string;
-          mobile_app: string;
-          software: string;
-          multiple: string;
+        featuresLabel: string;
+        featuresHelp: string;
+        featureName: string;
+        featureNamePh: string;
+        featureWhat: string;
+        featureWhatPh: string;
+        addFeature: string;
+        removeFeature: string;
+        integrationsLabel: string;
+        integrations: {
+          payment_gateway: string;
+          email: string;
+          sms: string;
+          ai: string;
+          other_api: string;
         };
-        websiteUrl: string;
-        websiteUrlPh: string;
-        changeNotes: string;
-        changeNotesPh: string;
-        sectionScopeLead: string;
+        documentsHelp: string;
+        documentsBrowse: string;
+        filesLabel: string;
+        removeFile: string;
+        linksLabel: string;
+        linksHelp: string;
+        linkName: string;
+        linkNamePh: string;
+        linkUrl: string;
+        linkUrlPh: string;
+        addLink: string;
+        removeLink: string;
         launchMustHaves: string;
         launchMustHavesPh: string;
-        laterFeatures: string;
-        laterFeaturesPh: string;
-        userRolesLabel: string;
-        userRoles: {
-          admin: string;
-          customer: string;
-          employee: string;
-          vendor: string;
-          other: string;
-        };
-        sectionDeliveryLead: string;
-        languagesLabel: string;
-        languages: {
-          english: string;
-          arabic: string;
-          other: string;
-        };
-        rtlRequired: string;
+        notes: string;
+        notesPh: string;
         expectedLaunchDate: string;
-        hasFixedDeadline: string;
-        contentReady: string;
-        contentReadyPh: string;
-        contentReadyOptions: {
-          complete: string;
-          partial: string;
-          not_ready: string;
-        };
         requirementsConfirmed: string;
-        yes: string;
-        no: string;
         submit: string;
         submitting: string;
         editSubmit: string;
@@ -1044,11 +1027,11 @@ export interface Translation {
         editErrorFallback: string;
         nextStep: string;
         previousStep: string;
-        stepClient: string;
-        stepProject: string;
-        stepGoals: string;
-        stepScope: string;
-        stepDelivery: string;
+        stepCompany: string;
+        stepBlueprint: string;
+        stepFeatures: string;
+        stepAssets: string;
+        stepLaunch: string;
         stepperAria: string;
         stepValidationError: string;
         valRequired: string;
@@ -1057,16 +1040,26 @@ export interface Translation {
         valUrl: string;
         valEmail: string;
         valSelectProjectType: string;
-        valWebsitePlatform: string;
+        valWebsiteFocus: string;
         valMobilePlatform: string;
-        valSelectUserRole: string;
-        valSelectLanguage: string;
+        valWebAppType: string;
+        valSpecifyOther: string;
+        valFeatures: string;
+        valFeatureRow: string;
+        valFeatureWhat: string;
+        valLinkRow: string;
+        valFileType: string;
+        valFileSizeImage: string;
+        valFileSizeDoc: string;
+        valFileMax: string;
+        valFileSizeClient: string;
         valConfirm: string;
         backToList: string;
         backToClient: string;
       };
       detail: {
         loading: string;
+        pageLead: string;
         notFoundTitle: string;
         notFoundBody: string;
         loadErrorTitle: string;
@@ -1075,23 +1068,31 @@ export interface Translation {
         sectionClientLead: string;
         sectionProjectTitle: string;
         sectionProjectLead: string;
-        sectionGoalsTitle: string;
-        sectionGoalsLead: string;
-        sectionScopeTitle: string;
-        sectionScopeLead: string;
-        sectionDeliveryTitle: string;
-        sectionDeliveryLead: string;
-        sectionShareTitle: string;
-        sectionShareLead: string;
+        sectionFeaturesTitle: string;
+        sectionFeaturesLead: string;
+        sectionAssetsTitle: string;
+        sectionAssetsLead: string;
+        sectionAssetsPublicLead: string;
+        sectionLaunchTitle: string;
+        sectionLaunchLead: string;
+        viewFile: string;
+        downloadFile: string;
+        fileOpenError: string;
+        fileKindImage: string;
+        fileKindDocument: string;
         noValue: string;
         noProjectTypes: string;
-        noPlatforms: string;
-        noUserRoles: string;
-        noLanguages: string;
+        noWebsiteFocus: string;
+        noMobilePlatforms: string;
+        noWebAppTypes: string;
+        noFeatures: string;
+        noIntegrations: string;
+        noFiles: string;
+        noLinks: string;
+        noLaunchDate: string;
       };
       public: {
         title: string;
-        lead: string;
         notFoundTitle: string;
         notFoundBody: string;
         loadErrorTitle: string;
@@ -2735,7 +2736,7 @@ const translation: Translation = {
       editClient: "Edit Client",
       deleteClient: "Delete Client",
       createTitle: "Add Client",
-      createLead: "Capture client, project, goals, and delivery details for this onboarding record.",
+      createLead: "Walk through company, blueprint, features, assets, and launch in five clear steps.",
       editTitle: "Edit Client",
       editLead: "Update this client's intake so the shared snapshot stays accurate.",
       notFoundTitle: "Client Not Found",
@@ -2772,7 +2773,6 @@ const translation: Translation = {
         shareLabel: "Share Link",
       },
       createForm: {
-        sectionClientLead: "Tell us about this business and who we should contact.",
         businessName: "Business Name",
         businessNamePh: "E.g. Example Ltd",
         companyLogoHint: "Upload your brand logo. JPG, PNG, WEBP, or GIF (maximum 5 MB).",
@@ -2784,88 +2784,72 @@ const translation: Translation = {
         pocEmail: "Business Email",
         pocEmailPh: "contact@example.com",
         businessSummary: "Business Summary",
-        businessSummaryPh: "What does this business do, and who does it serve?",
+        businessSummaryPh: "Please tell us briefly what your business does.",
         idealCustomerProfile: "Target Customers",
-        idealCustomerProfilePh: "Who is the ideal customer for this project?",
-        sectionProjectLead: "Describe what we are building and where it needs to run.",
-        projectTypesLabel: "Project Types",
+        idealCustomerProfilePh: "Who are your ideal customers or users?",
+        buildingLabel: "What Are We Building?",
+        pleaseSpecify: "Please Specify",
+        projectTypeOtherPh: "What are we building?",
         projectTypes: {
           website: "Website",
-          ecommerce: "E-Commerce",
           web_application: "Web Application",
           mobile_application: "Mobile Application",
-          saas: "SaaS",
-          custom_software: "Custom Software",
           other: "Other",
         },
-        platformsWebsiteLabel: "Website Platforms",
+        websiteFocusLabel: "Website Focus",
+        websiteFocus: {
+          business_website: "Business Website",
+          landing_page: "Landing Page",
+          ecommerce: "Ecommerce Website",
+        },
         platformsMobileLabel: "Mobile Platforms",
-        platformsWebAppLabel: "Web App Platforms",
-        platformsLabel: "Platforms",
-        platforms: {
-          desktop: "Desktop",
-          mobile_responsive: "Mobile Responsive",
+        mobilePlatforms: {
           android: "Android",
           ios: "iOS",
-          both_mobile: "Both (Android And iOS)",
-          web: "Web",
-          admin_dashboard: "Admin Dashboard",
-          user_portal: "User Portal",
-          vendor_portal: "Vendor Portal",
         },
-        projectName: "Project Name",
-        projectNamePh: "E.g. Example Marketing Site",
+        webAppTypeLabel: "Web App Type",
+        webAppTypes: {
+          saas: "SaaS Platform",
+          cms: "CMS",
+          dashboard: "Dashboards",
+          other: "Other",
+        },
         projectDescription: "Project Description",
-        projectDescriptionPh: "What should this project do for the client?",
-        sectionGoalsLead: "Capture what success looks like and whether something already exists.",
-        successLooksLike: "What Success Looks Like",
-        successLooksLikePh: "What should be true when this project is successful?",
-        existingSystem: "Existing System",
-        existingSystemPh: "Select Existing System",
-        existingSystems: {
-          none: "None",
-          website: "Website",
-          mobile_app: "Mobile App",
-          software: "Software",
-          multiple: "Multiple",
+        projectDescriptionPh: "Provide a brief, high-level summary of what you want us to build.",
+        featuresLabel: "Core Features",
+        featuresHelp: "Add up to five primary features that define this project.",
+        featureName: "Feature Name",
+        featureNamePh: "E.g. Customer Login",
+        featureWhat: "Feature Description",
+        featureWhatPh: "E.g. Allow customers to log in and download invoices.",
+        addFeature: "Add Feature",
+        removeFeature: "Remove Feature",
+        integrationsLabel: "Third-Party Integrations",
+        integrations: {
+          payment_gateway: "Payment Gateway",
+          email: "Email",
+          sms: "SMS",
+          ai: "AI",
+          other_api: "Other API",
         },
-        websiteUrl: "Website Or App URL",
-        websiteUrlPh: "example.com",
-        changeNotes: "What Should Change",
-        changeNotesPh: "What should stay, and what should change?",
-        sectionScopeLead: "Separate launch must-haves from later features, then mark who will use the product.",
+        documentsHelp: "You can upload a brand book, wireframes, or project briefs here. Max file size is 5 MB for images and 15 MB for documents.",
+        documentsBrowse: "Browse Files",
+        filesLabel: "Uploaded Files",
+        removeFile: "Remove",
+        linksLabel: "Project Links",
+        linksHelp: "Add up to ten named links such as Figma, Drive, or a live site.",
+        linkName: "Link Name",
+        linkNamePh: "E.g. Brand Guidelines",
+        linkUrl: "URL",
+        linkUrlPh: "https://",
+        addLink: "Add Link",
+        removeLink: "Remove Link",
         launchMustHaves: "Launch Must-Haves",
-        launchMustHavesPh: "What must ship for the first launch?",
-        laterFeatures: "Later Features",
-        laterFeaturesPh: "What can wait until after launch?",
-        userRolesLabel: "User Roles",
-        userRoles: {
-          admin: "Admin",
-          customer: "Customer",
-          employee: "Employee",
-          vendor: "Vendor",
-          other: "Other",
-        },
-        sectionDeliveryLead: "Languages, launch timing, and whether content is ready.",
-        languagesLabel: "Languages",
-        languages: {
-          english: "English",
-          arabic: "Arabic",
-          other: "Other",
-        },
-        rtlRequired: "RTL Required",
+        launchMustHavesPh: "What are the absolute critical features that must be active for the system to launch?",
         expectedLaunchDate: "Expected Launch Date",
-        hasFixedDeadline: "Has A Fixed Deadline",
-        contentReady: "Content Ready",
-        contentReadyPh: "Select Content Readiness",
-        contentReadyOptions: {
-          complete: "Complete",
-          partial: "Partial",
-          not_ready: "Not Ready",
-        },
-        requirementsConfirmed: "I confirm this information is accurate and complete.",
-        yes: "Yes",
-        no: "No",
+        requirementsConfirmed: "I confirm that the information provided is accurate and represents the current requirements.",
+        notes: "Notes",
+        notesPh: "Anything else we should know before we start?",
         submit: "Add Client",
         submitting: "Saving…",
         editSubmit: "Save Changes",
@@ -2876,11 +2860,11 @@ const translation: Translation = {
         editErrorFallback: "Could not update client.",
         nextStep: "Next Step",
         previousStep: "Back",
-        stepClient: "Client",
-        stepProject: "Project",
-        stepGoals: "Goals",
-        stepScope: "Scope",
-        stepDelivery: "Delivery",
+        stepCompany: "Company",
+        stepBlueprint: "Blueprint",
+        stepFeatures: "Features",
+        stepAssets: "Assets",
+        stepLaunch: "Launch",
         stepperAria: "Client Form Steps",
         stepValidationError: "Fix required fields.",
         valRequired: "This field is required.",
@@ -2888,42 +2872,60 @@ const translation: Translation = {
         valMax: "Use at most 50 characters.",
         valUrl: "Enter a valid website URL (e.g. example.com).",
         valEmail: "Enter a valid email address.",
-        valSelectProjectType: "Select at least one project type.",
-        valWebsitePlatform: "Select at least one website platform.",
+        valSelectProjectType: "Select at least one option for what we are building.",
+        valWebsiteFocus: "Select at least one website focus.",
         valMobilePlatform: "Select Android, iOS, or both.",
-        valSelectUserRole: "Select at least one user role.",
-        valSelectLanguage: "Select at least one language.",
+        valWebAppType: "Select at least one web app type.",
+        valSpecifyOther: "Please specify.",
+        valFeatures: "Add at least one core feature.",
+        valFeatureRow: "Fill in each feature name and description.",
+        valFeatureWhat: "Use at least 10 characters.",
+        valLinkRow: "Fill in a name and URL for each link.",
+        valFileType: "Use JPG, PNG, WEBP, GIF, PDF, or DOCX files.",
+        valFileSizeImage: "Images must be 5 MB or smaller.",
+        valFileSizeDoc: "Documents must be 15 MB or smaller.",
+        valFileMax: "You can upload up to 10 files.",
+        valFileSizeClient: "Total uploads for this client must stay at or below 100 MB.",
         valConfirm: "Confirm that the information is accurate.",
         backToList: "Back To Clients",
         backToClient: "Back To Client",
       },
       detail: {
         loading: "Loading…",
+        pageLead: "Company profile, blueprint, features, assets, and launch for this client.",
         notFoundTitle: "Client Not Found",
         notFoundBody: "This client is no longer available.",
         loadErrorTitle: "Could Not Load Client",
         loadErrorBody: "Could not load this client. Try again.",
-        sectionClientTitle: "Client And Business",
-        sectionClientLead: "Who this client is and how to reach them.",
-        sectionProjectTitle: "What We Are Building",
-        sectionProjectLead: "Project type, platforms, and description.",
-        sectionGoalsTitle: "Goals And Current State",
-        sectionGoalsLead: "What success looks like and what already exists.",
-        sectionScopeTitle: "Scope And Users",
-        sectionScopeLead: "Launch must-haves, later work, and who will use the product.",
-        sectionDeliveryTitle: "Delivery",
-        sectionDeliveryLead: "Languages, timing, and content readiness.",
-        sectionShareTitle: "Share Link",
-        sectionShareLead: "Anyone with this link can view a read-only snapshot of the intake.",
+        sectionClientTitle: "Company Profile",
+        sectionClientLead: "Who this client is, how to reach them, and what the business does.",
+        sectionProjectTitle: "Project Blueprint",
+        sectionProjectLead: "What we are building and how it should run.",
+        sectionFeaturesTitle: "Core Features & Integrations",
+        sectionFeaturesLead: "Primary features and any services this project should connect to.",
+        sectionAssetsTitle: "Assets & Readiness",
+        sectionAssetsLead: "Reference files and named links from this intake.",
+        sectionAssetsPublicLead: "Named links shared with this intake.",
+        sectionLaunchTitle: "Launch Scope",
+        sectionLaunchLead: "Launch date, must-haves, and notes.",
+        viewFile: "View File",
+        downloadFile: "Download File",
+        fileOpenError: "Could not open this file.",
+        fileKindImage: "Image",
+        fileKindDocument: "Document",
         noValue: "—",
         noProjectTypes: "No project types selected.",
-        noPlatforms: "No platforms selected.",
-        noUserRoles: "No user roles selected.",
-        noLanguages: "No languages selected.",
+        noWebsiteFocus: "No website focus selected.",
+        noMobilePlatforms: "No mobile platforms selected.",
+        noWebAppTypes: "No web app types selected.",
+        noFeatures: "No features listed.",
+        noIntegrations: "No integrations selected.",
+        noFiles: "No files uploaded.",
+        noLinks: "No links added.",
+        noLaunchDate: "No launch date set.",
       },
       public: {
         title: "Client Onboarding",
-        lead: "Read-only snapshot of this client's intake.",
         notFoundTitle: "Page Not Available",
         notFoundBody: "This onboarding page is not available.",
         loadErrorTitle: "Could Not Load Page",

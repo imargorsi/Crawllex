@@ -1,26 +1,28 @@
 import { ValidationError } from "@/lib/api/http-errors";
 import type { AuthContext } from "@/lib/auth/guards";
+import { validateClientIntakeFile } from "@/lib/clients/client-file-storage";
 import { storeClientLogoFile, validateClientLogoFile } from "@/lib/clients/client-logo-storage";
 import { updateClientSchema, type UpdateClientInput } from "@/schemas/client";
 
 export type UpdateClientRequest = {
   input: UpdateClientInput;
-  presentFields: Set<string>;
   logoFile: File | null;
+  assetFiles: File[];
 };
 
-function parseUpdateClientBody(raw: unknown): { input: UpdateClientInput; presentFields: Set<string> } {
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
-    throw ValidationError.fromFieldErrors({
-      _: ["Client data must be a valid object."],
-    });
+function collectAssetFiles(formData: FormData): File[] {
+  return formData
+    .getAll("assets")
+    .filter((value): value is File => value instanceof File && value.size > 0);
+}
+
+function assertAssetFiles(files: File[]): void {
+  for (const file of files) {
+    const message = validateClientIntakeFile(file);
+    if (message) {
+      throw ValidationError.fromFieldErrors({ assets: [message] });
+    }
   }
-
-  const record = raw as Record<string, unknown>;
-  const presentFields = new Set(Object.keys(record));
-  const input = updateClientSchema.parse(record);
-
-  return { input, presentFields };
 }
 
 export async function parseUpdateClientRequest(request: Request): Promise<UpdateClientRequest> {
@@ -31,19 +33,12 @@ export async function parseUpdateClientRequest(request: Request): Promise<Update
     const dataField = formData.get("data");
     const logoField = formData.get("company_logo");
     const logoFile = logoField instanceof File && logoField.size > 0 ? logoField : null;
+    const assetFiles = collectAssetFiles(formData);
 
     if (dataField == null || (typeof dataField === "string" && !dataField.trim())) {
-      if (!logoFile) {
-        throw ValidationError.fromFieldErrors({
-          _: ["At least one field must be provided."],
-        });
-      }
-
-      return {
-        input: {},
-        presentFields: new Set<string>(),
-        logoFile,
-      };
+      throw ValidationError.fromFieldErrors({
+        data: ["Client data is required."],
+      });
     }
 
     if (typeof dataField !== "string") {
@@ -61,15 +56,9 @@ export async function parseUpdateClientRequest(request: Request): Promise<Update
       });
     }
 
-    const { input, presentFields } = parseUpdateClientBody(parsed);
-
-    if (presentFields.size === 0 && !logoFile) {
-      throw ValidationError.fromFieldErrors({
-        _: ["At least one field must be provided."],
-      });
-    }
-
-    return { input, presentFields, logoFile };
+    const input = updateClientSchema.parse(parsed);
+    assertAssetFiles(assetFiles);
+    return { input, logoFile, assetFiles };
   }
 
   let parsed: unknown;
@@ -81,15 +70,8 @@ export async function parseUpdateClientRequest(request: Request): Promise<Update
     });
   }
 
-  const { input, presentFields } = parseUpdateClientBody(parsed);
-
-  if (presentFields.size === 0) {
-    throw ValidationError.fromFieldErrors({
-      _: ["At least one field must be provided."],
-    });
-  }
-
-  return { input, presentFields, logoFile: null };
+  const input = updateClientSchema.parse(parsed);
+  return { input, logoFile: null, assetFiles: [] };
 }
 
 export async function resolveClientLogoUpdate(

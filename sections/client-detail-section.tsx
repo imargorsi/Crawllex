@@ -4,18 +4,18 @@ import { useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
+import { ClientIntakeHero } from "@/components/clients/client-intake-hero";
 import { ClientIntakeSnapshot } from "@/components/clients/client-intake-snapshot";
 import { ClientStatusChip } from "@/components/clients/client-status-chip";
 import { DashboardModuleBreadcrumbSection } from "@/components/layout/dashboard-module-breadcrumb-section";
-import { ProjectDetailInfoCard } from "@/components/projects/detail/project-detail-info-card";
 import { ActiveInactiveToggle } from "@/components/ui/active-inactive-toggle";
 import { AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingState } from "@/components/ui/loading-state";
-import { UserAvatar } from "@/components/ui/user-avatar";
 import { Heading } from "@/components/heading";
+import { Paragraph } from "@/components/paragraph";
 import { useAuthUserQuery } from "@/features/auth/auth.api";
 import { useClientQuery, useClientStatusActionMutation, useDeleteClientMutation } from "@/features/clients/clients.api";
 import { ApiError } from "@/lib/frontend/api/errors";
@@ -23,15 +23,6 @@ import { clientCanDelete, clientCanUpdate } from "@/lib/frontend/clients/acl";
 import { CLIENT_ROUTES } from "@/lib/frontend/clients/client-routes.utils";
 import { notify } from "@/lib/frontend/feedback/notify";
 import { Icons } from "@/lib/frontend/icons/app-icons";
-import { displayDetailValue } from "@/lib/frontend/projects/project-detail-display.utils";
-import {
-  elevatedCardBodyClass,
-  elevatedCardSurfaceClass,
-  elevatedCardTitleClass,
-  typeIconTextClass,
-  typeMetaRowClass,
-  typeStackIdentityClass,
-} from "@/lib/frontend/layout/dashboard-chrome";
 import { cn } from "@/lib/utils";
 
 async function copyText(value: string): Promise<boolean> {
@@ -126,88 +117,76 @@ export function ClientDetailSection() {
   }
 
   return (
-    <div className="px-4 py-6 sm:px-6">
+    <div className="w-full min-w-0">
       <DashboardModuleBreadcrumbSection items={breadcrumbItems} />
 
-      <div className="mt-5 space-y-4">
-        <section className={cn(elevatedCardSurfaceClass, "rounded-3xl p-3 sm:p-4")}>
-          <div className="flex items-start gap-4">
-            <UserAvatar name={client.businessName} imageUrl={client.logoImage} size="lg" variant="logo" />
-            <div className={cn("min-w-0 flex-1", typeStackIdentityClass)}>
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <Heading sectionTitle className={cn("min-w-0 truncate", elevatedCardTitleClass)}>
-                    {client.businessName}
-                  </Heading>
-                  <ClientStatusChip status={client.status} />
-                  {canUpdate ? (
-                    <ActiveInactiveToggle
-                      checked={client.status === "active"}
-                      isLoading={statusMutation.isPending}
-                      ariaLabel={client.status === "active" ? t("cardActions.inactive") : t("cardActions.active")}
-                      onCheckedChange={(nextChecked) => void onToggleStatus(nextChecked)}
-                    />
-                  ) : null}
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button type="button" variant="outlined" size="sm" onClick={() => void onCopyLink()}>
-                    {t("copyLink")}
-                  </Button>
-                  {canUpdate ? (
-                    <Button type="button" variant="outlined" size="sm" onClick={() => router.push(CLIENT_ROUTES.edit(client.id))}>
-                      {t("editClient")}
-                    </Button>
-                  ) : null}
-                  {canDelete ? (
-                    <Button
-                      type="button"
-                      variant="outlined"
-                      size="sm"
-                      className="text-destructive"
-                      onClick={() => setIsDeleteOpen(true)}
-                    >
-                      {t("deleteClient")}
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
-              <div className={cn(typeMetaRowClass, "sm:flex-nowrap")}>
-                <span className={cn(typeIconTextClass, "type-caption", elevatedCardBodyClass)}>
-                  <Icons.file className="size-3.5 shrink-0 text-text-muted" aria-hidden />
-                  <span className="truncate">{displayDetailValue(client.projectName)}</span>
-                </span>
-                <span className={cn(typeIconTextClass, "type-caption", elevatedCardBodyClass)}>
-                  <Icons.call className="size-3.5 shrink-0 text-text-muted" aria-hidden />
-                  <span className="truncate">{displayDetailValue(client.pocContactNumber)}</span>
-                </span>
-                <span className={cn(typeIconTextClass, "type-caption", elevatedCardBodyClass)}>
-                  <Icons.mail className="size-3.5 shrink-0 text-text-muted" aria-hidden />
-                  <span className="truncate">{displayDetailValue(client.pocEmail)}</span>
-                </span>
-              </div>
-            </div>
+      <div className="space-y-5 px-4 py-6 sm:px-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="type-stack-md min-w-0">
+            <Heading id="client-detail-title" pageTitle>
+              {client.businessName}
+            </Heading>
+            <Paragraph className="text-text-muted">{tDetail("pageLead")}</Paragraph>
           </div>
-        </section>
-
-        <ProjectDetailInfoCard
-          title={tDetail("sectionShareTitle")}
-          lead={tDetail("sectionShareLead")}
-          icon={<Icons.link className="size-4 shrink-0" aria-hidden />}
-        >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="type-body-strong min-w-0 truncate text-text-primary">{client.shareUrl}</p>
-            <Button type="button" variant="outlined" size="sm" className="shrink-0" onClick={() => void onCopyLink()}>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button type="button" variant="outlined" size="md" onClick={() => void onCopyLink()}>
+              <Icons.link className="size-4" aria-hidden />
               {t("copyLink")}
             </Button>
+            {canUpdate ? (
+              <Button
+                type="button"
+                variant="outlined"
+                size="md"
+                onClick={() => router.push(CLIENT_ROUTES.edit(client.id))}
+              >
+                <Icons.pencil className="size-4" aria-hidden />
+                {t("editClient")}
+              </Button>
+            ) : null}
+            {canDelete ? (
+              <Button
+                type="button"
+                variant="outlined"
+                size="md"
+                className="text-destructive"
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                <Icons.delete className="size-4" aria-hidden />
+                {t("deleteClient")}
+              </Button>
+            ) : null}
           </div>
-        </ProjectDetailInfoCard>
+        </div>
 
-        <ClientIntakeSnapshot client={client} />
+        <ClientIntakeHero
+          businessName={client.businessName}
+          logoImage={client.logoImage}
+          contactPerson={client.contactPerson}
+          pocEmail={client.pocEmail}
+          pocContactNumber={client.pocContactNumber}
+          endSlot={
+            <>
+              <ClientStatusChip status={client.status} />
+              {canUpdate ? (
+                <ActiveInactiveToggle
+                  checked={client.status === "active"}
+                  isLoading={statusMutation.isPending}
+                  ariaLabel={client.status === "active" ? t("cardActions.inactive") : t("cardActions.active")}
+                  onCheckedChange={(nextChecked) => void onToggleStatus(nextChecked)}
+                />
+              ) : null}
+            </>
+          }
+        />
+
+        <ClientIntakeSnapshot client={client} files={client.files} clientId={client.id} />
       </div>
 
       <ConfirmDialog
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
+        icon={Icons.delete}
         title={t("table.deleteTitle")}
         description={t("table.deleteBody", { name: client.businessName })}
         action={

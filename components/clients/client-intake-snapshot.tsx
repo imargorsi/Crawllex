@@ -2,158 +2,156 @@
 
 import { useTranslation } from "react-i18next";
 
+import { ClientIntakeReadChips, useClientIntakeReadChips } from "@/components/clients/client-intake-read-chips";
+import {
+  IntakeFeatureRows,
+  IntakeFileRows,
+  IntakeLabeledBlock,
+  IntakeLinkRows,
+  IntakeOutlineField,
+  IntakeProse,
+} from "@/components/clients/client-intake-snapshot-parts";
 import {
   ProjectDetailField,
   ProjectDetailInfoCard,
-  ProjectDetailTagList,
 } from "@/components/projects/detail/project-detail-info-card";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { displayDetailValue } from "@/lib/frontend/projects/project-detail-display.utils";
-import { clientHasExistingSystem } from "@/lib/clients/intake-constants";
-import { elevatedCardMutedClass, elevatedCardTitleClass } from "@/lib/frontend/layout/dashboard-chrome";
-import type { TPublicClientView } from "@/types/client.types";
+import { formatIntakeDate } from "@/lib/frontend/clients/intake-ui.utils";
+import {
+  clientNeedsMobilePlatforms,
+  clientNeedsWebAppTypes,
+  clientNeedsWebsiteFocus,
+} from "@/lib/clients/intake-constants";
+import { elevatedCardTitleClass } from "@/lib/frontend/layout/dashboard-chrome";
+import type { TClientFilePublic, TPublicClientView } from "@/types/client.types";
 import { cn } from "@/lib/utils";
 
 type TClientIntakeSnapshotProps = {
   client: TPublicClientView;
+  files?: TClientFilePublic[];
+  clientId?: string;
 };
 
-function LongText({ value, empty }: { value: string | null | undefined; empty: string }) {
-  return (
-    <p className={cn("type-body whitespace-pre-wrap", value ? elevatedCardTitleClass : elevatedCardMutedClass)}>
-      {displayDetailValue(value, empty)}
-    </p>
-  );
-}
-
-export function ClientIntakeSnapshot({ client }: TClientIntakeSnapshotProps) {
+export function ClientIntakeSnapshot({
+  client,
+  files,
+  clientId,
+}: TClientIntakeSnapshotProps) {
   const { t: tForm } = useTranslation("translation", { keyPrefix: "modules.clients.createForm" });
   const { t: tDetail } = useTranslation("translation", { keyPrefix: "modules.clients.detail" });
-  const yesNo = (value: boolean) => (value ? tForm("yes") : tForm("no"));
+  const { i18n } = useTranslation();
+  const locale = i18n.language?.startsWith("ar") ? "ar" : "en";
+  const empty = tDetail("noValue");
+  const { projectTypeItems, websiteFocusItems, mobileItems, webAppItems, integrationItems } =
+    useClientIntakeReadChips(client);
+
+  const hasFiles = files !== undefined;
+  const storedFiles = files ?? [];
 
   return (
-    <div className="space-y-4">
-      <ProjectDetailInfoCard
-        title={tDetail("sectionClientTitle")}
-        lead={tDetail("sectionClientLead")}
-        icon={<Icons.briefcase className="size-4 shrink-0" aria-hidden />}
-      >
-        <div className="grid gap-5 sm:grid-cols-2">
-          <ProjectDetailField label={tForm("contactPerson")} value={displayDetailValue(client.contactPerson)} />
-          <ProjectDetailField label={tForm("pocEmail")} value={displayDetailValue(client.pocEmail)} />
-          <ProjectDetailField label={tForm("pocContactNumber")} value={displayDetailValue(client.pocContactNumber)} />
-        </div>
-        <div className="mt-5 space-y-4">
-          <ProjectDetailField
-            label={tForm("businessSummary")}
-            value={<LongText value={client.businessSummary} empty={tDetail("noValue")} />}
-          />
-          <ProjectDetailField
-            label={tForm("idealCustomerProfile")}
-            value={<LongText value={client.idealCustomerProfile} empty={tDetail("noValue")} />}
-          />
-        </div>
-      </ProjectDetailInfoCard>
+    <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
+      <div className="space-y-5">
+        <ProjectDetailInfoCard
+          title={tDetail("sectionClientTitle")}
+          lead={tDetail("sectionClientLead")}
+          icon={<Icons.briefcase className="size-4 shrink-0" aria-hidden />}
+        >
+          <div className="grid gap-5 sm:grid-cols-2">
+            <ProjectDetailField label={tForm("contactPerson")} value={displayDetailValue(client.contactPerson)} />
+            <ProjectDetailField label={tForm("pocContactNumber")} value={displayDetailValue(client.pocContactNumber)} />
+            <ProjectDetailField
+              className="sm:col-span-2"
+              label={tForm("pocEmail")}
+              value={displayDetailValue(client.pocEmail)}
+            />
+          </div>
+          <div className="mt-6 space-y-5">
+            <IntakeLabeledBlock label={tForm("businessSummary")}>
+              <IntakeProse value={client.businessSummary} empty={empty} />
+            </IntakeLabeledBlock>
+            <IntakeLabeledBlock label={tForm("idealCustomerProfile")}>
+              <IntakeProse value={client.idealCustomerProfile} empty={empty} />
+            </IntakeLabeledBlock>
+          </div>
+        </ProjectDetailInfoCard>
 
-      <ProjectDetailInfoCard
-        title={tDetail("sectionProjectTitle")}
-        lead={tDetail("sectionProjectLead")}
-        icon={<Icons.grid className="size-4 shrink-0" aria-hidden />}
-      >
-        <div className="grid gap-5 sm:grid-cols-2">
-          <ProjectDetailField label={tForm("projectName")} value={displayDetailValue(client.projectName)} />
-        </div>
-        <div className="mt-5 space-y-4">
-          <p className="type-caption text-text-secondary">{tForm("projectTypesLabel")}</p>
-          <ProjectDetailTagList
-            items={client.projectTypes.map((type) => tForm(`projectTypes.${type}`))}
-            emptyLabel={tDetail("noProjectTypes")}
-          />
-          <p className="type-caption text-text-secondary">{tForm("platformsLabel")}</p>
-          <ProjectDetailTagList
-            items={client.platforms.map((platform) => tForm(`platforms.${platform}`))}
-            emptyLabel={tDetail("noPlatforms")}
-          />
-          <ProjectDetailField
-            label={tForm("projectDescription")}
-            value={<LongText value={client.projectDescription} empty={tDetail("noValue")} />}
-          />
-        </div>
-      </ProjectDetailInfoCard>
+        <ProjectDetailInfoCard
+          title={tDetail("sectionAssetsTitle")}
+          lead={hasFiles ? tDetail("sectionAssetsLead") : tDetail("sectionAssetsPublicLead")}
+          icon={<Icons.file className="size-4 shrink-0" aria-hidden />}
+        >
+          <div className="space-y-6">
+            {hasFiles ? <IntakeFileRows files={storedFiles} clientId={clientId} /> : null}
+            <IntakeLinkRows links={client.links} />
+          </div>
+        </ProjectDetailInfoCard>
 
-      <ProjectDetailInfoCard
-        title={tDetail("sectionGoalsTitle")}
-        lead={tDetail("sectionGoalsLead")}
-        icon={<Icons.flag className="size-4 shrink-0" aria-hidden />}
-      >
-        <div className="space-y-4">
-          <ProjectDetailField
-            label={tForm("successLooksLike")}
-            value={<LongText value={client.successLooksLike} empty={tDetail("noValue")} />}
-          />
-          <ProjectDetailField
-            label={tForm("existingSystem")}
-            value={tForm(`existingSystems.${client.existingSystem}`)}
-          />
-          {clientHasExistingSystem(client.existingSystem) ? (
-            <>
-              <ProjectDetailField label={tForm("websiteUrl")} value={displayDetailValue(client.websiteUrl)} />
-              <ProjectDetailField
-                label={tForm("changeNotes")}
-                value={<LongText value={client.changeNotes} empty={tDetail("noValue")} />}
-              />
-            </>
-          ) : null}
-        </div>
-      </ProjectDetailInfoCard>
+        <ProjectDetailInfoCard
+          title={tDetail("sectionFeaturesTitle")}
+          lead={tDetail("sectionFeaturesLead")}
+          icon={<Icons.sparkles className="size-4 shrink-0" aria-hidden />}
+        >
+          <div className="space-y-6">
+            <IntakeFeatureRows features={client.features} empty={empty} />
+            <IntakeLabeledBlock label={tForm("integrationsLabel")}>
+              <ClientIntakeReadChips items={integrationItems} emptyLabel={tDetail("noIntegrations")} />
+            </IntakeLabeledBlock>
+          </div>
+        </ProjectDetailInfoCard>
+      </div>
 
-      <ProjectDetailInfoCard
-        title={tDetail("sectionScopeTitle")}
-        lead={tDetail("sectionScopeLead")}
-        icon={<Icons.file className="size-4 shrink-0" aria-hidden />}
-      >
-        <div className="space-y-4">
-          <ProjectDetailField
-            label={tForm("launchMustHaves")}
-            value={<LongText value={client.launchMustHaves} empty={tDetail("noValue")} />}
-          />
-          <ProjectDetailField
-            label={tForm("laterFeatures")}
-            value={<LongText value={client.laterFeatures} empty={tDetail("noValue")} />}
-          />
-          <p className="type-caption text-text-secondary">{tForm("userRolesLabel")}</p>
-          <ProjectDetailTagList
-            items={client.userRoles.map((role) => tForm(`userRoles.${role}`))}
-            emptyLabel={tDetail("noUserRoles")}
-          />
-        </div>
-      </ProjectDetailInfoCard>
+      <div className="space-y-5">
+        <ProjectDetailInfoCard
+          title={tDetail("sectionProjectTitle")}
+          lead={tDetail("sectionProjectLead")}
+          icon={<Icons.grid className="size-4 shrink-0" aria-hidden />}
+        >
+          <div className="space-y-6">
+            <IntakeLabeledBlock label={tForm("buildingLabel")}>
+              <ClientIntakeReadChips items={projectTypeItems} emptyLabel={tDetail("noProjectTypes")} layout="grid" />
+            </IntakeLabeledBlock>
+            {clientNeedsWebsiteFocus(client.projectTypes) ? (
+              <IntakeLabeledBlock label={tForm("websiteFocusLabel")}>
+                <ClientIntakeReadChips items={websiteFocusItems} emptyLabel={tDetail("noWebsiteFocus")} />
+              </IntakeLabeledBlock>
+            ) : null}
+            {clientNeedsMobilePlatforms(client.projectTypes) ? (
+              <IntakeLabeledBlock label={tForm("platformsMobileLabel")}>
+                <ClientIntakeReadChips items={mobileItems} emptyLabel={tDetail("noMobilePlatforms")} />
+              </IntakeLabeledBlock>
+            ) : null}
+            {clientNeedsWebAppTypes(client.projectTypes) ? (
+              <IntakeLabeledBlock label={tForm("webAppTypeLabel")}>
+                <ClientIntakeReadChips items={webAppItems} emptyLabel={tDetail("noWebAppTypes")} />
+              </IntakeLabeledBlock>
+            ) : null}
+            <IntakeLabeledBlock label={tForm("projectDescription")}>
+              <IntakeProse value={client.projectDescription} empty={empty} />
+            </IntakeLabeledBlock>
+          </div>
+        </ProjectDetailInfoCard>
 
-      <ProjectDetailInfoCard
-        title={tDetail("sectionDeliveryTitle")}
-        lead={tDetail("sectionDeliveryLead")}
-        icon={<Icons.calendar className="size-4 shrink-0" aria-hidden />}
-      >
-        <div className="grid gap-5 sm:grid-cols-2">
-          <ProjectDetailField label={tForm("rtlRequired")} value={yesNo(client.rtlRequired)} />
-          <ProjectDetailField
-            label={tForm("expectedLaunchDate")}
-            value={displayDetailValue(client.expectedLaunchDate)}
-          />
-          <ProjectDetailField label={tForm("hasFixedDeadline")} value={yesNo(client.hasFixedDeadline)} />
-          <ProjectDetailField
-            label={tForm("contentReady")}
-            value={tForm(`contentReadyOptions.${client.contentReady}`)}
-          />
-        </div>
-        <div className="mt-5 space-y-4">
-          <p className="type-caption text-text-secondary">{tForm("languagesLabel")}</p>
-          <ProjectDetailTagList
-            items={client.languages.map((language) => tForm(`languages.${language}`))}
-            emptyLabel={tDetail("noLanguages")}
-          />
-        </div>
-      </ProjectDetailInfoCard>
+        <ProjectDetailInfoCard
+          title={tDetail("sectionLaunchTitle")}
+          lead={tDetail("sectionLaunchLead")}
+          icon={<Icons.calendar className="size-4 shrink-0" aria-hidden />}
+        >
+          <div className="space-y-5">
+            <IntakeOutlineField icon={<Icons.calendar className="size-4" />} label={tForm("expectedLaunchDate")}>
+              <span className={cn("type-body-strong", elevatedCardTitleClass)}>
+                {formatIntakeDate(client.expectedLaunchDate, locale, tDetail("noLaunchDate"))}
+              </span>
+            </IntakeOutlineField>
+            <IntakeOutlineField icon={<Icons.tick className="size-4" />} label={tForm("launchMustHaves")}>
+              <IntakeProse value={client.launchMustHaves} empty={empty} />
+            </IntakeOutlineField>
+            <IntakeOutlineField icon={<Icons.note className="size-4" />} label={tForm("notes")}>
+              <IntakeProse value={client.notes} empty={empty} />
+            </IntakeOutlineField>
+          </div>
+        </ProjectDetailInfoCard>
+      </div>
     </div>
   );
 }

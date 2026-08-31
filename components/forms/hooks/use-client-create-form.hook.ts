@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import type { TUseClientFormOptions } from "@/components/forms/client-form.types";
 import type { TClientCreateFormValues } from "@/components/forms/client-create-form.types";
+import type { TUseClientFormOptions } from "@/components/forms/client-form.types";
+import type { TClientFilePublic } from "@/types/client.types";
 import { useCreateClientMutation, useUpdateClientMutation } from "@/features/clients/clients.api";
 import { ApiError } from "@/lib/frontend/api/errors";
 import {
@@ -14,75 +15,37 @@ import {
   toCreateClientPayload,
   toUpdateClientPayload,
 } from "@/lib/frontend/clients/client-form-payload.utils";
+import {
+  CLIENT_FORM_STEP_LABEL_KEYS,
+  clientFormStepFields,
+  earliestClientFormErrorStep,
+} from "@/lib/frontend/clients/client-form-steps.utils";
 import { CLIENT_ROUTES } from "@/lib/frontend/clients/client-routes.utils";
 import { notify } from "@/lib/frontend/feedback/notify";
 import {
-  CLIENT_MOBILE_PLATFORMS,
-  CLIENT_WEB_APP_PLATFORMS,
-  CLIENT_WEBSITE_PLATFORMS,
-  clientNeedsMobilePlatforms,
-  clientNeedsWebAppPlatforms,
-  clientNeedsWebsitePlatforms,
-  type TClientLanguage,
-  type TClientPlatform,
-  type TClientProjectType,
-  type TClientUserRole,
-} from "@/lib/clients/intake-constants";
+  EMPTY_INTAKE_FEATURE,
+  EMPTY_INTAKE_LINK,
+  INTAKE_FEATURE_WHAT_MIN,
+  INTAKE_MAX_FEATURES,
+  INTAKE_MAX_LINKS,
+  intakeNeedsMobilePlatforms,
+  intakeNeedsProjectTypeOther,
+  intakeNeedsWebAppTypes,
+  intakeNeedsWebsiteFocus,
+  type TIntakeBuildType,
+  type TIntakeIntegration,
+  type TIntakeMobilePlatform,
+  type TIntakeWebAppType,
+  type TIntakeWebsiteFocus,
+} from "@/lib/frontend/clients/intake-ui.constants";
+import { toggleListValue } from "@/lib/frontend/clients/intake-ui.utils";
+
+export const EMPTY_CLIENT_FILES: TClientFilePublic[] = [];
 
 type UseClientCreateFormResult = ReturnType<typeof useClientCreateForm>;
 
-const CLIENT_FORM_STEP_LABEL_KEYS = [
-  "stepClient",
-  "stepProject",
-  "stepGoals",
-  "stepScope",
-  "stepDelivery",
-] as const;
-
-function fieldStepIndex(): Record<keyof TClientCreateFormValues, number> {
-  return {
-    businessName: 0,
-    contactPerson: 0,
-    pocEmail: 0,
-    pocContactNumber: 0,
-    businessSummary: 0,
-    idealCustomerProfile: 0,
-    projectTypes: 1,
-    platforms: 1,
-    projectName: 1,
-    projectDescription: 1,
-    successLooksLike: 2,
-    existingSystem: 2,
-    websiteUrl: 2,
-    changeNotes: 2,
-    launchMustHaves: 3,
-    laterFeatures: 3,
-    userRoles: 3,
-    languages: 4,
-    rtlRequired: 4,
-    expectedLaunchDate: 4,
-    hasFixedDeadline: 4,
-    contentReady: 4,
-    requirementsConfirmed: 4,
-  };
-}
-
-function stepFields(): Array<Array<keyof TClientCreateFormValues>> {
-  return [
-    ["businessName", "contactPerson", "pocEmail", "pocContactNumber", "businessSummary", "idealCustomerProfile"],
-    ["projectTypes", "platforms", "projectName", "projectDescription"],
-    ["successLooksLike", "existingSystem", "websiteUrl", "changeNotes"],
-    ["launchMustHaves", "laterFeatures", "userRoles"],
-    ["languages", "rtlRequired", "expectedLaunchDate", "hasFixedDeadline", "contentReady", "requirementsConfirmed"],
-  ];
-}
-
-function toggleValue<T>(current: T[], value: T): T[] {
-  return current.includes(value) ? current.filter((item) => item !== value) : [...current, value];
-}
-
 export function useClientCreateForm(options: TUseClientFormOptions = {}) {
-  const { isEdit = false, clientId, initialValues, initialLogoUrl = null } = options;
+  const { isEdit = false, clientId, initialValues, initialLogoUrl = null, initialFiles = EMPTY_CLIENT_FILES } = options;
 
   const router = useRouter();
   const { t } = useTranslation("translation", { keyPrefix: "modules.clients.createForm" });
@@ -91,45 +54,76 @@ export function useClientCreateForm(options: TUseClientFormOptions = {}) {
   const [currentStep, setCurrentStep] = useState(0);
   const logoFileRef = useRef<File | null>(null);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(initialLogoUrl);
-  const steps = useMemo(() => stepFields(), []);
+  const [assetFiles, setAssetFiles] = useState<File[]>([]);
+  const [storedFiles, setStoredFiles] = useState<TClientFilePublic[]>(initialFiles);
+  const steps = useMemo(() => clientFormStepFields(), []);
   const stepLabels = useMemo(() => CLIENT_FORM_STEP_LABEL_KEYS.map((key) => t(key)), [t]);
-  const indexMap = useMemo(() => fieldStepIndex(), []);
 
   const form = useForm<TClientCreateFormValues>({
     defaultValues: initialValues ?? EMPTY_CLIENT_FORM_VALUES,
     mode: "onSubmit",
   });
 
-  const { handleSubmit, setError, trigger, setFocus, watch, setValue, reset, getValues, register, formState: { errors }, clearErrors } =
+  const { handleSubmit, trigger, setFocus, setValue, reset, getValues, register, formState: { errors }, clearErrors } =
     form;
+
+  const featureArray = useFieldArray({ control: form.control, name: "features" });
+  const linkArray = useFieldArray({ control: form.control, name: "links" });
 
   useEffect(() => {
     register("projectTypes", {
       validate: (value) => value.length > 0 || t("valSelectProjectType"),
     });
-    register("platforms", {
+    register("projectTypeOther", {
       validate: (value) => {
-        const types = getValues("projectTypes");
-        if (
-          clientNeedsWebsitePlatforms(types) &&
-          !value.some((platform) => (CLIENT_WEBSITE_PLATFORMS as readonly string[]).includes(platform))
-        ) {
-          return t("valWebsitePlatform");
-        }
-        if (
-          clientNeedsMobilePlatforms(types) &&
-          !value.some((platform) => (CLIENT_MOBILE_PLATFORMS as readonly string[]).includes(platform))
-        ) {
-          return t("valMobilePlatform");
-        }
-        return true;
+        if (!intakeNeedsProjectTypeOther(getValues("projectTypes"))) return true;
+        return value.trim().length >= 2 || t("valSpecifyOther");
       },
     });
-    register("userRoles", {
-      validate: (value) => value.length > 0 || t("valSelectUserRole"),
+    register("websiteFocus", {
+      validate: (value) => {
+        if (!intakeNeedsWebsiteFocus(getValues("projectTypes"))) return true;
+        return value.length > 0 || t("valWebsiteFocus");
+      },
     });
-    register("languages", {
-      validate: (value) => value.length > 0 || t("valSelectLanguage"),
+    register("mobilePlatforms", {
+      validate: (value) => {
+        if (!intakeNeedsMobilePlatforms(getValues("projectTypes"))) return true;
+        return value.length > 0 || t("valMobilePlatform");
+      },
+    });
+    register("webAppTypes", {
+      validate: (value) => {
+        if (!intakeNeedsWebAppTypes(getValues("projectTypes"))) return true;
+        return value.length > 0 || t("valWebAppType");
+      },
+    });
+    register("webAppTypeOther", {
+      validate: (value) => {
+        if (!getValues("webAppTypes").includes("other")) return true;
+        return value.trim().length >= 2 || t("valSpecifyOther");
+      },
+    });
+    register("features", {
+      validate: (rows) => {
+        if (rows.length < 1) return t("valFeatures");
+        const incomplete = rows.some(
+          (row) => row.name.trim().length < 2 || row.whatItDoes.trim().length < INTAKE_FEATURE_WHAT_MIN,
+        );
+        return incomplete ? t("valFeatureRow") : true;
+      },
+    });
+    register("integrationOther", {
+      validate: (value) => {
+        if (!getValues("integrations").includes("other_api")) return true;
+        return value.trim().length >= 2 || t("valSpecifyOther");
+      },
+    });
+    register("links", {
+      validate: (rows) => {
+        const incomplete = rows.some((row) => !row.linkName.trim() || !row.url.trim());
+        return incomplete ? t("valLinkRow") : true;
+      },
     });
     register("requirementsConfirmed", {
       validate: (value) => value || t("valConfirm"),
@@ -145,50 +139,69 @@ export function useClientCreateForm(options: TUseClientFormOptions = {}) {
     setLogoPreviewUrl(initialLogoUrl);
   }, [initialLogoUrl]);
 
+  const storedFileKey = initialFiles.map((file) => file.id).join("|");
+  const initialFilesRef = useRef(initialFiles);
+  initialFilesRef.current = initialFiles;
+
+  useEffect(() => {
+    setStoredFiles(initialFilesRef.current);
+  }, [storedFileKey]);
+
   const isSubmitting = isEdit ? updateMutation.isPending : createMutation.isPending;
   const isLastStep = currentStep === steps.length - 1;
 
-  function prunePlatforms(nextTypes: TClientProjectType[]) {
-    const current = getValues("platforms");
-    const allowed = new Set<string>();
-    if (clientNeedsWebsitePlatforms(nextTypes)) {
-      CLIENT_WEBSITE_PLATFORMS.forEach((platform) => allowed.add(platform));
-    }
-    if (clientNeedsMobilePlatforms(nextTypes)) {
-      CLIENT_MOBILE_PLATFORMS.forEach((platform) => allowed.add(platform));
-    }
-    if (clientNeedsWebAppPlatforms(nextTypes)) {
-      CLIENT_WEB_APP_PLATFORMS.forEach((platform) => allowed.add(platform));
-    }
-    const pruned = current.filter((platform) => allowed.has(platform));
-    if (pruned.length !== current.length) {
-      setValue("platforms", pruned, { shouldDirty: true });
-    }
-  }
-
-  function toggleProjectType(type: TClientProjectType) {
-    const next = toggleValue(getValues("projectTypes"), type);
+  function toggleProjectType(type: TIntakeBuildType) {
+    const next = toggleListValue(getValues("projectTypes"), type);
     setValue("projectTypes", next, { shouldDirty: true, shouldValidate: true });
-    prunePlatforms(next);
+    if (!intakeNeedsWebsiteFocus(next)) {
+      setValue("websiteFocus", []);
+    }
+    if (!intakeNeedsMobilePlatforms(next)) {
+      setValue("mobilePlatforms", []);
+    }
+    if (!intakeNeedsWebAppTypes(next)) {
+      setValue("webAppTypes", []);
+      setValue("webAppTypeOther", "");
+    }
+    if (!intakeNeedsProjectTypeOther(next)) {
+      setValue("projectTypeOther", "");
+    }
     if (next.length > 0) clearErrors("projectTypes");
   }
 
-  function togglePlatform(platform: TClientPlatform) {
-    const next = toggleValue(getValues("platforms"), platform);
-    setValue("platforms", next, { shouldDirty: true, shouldValidate: true });
-    if (next.length > 0) clearErrors("platforms");
+  function toggleWebsiteFocus(value: TIntakeWebsiteFocus) {
+    const next = toggleListValue(getValues("websiteFocus"), value);
+    setValue("websiteFocus", next, { shouldDirty: true, shouldValidate: true });
+    if (next.length > 0) clearErrors("websiteFocus");
   }
 
-  function toggleUserRole(role: TClientUserRole) {
-    const next = toggleValue(getValues("userRoles"), role);
-    setValue("userRoles", next, { shouldDirty: true, shouldValidate: true });
-    if (next.length > 0) clearErrors("userRoles");
+  function toggleMobilePlatform(value: TIntakeMobilePlatform) {
+    const next = toggleListValue(getValues("mobilePlatforms"), value);
+    setValue("mobilePlatforms", next, { shouldDirty: true, shouldValidate: true });
+    if (next.length > 0) clearErrors("mobilePlatforms");
   }
 
-  function toggleLanguage(language: TClientLanguage) {
-    const next = toggleValue(getValues("languages"), language);
-    setValue("languages", next, { shouldDirty: true, shouldValidate: true });
-    if (next.length > 0) clearErrors("languages");
+  function toggleWebAppType(value: TIntakeWebAppType) {
+    const next = toggleListValue(getValues("webAppTypes"), value);
+    setValue("webAppTypes", next, { shouldDirty: true, shouldValidate: true });
+    if (!next.includes("other")) setValue("webAppTypeOther", "");
+    if (next.length > 0) clearErrors("webAppTypes");
+  }
+
+  function toggleIntegration(value: TIntakeIntegration) {
+    const next = toggleListValue(getValues("integrations"), value);
+    setValue("integrations", next, { shouldDirty: true, shouldValidate: true });
+    if (!next.includes("other_api")) setValue("integrationOther", "");
+  }
+
+  function addFeature() {
+    if (getValues("features").length >= INTAKE_MAX_FEATURES) return;
+    featureArray.append({ ...EMPTY_INTAKE_FEATURE });
+  }
+
+  function addLink() {
+    if (getValues("links").length >= INTAKE_MAX_LINKS) return;
+    linkArray.append({ ...EMPTY_INTAKE_LINK });
   }
 
   async function goToNextStep() {
@@ -210,14 +223,7 @@ export function useClientCreateForm(options: TUseClientFormOptions = {}) {
   }
 
   function jumpToServerErrorStep(error: ApiError) {
-    const keys = Object.keys(error.errors);
-    const matched = keys.find((key) => {
-      const flat = key.includes(".") ? (key.split(".").at(-1) ?? key) : key;
-      return flat in indexMap;
-    });
-    if (!matched) return;
-    const flat = matched.includes(".") ? (matched.split(".").at(-1) ?? matched) : matched;
-    const step = indexMap[flat as keyof TClientCreateFormValues];
+    const step = earliestClientFormErrorStep(Object.keys(error.errors));
     if (step != null) setCurrentStep(step);
   }
 
@@ -242,8 +248,12 @@ export function useClientCreateForm(options: TUseClientFormOptions = {}) {
 
         await updateMutation.mutateAsync({
           clientId,
-          payload: toUpdateClientPayload(values),
+          payload: toUpdateClientPayload(
+            values,
+            storedFiles.map((file) => file.id),
+          ),
           companyLogoFile: logoFileRef.current,
+          assetFiles,
         });
         notify.success(t("editSuccessFallback"));
         router.push(CLIENT_ROUTES.view(clientId));
@@ -253,6 +263,7 @@ export function useClientCreateForm(options: TUseClientFormOptions = {}) {
       const created = await createMutation.mutateAsync({
         payload: toCreateClientPayload(values),
         companyLogoFile: logoFileRef.current,
+        assetFiles,
       });
       notify.success(t("successFallback"));
       router.push(CLIENT_ROUTES.view(created.id));
@@ -283,10 +294,19 @@ export function useClientCreateForm(options: TUseClientFormOptions = {}) {
     logoPreviewUrl,
     onLogoPicked,
     businessName: form.watch("businessName"),
+    assetFiles,
+    setAssetFiles,
+    storedFiles,
+    setStoredFiles,
+    featureArray,
+    linkArray,
+    addFeature,
+    addLink,
     toggleProjectType,
-    togglePlatform,
-    toggleUserRole,
-    toggleLanguage,
+    toggleWebsiteFocus,
+    toggleMobilePlatform,
+    toggleWebAppType,
+    toggleIntegration,
     clientId,
   };
 }
