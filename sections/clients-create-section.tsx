@@ -41,14 +41,14 @@ export function ClientsCreateSection() {
   return (
     <div className="w-full min-w-0">
       <DashboardModuleBreadcrumbSection items={breadcrumbItems} />
-      <div className="space-y-5 px-4 py-6 sm:px-6">
-        <div className="type-stack-md">
+      <div className="space-y-8 px-4 py-6 sm:px-6">
+        <div className="flex flex-col gap-3">
           <Heading id="clients-create-title" pageTitle>
             {t("createTitle")}
           </Heading>
           <Paragraph className="text-text-muted">{t("createLead")}</Paragraph>
         </div>
-        <ClientCreateForm authUser={authUser} />
+        <ClientCreateForm />
       </div>
     </div>
   );

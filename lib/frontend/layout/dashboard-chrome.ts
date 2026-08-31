@@ -19,6 +19,23 @@ export const glassPanelSurfaceClass =
   "border border-border/50 bg-bg-card/20 text-text-primary shadow-sm backdrop-blur-md backdrop-saturate-125 dark:border-text-primary/30 dark:bg-text-primary/[0.05]";
 
 /**
+ * Client intake surfaces — filled blocks, no outline (chips, follow-up groups, feature rows).
+ */
+export const intakeFillSurfaceClass =
+  "border-0 bg-bg-hover text-text-primary dark:bg-text-primary/10";
+
+/** Intake detail chips — lifted tile with the theme drop shadow. */
+export const intakeFloatedChipClass =
+  "border border-border/50 bg-bg-hover text-text-primary shadow-(--shadow-elevated) dark:border-text-primary/22 dark:bg-text-primary/8";
+
+/** Client intake choice tiles / chips — selected lifts with a tinted fill and brand outline. */
+export const intakeChoiceIdleClass =
+  "border-2 border-transparent bg-bg-hover text-text-primary shadow-none hover:bg-bg-selected dark:bg-text-primary/12 dark:hover:bg-text-primary/18";
+
+export const intakeChoiceSelectedClass =
+  "border-2 border-brand bg-bg-selected text-text-primary shadow-(--shadow-elevated)";
+
+/**
  * Modal frost (centered dialogs + side sheets only).
  * Greyer wash like chips/actions (`text-primary` tint) — not the purple `bg-card` slab —
  * so modals stay frosted and readable without looking too dark.
@@ -50,6 +67,10 @@ export const detailIconWellClass =
 /** Modal / sheet icon wells — outline only, no fill (create/edit dialogs + detail sheets). */
 export const detailIconWellOutlineClass =
   "inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-border/60 bg-transparent text-brand shadow-none dark:border-text-primary/40 dark:bg-transparent dark:text-text-primary";
+
+/** Intake numbered / glyph marks — compact outline circle (features, links, launch headings). */
+export const intakeOutlineMarkClass =
+  "inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border/60 bg-transparent type-caption tabular-nums text-text-primary shadow-none dark:border-text-primary/40 dark:bg-transparent";
 
 /** Empty-state icon well — larger glass disc, same surface language as detail wells. */
 export const emptyStateIconWellClass =

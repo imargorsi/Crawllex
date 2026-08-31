@@ -1,22 +1,16 @@
 import type { TCreateClientPayload, TUpdateClientPayload } from "@/features/clients/clients.api";
 import type { TClientCreateFormValues } from "@/components/forms/client-create-form.types";
 import { optionalText } from "@/lib/frontend/projects/project-form-payload.utils";
+import { EMPTY_INTAKE_FEATURE } from "@/lib/frontend/clients/intake-ui.constants";
 import {
-  CLIENT_CONTENT_READY,
-  CLIENT_EXISTING_SYSTEMS,
-  clientHasExistingSystem,
-  type TClientContentReady,
-  type TClientExistingSystem,
+  clientNeedsIntegrationOther,
+  clientNeedsMobilePlatforms,
+  clientNeedsProjectTypeOther,
+  clientNeedsWebAppTypeOther,
+  clientNeedsWebAppTypes,
+  clientNeedsWebsiteFocus,
 } from "@/lib/clients/intake-constants";
 import type { TClientDetail } from "@/types/client.types";
-
-function isExistingSystem(value: string): value is TClientExistingSystem {
-  return (CLIENT_EXISTING_SYSTEMS as readonly string[]).includes(value);
-}
-
-function isContentReady(value: string): value is TClientContentReady {
-  return (CLIENT_CONTENT_READY as readonly string[]).includes(value);
-}
 
 export const EMPTY_CLIENT_FORM_VALUES: TClientCreateFormValues = {
   businessName: "",
@@ -25,26 +19,29 @@ export const EMPTY_CLIENT_FORM_VALUES: TClientCreateFormValues = {
   pocContactNumber: "",
   businessSummary: "",
   idealCustomerProfile: "",
-  projectTypes: [],
-  platforms: [],
-  projectName: "",
   projectDescription: "",
-  successLooksLike: "",
-  existingSystem: "",
-  websiteUrl: "",
-  changeNotes: "",
-  launchMustHaves: "",
-  laterFeatures: "",
-  userRoles: [],
-  languages: [],
-  rtlRequired: false,
+  projectTypes: [],
+  projectTypeOther: "",
+  websiteFocus: [],
+  mobilePlatforms: [],
+  webAppTypes: [],
+  webAppTypeOther: "",
+  features: [{ ...EMPTY_INTAKE_FEATURE }],
+  integrations: [],
+  integrationOther: "",
+  links: [],
   expectedLaunchDate: "",
-  hasFixedDeadline: false,
-  contentReady: "",
+  launchMustHaves: "",
+  notes: "",
   requirementsConfirmed: false,
 };
 
 export function mapClientDetailToFormValues(client: TClientDetail): TClientCreateFormValues {
+  const features =
+    client.features.length > 0
+      ? client.features.map((feature) => ({ name: feature.name, whatItDoes: feature.whatItDoes }))
+      : [{ ...EMPTY_INTAKE_FEATURE }];
+
   return {
     businessName: client.businessName,
     contactPerson: client.contactPerson,
@@ -52,36 +49,30 @@ export function mapClientDetailToFormValues(client: TClientDetail): TClientCreat
     pocContactNumber: client.pocContactNumber,
     businessSummary: client.businessSummary,
     idealCustomerProfile: client.idealCustomerProfile,
-    projectTypes: [...client.projectTypes],
-    platforms: [...client.platforms],
-    projectName: client.projectName,
     projectDescription: client.projectDescription,
-    successLooksLike: client.successLooksLike,
-    existingSystem: client.existingSystem,
-    websiteUrl: client.websiteUrl ?? "",
-    changeNotes: client.changeNotes ?? "",
-    launchMustHaves: client.launchMustHaves,
-    laterFeatures: client.laterFeatures ?? "",
-    userRoles: [...client.userRoles],
-    languages: [...client.languages],
-    rtlRequired: client.rtlRequired,
+    projectTypes: client.projectTypes,
+    projectTypeOther: client.projectTypeOther ?? "",
+    websiteFocus: client.websiteFocus,
+    mobilePlatforms: client.mobilePlatforms,
+    webAppTypes: client.webAppTypes,
+    webAppTypeOther: client.webAppTypeOther ?? "",
+    features,
+    integrations: client.integrations,
+    integrationOther: client.integrationOther ?? "",
+    links: client.links.map((link) => ({ linkName: link.linkName, url: link.url })),
     expectedLaunchDate: client.expectedLaunchDate ?? "",
-    hasFixedDeadline: client.hasFixedDeadline,
-    contentReady: client.contentReady,
+    launchMustHaves: client.launchMustHaves,
+    notes: client.notes ?? "",
     requirementsConfirmed: client.requirementsConfirmed,
   };
 }
 
 export function toCreateClientPayload(values: TClientCreateFormValues): TCreateClientPayload {
-  if (!isExistingSystem(values.existingSystem)) {
-    throw new Error("Existing system is required.");
-  }
-  if (!isContentReady(values.contentReady)) {
-    throw new Error("Content readiness is required.");
-  }
-
-  const existingSystem = values.existingSystem;
-  const hasExisting = clientHasExistingSystem(existingSystem);
+  const projectTypes = values.projectTypes;
+  const websiteFocus = clientNeedsWebsiteFocus(projectTypes) ? values.websiteFocus : [];
+  const mobilePlatforms = clientNeedsMobilePlatforms(projectTypes) ? values.mobilePlatforms : [];
+  const webAppTypes = clientNeedsWebAppTypes(projectTypes) ? values.webAppTypes : [];
+  const integrations = values.integrations;
 
   return {
     businessName: values.businessName.trim(),
@@ -90,26 +81,38 @@ export function toCreateClientPayload(values: TClientCreateFormValues): TCreateC
     pocContactNumber: values.pocContactNumber.trim(),
     businessSummary: values.businessSummary.trim(),
     idealCustomerProfile: values.idealCustomerProfile.trim(),
-    projectTypes: values.projectTypes,
-    platforms: values.platforms,
-    projectName: values.projectName.trim(),
     projectDescription: values.projectDescription.trim(),
-    successLooksLike: values.successLooksLike.trim(),
-    existingSystem,
-    websiteUrl: hasExisting ? optionalText(values.websiteUrl) : null,
-    changeNotes: hasExisting ? optionalText(values.changeNotes) : null,
-    launchMustHaves: values.launchMustHaves.trim(),
-    laterFeatures: optionalText(values.laterFeatures),
-    userRoles: values.userRoles,
-    languages: values.languages,
-    rtlRequired: values.rtlRequired,
+    projectTypes,
+    projectTypeOther: clientNeedsProjectTypeOther(projectTypes) ? values.projectTypeOther.trim() : null,
+    websiteFocus,
+    mobilePlatforms,
+    webAppTypes,
+    webAppTypeOther: clientNeedsWebAppTypeOther(webAppTypes) ? values.webAppTypeOther.trim() : null,
+    features: values.features.map((feature) => ({
+      name: feature.name.trim(),
+      whatItDoes: feature.whatItDoes.trim(),
+    })),
+    integrations,
+    integrationOther: clientNeedsIntegrationOther(integrations) ? values.integrationOther.trim() : null,
+    links: values.links
+      .filter((link) => link.linkName.trim() || link.url.trim())
+      .map((link) => ({
+        linkName: link.linkName.trim(),
+        url: link.url.trim(),
+      })),
+    notes: optionalText(values.notes),
     expectedLaunchDate: optionalText(values.expectedLaunchDate),
-    hasFixedDeadline: values.hasFixedDeadline,
-    contentReady: values.contentReady,
+    launchMustHaves: values.launchMustHaves.trim(),
     requirementsConfirmed: values.requirementsConfirmed,
   };
 }
 
-export function toUpdateClientPayload(values: TClientCreateFormValues): TUpdateClientPayload {
-  return toCreateClientPayload(values);
+export function toUpdateClientPayload(
+  values: TClientCreateFormValues,
+  retainedFileIds: string[],
+): TUpdateClientPayload {
+  return {
+    ...toCreateClientPayload(values),
+    retainedFileIds,
+  };
 }

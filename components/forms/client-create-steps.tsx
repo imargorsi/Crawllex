@@ -1,11 +1,11 @@
 "use client";
 
 import type { TUseClientCreateFormResult } from "@/components/forms/hooks/use-client-create-form.hook";
-import { ClientCreateStepClient } from "@/components/forms/client-create-step-client";
-import { ClientCreateStepDelivery } from "@/components/forms/client-create-step-delivery";
-import { ClientCreateStepGoals } from "@/components/forms/client-create-step-goals";
-import { ClientCreateStepProject } from "@/components/forms/client-create-step-project";
-import { ClientCreateStepScope } from "@/components/forms/client-create-step-scope";
+import { ClientCreateStepAssets } from "@/components/forms/client-create-step-assets";
+import { ClientCreateStepBlueprint } from "@/components/forms/client-create-step-blueprint";
+import { ClientCreateStepCompany } from "@/components/forms/client-create-step-company";
+import { ClientCreateStepFeatures } from "@/components/forms/client-create-step-features";
+import { ClientCreateStepLaunch } from "@/components/forms/client-create-step-launch";
 
 type TStepProps = {
   hook: TUseClientCreateFormResult;
@@ -14,11 +14,11 @@ type TStepProps = {
 export function ClientCreateStepContent({ hook }: TStepProps) {
   const { currentStep } = hook;
 
-  if (currentStep === 0) return <ClientCreateStepClient hook={hook} />;
-  if (currentStep === 1) return <ClientCreateStepProject hook={hook} />;
-  if (currentStep === 2) return <ClientCreateStepGoals hook={hook} />;
-  if (currentStep === 3) return <ClientCreateStepScope hook={hook} />;
-  if (currentStep === 4) return <ClientCreateStepDelivery hook={hook} />;
+  if (currentStep === 0) return <ClientCreateStepCompany hook={hook} />;
+  if (currentStep === 1) return <ClientCreateStepBlueprint hook={hook} />;
+  if (currentStep === 2) return <ClientCreateStepFeatures hook={hook} />;
+  if (currentStep === 3) return <ClientCreateStepAssets hook={hook} />;
+  if (currentStep === 4) return <ClientCreateStepLaunch hook={hook} />;
 
   return null;
 }

@@ -1,23 +1,26 @@
 "use client";
 
-import { Icons } from "@/lib/frontend/icons/app-icons";
-
 import { useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
+import { ClientStatusChip } from "@/components/clients/client-status-chip";
 import { ClientCreateForm } from "@/components/forms/client-create-form";
 import { DashboardModuleBreadcrumbSection } from "@/components/layout/dashboard-module-breadcrumb-section";
 import { Heading } from "@/components/heading";
 import { Paragraph } from "@/components/paragraph";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LoadingState } from "@/components/ui/loading-state";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { useAuthUserQuery } from "@/features/auth/auth.api";
 import { useClientQuery } from "@/features/clients/clients.api";
 import { ApiError } from "@/lib/frontend/api/errors";
 import { clientCanUpdate } from "@/lib/frontend/clients/acl";
 import { mapClientDetailToFormValues } from "@/lib/frontend/clients/client-form-payload.utils";
 import { CLIENT_ROUTES } from "@/lib/frontend/clients/client-routes.utils";
+import { Icons } from "@/lib/frontend/icons/app-icons";
+import { typeStackMdClass } from "@/lib/frontend/layout/dashboard-chrome";
+import { cn } from "@/lib/utils";
 
 export function ClientsEditSection() {
   const params = useParams<{ id: string }>();
@@ -38,9 +41,14 @@ export function ClientsEditSection() {
   const breadcrumbItems = useMemo(
     () => [
       { id: "clients", label: t("title"), href: CLIENT_ROUTES.list },
-      { id: "clients-edit", label: client?.businessName ?? t("editClient") },
+      {
+        id: "client-detail",
+        label: client?.businessName ?? t("editClient"),
+        href: client ? CLIENT_ROUTES.view(client.id) : undefined,
+      },
+      { id: "clients-edit", label: t("editClient") },
     ],
-    [client?.businessName, t],
+    [client, t],
   );
 
   useEffect(() => {
@@ -81,19 +89,26 @@ export function ClientsEditSection() {
   return (
     <div className="w-full min-w-0">
       <DashboardModuleBreadcrumbSection items={breadcrumbItems} />
-      <div className="space-y-5 px-4 py-6 sm:px-6">
-        <div className="type-stack-md">
-          <Heading id="clients-edit-title" pageTitle>
-            {t("editTitle")}
-          </Heading>
-          <Paragraph className="text-text-muted">{t("editLead")}</Paragraph>
+      <div className="space-y-8 px-4 py-6 sm:px-6">
+        <div className="flex items-start gap-4">
+          <UserAvatar name={client.businessName} imageUrl={client.logoImage} size="lg" variant="logo" />
+          <div className={cn(typeStackMdClass, "min-w-0 flex-1")}>
+            <Heading id="clients-edit-title" pageTitle>
+              {t("editTitle")}
+            </Heading>
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="type-body-strong text-text-primary">{client.businessName}</p>
+              <ClientStatusChip status={client.status} />
+            </div>
+            <Paragraph className="text-text-muted">{t("editLead")}</Paragraph>
+          </div>
         </div>
         <ClientCreateForm
-          authUser={authUser}
           isEdit
           clientId={client.id}
           initialValues={initialValues}
           initialLogoUrl={client.logoImage}
+          initialFiles={client.files}
         />
       </div>
     </div>

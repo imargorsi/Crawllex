@@ -111,8 +111,8 @@ export function ClientCard({
       <div className={cn("mt-4", typeStackMdClass)}>
         <h3 className={cn("type-title", elevatedCardTitleClass)}>{client.businessName}</h3>
         <p className={cn(typeIconTextClass, "type-body", elevatedCardBodyClass)}>
-          <Icons.file className="size-3.5 shrink-0" aria-hidden />
-          <span className="truncate">{client.projectName}</span>
+          <Icons.user className="size-3.5 shrink-0" aria-hidden />
+          <span className="truncate">{client.contactPerson}</span>
         </p>
       </div>
 

@@ -26,9 +26,9 @@ export const POST = withApiHandler(async (request) => {
   const auth = await runApiGuards(request, { superAdmin: true });
   if (auth instanceof Response) return auth;
 
-  const { input, logoFile } = await parseCreateClientRequest(request);
+  const { input, logoFile, assetFiles } = await parseCreateClientRequest(request);
   const logoImage = await resolveClientLogo(auth, logoFile);
-  const { client } = await createClient(auth, input, { logoImage });
+  const { client } = await createClient(auth, input, { logoImage, assetFiles });
 
   return buildCreateClientResponse(client);
 });
