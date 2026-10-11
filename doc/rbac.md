@@ -25,7 +25,7 @@ deprecated and hidden.
 | integrations | view, disconnect, refresh, update | `integrations.*` (GSC/GA4 **and** WordPress lead sources) |
 | members | view, invite, remove | `members.*` |
 | admin (platform) | users.{view,create,update,delete}, roles.{…}, dashboard.view | `admin.users.view`, … |
-| clients (platform, Module 13) | view, create, update, delete | `clients.*`, never on project roles |
+| clients (platform, Module 13, `client-onboarding` branch only) | view, create, update, delete | `clients.*`, never on project roles |
 
 Profile, password and preferences are open to any authenticated user. Reports (Module 11) are out
 of scope and have no keys.
@@ -36,7 +36,7 @@ of scope and have no keys.
 |------|-------------|
 | `project_owner` | Full matrix, except Leads = `view` + `export` only |
 | `project_user` | `*.view` everywhere, plus `leads.export` |
-| `super_admin` (platform) | All admin + all project + all clients keys |
+| `super_admin` (platform) | All admin + all project keys (+ `clients.*` on the onboarding branch) |
 
 Custom project roles are created by super admins at `/roles` (permission matrix UI). Only active
 roles grant permissions. An inactive role referenced by a membership grants nothing. Only inactive
@@ -62,7 +62,7 @@ Super admins can create projects as active and assign or reassign the owner.
 |-------|-------|-------|
 | `/users` | `admin.users.view` | platform |
 | `/roles` | `admin.roles.view` | platform |
-| `/clients` | `clients.view` | platform |
+| `/clients` (`client-onboarding` branch) | `clients.view` | platform |
 | `/dashboard` | `dashboard.view` | project |
 | `/projects` | `projects.view` (also listed auth-only) | project |
 | `/analytics` | `analytics.view` | project |
@@ -75,7 +75,7 @@ the selected project's perms when present.
 
 ## Gotchas
 
-- `isKnownPermission()` checks project + admin keys but **not** `clients.*`. Assigning `clients.*` to a
+- (Onboarding branch) `isKnownPermission()` checks project + admin keys but **not** `clients.*`. Assigning `clients.*` to a
   role through the API would be rejected. That is consistent with the rule (no clients on project roles),
   but remember it if clients ever get delegated.
 - `/projects` is in both `AUTH_ONLY_ROUTE_PREFIXES` and the rules table. Auth-only wins, so

@@ -9,8 +9,8 @@
 
 Multi-client SEO operations platform for agencies. One **project** = one client website
 workspace. The team logs SEO work, reads cached GSC/GA4 analytics, and tracks leads per
-project, with project-scoped RBAC. A second **Onboarding** workspace (Module 13, `clients`)
-holds client intake briefs that can be shared publicly by token.
+project, with project-scoped RBAC. Module 13 (Client Onboarding: intake briefs shared publicly by
+token) is parked on the `client-onboarding` branch and is **not** in `dev`.
 
 Product spec: `doc/source/Crawllex — Product Manual.md` (canonical) and
 `doc/source/SEO Dashboard - By Modules.md` (original module breakdown, 1–12).
@@ -53,7 +53,7 @@ Env files, environments, seeding and migrations: `doc/setup.md`.
 | Path | Role |
 |------|------|
 | `app/api/v1/**/route.ts` | REST handlers. Thin: guard → parse (Zod) → call `lib/` → `ApiResponse` |
-| `lib/<domain>/` | Server business logic (projects, leads, integrations, users, roles, clients, assistant, auth, rbac, mail, storage) |
+| `lib/<domain>/` | Server business logic (projects, leads, integrations, users, roles, assistant, auth, rbac, mail, storage) |
 | `lib/frontend/` | Client-only helpers (API client, session, layout/nav, table/query utils, theme, export) |
 | `models/` | Mongoose models (re-exported from `models/index.ts`) |
 | `schemas/` | Zod request/query schemas shared by API and forms |
@@ -62,7 +62,7 @@ Env files, environments, seeding and migrations: `doc/setup.md`.
 | `app/(auth)`, `app/(dashboard)`, `app/(public)` | Route groups: auth screens, authed shell, public onboarding page |
 | `sections/` | Page-level composites mounted by `app/**/page.tsx` |
 | `components/` | UI by domain; `components/ui/` = shadcn primitives |
-| `context/` | Selected project, project access, workspace, sidebar, breadcrumbs |
+| `context/` | Selected project, project access, sidebar, breadcrumbs |
 | `styles/themes/*.css` | Theme pack tokens |
 | `locales/{en,ar}.ts` | i18n strings |
 | `crawllex-leads-capture/` | WordPress plugin (PHP). `npm run plugin:pack` → `public/resources/crawllex-lead-capture.zip` |
@@ -76,7 +76,8 @@ Env files, environments, seeding and migrations: `doc/setup.md`.
    project route checks `requireProjectPermission` / `getProjectAccessForUser`.
 3. **`super_admin` lives only on `User.roles`.** Never in the `roles` collection or admin UI.
    Project roles live in `Role` docs and attach through `ProjectMember.roleId`.
-4. **Never add `clients` to `PROJECT_MODULE_SLUGS`.** Client Onboarding is platform-scoped.
+4. **Keep Client Onboarding off `dev`.** It lives on the `client-onboarding` branch. When it returns, `clients` stays
+   platform-scoped and never goes into `PROJECT_MODULE_SLUGS`.
 5. **SEO activities are manual.** No Google Sheets import.
 6. **Analytics pages read the cache only.** Google is called by sync (connect, manual refresh,
    nightly cron), never on page view.
@@ -97,6 +98,10 @@ Env files, environments, seeding and migrations: `doc/setup.md`.
 
 ## Branches
 
-Work on `dev`. It is 5 commits ahead of `main` (Client Onboarding, Module 13), and `main` has
-only merge commits that `dev` lacks. Other remote branches are older feature branches from
-July and early August, already merged.
+| Branch | Purpose |
+|--------|---------|
+| `dev` | Active work. Module 13 removed 2026-10-11 (history rewritten; old tip tagged `backup/dev-before-split-2026-10-11`) |
+| `client-onboarding` | Module 13 only: `b686bfb`, `36b46e1` + cherry-picked "fixed onboarding". Based on `7cda477`, so rebase onto `dev` when you return to it |
+| `main` | Last release merge (2026-08-27). Merge `dev` → `main` to release |
+
+Other remote branches are older feature branches from July and early August, already merged.

@@ -19,7 +19,7 @@ Legend: ✅ built · 🟡 partial · ⬜ not built · ⛔ out of scope
 | 10 | Leads | ✅ | `/leads` — table, detail sheet, editor, CSV import wizard, export | `lib/leads/*`, WordPress plugin `crawllex-leads-capture/`, `api/v1/leads/ingest*` |
 | 11 | Reports | ⛔ | — | Declared out of scope in `permission-catalog.ts`. See `doc/roadmap-automated-client-reporting.md` |
 | 12 | Settings | ✅ | `/settings` (theme packs, font packs, integrations panel), `/edit-profile` (profile, photo, password) | `api/v1/me/*`, `api/v1/projects/[id]/integrations/*` |
-| 13 | Client Onboarding | ✅ (dev only) | Onboarding workspace: `/clients`, `/clients/create`, `/clients/view/[id]`, `/clients/edit/[id]`; public `/onboarding/[shareToken]` | `lib/clients/*`, `models/Client.ts`, `api/v1/clients/*`, `api/v1/onboarding/[shareToken]` — super admin only |
+| 13 | Client Onboarding | 🅿️ parked on `client-onboarding` branch | Onboarding workspace: `/clients`, `/clients/create`, `/clients/view/[id]`, `/clients/edit/[id]`; public `/onboarding/[shareToken]` | `lib/clients/*`, `models/Client.ts`, `api/v1/clients/*`, `api/v1/onboarding/[shareToken]` — super admin only |
 
 ## Spec vs Original Module Doc
 

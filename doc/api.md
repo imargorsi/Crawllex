@@ -22,11 +22,6 @@ caller's membership in `[id]` (see `doc/rbac.md`). Regenerate with the snippet a
 | `/auth/reset-password` | POST | — |
 | `/auth/user` | GET | — |
 | `/client-errors` | POST | — |
-| `/clients/[id]/activate` | POST | super_admin |
-| `/clients/[id]/deactivate` | POST | super_admin |
-| `/clients/[id]/files/[fileId]` | GET | super_admin |
-| `/clients/[id]` | GET,PATCH,DELETE | super_admin |
-| `/clients` | GET,POST | super_admin |
 | `/cron/analytics-sync` | GET,POST | CRON_SECRET |
 | `/downloads` | function,function | — |
 | `/leads/ingest` | POST | lead-source, key |
@@ -38,7 +33,6 @@ caller's membership in `[id]` (see `doc/rbac.md`). Regenerate with the snippet a
 | `/me/project-invitations/[projectId]/accept` | POST | — |
 | `/me/project-invitations/[projectId]/decline` | POST | — |
 | `/me/project-invitations` | GET | — |
-| `/onboarding/[shareToken]` | GET | — |
 | `/ping` | GET | — |
 | `/projects/[id]/access` | GET | — |
 | `/projects/[id]/activate` | POST | super_admin |
@@ -85,7 +79,12 @@ caller's membership in `[id]` (see `doc/rbac.md`). Regenerate with the snippet a
 - `projects/[id]/invites/[userId]` DELETE: `members.invite` or `members.remove`.
 - `projects/[id]/integrations/lead-sources/[sourceId]` DELETE: `integrations.disconnect`.
 - `users/lookup`: invite search across verified users.
-- `onboarding/[shareToken]`, `downloads`, `ping`, `client-errors`, `storage/image`: public (rate limited where relevant).
+- `downloads`, `ping`, `client-errors`, `storage/image`: public (rate limited where relevant).
+
+## Client Onboarding Routes (`client-onboarding` branch only)
+
+`/clients`, `/clients/[id]`, `/clients/[id]/activate|deactivate`, `/clients/[id]/files/[fileId]` (all super_admin),
+and public `/onboarding/[shareToken]`.
 
 ## Regenerate
 

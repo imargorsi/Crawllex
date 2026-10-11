@@ -63,7 +63,7 @@ External callers that don't use a user token:
 | `SeoActivity` | projectId, activityType (`blogs`/`backlinks`/`technical_work`), url, occurredOn, title/anchorText/details | |
 | `Lead` | projectId, names, email, phone, message, leadDate, extras (Mixed), normalizedEmail+normalizedPhone (unique per project), origin `csv_import`/`manual`/`wordpress`, leadSourceId, idempotencyKey | Dedupe on email+phone |
 | `LeadSource` | projectId+provider (unique, so **1 per project** in the MVP), keyHash (unique), keyPrefix `clx_ls_`, keyCiphertext, siteUrl, counters, lastError | Key is hashed for lookup and encrypted for reveal |
-| `Client` | Module 13 intake brief: business, contact, project types, features[], integrations, links[], files[] (R2), launch info, shareToken (unique, `clx_ob_` prefix), status | Platform scoped |
+| `Client` ({B} only) | Module 13 intake brief: business, contact, project types, features[], integrations, links[], files[] (R2), launch info, shareToken (unique, `clx_ob_` prefix), status | Platform scoped |
 | `AssistantQueryHistory` | projectId, userId, query, intent | |
 | `AccessToken`, `PasswordResetToken`, `OAuthLoginCode` | | Auth plumbing |
 
@@ -107,7 +107,7 @@ wink-nlp + a custom lexicon, date/duration windows, typo correction), not an LLM
 `leads.view`, `seo_activities.view`), answers from the DB, and logs to `AssistantQueryHistory`.
 Large test corpus: `tests/assistant-*.test.ts`.
 
-## Client Onboarding (Module 13, `dev` branch)
+## Client Onboarding (Module 13, `client-onboarding` branch only, not in `dev`)
 
 A separate **Onboarding workspace** (sidebar workspace toggle, `lib/frontend/layout/workspace.ts`:
 `seo` | `onboarding`). Super admins create client intake briefs (multi-step form: company → blueprint
@@ -149,4 +149,4 @@ share a layout that loads `${APP_URL}/crawllex-dark.png`. With `MAIL_MAILER=log`
 
 Cloudflare R2 through `aws4fetch` (`lib/storage/r2-client.ts`). Images (≤5 MB, jpeg/png/webp/gif) go
 through `blob-image-storage.ts` and are served via `GET /api/v1/storage/image`. Client intake files
-have their own validation and quota (`lib/clients/client-file-storage.ts`).
+have their own validation and quota (`lib/clients/client-file-storage.ts`, onboarding branch).
