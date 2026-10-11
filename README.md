@@ -25,16 +25,18 @@ Details: `doc/setup.md`. Prefer `npm run dev` day-to-day — `dev:prod` talks to
 
 ## Documentation
 
-Internal docs live in **`doc/`** and root **`AGENTS.md`** (local/agent use — gitignored, not shipped in production deploys).
+Docs live in **`doc/`** and root **`AGENTS.md`** (committed; `CLAUDE.md` imports `AGENTS.md`).
 
 | Start | Path |
 |-------|------|
 | Agent hub | `AGENTS.md` |
-| Theming + typography | `doc/theming-typography.md` |
-| Theme packs | `doc/theme-packs.md` |
-| Product modules (1–12) | `doc/modules/README.md` |
+| Setup + environments | `doc/setup.md` |
+| Architecture (incl. theming, mail, storage) | `doc/architecture.md` |
 | RBAC model | `doc/rbac.md` |
-| Migration tracker | `doc/migration.md` |
+| API reference | `doc/api.md` |
+| Product modules (1–13) | `doc/modules/README.md` |
+| Status tracker + known issues | `doc/migration.md` |
+| Product spec (from Drive) | `doc/source/` |
 
 ## Repo structure
 
@@ -42,22 +44,15 @@ Internal docs live in **`doc/`** and root **`AGENTS.md`** (local/agent use — g
 - **`app/(dashboard)/`** — Authenticated app shell and modules
 - **`app/api/v1/`** — REST API
 - **`crawllex-leads-capture/`** — WordPress Lead Capture plugin source (`npm run plugin:pack` writes the public zip)
-- **`laravel-old/`** — Original Laravel API (**reference only** — reuse business rules, not implementation)
 
 ## Principles
 
 1. **Product spec first** — `doc/modules/` and `doc/rbac.md` define behavior.
 2. **Next.js-native** — App Router, route handlers, Mongoose, TanStack Query.
-3. **Laravel as reference** — check `laravel-old/` for legacy rules when porting; do not copy company-centric patterns.
+3. **Port complete** — the Laravel reference (`laravel-old/`) was removed 2026-08-18; business rules now live in `lib/` and `doc/`.
 4. **Project-scoped RBAC** — permissions via `project_members` + role templates; `super_admin` on `User.roles` only.
 
 ## Status (summary)
 
-| Layer | Status |
-|-------|--------|
-| Module 1 — Auth API + UI | ✅ |
-| Module 6 — Access control (platform) | 🟡 |
-| Modules 2–5, 7–11 | ⬜ / 🟡 placeholders |
-| Module 12 — Profile + password | ✅ |
-
-See `doc/migration.md` for the full tracker.
+Modules 1–10, 12 and 13 are built; Module 11 (Reports) is out of scope.
+See `doc/migration.md` for health, known issues and open work.

@@ -31,11 +31,8 @@ next-env.d.ts
 
 # user uploads (runtime data)
 /public/profile-images/
-# internal documentation & agent context (local only — not pushed)
-/doc/
+# legacy scratch docs (doc/, AGENTS.md, CLAUDE.md are committed since 2026-10-11)
 /docs/
-AGENTS.md
-CLAUDE.md
 project.md
 
 # legacy root doc
