@@ -12,6 +12,7 @@ import {
   WP_PLUGIN_ZIP_HREF,
 } from "@/lib/leads/constants";
 import {
+  buildWordpressDashboardUrlPhp,
   buildWordpressPluginUpdateDto,
   buildWordpressPluginZipFromSource,
   publicResourcesDir,
@@ -64,8 +65,9 @@ describe("WordPress plugin package", () => {
     const previous = process.env.APP_URL;
     process.env.APP_URL = "https://crawllex.example";
     try {
+      expect(buildWordpressDashboardUrlPhp()).toContain("https://crawllex.example");
       const zip = buildWordpressPluginZipFromSource();
-      expect(zip.includes(Buffer.from("https://crawllex.example"))).toBe(true);
+      expect(zip.includes(Buffer.from("includes/dashboard-url.php"))).toBe(true);
     } finally {
       if (previous === undefined) {
         delete process.env.APP_URL;
