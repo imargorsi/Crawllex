@@ -141,15 +141,15 @@ export function DashboardSidebar({ onClose }: DashboardSidebarProps) {
       <div className={cn(sidebarBrandRowClass, isCollapsed && sidebarBrandRowCollapsedClass)}>
         <Link
           href="/dashboard"
-          className="mx-auto inline-flex w-full max-w-full items-center justify-center px-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--accent-border) focus-visible:ring-offset-2 focus-visible:ring-offset-bg-sidebar"
+          className="mx-auto inline-flex items-center justify-center rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--accent-border) focus-visible:ring-offset-2 focus-visible:ring-offset-bg-sidebar"
           aria-label={tLayout("appName")}
         >
           <AppLogo
             priority
             variant={isCollapsed ? "mark" : "full"}
-            className={isCollapsed ? "size-7" : "h-auto w-full"}
-            width={isCollapsed ? 28 : 192}
-            height={isCollapsed ? 28 : 64}
+            className={isCollapsed ? "size-7" : "mx-auto h-auto w-44"}
+            width={isCollapsed ? 28 : 176}
+            height={isCollapsed ? 28 : 59}
           />
         </Link>
         {onClose ? (
