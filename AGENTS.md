@@ -105,3 +105,16 @@ Env files, environments, seeding and migrations: `doc/setup.md`.
 | `main` | Last release merge (2026-08-27). Merge `dev` → `main` to release |
 
 Other remote branches are older feature branches from July and early August, already merged.
+
+## Obsidian project note
+
+This project has a note in the Obsidian vault:
+`/run/media/argorsi/Storage/2ndBrainNotes/2nd-brain/01 Projects/Crawllex/Crawllex.md`
+
+Whenever you change this project's state (status, next steps, releases, deploys) or update any of its docs in this repo, also update that note in the same session:
+
+1. **Status**, **Next**, and **Log** (dated, PKT) in the note.
+2. The `updated:` date in the note's frontmatter.
+3. `01 Projects/Projects MOC.md` line for this project, if the one-line status changed.
+
+Never write secrets, tokens, passwords, or key values into the vault.
