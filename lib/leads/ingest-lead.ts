@@ -94,6 +94,8 @@ export async function verifyLeadSourceIngest(
       name: source.name,
       provider: source.provider,
     },
+    // Stored state before this call decides it; the plugin re-creates the password when false.
+    wpCredentialsStored: Boolean(wpCredentials) || Boolean(source.wpAppPasswordCiphertext),
   };
 }
 
