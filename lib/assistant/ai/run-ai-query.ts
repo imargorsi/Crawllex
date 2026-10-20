@@ -1,9 +1,9 @@
 import {
   AssistantAiError,
-  type TGeminiContent,
-  type TGeminiPart,
-  type TGeminiRequest,
-} from "@/lib/assistant/ai/gemini-client";
+  type TAssistantMessage,
+  type TChatMessage,
+  type TChatRequest,
+} from "@/lib/assistant/ai/openrouter-client";
 import {
   assistantToolDeclarations,
   type TAssistantToolResult,
@@ -28,56 +28,51 @@ const SYSTEM_INSTRUCTION = [
 export type TAiAnswer = { message: string; toolCalls: string[] };
 
 type TAiDeps = {
-  generate: (request: TGeminiRequest) => Promise<TGeminiContent>;
-  execute: (
-    name: string,
-    args: unknown,
-  ) => Promise<TAssistantToolResult>;
+  generate: (request: TChatRequest) => Promise<TAssistantMessage>;
+  execute: (name: string, args: unknown) => Promise<TAssistantToolResult>;
 };
 
-function textOf(parts: TGeminiPart[]): string {
-  return parts
-    .map((part) => part.text ?? "")
-    .join("")
-    .trim();
+function parseArguments(raw: string): { ok: true; value: unknown } | { ok: false } {
+  try {
+    return { ok: true, value: raw.trim() ? JSON.parse(raw) : {} };
+  } catch {
+    return { ok: false };
+  }
 }
 
 /** Tool loop: model asks for data, server answers with data, model writes the reply. */
 export async function answerWithAi(query: string, deps: TAiDeps): Promise<TAiAnswer> {
-  const contents: TGeminiContent[] = [{ role: "user", parts: [{ text: query }] }];
+  const messages: TChatMessage[] = [
+    { role: "system", content: SYSTEM_INSTRUCTION },
+    { role: "user", content: query },
+  ];
   const toolCalls: string[] = [];
-  const declarations = assistantToolDeclarations();
+  const tools = assistantToolDeclarations();
 
   for (let turn = 0; turn < ASSISTANT_AI_MAX_TURNS; turn += 1) {
-    const request: TGeminiRequest = {
-      systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
-      contents: [...contents],
-      tools: [{ functionDeclarations: declarations }],
-    };
-    const modelContent = await deps.generate(request);
-    contents.push(modelContent);
+    const request: TChatRequest = { messages: [...messages], tools };
+    const reply = await deps.generate(request);
 
-    const calls = modelContent.parts.filter((part) => part.functionCall);
-    if (calls.length === 0) {
-      const message = textOf(modelContent.parts);
+    if (!reply.tool_calls || reply.tool_calls.length === 0) {
+      const message = reply.content?.trim() ?? "";
       if (!message) throw new AssistantAiError("invalid_response");
       return { message, toolCalls };
     }
 
-    const responses: TGeminiPart[] = [];
-    for (const part of calls) {
-      const call = part.functionCall!;
-      toolCalls.push(call.name);
-      const result = await deps.execute(call.name, call.args ?? {});
-      responses.push({
-        functionResponse: {
-          name: call.name,
-          id: call.id,
-          response: result.ok ? { data: result.data } : { error: result.error },
-        },
+    messages.push({ role: "assistant", content: reply.content, tool_calls: reply.tool_calls });
+
+    for (const call of reply.tool_calls) {
+      toolCalls.push(call.function.name);
+      const parsed = parseArguments(call.function.arguments);
+      const result: TAssistantToolResult = parsed.ok
+        ? await deps.execute(call.function.name, parsed.value)
+        : { ok: false, error: "Invalid Tool Arguments." };
+      messages.push({
+        role: "tool",
+        tool_call_id: call.id,
+        content: JSON.stringify(result.ok ? { data: result.data } : { error: result.error }),
       });
     }
-    contents.push({ role: "user", parts: responses });
   }
 
   throw new AssistantAiError("tool_limit");
@@ -111,7 +106,7 @@ export function resetAiBreakerForTests(): void {
 
 /**
  * Returns the AI answer, or null so the caller falls back to NLP. Never throws.
- * Logs the failure reason only, never the query or any data.
+ * Logs the failure reason and HTTP status only, never the query or any data.
  */
 export async function tryAnswerWithAi(
   query: string,

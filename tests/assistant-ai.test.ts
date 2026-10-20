@@ -30,9 +30,9 @@ import { getAnalyticsDimensions } from "@/lib/integrations/read-analytics";
 import { countLeadsInRange } from "@/lib/leads/list-leads";
 import {
   AssistantAiError,
-  generateGeminiContent,
-  type TGeminiContent,
-} from "@/lib/assistant/ai/gemini-client";
+  generateChatCompletion,
+  type TAssistantMessage,
+} from "@/lib/assistant/ai/openrouter-client";
 import {
   answerWithAi,
   aiBreakerOpen,
@@ -53,50 +53,8 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
-});
-
-describe("gemini client rate limit", () => {
-  const okBody = {
-    candidates: [{ content: { role: "model", parts: [{ text: "ok" }] } }],
-  };
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.unstubAllEnvs();
-  });
-
-  it("retries once on 429 and returns the second response", async () => {
-    vi.stubEnv("GEMINI_API_KEY", "test-key");
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce(new Response("{}", { status: 429 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify(okBody), { status: 200 }));
-    vi.stubGlobal("fetch", fetchMock);
-
-    const content = await generateGeminiContent({
-      systemInstruction: { parts: [{ text: "s" }] },
-      contents: [{ role: "user", parts: [{ text: "q" }] }],
-      tools: [],
-    });
-    expect(content.parts[0].text).toBe("ok");
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-  });
-
-  it("gives up after a second 429 and keeps the status", async () => {
-    vi.stubEnv("GEMINI_API_KEY", "test-key");
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async () => new Response("{}", { status: 429 })),
-    );
-
-    await expect(
-      generateGeminiContent({
-        systemInstruction: { parts: [{ text: "s" }] },
-        contents: [{ role: "user", parts: [{ text: "q" }] }],
-        tools: [],
-      }),
-    ).rejects.toMatchObject({ reason: "http", status: 429 });
-  });
+  vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });
 
 describe("assistant AI tools", () => {
@@ -195,18 +153,21 @@ describe("assistant AI tools", () => {
   });
 });
 
-function modelText(text: string): TGeminiContent {
-  return { role: "model", parts: [{ text }] };
+function textReply(text: string): TAssistantMessage {
+  return { content: text };
 }
 
-function modelCall(name: string, args: Record<string, unknown>): TGeminiContent {
-  return { role: "model", parts: [{ functionCall: { name, args }, thoughtSignature: "sig" }] };
+function toolReply(name: string, args: Record<string, unknown>, id = "call_1"): TAssistantMessage {
+  return {
+    content: null,
+    tool_calls: [{ id, type: "function", function: { name, arguments: JSON.stringify(args) } }],
+  };
 }
 
 describe("answerWithAi", () => {
   it("returns plain text when no tool is needed", async () => {
     const answer = await answerWithAi("hi", {
-      generate: vi.fn(async () => modelText("Hello.")),
+      generate: vi.fn(async () => textReply("Hello.")),
       execute: vi.fn(),
     });
     expect(answer).toEqual({ message: "Hello.", toolCalls: [] });
@@ -215,65 +176,69 @@ describe("answerWithAi", () => {
   it("runs a tool and feeds the result back before answering", async () => {
     const generate = vi
       .fn()
-      .mockResolvedValueOnce(modelCall("get_leads_count", { from: "2026-10-01", to: "2026-10-10" }))
-      .mockResolvedValueOnce(modelText("You had 7 leads."));
+      .mockResolvedValueOnce(toolReply("get_leads_count", { from: "2026-10-01", to: "2026-10-10" }))
+      .mockResolvedValueOnce(textReply("You had 7 leads."));
     const execute = vi.fn(async () => ({ ok: true as const, data: { leads: 7 } }));
 
     const answer = await answerWithAi("leads?", { generate, execute });
 
-    expect(execute).toHaveBeenCalledWith("get_leads_count", {
-      from: "2026-10-01",
-      to: "2026-10-10",
-    });
+    expect(execute).toHaveBeenCalledWith("get_leads_count", { from: "2026-10-01", to: "2026-10-10" });
     expect(answer).toEqual({ message: "You had 7 leads.", toolCalls: ["get_leads_count"] });
 
-    const secondRequest = generate.mock.calls[1][0];
-    const last = secondRequest.contents[secondRequest.contents.length - 1];
-    expect(last.role).toBe("user");
-    expect(last.parts[0].functionResponse).toEqual({
-      name: "get_leads_count",
-      response: { data: { leads: 7 } },
-    });
+    const second = generate.mock.calls[1][0];
+    const toolMessage = second.messages[second.messages.length - 1];
+    expect(toolMessage).toMatchObject({ role: "tool", tool_call_id: "call_1" });
+    expect(JSON.parse(toolMessage.content)).toEqual({ data: { leads: 7 } });
   });
 
   it("passes tool errors back to the model instead of throwing", async () => {
     const generate = vi
       .fn()
-      .mockResolvedValueOnce(modelCall("get_analytics_overview", { from: "2026-10-01", to: "2026-10-10" }))
-      .mockResolvedValueOnce(modelText("Analytics are not available for this range."));
+      .mockResolvedValueOnce(toolReply("get_analytics_overview", { from: "2026-10-01", to: "2026-10-10" }))
+      .mockResolvedValueOnce(textReply("Analytics are not available for this range."));
     const execute = vi.fn(async () => ({ ok: false as const, error: "Not Permitted For This Project." }));
 
     const answer = await answerWithAi("traffic?", { generate, execute });
     expect(answer.message).toBe("Analytics are not available for this range.");
     const second = generate.mock.calls[1][0];
-    expect(second.contents[second.contents.length - 1].parts[0].functionResponse).toEqual({
-      name: "get_analytics_overview",
-      response: { error: "Not Permitted For This Project." },
+    expect(JSON.parse(second.messages[second.messages.length - 1].content)).toEqual({
+      error: "Not Permitted For This Project.",
+    });
+  });
+
+  it("reports invalid tool arguments to the model without calling the tool", async () => {
+    const badCall: TAssistantMessage = {
+      content: null,
+      tool_calls: [{ id: "c", type: "function", function: { name: "get_leads_count", arguments: "{not json" } }],
+    };
+    const generate = vi.fn().mockResolvedValueOnce(badCall).mockResolvedValueOnce(textReply("ok"));
+    const execute = vi.fn();
+
+    await answerWithAi("x", { generate, execute });
+    expect(execute).not.toHaveBeenCalled();
+    const second = generate.mock.calls[1][0];
+    expect(JSON.parse(second.messages[second.messages.length - 1].content)).toEqual({
+      error: "Invalid Tool Arguments.",
     });
   });
 
   it("stops after the turn cap instead of looping forever", async () => {
-    const generate = vi.fn(async () => modelCall("get_leads_count", { from: "2026-10-01", to: "2026-10-10" }));
+    const generate = vi.fn(async () => toolReply("get_leads_count", { from: "2026-10-01", to: "2026-10-10" }));
     const execute = vi.fn(async () => ({ ok: true as const, data: {} }));
 
-    await expect(answerWithAi("loop", { generate, execute })).rejects.toMatchObject({
-      reason: "tool_limit",
-    });
+    await expect(answerWithAi("loop", { generate, execute })).rejects.toMatchObject({ reason: "tool_limit" });
     expect(generate).toHaveBeenCalledTimes(5);
   });
 
   it("rejects an empty model reply", async () => {
     await expect(
-      answerWithAi("x", { generate: vi.fn(async () => modelText("   ")), execute: vi.fn() }),
+      answerWithAi("x", { generate: vi.fn(async () => textReply("   ")), execute: vi.fn() }),
     ).rejects.toBeInstanceOf(AssistantAiError);
   });
 });
 
 describe("tryAnswerWithAi fallback", () => {
-  const deps = (generate: () => Promise<TGeminiContent>) => ({
-    generate,
-    execute: vi.fn(),
-  });
+  const deps = (generate: () => Promise<TAssistantMessage>) => ({ generate, execute: vi.fn() });
 
   it("returns null on provider failure so NLP can answer", async () => {
     const result = await tryAnswerWithAi(
@@ -296,8 +261,7 @@ describe("tryAnswerWithAi fallback", () => {
     expect(aiBreakerOpen(now)).toBe(true);
 
     generate.mockClear();
-    const skipped = await tryAnswerWithAi("q", deps(generate), now + 1000);
-    expect(skipped).toBeNull();
+    expect(await tryAnswerWithAi("q", deps(generate), now + 1000)).toBeNull();
     expect(generate).not.toHaveBeenCalled();
   });
 
@@ -310,55 +274,90 @@ describe("tryAnswerWithAi fallback", () => {
     expect(aiBreakerOpen(now + 5 * 60 * 1000 + 1)).toBe(false);
   });
 
-  it("logs the reason only, never the query text", async () => {
+  it("logs the reason and status only, never the query text", async () => {
     const spy = vi.spyOn(console, "error");
     await tryAnswerWithAi(
       "secret lead name Jane",
       deps(async () => {
-        throw new AssistantAiError("timeout");
+        throw new AssistantAiError("http", 429);
       }),
     );
     const logged = spy.mock.calls.map((call) => String(call[0])).join(" ");
-    expect(logged).toContain("timeout");
+    expect(logged).toContain("http (HTTP 429)");
     expect(logged).not.toContain("Jane");
   });
 });
 
-function sentBody(fetchMock: { mock: { calls: unknown[][] } }, index: number) {
-  const init = fetchMock.mock.calls[index][1] as RequestInit;
-  return JSON.parse(String(init.body)) as { generationConfig: { thinkingConfig?: unknown } };
-}
+describe("openrouter client", () => {
+  const request = { messages: [{ role: "user" as const, content: "q" }], tools: [] };
 
-describe("gemini thinking config", () => {
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.unstubAllEnvs();
+  it("throws disabled without an API key", async () => {
+    vi.stubEnv("OPENROUTER_API_KEY", "");
+    await expect(generateChatCompletion(request)).rejects.toMatchObject({ reason: "disabled" });
   });
 
-  it("sends thinkingConfig only when GEMINI_THINKING_LEVEL is a known level", async () => {
-    vi.stubEnv("GEMINI_API_KEY", "test-key");
+  it("retries once on 429 and returns the second response", async () => {
+    vi.stubEnv("OPENROUTER_API_KEY", "test-key");
+    const body = { choices: [{ message: { role: "assistant", content: "ok" } }] };
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("{}", { status: 429 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(body), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const reply = await generateChatCompletion(request);
+    expect(reply.content).toBe("ok");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("gives up after a second 429 and keeps the status", async () => {
+    vi.stubEnv("OPENROUTER_API_KEY", "test-key");
+    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 429 })));
+    await expect(generateChatCompletion(request)).rejects.toMatchObject({ reason: "http", status: 429 });
+  });
+
+  it("sends Bearer auth, the model and tool declarations", async () => {
+    vi.stubEnv("OPENROUTER_API_KEY", "test-key");
+    vi.stubEnv("OPENROUTER_MODEL", "dots-studio/dots-3-note-preview:free");
     const fetchMock = vi.fn(
       async () =>
-        new Response(
-          JSON.stringify({ candidates: [{ content: { role: "model", parts: [{ text: "ok" }] } }] }),
-          { status: 200 },
-        ),
+        new Response(JSON.stringify({ choices: [{ message: { role: "assistant", content: "ok" } }] }), {
+          status: 200,
+        }),
     );
     vi.stubGlobal("fetch", fetchMock);
-    const request = {
-      systemInstruction: { parts: [{ text: "s" }] },
-      contents: [{ role: "user" as const, parts: [{ text: "q" }] }],
-      tools: [],
-    };
 
-    vi.stubEnv("GEMINI_THINKING_LEVEL", "minimal");
-    await generateGeminiContent(request);
-    expect(sentBody(fetchMock, 0).generationConfig.thinkingConfig).toEqual({
-      thinkingLevel: "minimal",
+    await generateChatCompletion({
+      messages: [{ role: "user", content: "q" }],
+      tools: [{ name: "t", description: "d", parameters: { type: "object", properties: {} } }],
     });
 
-    vi.stubEnv("GEMINI_THINKING_LEVEL", "turbo");
-    await generateGeminiContent(request);
-    expect(sentBody(fetchMock, 1).generationConfig.thinkingConfig).toBeUndefined();
+    const init = (fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1];
+    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer test-key");
+    const sent = JSON.parse(String(init.body));
+    expect(sent.model).toBe("dots-studio/dots-3-note-preview:free");
+    expect(sent.tools[0]).toEqual({
+      type: "function",
+      function: { name: "t", description: "d", parameters: { type: "object", properties: {} } },
+    });
+  });
+
+  it("returns tool calls from the reply", async () => {
+    vi.stubEnv("OPENROUTER_API_KEY", "test-key");
+    const body = {
+      choices: [
+        {
+          message: {
+            role: "assistant",
+            content: null,
+            tool_calls: [{ id: "c1", type: "function", function: { name: "get_leads_count", arguments: "{}" } }],
+          },
+        },
+      ],
+    };
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(body), { status: 200 })));
+    const reply = await generateChatCompletion(request);
+    expect(reply.tool_calls?.[0].function.name).toBe("get_leads_count");
   });
 });
+

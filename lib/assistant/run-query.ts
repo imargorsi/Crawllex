@@ -1,4 +1,4 @@
-import { generateGeminiContent } from "@/lib/assistant/ai/gemini-client";
+import { generateChatCompletion, openRouterApiKey } from "@/lib/assistant/ai/openrouter-client";
 import { executeAssistantTool } from "@/lib/assistant/ai/tools";
 import { tryAnswerWithAi } from "@/lib/assistant/ai/run-ai-query";
 import type { AuthContext } from "@/lib/auth/guards";
@@ -24,7 +24,7 @@ function denyModule(
 }
 
 export function isAssistantAiEnabled(): boolean {
-  return process.env.ASSISTANT_AI_ENABLED === "true" && Boolean(process.env.GEMINI_API_KEY);
+  return process.env.ASSISTANT_AI_ENABLED === "true" && Boolean(openRouterApiKey());
 }
 
 async function tryAiAnswer(
@@ -38,7 +38,7 @@ async function tryAiAnswer(
   const permissions = access.permissions;
 
   const answer = await tryAnswerWithAi(query, {
-    generate: generateGeminiContent,
+    generate: generateChatCompletion,
     execute: (name, args) => executeAssistantTool(name, args, projectId, permissions),
   });
   return answer?.message ?? null;
