@@ -323,3 +323,42 @@ describe("tryAnswerWithAi fallback", () => {
     expect(logged).not.toContain("Jane");
   });
 });
+
+function sentBody(fetchMock: { mock: { calls: unknown[][] } }, index: number) {
+  const init = fetchMock.mock.calls[index][1] as RequestInit;
+  return JSON.parse(String(init.body)) as { generationConfig: { thinkingConfig?: unknown } };
+}
+
+describe("gemini thinking config", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it("sends thinkingConfig only when GEMINI_THINKING_LEVEL is a known level", async () => {
+    vi.stubEnv("GEMINI_API_KEY", "test-key");
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(
+          JSON.stringify({ candidates: [{ content: { role: "model", parts: [{ text: "ok" }] } }] }),
+          { status: 200 },
+        ),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    const request = {
+      systemInstruction: { parts: [{ text: "s" }] },
+      contents: [{ role: "user" as const, parts: [{ text: "q" }] }],
+      tools: [],
+    };
+
+    vi.stubEnv("GEMINI_THINKING_LEVEL", "minimal");
+    await generateGeminiContent(request);
+    expect(sentBody(fetchMock, 0).generationConfig.thinkingConfig).toEqual({
+      thinkingLevel: "minimal",
+    });
+
+    vi.stubEnv("GEMINI_THINKING_LEVEL", "turbo");
+    await generateGeminiContent(request);
+    expect(sentBody(fetchMock, 1).generationConfig.thinkingConfig).toBeUndefined();
+  });
+});
