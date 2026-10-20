@@ -5,8 +5,10 @@ import {
   type TWpConnection,
   type TWpDraftInput,
 } from "@/lib/integrations/wordpress/wp-rest";
+import { LEAD_SOURCE_PROVIDER } from "@/lib/leads/constants";
 import { findProjectSource } from "@/lib/leads/manage-lead-source";
 import { readLeadSourceWpPassword } from "@/lib/leads/wp-credentials";
+import { LeadSource } from "@/models";
 
 const NOT_VERIFIED_MESSAGE = "Verify the Crawllex plugin on this WordPress site first.";
 
@@ -28,6 +30,19 @@ export async function wpConnectionForSource(
     username: source.wpUsername,
     applicationPassword,
   };
+}
+
+/** Connection for the project's connected WordPress lead source (the one-per-project MVP source). */
+export async function wpConnectionForProject(projectId: string): Promise<TWpConnection> {
+  const source = await LeadSource.findOne({
+    projectId,
+    provider: LEAD_SOURCE_PROVIDER,
+    status: "connected",
+  });
+  if (!source) {
+    throw new HttpError(422, "Connect WordPress for this project before pushing a blog.");
+  }
+  return wpConnectionForSource(projectId, String(source._id));
 }
 
 export async function checkWpSourceConnection(projectId: string, sourceId: string) {

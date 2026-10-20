@@ -1166,6 +1166,9 @@ export interface Translation {
           url: string;
           urlPh: string;
           occurredOn: string;
+          pushToWordpress: string;
+          docUrl: string;
+          docUrlPh: string;
         };
         validation: {
           required: string;
@@ -1175,6 +1178,7 @@ export interface Translation {
           maxTitle: string;
           minAnchor: string;
           minDetails: string;
+          docUrl: string;
         };
         cancel: string;
         submit: string;
@@ -1191,6 +1195,7 @@ export interface Translation {
         };
         createErrorFallback: string;
         updateErrorFallback: string;
+        pushSuccess: string;
       };
     };
     leads: {
@@ -2771,6 +2776,9 @@ const translation: Translation = {
           url: "Link",
           urlPh: "https://example.com/page",
           occurredOn: "Date",
+          pushToWordpress: "Push to draft on live website",
+          docUrl: "Google Doc Link (Public)",
+          docUrlPh: "https://docs.google.com/document/d/...",
         },
         validation: {
           required: "This Field Is Required.",
@@ -2780,6 +2788,7 @@ const translation: Translation = {
           maxTitle: "Use At Most 50 Characters.",
           minAnchor: "Use At Least 2 Characters.",
           minDetails: "Use At Least 4 Characters.",
+          docUrl: "Enter A Google Docs Link (docs.google.com/document/d/...).",
         },
         cancel: "Cancel",
         submit: "Add Activity",
@@ -2796,6 +2805,7 @@ const translation: Translation = {
         },
         createErrorFallback: "Could not create activity.",
         updateErrorFallback: "Could not update activity.",
+        pushSuccess: "Blog Saved And Pushed To WordPress As A Draft.",
       },
     },
     leads: {

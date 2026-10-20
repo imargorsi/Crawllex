@@ -12,6 +12,9 @@ export type TSeoActivityQuickAddValues = {
   anchorText: string;
   details: string;
   occurredOn: string;
+  /** Blogs only, create only: publish the public Google Doc to WordPress as a draft. */
+  pushToWordpress: boolean;
+  docUrl: string;
 };
 
 export function todayIsoDate(now = new Date()): string {
@@ -28,6 +31,8 @@ export function emptyQuickAddValues(now = new Date()): TSeoActivityQuickAddValue
     anchorText: "",
     details: "",
     occurredOn: todayIsoDate(now),
+    pushToWordpress: false,
+    docUrl: "",
   };
 }
 
