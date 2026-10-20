@@ -14,7 +14,7 @@ import { normalizeLeadEmail, normalizeLeadPhone } from "@/lib/leads/normalize";
 import { serializeLead } from "@/lib/leads/serialize-lead";
 import { isDuplicateKeyError } from "@/lib/roles/role-mutation.utils";
 import { stampLeadSourceSiteUrl } from "@/lib/leads/lead-source-site-url";
-import { storeLeadSourceWpCredentials, type TWpCredentialsInput } from "@/lib/leads/wp-credentials";
+import { storeLeadSourceWpCredentials, type TWpCredentialsInput } from "@/lib/integrations/wordpress/wp-credentials";
 import { Lead, LeadSource, type LeadDocument, type LeadSourceDocument } from "@/models";
 import type { IngestLeadInput } from "@/schemas/lead";
 import type { TLeadIngestResultDto, TLeadIngestVerifyDto } from "@/types/lead.types";

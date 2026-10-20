@@ -20,7 +20,16 @@ export const POST = withApiHandler(async (request, context) => {
   const permissionError = await requireProjectPermission(auth, params.id, "integrations.update");
   if (permissionError) return permissionError;
 
-  const input = wpDraftSchema.parse(await request.json());
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return ApiResponse.validation("Invalid Request Body.", {
+      body: ["Request Body Must Be Valid JSON."],
+    });
+  }
+
+  const input = wpDraftSchema.parse(body);
   const draft = await pushWpDraft(params.id, params.sourceId, input);
   return ApiResponse.success({ draft }, "Draft created in WordPress.");
 });

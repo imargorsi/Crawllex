@@ -17,11 +17,12 @@ const connection: TWpConnection = {
 };
 
 function stubFetch(status: number, body: unknown) {
-  const fetchMock = vi.fn(async () =>
-    new Response(JSON.stringify(body), {
-      status,
-      headers: { "Content-Type": "application/json" },
-    }),
+  const fetchMock = vi.fn(
+    async () =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { "Content-Type": "application/json" },
+      })
   );
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
@@ -57,14 +58,20 @@ describe("WordPress REST client", () => {
     expect(init.method).toBe("POST");
     expect(init.redirect).toBe("error");
     expect((init.headers as Record<string, string>).Authorization).toBe(
-      wpAuthHeader("admin", "abcd EFGH ijkl MNOP qrst UVWX"),
+      wpAuthHeader("admin", "abcd EFGH ijkl MNOP qrst UVWX")
     );
     expect(JSON.parse(init.body as string)).toMatchObject({ status: "draft" });
   });
 
-  it("refuses to publish: a post not created as draft throws", async () => {
-    stubFetch(201, { id: 7, status: "publish", link: "https://x" });
+  it("refuses to publish: a post not created as draft is trashed and the call throws", async () => {
+    const fetchMock = stubFetch(201, { id: 7, status: "publish", link: "https://x" });
     await expect(createWpDraft(connection, { title: "T", content: "C" })).rejects.toBeInstanceOf(HttpError);
+
+    const methods = fetchMock.mock.calls.map((call) => (call as unknown as [string, RequestInit])[1].method);
+    expect(methods).toEqual(["POST", "DELETE"]);
+    expect((fetchMock.mock.calls[1] as unknown as [string])[0]).toBe(
+      "https://scentnsplendor.scentnsplendor.com/wp-json/wp/v2/posts/7"
+    );
   });
 
   it("maps WordPress 401 to 422 with its message", async () => {
@@ -77,9 +84,9 @@ describe("WordPress REST client", () => {
 
   it("refuses non-HTTPS sites before any request", async () => {
     const fetchMock = stubFetch(200, {});
-    await expect(
-      testWpConnection({ ...connection, siteUrl: "http://insecure.example.com" }),
-    ).rejects.toBeInstanceOf(HttpError);
+    await expect(testWpConnection({ ...connection, siteUrl: "http://insecure.example.com" })).rejects.toBeInstanceOf(
+      HttpError
+    );
     expect(fetchMock).not.toHaveBeenCalled();
   });
 });

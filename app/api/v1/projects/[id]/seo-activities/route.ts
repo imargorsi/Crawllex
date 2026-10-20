@@ -86,6 +86,12 @@ export const POST = withApiHandler(async (request, context) => {
     throw error;
   }
 
+  // Pushing to the live WordPress site is an integration action, so it needs integrations.update too.
+  if (input.pushToWordpress) {
+    const integrationError = await requireProjectPermission(auth, projectId, "integrations.update");
+    if (integrationError) return integrationError;
+  }
+
   const { activity } = await createSeoActivity(auth, projectId, input);
   return buildCreateSeoActivityResponse(activity);
 });

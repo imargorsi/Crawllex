@@ -22,8 +22,14 @@ import {
 import { resolvePublicResourceFile } from "@/lib/leads/public-resources";
 
 describe("WordPress plugin package", () => {
-  it("reads the plugin header version", () => {
-    expect(readWordpressPluginVersion()).toBe("0.4.1");
+  it("reads the plugin header version and it matches CRAWLLEX_LC_VERSION", () => {
+    const source = readFileSync(
+      path.join(process.cwd(), "crawllex-leads-capture/plugin/crawllex-lead-capture.php"),
+      "utf8",
+    );
+    const constant = source.match(/define\('CRAWLLEX_LC_VERSION', '([^']+)'\)/)?.[1];
+    expect(constant).toBeTruthy();
+    expect(readWordpressPluginVersion()).toBe(constant);
   });
 
   it("builds a zip whose entries live under the WordPress plugin slug", () => {
@@ -81,7 +87,7 @@ describe("WordPress plugin package", () => {
     const payload = buildWordpressPluginUpdateDto();
     expect(payload.slug).toBe(WP_PLUGIN_SLUG);
     expect(payload.plugin).toBe(WP_PLUGIN_BASENAME);
-    expect(payload.version).toBe("0.4.1");
+    expect(payload.version).toBe(readWordpressPluginVersion());
     expect(payload.downloadUrl).toBe(`http://localhost:3000${WP_PLUGIN_ZIP_HREF}`);
     expect(WP_PLUGIN_ZIP_FILENAME).toBe("crawllex-lead-capture.zip");
   });

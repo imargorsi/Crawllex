@@ -7,16 +7,13 @@ import {
 } from "@/lib/integrations/wordpress/wp-rest";
 import { LEAD_SOURCE_PROVIDER } from "@/lib/leads/constants";
 import { findProjectSource } from "@/lib/leads/manage-lead-source";
-import { readLeadSourceWpPassword } from "@/lib/leads/wp-credentials";
+import { readLeadSourceWpPassword } from "@/lib/integrations/wordpress/wp-credentials";
 import { LeadSource } from "@/models";
 
 const NOT_VERIFIED_MESSAGE = "Verify the Crawllex plugin on this WordPress site first.";
 
 /** Loads the stored WordPress connection for a project's lead source. Server-only. */
-export async function wpConnectionForSource(
-  projectId: string,
-  sourceId: string,
-): Promise<TWpConnection> {
+export async function wpConnectionForSource(projectId: string, sourceId: string): Promise<TWpConnection> {
   const source = await findProjectSource(projectId, sourceId);
   if (!source.siteUrl || !source.wpUsername) {
     throw new HttpError(422, NOT_VERIFIED_MESSAGE);

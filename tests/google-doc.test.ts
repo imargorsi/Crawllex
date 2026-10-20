@@ -28,7 +28,9 @@ describe("Google Docs to WordPress HTML", () => {
     expect(out).toContain("<em>italic</em>");
     expect(out).toContain("<u>under</u>");
     expect(out).toContain("<p>&nbsp;</p>");
-    expect(out).toContain("<ul><li>First item</li><li>Second item with <a href=\"https://example.com/page\">a link</a></li></ul>");
+    expect(out).toContain(
+      '<ul><li>First item</li><li>Second item with <a href="https://example.com/page">a link</a></li></ul>'
+    );
     expect(out).toContain("<ol><li>Numbered</li></ol>");
     expect(out).toContain("<p>Last paragraph</p>");
   });
@@ -44,7 +46,7 @@ describe("Google Docs to WordPress HTML", () => {
 
   it("escapes text and refuses non-http links", () => {
     const out = googleDocHtmlToWordPress(
-      `<body><p><span>5 &lt; 6 &amp; "quotes"</span></p><p><a href="javascript:alert(1)">bad</a></p></body>`,
+      `<body><p><span>5 &lt; 6 &amp; "quotes"</span></p><p><a href="javascript:alert(1)">bad</a></p></body>`
     );
     expect(out).toContain("5 &lt; 6 &amp; &quot;quotes&quot;");
     expect(out).not.toContain("javascript:");

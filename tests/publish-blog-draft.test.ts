@@ -62,7 +62,7 @@ describe("publishBlogDraft", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      publishBlogDraft("project-1", { title: "My post", docUrl: "https://docs.google.com/document/d/1AbC/edit" }),
+      publishBlogDraft("project-1", { title: "My post", docUrl: "https://docs.google.com/document/d/1AbC/edit" })
     ).rejects.toMatchObject({ statusCode: 422 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });

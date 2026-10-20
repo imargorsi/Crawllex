@@ -3,7 +3,7 @@ import type { Types } from "mongoose";
 
 import { ApiResponse } from "@/lib/api/response";
 import type { AuthContext } from "@/lib/auth/guards";
-import { publishBlogDraft } from "@/lib/seo-activities/publish-blog-draft";
+import { discardBlogDraft, publishBlogDraft } from "@/lib/seo-activities/publish-blog-draft";
 import { serializeSeoActivity } from "@/lib/seo-activities/serialize-seo-activity";
 import { SeoActivity, type SeoActivityDocument } from "@/models";
 import type { CreateSeoActivityInput } from "@/schemas/seo-activity";
@@ -45,20 +45,27 @@ export async function createSeoActivity(
       ? await publishBlogDraft(projectId, { title: input.title!.trim(), docUrl: input.docUrl })
       : null;
 
-  const activity = await SeoActivity.create({
-    projectId,
-    activityType: input.type,
-    url: wordpress ? wordpress.link : input.url,
-    occurredOn: input.occurredOn,
-    ...typeSpecificFields(input),
-    docUrl: wordpress ? input.docUrl : null,
-    pushedToWordpress: Boolean(wordpress),
-    wpPostId: wordpress ? wordpress.postId : null,
-    wpPostLink: wordpress ? wordpress.link : null,
-    wpPushedAt: wordpress ? wordpress.pushedAt : null,
-    createdBy: userId,
-    updatedBy: userId,
-  });
+  let activity: SeoActivityDocument;
+  try {
+    activity = await SeoActivity.create({
+      projectId,
+      activityType: input.type,
+      url: wordpress ? wordpress.link : input.url,
+      occurredOn: input.occurredOn,
+      ...typeSpecificFields(input),
+      docUrl: wordpress ? input.docUrl : null,
+      pushedToWordpress: Boolean(wordpress),
+      wpPostId: wordpress ? wordpress.postId : null,
+      wpPostLink: wordpress ? wordpress.link : null,
+      wpPushedAt: wordpress ? wordpress.pushedAt : null,
+      createdBy: userId,
+      updatedBy: userId,
+    });
+  } catch (error) {
+    // Saving failed after WordPress created the draft. Remove it so a retry does not duplicate it.
+    if (wordpress) await discardBlogDraft(projectId, wordpress.postId);
+    throw error;
+  }
 
   return { activity };
 }

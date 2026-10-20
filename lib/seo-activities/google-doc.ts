@@ -48,8 +48,25 @@ type HtmlNode = {
 
 /** Tags whose content is dropped entirely. */
 const DROPPED_TAGS = new Set([
-  "script", "style", "img", "svg", "noscript", "head", "title", "meta", "link",
-  "iframe", "object", "video", "audio", "canvas", "form", "input", "button", "select", "textarea",
+  "script",
+  "style",
+  "img",
+  "svg",
+  "noscript",
+  "head",
+  "title",
+  "meta",
+  "link",
+  "iframe",
+  "object",
+  "video",
+  "audio",
+  "canvas",
+  "form",
+  "input",
+  "button",
+  "select",
+  "textarea",
 ]);
 
 /** Block tags kept as-is, so the Doc's h1-h6, paragraphs and lists carry over. */
@@ -110,8 +127,7 @@ function renderNode(node: HtmlNode, styles: TDocStyleClasses, inHeading: boolean
 
   const childHeading = inHeading || HEADING_TAGS.has(name);
   const children = (node.children ?? []).filter(
-    (child) =>
-      !(CONTAINER_TAGS.has(name) && child.type === "text" && /^\s*$/.test(child.data ?? "")),
+    (child) => !(CONTAINER_TAGS.has(name) && child.type === "text" && /^\s*$/.test(child.data ?? ""))
   );
   const inner = children.map((child) => renderNode(child, styles, childHeading)).join("");
 

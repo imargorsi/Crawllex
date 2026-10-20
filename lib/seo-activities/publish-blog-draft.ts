@@ -1,5 +1,5 @@
 import { HttpError } from "@/lib/api/http-errors";
-import { createWpDraft } from "@/lib/integrations/wordpress/wp-rest";
+import { createWpDraft, trashWpPost } from "@/lib/integrations/wordpress/wp-rest";
 import { wpConnectionForProject } from "@/lib/integrations/wordpress/wp-source";
 import { fetchPublicGoogleDocHtml, googleDocHtmlToWordPress } from "@/lib/seo-activities/google-doc";
 
@@ -9,7 +9,7 @@ import { fetchPublicGoogleDocHtml, googleDocHtmlToWordPress } from "@/lib/seo-ac
  */
 export async function publishBlogDraft(
   projectId: string,
-  input: { title: string; docUrl: string },
+  input: { title: string; docUrl: string }
 ): Promise<{ postId: number; link: string; pushedAt: Date }> {
   const connection = await wpConnectionForProject(projectId);
   const content = googleDocHtmlToWordPress(await fetchPublicGoogleDocHtml(input.docUrl));
@@ -19,4 +19,14 @@ export async function publishBlogDraft(
 
   const draft = await createWpDraft(connection, { title: input.title, content });
   return { postId: draft.id, link: draft.link, pushedAt: new Date() };
+}
+
+/** Undoes publishBlogDraft when Crawllex cannot save the activity. Best effort. */
+export async function discardBlogDraft(projectId: string, postId: number): Promise<void> {
+  try {
+    const connection = await wpConnectionForProject(projectId);
+    await trashWpPost(connection, postId);
+  } catch {
+    // Never mask the original save error with a cleanup error.
+  }
 }

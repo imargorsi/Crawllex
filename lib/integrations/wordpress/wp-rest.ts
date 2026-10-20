@@ -41,8 +41,8 @@ export function buildWpDraftBody(input: TWpDraftInput): Record<string, string> {
 async function wpFetch(
   connection: TWpConnection,
   path: string,
-  method: "GET" | "POST",
-  body?: Record<string, string>,
+  method: "GET" | "POST" | "DELETE",
+  body?: Record<string, string>
 ): Promise<unknown> {
   if (!connection.siteUrl.startsWith("https://")) {
     throw new HttpError(422, "The WordPress site must use HTTPS.");
@@ -73,26 +73,27 @@ async function wpFetch(
   return json;
 }
 
-export async function testWpConnection(
-  connection: TWpConnection,
-): Promise<{ id: number; name: string }> {
+export async function testWpConnection(connection: TWpConnection): Promise<{ id: number; name: string }> {
   const user = (await wpFetch(connection, "/users/me", "GET")) as { id: number; name: string };
   return { id: user.id, name: user.name };
 }
 
-export async function createWpDraft(
-  connection: TWpConnection,
-  input: TWpDraftInput,
-): Promise<TWpDraftResult> {
-  const post = (await wpFetch(
-    connection,
-    "/posts",
-    "POST",
-    buildWpDraftBody(input),
-  )) as { id: number; status: string; link: string };
+export async function createWpDraft(connection: TWpConnection, input: TWpDraftInput): Promise<TWpDraftResult> {
+  const post = (await wpFetch(connection, "/posts", "POST", buildWpDraftBody(input))) as {
+    id: number;
+    status: string;
+    link: string;
+  };
 
   if (post.status !== "draft") {
+    // The post must not stay live. Move it to the trash before failing.
+    await trashWpPost(connection, post.id).catch(() => undefined);
     throw new HttpError(502, `WordPress created the post as "${post.status}", not a draft.`);
   }
   return { id: post.id, status: post.status, link: post.link };
+}
+
+/** Moves a post to the WordPress trash (no force delete). Used to undo a draft Crawllex could not save. */
+export async function trashWpPost(connection: TWpConnection, postId: number): Promise<void> {
+  await wpFetch(connection, `/posts/${postId}`, "DELETE");
 }
