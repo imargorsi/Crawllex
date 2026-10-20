@@ -1,4 +1,4 @@
-export const GEMINI_TIMEOUT_MS = 15_000;
+export const GEMINI_TIMEOUT_MS = 25_000;
 const DEFAULT_MODEL = "gemini-3.5-flash";
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 
