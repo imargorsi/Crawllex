@@ -40,6 +40,6 @@ describe("create SEO activity with WordPress push", () => {
     expect(createSeoActivitySchema.safeParse({ ...base, url: "ftp://x.com" }).success).toBe(false);
     const ok = createSeoActivitySchema.parse({ ...base, url: "https://example.com/post" });
     expect(ok.url).toBe("https://example.com/post");
-    expect(ok.pushToWordpress).toBe(false);
+    expect(ok.pushToWordpress).toBeUndefined();
   });
 });

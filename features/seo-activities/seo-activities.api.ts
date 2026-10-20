@@ -31,11 +31,14 @@ export type TSeoActivitiesListParams = {
 
 export type TSeoActivityCreatePayload = {
   type: TSeoActivityType;
-  url: string;
+  /** Required unless pushing a blog to WordPress (the URL then comes from WordPress). */
+  url?: string;
   occurredOn: string;
   title?: string;
   anchorText?: string;
   details?: string;
+  pushToWordpress?: boolean;
+  docUrl?: string;
 };
 
 export type TSeoActivityUpdatePayload = {

@@ -159,6 +159,7 @@ export function SeoActivitiesSection() {
       if (values.pushToWordpress) {
         // The post's URL comes back from WordPress, so no url is sent.
         return {
+          url: undefined,
           occurredOn: base.occurredOn,
           type,
           title: values.title.trim(),
@@ -182,8 +183,12 @@ export function SeoActivitiesSection() {
   }) {
     try {
       if (input.mode === "edit" && input.activityId) {
-        const payload = buildPayload(input.type, input.values);
-        const { type: _type, ...updatePayload } = payload;
+        // Edit never re-pushes to WordPress, so the payload always carries a url.
+        const { type: _type, pushToWordpress: _push, docUrl: _docUrl, ...rest } = buildPayload(
+          input.type,
+          input.values,
+        );
+        const updatePayload = { ...rest, url: rest.url ?? "" };
         await updateMutation.mutateAsync({
           activityId: input.activityId,
           payload: updatePayload,

@@ -91,7 +91,7 @@ export const createSeoActivitySchema = z
     title: contentFields.title,
     anchorText: contentFields.anchorText,
     details: contentFields.details,
-    pushToWordpress: z.boolean().optional().default(false),
+    pushToWordpress: z.boolean().optional(),
     docUrl: z.string().trim().optional(),
   })
   .superRefine((data, ctx) => {
@@ -124,11 +124,14 @@ export const createSeoActivitySchema = z
       });
     }
   })
-  .transform((data) => ({
-    ...data,
-    url: data.url ? (sanitizeHttpUrl(data.url) ?? undefined) : undefined,
-    docUrl: data.docUrl ? data.docUrl.trim() : undefined,
-  }));
+  .transform((data) => {
+    const { url, docUrl, ...rest } = data;
+    return {
+      ...rest,
+      ...(url ? { url: sanitizeHttpUrl(url) ?? undefined } : {}),
+      ...(docUrl ? { docUrl: docUrl.trim() } : {}),
+    };
+  });
 
 export type CreateSeoActivityInput = z.infer<typeof createSeoActivitySchema>;
 
