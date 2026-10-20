@@ -1,5 +1,5 @@
 export const GEMINI_TIMEOUT_MS = 15_000;
-const DEFAULT_MODEL = "gemini-2.5-flash";
+const DEFAULT_MODEL = "gemini-3.5-flash";
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 
 export type TAssistantAiFailure =
@@ -24,8 +24,8 @@ export class AssistantAiError extends Error {
 
 export type TGeminiPart = {
   text?: string;
-  functionCall?: { name: string; args?: Record<string, unknown> };
-  functionResponse?: { name: string; response: Record<string, unknown> };
+  functionCall?: { name: string; args?: Record<string, unknown>; id?: string };
+  functionResponse?: { name: string; response: Record<string, unknown>; id?: string };
   thoughtSignature?: string;
 };
 

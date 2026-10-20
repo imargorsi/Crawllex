@@ -72,6 +72,7 @@ export async function answerWithAi(query: string, deps: TAiDeps): Promise<TAiAns
       responses.push({
         functionResponse: {
           name: call.name,
+          id: call.id,
           response: result.ok ? { data: result.data } : { error: result.error },
         },
       });
