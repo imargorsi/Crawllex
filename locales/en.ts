@@ -1122,6 +1122,7 @@ export interface Translation {
         colBacklinkDetails: string;
         colChangeDetails: string;
         colBlogLink: string;
+        pushedBadge: string;
         colUrls: string;
         colPageLink: string;
         colActions: string;
@@ -2732,6 +2733,7 @@ const translation: Translation = {
         colBacklinkDetails: "Backlink Details",
         colChangeDetails: "Work Details",
         colBlogLink: "Blog Link",
+        pushedBadge: "Pushed As Draft",
         colUrls: "Links",
         colPageLink: "Page Link",
         colActions: "Actions",

@@ -1131,6 +1131,7 @@ const translation: Translation = {
         colBacklinkDetails: "تفاصيل الرابط",
         colChangeDetails: "تفاصيل العمل",
         colBlogLink: "رابط المدونة",
+        pushedBadge: "أُرسلت كمسودة",
         colUrls: "الروابط",
         colPageLink: "رابط الصفحة",
         colActions: "الإجراءات",

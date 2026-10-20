@@ -24,6 +24,7 @@ export type TSeoActivityBlog = {
   title: string | null;
   url: string | null;
   occurredOn: string | null;
+  pushedToWordpress?: boolean;
 };
 
 export type TSeoActivityBacklink = {
