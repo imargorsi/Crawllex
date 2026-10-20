@@ -51,6 +51,16 @@ export function geminiModelId(): string {
   return process.env.GEMINI_MODEL?.trim() || DEFAULT_MODEL;
 }
 
+const THINKING_LEVELS = ["minimal", "low", "medium", "high"] as const;
+
+/** Optional thinking level (`GEMINI_THINKING_LEVEL`). Unset = model default. Lower = faster answers. */
+export function geminiThinkingConfig(): { thinkingLevel: (typeof THINKING_LEVELS)[number] } | null {
+  const level = process.env.GEMINI_THINKING_LEVEL?.trim();
+  if (!level) return null;
+  if (!(THINKING_LEVELS as readonly string[]).includes(level)) return null;
+  return { thinkingLevel: level as (typeof THINKING_LEVELS)[number] };
+}
+
 /**
  * One generateContent call. Returns the model's content (kept verbatim so
  * thought signatures survive the round trip). Never logs the key or the body.
@@ -84,7 +94,10 @@ async function postGenerateContent(request: TGeminiRequest, apiKey: string): Pro
       },
       body: JSON.stringify({
         ...request,
-        generationConfig: { temperature: 0 },
+        generationConfig: {
+          temperature: 0,
+          ...(geminiThinkingConfig() ? { thinkingConfig: geminiThinkingConfig() } : {}),
+        },
       }),
       redirect: "error",
       signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
