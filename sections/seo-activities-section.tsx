@@ -156,6 +156,16 @@ export function SeoActivitiesSection() {
     };
 
     if (type === "blogs") {
+      if (values.pushToWordpress) {
+        // The post's URL comes back from WordPress, so no url is sent.
+        return {
+          occurredOn: base.occurredOn,
+          type,
+          title: values.title.trim(),
+          pushToWordpress: true,
+          docUrl: values.docUrl.trim(),
+        };
+      }
       return { ...base, type, title: values.title.trim() };
     }
     if (type === "backlinks") {
@@ -185,7 +195,11 @@ export function SeoActivitiesSection() {
       await createMutation.mutateAsync(buildPayload(input.type, input.values));
       if (input.type !== listQuery.type) onTypeChange(input.type);
       else deleteQueryParams(["page"]);
-      notify.success(t(`quickAdd.success.${input.type}`));
+      notify.success(
+        input.type === "blogs" && input.values.pushToWordpress
+          ? t("quickAdd.pushSuccess")
+          : t(`quickAdd.success.${input.type}`),
+      );
     } catch (err) {
       const message =
         err instanceof ApiError

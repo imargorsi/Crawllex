@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { ValidationError } from "@/lib/api/http-errors";
 import { SEO_ACTIVITY_TYPES } from "@/lib/seo-activities/constants";
+import { parseGoogleDocId } from "@/lib/seo-activities/google-doc-url";
 import { sanitizeHttpUrl } from "@/lib/seo-activities/sanitize-url";
 import {
   DISPLAY_NAME_MAX_LENGTH,
@@ -78,14 +79,56 @@ function refineTypeSpecificFields(
   }
 }
 
+/**
+ * Create accepts an optional WordPress push for blogs. When pushing, the post's URL comes from WordPress,
+ * so the url field is not required.
+ */
 export const createSeoActivitySchema = z
   .object({
     type: z.enum(SEO_ACTIVITY_TYPES),
-    ...contentFields,
+    url: z.string().trim().optional(),
+    occurredOn: isoDateSchema,
+    title: contentFields.title,
+    anchorText: contentFields.anchorText,
+    details: contentFields.details,
+    pushToWordpress: z.boolean().optional().default(false),
+    docUrl: z.string().trim().optional(),
   })
   .superRefine((data, ctx) => {
     refineTypeSpecificFields(data, ctx, data.type);
-  });
+
+    if (data.pushToWordpress) {
+      if (data.type !== "blogs") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["pushToWordpress"],
+          message: "Only blog posts can be pushed to WordPress.",
+        });
+      } else if (!data.docUrl || !parseGoogleDocId(data.docUrl)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["docUrl"],
+          message: "Enter A Google Docs Link (docs.google.com/document/d/...).",
+        });
+      }
+      return;
+    }
+
+    if (!data.url) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["url"], message: "Url Is Required." });
+    } else if (!sanitizeHttpUrl(data.url)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["url"],
+        message: "Enter A Valid Http Or Https Url.",
+      });
+    }
+  })
+  .transform((data) => ({
+    ...data,
+    url: data.url ? (sanitizeHttpUrl(data.url) ?? undefined) : undefined,
+    docUrl: data.docUrl ? data.docUrl.trim() : undefined,
+  }));
 
 export type CreateSeoActivityInput = z.infer<typeof createSeoActivitySchema>;
 

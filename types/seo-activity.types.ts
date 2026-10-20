@@ -10,6 +10,11 @@ export type TSeoActivityDto = {
   title: string | null;
   anchorText: string | null;
   details: string | null;
+  docUrl: string | null;
+  pushedToWordpress: boolean;
+  wpPostId: number | null;
+  wpPostLink: string | null;
+  wpPushedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -19,6 +24,7 @@ export type TSeoActivityBlog = {
   title: string | null;
   url: string | null;
   occurredOn: string | null;
+  pushedToWordpress?: boolean;
 };
 
 export type TSeoActivityBacklink = {

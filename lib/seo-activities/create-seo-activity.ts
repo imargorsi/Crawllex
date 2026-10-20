@@ -3,6 +3,7 @@ import type { Types } from "mongoose";
 
 import { ApiResponse } from "@/lib/api/response";
 import type { AuthContext } from "@/lib/auth/guards";
+import { publishBlogDraft } from "@/lib/seo-activities/publish-blog-draft";
 import { serializeSeoActivity } from "@/lib/seo-activities/serialize-seo-activity";
 import { SeoActivity, type SeoActivityDocument } from "@/models";
 import type { CreateSeoActivityInput } from "@/schemas/seo-activity";
@@ -37,12 +38,24 @@ export async function createSeoActivity(
   input: CreateSeoActivityInput,
 ): Promise<{ activity: SeoActivityDocument }> {
   const userId = auth.user._id as Types.ObjectId;
+
+  // The push runs first. If it fails, nothing is saved and the user can retry.
+  const wordpress =
+    input.type === "blogs" && input.pushToWordpress && input.docUrl
+      ? await publishBlogDraft(projectId, { title: input.title!.trim(), docUrl: input.docUrl })
+      : null;
+
   const activity = await SeoActivity.create({
     projectId,
     activityType: input.type,
-    url: input.url,
+    url: wordpress ? wordpress.link : input.url,
     occurredOn: input.occurredOn,
     ...typeSpecificFields(input),
+    docUrl: wordpress ? input.docUrl : null,
+    pushedToWordpress: Boolean(wordpress),
+    wpPostId: wordpress ? wordpress.postId : null,
+    wpPostLink: wordpress ? wordpress.link : null,
+    wpPushedAt: wordpress ? wordpress.pushedAt : null,
     createdBy: userId,
     updatedBy: userId,
   });

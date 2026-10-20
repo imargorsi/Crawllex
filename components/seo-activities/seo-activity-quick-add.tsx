@@ -4,12 +4,14 @@ import { Icons } from "@/lib/frontend/icons/app-icons";
 
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
 import { Input } from "@/components/input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DialogSectionDivider } from "@/components/ui/dialog-section-divider";
+import { parseGoogleDocId } from "@/lib/seo-activities/google-doc-url";
 import { fieldStartIcons } from "@/lib/frontend/forms/input-start-icons";
 import { SEO_ACTIVITY_TYPE_OPTIONS } from "@/lib/frontend/seo-activities/constants";
 import { isValidIsoDate } from "@/lib/frontend/seo-activities/date-range.utils";
@@ -65,11 +67,15 @@ export function SeoActivityQuickAdd({
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<TSeoActivityQuickAddValues>({
     defaultValues: emptyQuickAddValues(),
     mode: "onSubmit",
   });
+
+  const pushSelected = useWatch({ control, name: "pushToWordpress" });
+  const pushOn = type === "blogs" && !isEdit && Boolean(pushSelected);
 
   useEffect(() => {
     setMounted(true);
@@ -243,19 +249,44 @@ export function SeoActivityQuickAdd({
               />
             ) : null}
 
-            <Input
-              id="seo-quick-add-url"
-              type="url"
-              label={t("fields.url")}
-              placeholder={t("fields.urlPh")}
-              required
-              error={errors.url?.message}
-              {...register("url", {
-                required: t("validation.required"),
-                validate: (value) =>
-                  Boolean(sanitizeHttpUrl(value)) || t("validation.url"),
-              })}
-            />
+            {type === "blogs" && !isEdit ? (
+              <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                <Checkbox {...register("pushToWordpress")} />
+                <span className="type-label text-text-primary">{t("fields.pushToWordpress")}</span>
+              </label>
+            ) : null}
+
+            {/* Always registered so the rules stay current; hidden while a WordPress push is selected. */}
+            <div className={pushOn ? "hidden" : undefined}>
+              <Input
+                id="seo-quick-add-url"
+                type="url"
+                label={t("fields.url")}
+                placeholder={t("fields.urlPh")}
+                required={!pushOn}
+                error={errors.url?.message}
+                {...register("url", {
+                  required: pushOn ? false : t("validation.required"),
+                  validate: (value) =>
+                    pushOn || Boolean(sanitizeHttpUrl(value)) || t("validation.url"),
+                })}
+              />
+            </div>
+
+            <div className={pushOn ? undefined : "hidden"}>
+              <Input
+                id="seo-quick-add-doc-url"
+                type="url"
+                label={t("fields.docUrl")}
+                placeholder={t("fields.docUrlPh")}
+                required={pushOn}
+                error={errors.docUrl?.message}
+                {...register("docUrl", {
+                  validate: (value) =>
+                    !pushOn || Boolean(parseGoogleDocId(value)) || t("validation.docUrl"),
+                })}
+              />
+            </div>
 
             <Input
               id="seo-quick-add-date"

@@ -27,7 +27,7 @@
     "migrate:prod:unset-business-hours": "node scripts/with-env.mjs .env.production.local npx tsx scripts/migrate-unset-business-hours.ts",
     "service-token:issue": "node scripts/with-env.mjs .env.local npx tsx scripts/issue-service-token.ts",
     "service-token:revoke": "node scripts/with-env.mjs .env.local npx tsx scripts/issue-service-token.ts",
-    "plugin:pack":"node scripts/with-env.mjs .env.local npx tsx scripts/pack-wp-plugin.ts",
+    "plugin:pack": "node scripts/with-env.mjs .env.local npx tsx scripts/pack-wp-plugin.ts",
     "plugin:pack:prod": "node scripts/with-env.mjs .env.production.local npx tsx scripts/pack-wp-plugin.ts",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -40,6 +40,7 @@
     "@tarmiz/web-glass-toast": "^1.2.1",
     "aws4fetch": "^1.0.20",
     "bcryptjs": "^3.0.3",
+    "cheerio": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "country-telephone-data": "^0.6.3",

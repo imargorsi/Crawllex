@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import type { TAppTableColumn } from "@/components/table/app-table";
 import { TableRowIconActions } from "@/components/table/table-row-icon-actions";
+import { Badge } from "@/components/ui/badge";
 import {
   SeoActivityDetailsCell,
   SeoActivityLinkCell,
@@ -107,7 +108,14 @@ export function useSeoActivitiesTableColumns({
         {
           key: "title",
           label: t("colBlogDetails"),
-          render: (item) => <SeoActivityDetailsCell title={item.title} />,
+          render: (item) => (
+            <div className="flex min-w-0 flex-col items-start gap-1.5">
+              <SeoActivityDetailsCell title={item.title} />
+              {item.pushedToWordpress ? (
+                <Badge variant="success">{t("pushedBadge")}</Badge>
+              ) : null}
+            </div>
+          ),
         },
         {
           key: "url",

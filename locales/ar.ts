@@ -1131,6 +1131,7 @@ const translation: Translation = {
         colBacklinkDetails: "تفاصيل الرابط",
         colChangeDetails: "تفاصيل العمل",
         colBlogLink: "رابط المدونة",
+        pushedBadge: "أُرسلت كمسودة",
         colUrls: "الروابط",
         colPageLink: "رابط الصفحة",
         colActions: "الإجراءات",
@@ -1175,6 +1176,9 @@ const translation: Translation = {
           url: "الرابط",
           urlPh: "https://example.com/page",
           occurredOn: "التاريخ",
+          pushToWordpress: "إرسال كمسودة إلى الموقع المباشر",
+          docUrl: "رابط مستند Google (عام)",
+          docUrlPh: "https://docs.google.com/document/d/...",
         },
         validation: {
           required: "هذا الحقل مطلوب.",
@@ -1184,6 +1188,7 @@ const translation: Translation = {
           maxTitle: "استخدم 50 حرفًا كحد أقصى.",
           minAnchor: "استخدم حرفين على الأقل.",
           minDetails: "استخدم 4 أحرف على الأقل.",
+          docUrl: "أدخل رابط Google Docs (docs.google.com/document/d/...).",
         },
         cancel: "إلغاء",
         submit: "إضافة نشاط",
@@ -1200,6 +1205,7 @@ const translation: Translation = {
         },
         createErrorFallback: "تعذّر إنشاء النشاط.",
         updateErrorFallback: "تعذّر تحديث النشاط.",
+        pushSuccess: "تم حفظ المدونة وإرسالها إلى ووردبريس كمسودة.",
       },
     },
     leads: {
