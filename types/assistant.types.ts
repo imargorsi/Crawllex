@@ -76,7 +76,7 @@ export type TAssistantHistoryItem = {
 export type TAssistantQueryResult = {
   message: string;
   intent: TAssistantIntent;
-  /** Which path answered: Gemini tools (`ai`) or the rule-based parser (`nlp`). */
+  /** Which path answered: LLM tools (`ai`) or the rule-based parser (`nlp`). */
   source: "ai" | "nlp";
   action?: TAssistantAction;
   items?: TAssistantListItem[];
