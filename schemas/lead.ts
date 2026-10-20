@@ -120,6 +120,14 @@ const idempotencyKeySchema = z
 export const ingestVerifySchema = z.object({
   pluginVersion: pluginVersionSchema,
   siteUrl: z.string().trim().max(LEAD_SOURCE_SITE_URL_MAX_LENGTH).optional(),
+  /** Sent by the plugin when it created a WordPress application password on connect. */
+  wpCredentials: z
+    .object({
+      username: z.string().trim().min(1).max(60),
+      applicationPassword: z.string().trim().min(1).max(200),
+      applicationPasswordUuid: z.string().trim().min(1).max(64),
+    })
+    .optional(),
 });
 
 export const ingestLeadSchema = z.object({

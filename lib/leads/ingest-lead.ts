@@ -14,6 +14,7 @@ import { normalizeLeadEmail, normalizeLeadPhone } from "@/lib/leads/normalize";
 import { serializeLead } from "@/lib/leads/serialize-lead";
 import { isDuplicateKeyError } from "@/lib/roles/role-mutation.utils";
 import { stampLeadSourceSiteUrl } from "@/lib/leads/lead-source-site-url";
+import { storeLeadSourceWpCredentials, type TWpCredentialsInput } from "@/lib/leads/wp-credentials";
 import { Lead, LeadSource, type LeadDocument, type LeadSourceDocument } from "@/models";
 import type { IngestLeadInput } from "@/schemas/lead";
 import type { TLeadIngestResultDto, TLeadIngestVerifyDto } from "@/types/lead.types";
@@ -59,6 +60,7 @@ async function recordLeadSourceIngestSuccess(source: LeadSourceDocument): Promis
 export async function verifyLeadSourceIngest(
   source: LeadSourceDocument,
   siteUrl?: string,
+  wpCredentials?: TWpCredentialsInput,
 ): Promise<TLeadIngestVerifyDto> {
   try {
     await assertProjectActiveForLeads(String(source.projectId), LEAD_INGEST_INACTIVE_MESSAGE);
@@ -82,6 +84,9 @@ export async function verifyLeadSourceIngest(
     },
   );
   await stampLeadSourceSiteUrl(source, siteUrl);
+  if (wpCredentials) {
+    await storeLeadSourceWpCredentials(source, wpCredentials);
+  }
 
   return {
     source: {

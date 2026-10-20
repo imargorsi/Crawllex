@@ -18,6 +18,6 @@ export const POST = withApiHandler(async (request) => {
   const source = await requireLeadSourceFromRequest(request);
   const body = await readJsonBody(request);
   const input = ingestVerifySchema.parse(body);
-  const payload = await verifyLeadSourceIngest(source, input.siteUrl);
+  const payload = await verifyLeadSourceIngest(source, input.siteUrl, input.wpCredentials);
   return buildVerifyLeadSourceResponse(payload);
 });
