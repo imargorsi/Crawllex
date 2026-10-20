@@ -29,6 +29,7 @@ import {
   useDeleteSeoActivityMutation,
   useSeoActivitiesQuery,
   useUpdateSeoActivityMutation,
+  type TSeoActivityUpdatePayload,
 } from "@/features/seo-activities/seo-activities.api";
 import { useQueryParams } from "@/hooks/use-query-params.hook";
 import { ApiError } from "@/lib/frontend/api/errors";
@@ -175,6 +176,21 @@ export function SeoActivitiesSection() {
     return { ...base, type, details: values.details.trim() };
   }
 
+  /** Edit never re-pushes to WordPress, so an update always carries a url and no push fields. */
+  function buildUpdatePayload(
+    type: TSeoActivityType,
+    values: TSeoActivityQuickAddValues,
+  ): TSeoActivityUpdatePayload {
+    const base = {
+      url: values.url.trim(),
+      occurredOn: values.occurredOn.trim(),
+    };
+
+    if (type === "blogs") return { ...base, title: values.title.trim() };
+    if (type === "backlinks") return { ...base, anchorText: values.anchorText.trim() };
+    return { ...base, details: values.details.trim() };
+  }
+
   async function onSave(input: {
     mode: "create" | "edit";
     type: TSeoActivityType;
@@ -183,15 +199,9 @@ export function SeoActivitiesSection() {
   }) {
     try {
       if (input.mode === "edit" && input.activityId) {
-        // Edit never re-pushes to WordPress, so the payload always carries a url.
-        const { type: _type, pushToWordpress: _push, docUrl: _docUrl, ...rest } = buildPayload(
-          input.type,
-          input.values,
-        );
-        const updatePayload = { ...rest, url: rest.url ?? "" };
         await updateMutation.mutateAsync({
           activityId: input.activityId,
-          payload: updatePayload,
+          payload: buildUpdatePayload(input.type, input.values),
         });
         notify.success(t(`quickAdd.updateSuccess.${input.type}`));
         return;
