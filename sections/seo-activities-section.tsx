@@ -31,6 +31,7 @@ import {
   useUpdateSeoActivityMutation,
   type TSeoActivityUpdatePayload,
 } from "@/features/seo-activities/seo-activities.api";
+import { useLeadSourcesQuery } from "@/features/leads/lead-sources.api";
 import { useQueryParams } from "@/hooks/use-query-params.hook";
 import { ApiError } from "@/lib/frontend/api/errors";
 import { type TDateRange } from "@/lib/frontend/seo-activities/date-range.utils";
@@ -96,6 +97,8 @@ export function SeoActivitiesSection() {
     enabled: Boolean(projectId),
   });
   const createMutation = useCreateSeoActivityMutation(projectId);
+  const leadSourcesQuery = useLeadSourcesQuery(projectId, { enabled: Boolean(projectId) });
+  const canPushToWordpress = Boolean(leadSourcesQuery.data?.items.some((item) => item.canPushDrafts));
   const updateMutation = useUpdateSeoActivityMutation(projectId);
   const deleteMutation = useDeleteSeoActivityMutation(projectId);
 
@@ -352,6 +355,7 @@ export function SeoActivitiesSection() {
         target={editorTarget}
         onOpenChange={setEditorOpen}
         onSave={onSave}
+        canPushToWordpress={canPushToWordpress}
       />
 
       <ConfirmDialog

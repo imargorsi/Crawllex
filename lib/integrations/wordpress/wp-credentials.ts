@@ -29,3 +29,11 @@ export async function storeLeadSourceWpCredentials(
 export function readLeadSourceWpPassword(source: LeadSourceDocument): string | null {
   return source.wpAppPasswordCiphertext ? decryptSecret(source.wpAppPasswordCiphertext) : null;
 }
+
+/** True when Crawllex can push drafts to this source: connected, with a site URL and stored credentials. */
+export function canPushWpDrafts(source: LeadSourceDocument): boolean {
+  return (
+    source.status === "connected" &&
+    Boolean(source.siteUrl && source.wpUsername && source.wpAppPasswordCiphertext)
+  );
+}

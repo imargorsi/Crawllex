@@ -40,6 +40,8 @@ export type TSeoActivityEditorTarget = {
 
 type TSeoActivityQuickAddProps = {
   open: boolean;
+  /** True only when the project has a connected WordPress site with stored credentials. */
+  canPushToWordpress: boolean;
   target: TSeoActivityEditorTarget;
   onOpenChange: (open: boolean) => void;
   onSave: (input: {
@@ -52,6 +54,7 @@ type TSeoActivityQuickAddProps = {
 
 export function SeoActivityQuickAdd({
   open,
+  canPushToWordpress,
   target,
   onOpenChange,
   onSave,
@@ -75,7 +78,7 @@ export function SeoActivityQuickAdd({
   });
 
   const pushSelected = useWatch({ control, name: "pushToWordpress" });
-  const pushOn = type === "blogs" && !isEdit && Boolean(pushSelected);
+  const pushOn = type === "blogs" && !isEdit && canPushToWordpress && Boolean(pushSelected);
 
   useEffect(() => {
     setMounted(true);
@@ -249,7 +252,7 @@ export function SeoActivityQuickAdd({
               />
             ) : null}
 
-            {type === "blogs" && !isEdit ? (
+            {type === "blogs" && !isEdit && canPushToWordpress ? (
               <label className="flex items-center gap-2.5 cursor-pointer select-none">
                 <Checkbox {...register("pushToWordpress")} />
                 <span className="type-label text-text-primary">{t("fields.pushToWordpress")}</span>

@@ -1,3 +1,4 @@
+import { canPushWpDrafts } from "@/lib/integrations/wordpress/wp-credentials";
 import type { LeadSourceDocument } from "@/models/LeadSource";
 import type { TLeadSourceDto } from "@/types/lead-source.types";
 
@@ -10,6 +11,7 @@ export function serializeLeadSource(doc: LeadSourceDocument): TLeadSourceDto {
     status: doc.status,
     keyPrefix: doc.keyPrefix,
     siteUrl: doc.siteUrl ? doc.siteUrl : null,
+    canPushDrafts: canPushWpDrafts(doc),
     lastVerifiedAt: doc.lastVerifiedAt ? doc.lastVerifiedAt.toISOString() : null,
     lastIngestedAt: doc.lastIngestedAt ? doc.lastIngestedAt.toISOString() : null,
     lastError: doc.lastError ? doc.lastError : null,

@@ -12,6 +12,8 @@ export type TLeadSourceDto = {
   status: TLeadSourceStatus;
   keyPrefix: string;
   siteUrl: string | null;
+  /** WordPress draft pushes work for this source (credentials stored and connected). */
+  canPushDrafts: boolean;
   lastVerifiedAt: string | null;
   lastIngestedAt: string | null;
   lastError: string | null;
