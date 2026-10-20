@@ -336,6 +336,8 @@ export interface Translation {
       historyLabel: string;
       historyLoading: string;
       answerLabel: string;
+      sourceAi: string;
+      sourceNlp: string;
       emptyAnswer: string;
       queryError: string;
       tipTitle: string;
@@ -1927,6 +1929,8 @@ const translation: Translation = {
       historyLabel: "Recent Queries",
       historyLoading: "Loading recent queries…",
       answerLabel: "Answer",
+      sourceAi: "AI Answer",
+      sourceNlp: "Rule-Based Answer",
       emptyAnswer: "Pick a suggestion or type a question to see a quick project summary.",
       queryError: "Could not run that query. Try again.",
       tipTitle: "Pro Tip",
