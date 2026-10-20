@@ -30,6 +30,7 @@ import { getAnalyticsDimensions } from "@/lib/integrations/read-analytics";
 import { countLeadsInRange } from "@/lib/leads/list-leads";
 import {
   AssistantAiError,
+  generateGeminiContent,
   type TGeminiContent,
 } from "@/lib/assistant/ai/gemini-client";
 import {
@@ -52,6 +53,50 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
+});
+
+describe("gemini client rate limit", () => {
+  const okBody = {
+    candidates: [{ content: { role: "model", parts: [{ text: "ok" }] } }],
+  };
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it("retries once on 429 and returns the second response", async () => {
+    vi.stubEnv("GEMINI_API_KEY", "test-key");
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response("{}", { status: 429 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify(okBody), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const content = await generateGeminiContent({
+      systemInstruction: { parts: [{ text: "s" }] },
+      contents: [{ role: "user", parts: [{ text: "q" }] }],
+      tools: [],
+    });
+    expect(content.parts[0].text).toBe("ok");
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("gives up after a second 429 and keeps the status", async () => {
+    vi.stubEnv("GEMINI_API_KEY", "test-key");
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("{}", { status: 429 })),
+    );
+
+    await expect(
+      generateGeminiContent({
+        systemInstruction: { parts: [{ text: "s" }] },
+        contents: [{ role: "user", parts: [{ text: "q" }] }],
+        tools: [],
+      }),
+    ).rejects.toMatchObject({ reason: "http", status: 429 });
+  });
 });
 
 describe("assistant AI tools", () => {
