@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
 import { Icons } from "@/lib/frontend/icons/app-icons";
+import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { TAssistantQueryResult } from "@/types/assistant.types";
@@ -24,7 +25,19 @@ export function DashboardAssistantAnswer({ answer }: TDashboardAssistantAnswerPr
       )}
     >
       <div className="flex shrink-0 items-center justify-between gap-2">
-        <p className="type-caption text-text-muted">{t("answerLabel")}</p>
+        <div className="flex min-w-0 items-center gap-2">
+          <p className="type-caption text-text-muted">{t("answerLabel")}</p>
+          <Badge
+            variant="outline"
+            className="gap-1 whitespace-nowrap"
+            data-source={answer.source}
+          >
+            {answer.source === "ai" ? (
+              <Icons.sparkles className="size-3" aria-hidden />
+            ) : null}
+            {answer.source === "ai" ? t("sourceAi") : t("sourceNlp")}
+          </Badge>
+        </div>
         {answer.action ? (
           <Link
             href={answer.action.route}

@@ -340,6 +340,8 @@ const translation: Translation = {
       historyLabel: "الاستعلامات الأخيرة",
       historyLoading: "جارٍ تحميل الاستعلامات الأخيرة…",
       answerLabel: "الإجابة",
+      sourceAi: "إجابة ذكية",
+      sourceNlp: "إجابة وفق القواعد",
       emptyAnswer: "اختر اقتراحًا أو اكتب سؤالًا لعرض ملخص سريع للمشروع.",
       queryError: "تعذّر تنفيذ هذا الاستعلام. حاول مرة أخرى.",
       tipTitle: "نصيحة",
