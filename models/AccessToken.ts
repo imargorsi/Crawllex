@@ -6,6 +6,8 @@ const accessTokenSchema = new Schema(
     name: { type: String, required: true, default: "api" },
     tokenHash: { type: String, required: true },
     expiresAt: { type: Date, default: null },
+    /** Non-expiring integration token. Honored only when CRAWLEX_SERVICE_TOKENS_ENABLED=true. */
+    serviceToken: { type: Boolean, default: false },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );
