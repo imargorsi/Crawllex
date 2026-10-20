@@ -17,6 +17,9 @@ function zodFieldErrors(error: ZodError): Record<string, string[]> {
   return fieldErrors;
 }
 
+// Gemini tool loop can take several model calls (25 s each); allow room for them.
+export const maxDuration = 60;
+
 export const POST = withApiHandler(async (request, context) => {
   await connectDb();
 
