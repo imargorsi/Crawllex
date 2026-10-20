@@ -25,7 +25,9 @@
     "migrate:prod:seo-activity-types": "node scripts/with-env.mjs .env.production.local npx tsx scripts/migrate-seo-activity-types.ts",
     "migrate:prod:drop-seo-activity-index": "node scripts/with-env.mjs .env.production.local npx tsx scripts/drop-stale-seo-activity-index.ts",
     "migrate:prod:unset-business-hours": "node scripts/with-env.mjs .env.production.local npx tsx scripts/migrate-unset-business-hours.ts",
-    "plugin:pack": "node scripts/with-env.mjs .env.local npx tsx scripts/pack-wp-plugin.ts",
+    "service-token:issue": "node scripts/with-env.mjs .env.local npx tsx scripts/issue-service-token.ts",
+    "service-token:revoke": "node scripts/with-env.mjs .env.local npx tsx scripts/issue-service-token.ts",
+    "plugin:pack":"node scripts/with-env.mjs .env.local npx tsx scripts/pack-wp-plugin.ts",
     "plugin:pack:prod": "node scripts/with-env.mjs .env.production.local npx tsx scripts/pack-wp-plugin.ts",
     "test": "vitest run",
     "test:watch": "vitest"
