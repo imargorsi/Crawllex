@@ -25,7 +25,7 @@ import type { TLeadSourceListDto, TLeadSourceSecretDto } from "@/types/lead-sour
 const ALREADY_CONNECTED_MESSAGE = "A WordPress lead source is already connected.";
 const INACTIVE_CONNECT_MESSAGE = "Project must be active to connect a lead source.";
 
-async function findProjectSource(
+export async function findProjectSource(
   projectId: string,
   sourceId: string,
 ): Promise<LeadSourceDocument> {
