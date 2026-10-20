@@ -232,7 +232,9 @@ describe("answerWithAi", () => {
   });
 
   it("puts today's date in the system instruction", async () => {
-    const generate = vi.fn(async (_request: TChatRequest) => textReply("ok"));
+    const generate = vi.fn<(request: TChatRequest) => Promise<TAssistantMessage>>(
+      async () => textReply("ok"),
+    );
     await answerWithAi("q", { generate, execute: vi.fn() }, new Date("2026-10-20T10:00:00Z"));
     const system = generate.mock.calls[0]?.[0].messages[0];
     expect(system).toMatchObject({ role: "system" });
