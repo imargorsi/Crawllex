@@ -263,12 +263,30 @@ function dimensionSource(
   return "gsc";
 }
 
+/** Action words are write requests. The assistant is read-only, so these never produce an answer. */
+const WRITE_ACTION_TOKENS = new Set([
+  "invite",
+  "delete",
+  "remove",
+  "create",
+  "add",
+  "update",
+  "edit",
+  "publish",
+  "send",
+  "email",
+  "change",
+]);
+
 export function parseAssistantQuery(query: string): TAssistantParse {
   const normalized = correctAssistantQuery(
     normalizeAssistantQuery(query),
     ASSISTANT_LEXICON_TERM_SET,
   );
   if (!normalized) return { kind: "unknown" };
+  if (normalized.split(/\s+/).some((token) => WRITE_ACTION_TOKENS.has(token))) {
+    return { kind: "unknown" };
+  }
 
   const slots = collectSlots(normalized);
   const window = pickWindow(slots.windows);
