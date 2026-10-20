@@ -125,7 +125,10 @@ export async function tryAnswerWithAi(
     return answer;
   } catch (error) {
     const reason = error instanceof AssistantAiError ? error.reason : "unexpected";
-    console.error(`[assistant-ai] Falling back to NLP. Reason: ${reason}.`);
+    const status = error instanceof AssistantAiError ? error.status : undefined;
+    console.error(
+      `[assistant-ai] Falling back to NLP. Reason: ${reason}${status ? ` (HTTP ${status})` : ""}.`,
+    );
     recordAiFailure(now);
     return null;
   }

@@ -1,4 +1,5 @@
 export const GEMINI_TIMEOUT_MS = 25_000;
+export const GEMINI_RATE_LIMIT_RETRY_MS = 2_000;
 const DEFAULT_MODEL = "gemini-3.5-flash";
 const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
 
@@ -58,9 +59,24 @@ export async function generateGeminiContent(request: TGeminiRequest): Promise<TG
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new AssistantAiError("disabled");
 
-  let response: Response;
+  let response = await postGenerateContent(request, apiKey);
+  if (response.status === 429) {
+    // Free-tier per-minute limit. One short retry, then give up and let the caller fall back.
+    await new Promise((resolve) => setTimeout(resolve, GEMINI_RATE_LIMIT_RETRY_MS));
+    response = await postGenerateContent(request, apiKey);
+  }
+
+  if (!response.ok) throw new AssistantAiError("http", response.status);
+
+  const data: unknown = await response.json().catch(() => null);
+  const content = extractContent(data);
+  if (!content) throw new AssistantAiError("invalid_response");
+  return content;
+}
+
+async function postGenerateContent(request: TGeminiRequest, apiKey: string): Promise<Response> {
   try {
-    response = await fetch(`${ENDPOINT}/${geminiModelId()}:generateContent`, {
+    return await fetch(`${ENDPOINT}/${geminiModelId()}:generateContent`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -79,13 +95,6 @@ export async function generateGeminiContent(request: TGeminiRequest): Promise<TG
     }
     throw new AssistantAiError("http");
   }
-
-  if (!response.ok) throw new AssistantAiError("http", response.status);
-
-  const data: unknown = await response.json().catch(() => null);
-  const content = extractContent(data);
-  if (!content) throw new AssistantAiError("invalid_response");
-  return content;
 }
 
 function extractContent(data: unknown): TGeminiContent | null {
