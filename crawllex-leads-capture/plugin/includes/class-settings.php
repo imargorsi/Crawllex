@@ -73,7 +73,45 @@ final class Crawllex_Lead_Capture_Settings
         }
 
         $client = new Crawllex_Lead_Capture_Client($dashboard_url, $source_key);
-        $result = $client->verify();
+        $wp_user_id = get_current_user_id();
+        $old_uuid = $existing['wp_app_password_uuid'];
+        $old_user_id = $existing['wp_user_id'];
+
+        // WordPress shows an application password only once, so create one only when none is recorded.
+        $created = null;
+        if ($old_uuid === '') {
+            $created = Crawllex_Lead_Capture_App_Password::create($wp_user_id);
+            if (is_wp_error($created)) {
+                self::set_notice('error', $created->get_error_message());
+                self::redirect();
+            }
+        }
+
+        $result = $client->verify($created);
+
+        // Crawllex no longer holds the password (lost or never stored): replace it and send again.
+        if ($result['ok'] && $created === null && empty($result['data']['wpCredentialsStored'])) {
+            $created = Crawllex_Lead_Capture_App_Password::create($wp_user_id);
+            if (is_wp_error($created)) {
+                self::set_notice('error', $created->get_error_message());
+                self::redirect();
+            }
+            $result = $client->verify($created);
+        }
+
+        if (!$result['ok'] && $created !== null) {
+            Crawllex_Lead_Capture_App_Password::delete($created['user_id'], $created['uuid']);
+        }
+
+        if ($result['ok'] && $created !== null) {
+            if ($old_uuid !== '' && $old_uuid !== $created['uuid']) {
+                Crawllex_Lead_Capture_App_Password::delete($old_user_id, $old_uuid);
+            }
+            Crawllex_Lead_Capture_Plugin::update_options(array(
+                'wp_user_id' => $created['user_id'],
+                'wp_app_password_uuid' => $created['uuid'],
+            ));
+        }
 
         if ($result['ok']) {
             Crawllex_Lead_Capture_Updater::clear_cache();

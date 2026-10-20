@@ -15,12 +15,20 @@ final class Crawllex_Lead_Capture_Client
     /**
      * @return array{ok: bool, status: int, message: string, data: mixed}
      */
-    public function verify(): array
+    public function verify(?array $wp_credentials = null): array
     {
-        return $this->post(CRAWLLEX_LC_VERIFY_PATH, array(
+        $body = array(
             'pluginVersion' => CRAWLLEX_LC_VERSION,
             'siteUrl' => home_url(),
-        ));
+        );
+        if ($wp_credentials !== null) {
+            $body['wpCredentials'] = array(
+                'username' => $wp_credentials['username'],
+                'applicationPassword' => $wp_credentials['password'],
+                'applicationPasswordUuid' => $wp_credentials['uuid'],
+            );
+        }
+        return $this->post(CRAWLLEX_LC_VERIFY_PATH, $body);
     }
 
     /**

@@ -85,6 +85,8 @@ export type TLeadIngestVerifyDto = {
     name: string;
     provider: TLeadSourceProvider;
   };
+  /** True when Crawllex holds a WordPress application password for draft pushes. */
+  wpCredentialsStored: boolean;
 };
 
 export type TLeadIngestResultDto = {

@@ -30,7 +30,7 @@ final class Crawllex_Lead_Capture_Plugin
     }
 
     /**
-     * @return array{base_url: string, source_key: string, last_verified_at: string, last_status: string, ingest_count: int, failed_count: int, logs: array<int, array<string, string>>}
+     * @return array{base_url: string, source_key: string, wp_user_id: int, wp_app_password_uuid: string, last_verified_at: string, last_status: string, ingest_count: int, failed_count: int, logs: array<int, array<string, string>>}
      */
     public static function options(): array
     {
@@ -42,6 +42,8 @@ final class Crawllex_Lead_Capture_Plugin
         return array(
             'base_url' => isset($stored['base_url']) ? (string) $stored['base_url'] : '',
             'source_key' => isset($stored['source_key']) ? (string) $stored['source_key'] : '',
+            'wp_user_id' => isset($stored['wp_user_id']) ? (int) $stored['wp_user_id'] : 0,
+            'wp_app_password_uuid' => isset($stored['wp_app_password_uuid']) ? (string) $stored['wp_app_password_uuid'] : '',
             'last_verified_at' => isset($stored['last_verified_at']) ? (string) $stored['last_verified_at'] : '',
             'last_status' => isset($stored['last_status']) ? (string) $stored['last_status'] : '',
             'ingest_count' => isset($stored['ingest_count']) ? (int) $stored['ingest_count'] : 0,
@@ -59,6 +61,8 @@ final class Crawllex_Lead_Capture_Plugin
         $allowed = array(
             'base_url',
             'source_key',
+            'wp_user_id',
+            'wp_app_password_uuid',
             'last_verified_at',
             'last_status',
             'ingest_count',

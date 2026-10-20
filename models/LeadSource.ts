@@ -30,6 +30,13 @@ const leadSourceSchema = new Schema(
     keyCiphertext: { type: String, default: null },
     /** WordPress site URL reported by the plugin on verify/ingest. */
     siteUrl: { type: String, default: null, trim: true },
+    /** WordPress user that owns the application password used for draft pushes. */
+    wpUsername: { type: String, default: null, trim: true },
+    /** WordPress application password UUID (for revoke / reconnect). Not secret. */
+    wpAppPasswordUuid: { type: String, default: null, trim: true },
+    /** AES-GCM payload of the WordPress application password. Never returned to the client. */
+    wpAppPasswordCiphertext: { type: String, default: null },
+    wpCredentialsUpdatedAt: { type: Date, default: null },
     lastVerifiedAt: { type: Date, default: null },
     lastIngestedAt: { type: Date, default: null },
     lastError: { type: String, default: null, trim: true },
@@ -58,6 +65,10 @@ export type LeadSourceDocument = InferSchemaType<typeof leadSourceSchema> &
     keyPrefix: string;
     keyCiphertext: string | null;
     siteUrl: string | null;
+    wpUsername: string | null;
+    wpAppPasswordUuid: string | null;
+    wpAppPasswordCiphertext: string | null;
+    wpCredentialsUpdatedAt: Date | null;
     lastVerifiedAt: Date | null;
     lastIngestedAt: Date | null;
     lastError: string | null;
