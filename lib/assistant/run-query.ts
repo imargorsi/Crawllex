@@ -1,3 +1,6 @@
+import { generateGeminiContent } from "@/lib/assistant/ai/gemini-client";
+import { executeAssistantTool } from "@/lib/assistant/ai/tools";
+import { tryAnswerWithAi } from "@/lib/assistant/ai/run-ai-query";
 import type { AuthContext } from "@/lib/auth/guards";
 import { permissionForAssistantParse } from "@/lib/assistant/detect-intent";
 import {
@@ -20,14 +23,47 @@ function denyModule(
   return "analytics";
 }
 
+export function isAssistantAiEnabled(): boolean {
+  return process.env.ASSISTANT_AI_ENABLED === "true" && Boolean(process.env.GEMINI_API_KEY);
+}
+
+async function tryAiAnswer(
+  auth: AuthContext,
+  projectId: string,
+  query: string,
+): Promise<string | null> {
+  if (!isAssistantAiEnabled()) return null;
+  const access = await getProjectAccessForUser(auth, projectId);
+  if (!access) return null;
+  const permissions = access.permissions;
+
+  const answer = await tryAnswerWithAi(query, {
+    generate: generateGeminiContent,
+    execute: (name, args) => executeAssistantTool(name, args, projectId, permissions),
+  });
+  return answer?.message ?? null;
+}
+
 export async function runAssistantQuery(
   auth: AuthContext,
   projectId: string,
   input: AssistantQueryInput,
 ): Promise<TAssistantQueryResult> {
+  const userId = auth.user._id.toString();
+
+  const aiMessage = await tryAiAnswer(auth, projectId, input.query);
+  if (aiMessage != null) {
+    const history = await appendAssistantHistory({
+      projectId,
+      userId,
+      query: input.query,
+      intent: "ai_answer",
+    });
+    return { message: aiMessage, intent: "ai_answer", source: "ai", history };
+  }
+
   const parsed = parseAssistantQuery(input.query);
   const intent = parsed.kind;
-  const userId = auth.user._id.toString();
 
   let message: string;
   let action: TAssistantQueryResult["action"];
@@ -69,6 +105,7 @@ export async function runAssistantQuery(
   return {
     message,
     intent,
+    source: "nlp",
     action,
     items,
     history,

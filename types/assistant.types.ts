@@ -8,6 +8,7 @@ export type TAssistantIntent =
   | "analytics_metric"
   | "analytics_top"
   | "seo_count"
+  | "ai_answer"
   | "unknown";
 
 export type TAssistantAnalyticsMetric =
@@ -75,6 +76,8 @@ export type TAssistantHistoryItem = {
 export type TAssistantQueryResult = {
   message: string;
   intent: TAssistantIntent;
+  /** Which path answered: Gemini tools (`ai`) or the rule-based parser (`nlp`). */
+  source: "ai" | "nlp";
   action?: TAssistantAction;
   items?: TAssistantListItem[];
   history: TAssistantHistoryItem[];
