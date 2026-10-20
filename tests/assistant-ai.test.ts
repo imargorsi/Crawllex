@@ -32,6 +32,7 @@ import {
   AssistantAiError,
   generateChatCompletion,
   type TAssistantMessage,
+  type TChatRequest,
 } from "@/lib/assistant/ai/openrouter-client";
 import {
   answerWithAi,
@@ -228,6 +229,14 @@ describe("answerWithAi", () => {
 
     await expect(answerWithAi("loop", { generate, execute })).rejects.toMatchObject({ reason: "tool_limit" });
     expect(generate).toHaveBeenCalledTimes(5);
+  });
+
+  it("puts today's date in the system instruction", async () => {
+    const generate = vi.fn(async (_request: TChatRequest) => textReply("ok"));
+    await answerWithAi("q", { generate, execute: vi.fn() }, new Date("2026-10-20T10:00:00Z"));
+    const system = generate.mock.calls[0]?.[0].messages[0];
+    expect(system).toMatchObject({ role: "system" });
+    expect((system as { content: string }).content).toContain("Today is 2026-10-20 (UTC).");
   });
 
   it("rejects an empty model reply", async () => {
