@@ -11,9 +11,9 @@ import type { TAnalyticsOverviewDto } from "@/types/analytics.types";
 
 const emptyPulse = {
   leads: 0,
-  backlinks: 0,
-  pageViews: 0,
-  blogs: 0,
+  calls: 0,
+  emails: 0,
+  whatsapp: 0,
 };
 
 function emptyOverview(): TAnalyticsOverviewDto {

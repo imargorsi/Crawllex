@@ -5,6 +5,7 @@ import {
   ANALYTICS_INCREMENTAL_LOOKBACK_DAYS,
   ANALYTICS_MANUAL_SYNC_COOLDOWN_MS,
   ANALYTICS_SYNC_PROJECT_THROTTLE_MS,
+  type TAnalyticsDimensionType,
   type TGoogleIntegrationService,
 } from "@/lib/integrations/constants";
 import {
@@ -16,6 +17,7 @@ import {
 import {
   fetchGa4DailyTotals,
   fetchGa4TopDimensionsByDay,
+  fetchGa4TopEventsByDay,
   normalizeGa4PropertyId,
 } from "@/lib/integrations/google/analytics";
 import { formatGoogleError, GoogleNotConfiguredError } from "@/lib/integrations/google/auth";
@@ -120,6 +122,7 @@ async function markIntegrationError(
 async function markIntegrationSynced(
   integrationId: Types.ObjectId,
   expectedPropertyId: string,
+  extraSet: { eventsBackfilledAt?: Date } = {},
 ): Promise<boolean> {
   const updated = await ProjectIntegration.findOneAndUpdate(
     {
@@ -132,6 +135,7 @@ async function markIntegrationSynced(
         status: "connected",
         lastError: null,
         lastSyncedAt: new Date(),
+        ...extraSet,
       },
     },
   );
@@ -141,7 +145,7 @@ async function markIntegrationSynced(
 async function replaceDimensionRows(params: {
   projectId: Types.ObjectId;
   source: "gsc" | "ga4";
-  dimensionType: "query" | "page" | "country" | "device" | "landing_page" | "channel_group";
+  dimensionType: TAnalyticsDimensionType;
   dates: string[];
   rows: Array<{
     date: string;
@@ -152,6 +156,7 @@ async function replaceDimensionRows(params: {
     position?: number | null;
     sessions?: number | null;
     totalUsers?: number | null;
+    eventCount?: number | null;
   }>;
 }): Promise<void> {
   if (params.dates.length === 0) return;
@@ -178,6 +183,7 @@ async function replaceDimensionRows(params: {
       position: row.position ?? null,
       sessions: row.sessions ?? null,
       totalUsers: row.totalUsers ?? null,
+      eventCount: row.eventCount ?? null,
     })),
     { ordered: false },
   );
@@ -328,11 +334,16 @@ async function syncGa4Integration(
       );
     }
 
-    const [countries, landingPages, pages, channelGroups] = await Promise.all([
+    // Events were added after the first sync, so older projects need one 90-day event backfill.
+    const eventsStart = integration.eventsBackfilledAt
+      ? startDate
+      : addUtcDays(endDate, -(ANALYTICS_BACKFILL_DAYS - 1));
+    const [countries, landingPages, pages, channelGroups, events] = await Promise.all([
       fetchGa4TopDimensionsByDay(normalizedId, startDate, endDate, "country"),
       fetchGa4TopDimensionsByDay(normalizedId, startDate, endDate, "landingPage"),
       fetchGa4TopDimensionsByDay(normalizedId, startDate, endDate, "pagePath"),
       fetchGa4TopDimensionsByDay(normalizedId, startDate, endDate, "sessionDefaultChannelGroup"),
+      fetchGa4TopEventsByDay(normalizedId, eventsStart, endDate),
     ]);
 
     if (!(await isSyncTargetStillValid(integrationId, expectedPropertyId))) {
@@ -372,9 +383,22 @@ async function syncGa4Integration(
         dates: allDates,
         rows: channelGroups,
       }),
+      replaceDimensionRows({
+        projectId: integration.projectId,
+        source: "ga4",
+        dimensionType: "event_name",
+        dates: enumerateUtcDateRange(eventsStart, endDate),
+        rows: events.map((row) => ({
+          date: row.date,
+          dimensionValue: row.eventName,
+          eventCount: row.eventCount,
+        })),
+      }),
     ]);
 
-    const stillValid = await markIntegrationSynced(integrationId, expectedPropertyId);
+    const stillValid = await markIntegrationSynced(integrationId, expectedPropertyId, {
+      eventsBackfilledAt: new Date(),
+    });
     if (!stillValid) {
       await cleanupAfterStaleSync(integration.projectId, "ga4", integrationId);
       return { ok: false, message: abortMessage };

@@ -16,10 +16,12 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageAmbientGlow } from "@/components/ui/page-ambient-glow";
 import { useProjectAccess } from "@/context/project-access-context";
 import { useSelectedProject } from "@/context/selected-project-context";
-import { useAnalyticsOverviewQuery } from "@/features/analytics/analytics.api";
+import {
+  useAnalyticsDimensionsQuery,
+  useAnalyticsOverviewQuery,
+} from "@/features/analytics/analytics.api";
 import { useAuthUserQuery } from "@/features/auth/auth.api";
 import { useLeadsQuery } from "@/features/leads/leads.api";
-import { useSeoActivitiesQuery } from "@/features/seo-activities/seo-activities.api";
 import { useSyncedAnalyticsDateRange } from "@/hooks/use-synced-analytics-date-range.hook";
 import { ApiError } from "@/lib/frontend/api/errors";
 import {
@@ -33,6 +35,7 @@ import {
   matchAnalyticsDatePreset,
   resolveAnalyticsDatePreset,
 } from "@/lib/integrations/date.utils";
+import { summarizeEvents } from "@/lib/analytics/event-summary";
 import { hasPermission, mergePermissions } from "@/lib/rbac/access";
 import { cn } from "@/lib/utils";
 
@@ -62,10 +65,10 @@ export function DashboardHomeSection() {
     { enabled: Boolean(projectId) && canViewLeads && hasRange },
   );
 
-  const seoQuery = useSeoActivitiesQuery(
+  const eventsQuery = useAnalyticsDimensionsQuery(
     projectId,
-    { type: "blogs", page: 1, per_page: 1, from, to },
-    { enabled: Boolean(projectId) && canViewSeo && hasRange },
+    { from, to, source: "ga4", dimensionType: "event_name", limit: 100 },
+    { enabled: analyticsEnabled },
   );
 
   const overviewQuery = useAnalyticsOverviewQuery(projectId, { from, to }, {
@@ -78,20 +81,25 @@ export function DashboardHomeSection() {
 
   useEffect(() => {
     if (loadErrorNotified.current) return;
-    const error = leadsQuery.error ?? seoQuery.error ?? overviewQuery.error;
+    const error = leadsQuery.error ?? eventsQuery.error ?? overviewQuery.error;
     if (!error) return;
     loadErrorNotified.current = true;
     notify.error(ApiError.messageFrom(error, t("loadError")));
-  }, [leadsQuery.error, overviewQuery.error, seoQuery.error, t]);
+  }, [leadsQuery.error, eventsQuery.error, overviewQuery.error, t]);
 
-  const typeCounts = seoQuery.data?.filters.type_counts;
+  // Without a connected GA4 property, zero would read as "no clicks" rather than "no data".
+  const contactsAvailable = canViewAnalytics && Boolean(overviewQuery.data?.integrations.ga4);
+  const events = summarizeEvents(
+    (eventsQuery.data?.rows ?? []).map((row) => ({
+      dimensionValue: row.dimensionValue,
+      eventCount: row.eventCount,
+    })),
+  );
   const pulseValues = {
     leads: canViewLeads ? (leadsQuery.data?.pagination.total ?? 0) : null,
-    backlinks: canViewSeo ? (typeCounts?.backlinks ?? 0) : null,
-    pageViews: canViewAnalytics
-      ? (overviewQuery.data?.engagement.pageViews.value ?? null)
-      : null,
-    blogs: canViewSeo ? (typeCounts?.blogs ?? 0) : null,
+    calls: contactsAvailable ? events.contacts.call : null,
+    emails: contactsAvailable ? events.contacts.email : null,
+    whatsapp: contactsAvailable ? events.contacts.whatsapp : null,
   };
 
   function onExportExcel() {
@@ -120,9 +128,9 @@ export function DashboardHomeSection() {
           value: t("export.value"),
           date: t("export.date"),
           leads: t("pulse.cards.leads"),
-          backlinks: t("pulse.cards.backlinks"),
-          pageViews: t("pulse.cards.pageViews"),
-          blogs: t("pulse.cards.blogs"),
+          calls: t("pulse.cards.calls"),
+          emails: t("pulse.cards.emails"),
+          whatsapp: t("pulse.cards.whatsapp"),
           clicks: t("trend.cards.clicks"),
           impressions: t("trend.cards.impressions"),
           ctr: t("trend.cards.ctr"),
@@ -148,8 +156,7 @@ export function DashboardHomeSection() {
 
   const pulseLoading =
     (canViewLeads && leadsQuery.isLoading) ||
-    (canViewSeo && seoQuery.isLoading) ||
-    (canViewAnalytics && overviewQuery.isLoading);
+    (canViewAnalytics && (overviewQuery.isLoading || eventsQuery.isLoading));
 
   return (
     <div className="relative flex w-full min-w-0 flex-col xl:h-full xl:min-h-0">

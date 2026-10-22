@@ -22,6 +22,15 @@ type TAggregatedDimension = Omit<TAnalyticsDimensionRowDto, "trend" | "ctr" | "p
   position: number | null;
 };
 
+/** Ranking metric per dimension: clicks (GSC), else sessions (GA4), else event count (GA4 events). */
+function primaryMetric(row: {
+  clicks?: number | null;
+  sessions?: number | null;
+  eventCount?: number | null;
+}): number {
+  return (row.clicks ?? 0) || (row.sessions ?? 0) || (row.eventCount ?? 0);
+}
+
 function average(values: number[]): number | null {
   if (values.length === 0) return null;
   return values.reduce((sum, value) => sum + value, 0) / values.length;
@@ -210,6 +219,7 @@ function aggregateDimensionRows(
     position: number | null;
     sessions: number | null;
     totalUsers: number | null;
+    eventCount?: number | null;
   }>,
 ): Map<string, TAggregatedDimension> {
   const aggregated = new Map<string, TAggregatedDimension>();
@@ -223,12 +233,14 @@ function aggregateDimensionRows(
       position: null,
       sessions: 0,
       totalUsers: 0,
+      eventCount: 0,
     };
 
     existing.clicks = (existing.clicks ?? 0) + (row.clicks ?? 0);
     existing.impressions = (existing.impressions ?? 0) + (row.impressions ?? 0);
     existing.sessions = (existing.sessions ?? 0) + (row.sessions ?? 0);
     existing.totalUsers = (existing.totalUsers ?? 0) + (row.totalUsers ?? 0);
+    existing.eventCount = (existing.eventCount ?? 0) + (row.eventCount ?? 0);
 
     if (row.position != null) {
       existing.position = (existing.position ?? 0) + row.position * (row.impressions ?? 1);
@@ -381,9 +393,8 @@ export async function getAnalyticsDimensions(
 
   const result: TAnalyticsDimensionRowDto[] = [...current.values()].map((row) => {
     const priorRow = prior.get(row.dimensionValue);
-    const currentPrimary = (row.clicks ?? 0) || (row.sessions ?? 0);
-    const priorPrimary =
-      priorRow == null ? undefined : (priorRow.clicks ?? 0) || (priorRow.sessions ?? 0);
+    const currentPrimary = primaryMetric(row);
+    const priorPrimary = priorRow == null ? undefined : primaryMetric(priorRow);
 
     return {
       ...row,
@@ -392,9 +403,7 @@ export async function getAnalyticsDimensions(
   });
 
   result.sort((a, b) => {
-    const aPrimary = (a.clicks ?? 0) || (a.sessions ?? 0);
-    const bPrimary = (b.clicks ?? 0) || (b.sessions ?? 0);
-    return bPrimary - aPrimary;
+    return primaryMetric(b) - primaryMetric(a);
   });
 
   return {

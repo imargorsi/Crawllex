@@ -16,6 +16,7 @@ export const ANALYTICS_DIMENSION_TYPES = [
   "device",
   "landing_page",
   "channel_group",
+  "event_name",
 ] as const;
 export type TAnalyticsDimensionType = (typeof ANALYTICS_DIMENSION_TYPES)[number];
 

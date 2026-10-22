@@ -278,21 +278,23 @@ const translation: Translation = {
       },
     },
     pulse: {
-      title: "نبض السيو",
+      title: "النتائج الرئيسية",
       cards: {
         leads: "العملاء المحتملون",
-        backlinks: "الروابط الخلفية",
-        pageViews: "مشاهدات الصفحة",
-        blogs: "المدونات المنشورة",
+        calls: "المكالمات",
+        emails: "نقرات البريد",
+        whatsapp: "نقرات واتساب",
       },
       descriptions: {
-        leads: "حصلت على {{count}} من العملاء المحتملين.",
-        backlinks: "اكتسبت {{count}} من الروابط الخلفية.",
-        pageViews: "سجّلت {{count}} من مشاهدات الصفحة.",
-        blogs: "نشرت {{count}} من المدونات.",
-        unavailable: "غير متاح حسب صلاحياتك على هذا المشروع.",
+        leads: "حصلت على {{count}} عميل محتمل.",
+        calls: "حصلت على {{count}} مكالمة.",
+        emails: "نقر الزوار على بريدك {{count}} مرة.",
+        whatsapp: "فتح الزوار واتساب {{count}} مرة.",
+        unavailable: "غير متاح لصلاحياتك في هذا المشروع.",
       },
     },
+
+
     trend: {
       title: "اتجاه أداء السيو",
       subtitle: "النقرات ومرات الظهور ونسبة النقر إلى الظهور والترتيب ومعدل التفاعل ومدة الجلسة للنطاق المحدد.",
@@ -1016,6 +1018,24 @@ const translation: Translation = {
         loading: "جارٍ التحميل…",
         emptyTitle: "لا توجد مصادر زيارات",
         emptyBody: "اربط Google Analytics وزامن البيانات لملء هذا الرسم.",
+      },
+
+      topEvents: {
+        title: "أهم الأحداث",
+        subtitle: "ما الذي فعله الزوار في موقعك.",
+        loading: "جارٍ التحميل…",
+        listAria: "أهم الأحداث",
+        emptyTitle: "لا توجد أحداث بعد",
+        emptyBody: "اربط Google Analytics وزامن البيانات لعرض أهم الأحداث.",
+        labels: {
+          lead: "إرسال نموذج",
+          download: "تنزيلات",
+          firstVisit: "زيارات أولى",
+          pageView: "مشاهدات الصفحات",
+          sessionStart: "جلسات بدأت",
+          engagement: "تفاعلات",
+          click: "نقرات",
+        },
       },
       demographics: {
         title: "التركيبة السكانية للمستخدمين",

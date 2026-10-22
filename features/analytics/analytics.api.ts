@@ -6,7 +6,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAccessToken } from "@/hooks/use-access-token.hook";
 import { baseQuery } from "@/lib/frontend/api/base";
 import { projectKeys } from "@/features/projects/projects.api";
-import type { TGoogleIntegrationService } from "@/lib/integrations/constants";
+import type {
+  TAnalyticsDimensionType,
+  TGoogleIntegrationService,
+} from "@/lib/integrations/constants";
 import type {
   TAnalyticsDimensionsDto,
   TAnalyticsOverviewDto,
@@ -45,7 +48,7 @@ export type TAnalyticsDimensionsParams = {
   from: string;
   to: string;
   source: "gsc" | "ga4";
-  dimensionType: "query" | "page" | "country" | "device" | "landing_page" | "channel_group";
+  dimensionType: TAnalyticsDimensionType;
   limit?: number;
 };
 

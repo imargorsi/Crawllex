@@ -20,6 +20,8 @@ const analyticsDimensionRowSchema = new Schema(
     // GA4
     sessions: { type: Number, default: null },
     totalUsers: { type: Number, default: null },
+    // GA4 events
+    eventCount: { type: Number, default: null },
   },
   { timestamps: true },
 );

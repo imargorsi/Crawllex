@@ -20,6 +20,8 @@ const projectIntegrationSchema = new Schema(
     /** GSC site URL (e.g. `https://example.com/`) or GA4 property resource (`properties/123`). */
     externalPropertyId: { type: String, default: null, trim: true },
     lastSyncedAt: { type: Date, default: null },
+    // Set once the GA4 event history (90 days) has been pulled. Until then the next sync backfills it.
+    eventsBackfilledAt: { type: Date, default: null },
     lastError: { type: String, default: null, trim: true },
     connectedByUserId: { type: Schema.Types.ObjectId, ref: "User", default: null },
     connectedAt: { type: Date, default: null },
@@ -38,6 +40,7 @@ export type ProjectIntegrationDocument = InferSchemaType<typeof projectIntegrati
     status: (typeof INTEGRATION_STATUSES)[number];
     externalPropertyId: string | null;
     lastSyncedAt: Date | null;
+    eventsBackfilledAt: Date | null;
     lastError: string | null;
     connectedByUserId: Types.ObjectId | null;
     connectedAt: Date | null;
