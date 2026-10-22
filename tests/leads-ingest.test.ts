@@ -280,6 +280,7 @@ describe("Lead ingest", () => {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({}),
       }),
+      { params: Promise.resolve({}) },
     );
     expect(response.status).toBe(401);
   });
@@ -296,6 +297,7 @@ describe("Lead ingest", () => {
         },
         body: JSON.stringify({ pluginVersion: "1.0.0" }),
       }),
+      { params: Promise.resolve({}) },
     );
     const body = await response.json();
     expect(response.status).toBe(200);
@@ -427,7 +429,7 @@ describe("Lead ingest", () => {
       body: JSON.stringify(pluginBody),
     } as const;
 
-    const created = await POST(new Request("http://localhost/api/v1/leads/ingest", requestInit));
+    const created = await POST(new Request("http://localhost/api/v1/leads/ingest", requestInit), { params: Promise.resolve({}) });
     const createdBody = await created.json();
     expect(created.status).toBe(201);
     expect(createdBody.success).toBe(true);
@@ -441,7 +443,7 @@ describe("Lead ingest", () => {
     expect(String(stored?.createdBy)).toBe(String(owner._id));
     expect(stored?.idempotencyKey).toBe(idempotencyKey);
 
-    const replayed = await POST(new Request("http://localhost/api/v1/leads/ingest", requestInit));
+    const replayed = await POST(new Request("http://localhost/api/v1/leads/ingest", requestInit), { params: Promise.resolve({}) });
     const replayedBody = await replayed.json();
     expect(replayed.status).toBe(200);
     expect(replayedBody.message).toBe("Lead already ingested.");

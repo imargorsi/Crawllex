@@ -69,7 +69,7 @@ describe("Access control", () => {
     const token = await createAccessToken(user._id);
 
     const { GET } = await import("@/app/api/v1/admin/permissions/route");
-    const response = await GET(authRequest(token));
+    const response = await GET(authRequest(token), { params: Promise.resolve({}) });
     const body = await response.json();
 
     expect(response.status).toBe(200);
