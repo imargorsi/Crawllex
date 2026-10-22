@@ -3,7 +3,7 @@ import { handleApiError } from "@/lib/api/handle-error";
 
 type RouteHandler = (
   request: Request,
-  context?: { params: Promise<Record<string, string>> },
+  context: { params: Promise<Record<string, string>> },
 ) => Promise<NextResponse>;
 
 export function withApiHandler(handler: RouteHandler): RouteHandler {
