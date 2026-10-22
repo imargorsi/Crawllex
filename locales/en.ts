@@ -279,18 +279,20 @@ export interface Translation {
       title: string;
       cards: {
         leads: string;
-        backlinks: string;
-        pageViews: string;
-        blogs: string;
+        calls: string;
+        emails: string;
+        whatsapp: string;
       };
       descriptions: {
         leads: string;
-        backlinks: string;
-        pageViews: string;
-        blogs: string;
+        calls: string;
+        emails: string;
+        whatsapp: string;
         unavailable: string;
       };
     };
+
+
     trend: {
       title: string;
       subtitle: string;
@@ -1007,6 +1009,26 @@ export interface Translation {
         loading: string;
         emptyTitle: string;
         emptyBody: string;
+      };
+
+
+
+      topEvents: {
+        title: string;
+        subtitle: string;
+        loading: string;
+        listAria: string;
+        emptyTitle: string;
+        emptyBody: string;
+        labels: {
+          lead: string;
+          download: string;
+          firstVisit: string;
+          pageView: string;
+          sessionStart: string;
+          engagement: string;
+          click: string;
+        };
       };
       demographics: {
         title: string;
@@ -1872,21 +1894,23 @@ const translation: Translation = {
       },
     },
     pulse: {
-      title: "SEO Pulse",
+      title: "Key Results",
       cards: {
         leads: "Leads",
-        backlinks: "Backlinks Created",
-        pageViews: "Page Views",
-        blogs: "Blogs Published",
+        calls: "Calls",
+        emails: "Email Clicks",
+        whatsapp: "WhatsApp Clicks",
       },
       descriptions: {
         leads: "You got {{count}} leads.",
-        backlinks: "You gained {{count}} backlinks.",
-        pageViews: "You recorded {{count}} page views.",
-        blogs: "You published {{count}} blogs.",
+        calls: "You got {{count}} calls.",
+        emails: "Visitors clicked your email {{count}} times.",
+        whatsapp: "Visitors opened WhatsApp {{count}} times.",
         unavailable: "Not available for your access on this project.",
       },
     },
+
+
     trend: {
       title: "SEO Performance Trend",
       subtitle:
@@ -2620,6 +2644,24 @@ const translation: Translation = {
         loading: "Loading…",
         emptyTitle: "No Traffic Sources",
         emptyBody: "Connect Google Analytics And Sync To Populate This Chart.",
+      },
+
+      topEvents: {
+        title: "Top Events",
+        subtitle: "What visitors did on your site.",
+        loading: "Loading…",
+        listAria: "Top events",
+        emptyTitle: "No Events Yet",
+        emptyBody: "Connect Google Analytics and sync to see your top events.",
+        labels: {
+          lead: "Form Submissions",
+          download: "Downloads",
+          firstVisit: "First Visits",
+          pageView: "Page Views",
+          sessionStart: "Sessions Started",
+          engagement: "Engaged Moments",
+          click: "Clicks",
+        },
       },
       demographics: {
         title: "User Demographics",

@@ -1,5 +1,7 @@
 import { google } from "googleapis";
 
+import { classifyEvent, isContactKind } from "@/lib/analytics/event-summary";
+import { topRowsPerDay } from "@/lib/analytics/top-rows-per-day";
 import { ANALYTICS_DIMENSION_TOP_N } from "@/lib/integrations/constants";
 import {
   createAnalyticsAuth,
@@ -184,21 +186,58 @@ export async function fetchGa4TopDimensionsByDay(
   dimensionName: "country" | "landingPage" | "pagePath" | "sessionDefaultChannelGroup",
 ): Promise<TGa4DimensionRow[]> {
   const rows = await fetchGa4DimensionRows(propertyId, startDate, endDate, dimensionName);
-  const byDate = new Map<string, TGa4DimensionRow[]>();
-
-  for (const row of rows) {
-    const list = byDate.get(row.date) ?? [];
-    list.push(row);
-    byDate.set(row.date, list);
-  }
-
-  const trimmed: TGa4DimensionRow[] = [];
-  for (const [, list] of byDate) {
-    list.sort((a, b) => b.sessions - a.sessions || b.totalUsers - a.totalUsers);
-    trimmed.push(...list.slice(0, ANALYTICS_DIMENSION_TOP_N));
-  }
-
-  return trimmed;
+  return topRowsPerDay(
+    rows,
+    ANALYTICS_DIMENSION_TOP_N,
+    (a, b) => b.sessions - a.sessions || b.totalUsers - a.totalUsers,
+  );
 }
 
 export { normalizeGa4PropertyId };
+
+export type TGa4EventRow = {
+  date: string;
+  eventName: string;
+  eventCount: number;
+};
+
+/** Top GA4 events per day by event count. Includes every event name the property records. */
+export async function fetchGa4TopEventsByDay(
+  propertyId: string,
+  startDate: string,
+  endDate: string,
+): Promise<TGa4EventRow[]> {
+  const auth = createAnalyticsAuth();
+  const dataApi = google.analyticsdata({ version: "v1beta", auth });
+  const property = normalizeGa4PropertyId(propertyId);
+
+  const response = await withGoogleBackoff(() =>
+    dataApi.properties.runReport({
+      property,
+      requestBody: {
+        dateRanges: [{ startDate, endDate }],
+        dimensions: [{ name: "date" }, { name: "eventName" }],
+        metrics: [{ name: "eventCount" }],
+        orderBys: [{ metric: { metricName: "eventCount" }, desc: true }],
+        limit: String(ANALYTICS_DIMENSION_TOP_N * 120),
+        returnPropertyQuota: true,
+      },
+    }),
+  );
+
+  const parsed: TGa4EventRow[] = [];
+  for (const row of response.data.rows ?? []) {
+    const date = formatGa4Date(row.dimensionValues?.[0]?.value ?? "");
+    const eventName = row.dimensionValues?.[1]?.value ?? "";
+    if (!date || !eventName) continue;
+    parsed.push({ date, eventName, eventCount: Number(row.metricValues?.[0]?.value ?? 0) });
+  }
+
+  // Contact clicks (call, email, WhatsApp) stay even when outside the per-day top N.
+  return topRowsPerDay(
+    parsed,
+    ANALYTICS_DIMENSION_TOP_N,
+    (a, b) => b.eventCount - a.eventCount,
+    (row) => isContactKind(classifyEvent(row.eventName)),
+  );
+}

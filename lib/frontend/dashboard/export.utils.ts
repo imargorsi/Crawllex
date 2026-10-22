@@ -13,9 +13,9 @@ import type { TAnalyticsOverviewDto } from "@/types/analytics.types";
 
 export type TDashboardExportPulse = {
   leads: number | null;
-  backlinks: number | null;
-  pageViews: number | null;
-  blogs: number | null;
+  calls: number | null;
+  emails: number | null;
+  whatsapp: number | null;
 };
 
 export type TDashboardExportLabels = {
@@ -27,9 +27,9 @@ export type TDashboardExportLabels = {
   value: string;
   date: string;
   leads: string;
-  backlinks: string;
-  pageViews: string;
-  blogs: string;
+  calls: string;
+  emails: string;
+  whatsapp: string;
   clicks: string;
   impressions: string;
   ctr: string;
@@ -60,9 +60,9 @@ export function hasDashboardExportSignal(payload: TDashboardExportPayload): bool
   const { pulse, overview } = payload;
   if (
     hasPositive(pulse.leads) ||
-    hasPositive(pulse.backlinks) ||
-    hasPositive(pulse.pageViews) ||
-    hasPositive(pulse.blogs)
+    hasPositive(pulse.calls) ||
+    hasPositive(pulse.emails) ||
+    hasPositive(pulse.whatsapp)
   ) {
     return true;
   }
@@ -94,9 +94,9 @@ function buildSheets(
       headers: [labels.metric, labels.value],
       rows: [
         [stringCell(labels.leads), numberOrEmpty(pulse.leads)],
-        [stringCell(labels.backlinks), numberOrEmpty(pulse.backlinks)],
-        [stringCell(labels.pageViews), numberOrEmpty(pulse.pageViews)],
-        [stringCell(labels.blogs), numberOrEmpty(pulse.blogs)],
+        [stringCell(labels.calls), numberOrEmpty(pulse.calls)],
+        [stringCell(labels.emails), numberOrEmpty(pulse.emails)],
+        [stringCell(labels.whatsapp), numberOrEmpty(pulse.whatsapp)],
         [stringCell(labels.clicks), numberOrEmpty(overview?.cards.clicks.value)],
         [stringCell(labels.impressions), numberOrEmpty(overview?.cards.impressions.value)],
         [

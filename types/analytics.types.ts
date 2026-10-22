@@ -91,6 +91,7 @@ export type TAnalyticsDimensionRowDto = {
   position: number | null;
   sessions: number | null;
   totalUsers: number | null;
+  eventCount: number | null;
   /**
    * Direction vs the immediately preceding equal-length window (primary metric:
    * clicks for GSC, sessions for GA4). Null when prior data is missing.

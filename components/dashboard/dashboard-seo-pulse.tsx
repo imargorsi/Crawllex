@@ -16,9 +16,9 @@ import { cn } from "@/lib/utils";
 
 export type TDashboardSeoPulseValues = {
   leads: number | null;
-  backlinks: number | null;
-  pageViews: number | null;
-  blogs: number | null;
+  calls: number | null;
+  emails: number | null;
+  whatsapp: number | null;
 };
 
 type TPulseCardId = keyof TDashboardSeoPulseValues;
@@ -54,7 +54,7 @@ function CardSkeleton({ isRow }: { isRow: boolean }) {
       className={cn(
         elevatedCardSurfaceClass,
         "rounded-2xl min-w-0",
-        isRow ? "flex items-center gap-3 p-3" : "flex h-full min-h-0 flex-col justify-between p-3.5",
+        isRow ? "flex min-h-32 flex-col justify-between gap-4 p-4" : "flex h-full min-h-0 flex-col justify-between p-3.5",
       )}
     >
       <div className="size-9 shrink-0 animate-pulse rounded-xl bg-bg-hover/70" />
@@ -80,6 +80,20 @@ export function DashboardSeoPulse({
 
   const cards: TPulseCardDef[] = [
     {
+      id: "calls",
+      labelKey: "calls",
+      icon: Icons.call,
+      accent: "var(--status-active)",
+      href: null,
+    },
+    {
+      id: "whatsapp",
+      labelKey: "whatsapp",
+      icon: Icons.message,
+      accent: "var(--status-invited)",
+      href: null,
+    },
+    {
       id: "leads",
       labelKey: "leads",
       icon: Icons.userGroup,
@@ -87,25 +101,11 @@ export function DashboardSeoPulse({
       href: values.leads == null ? null : withDateRangeQuery("/leads", from, to),
     },
     {
-      id: "backlinks",
-      labelKey: "backlinks",
-      icon: Icons.link,
-      accent: "var(--status-active)",
-      href: values.backlinks == null ? null : withDateRangeQuery("/seo-activities?type=backlinks", from, to),
-    },
-    {
-      id: "pageViews",
-      labelKey: "pageViews",
-      icon: Icons.view,
+      id: "emails",
+      labelKey: "emails",
+      icon: Icons.mail,
       accent: "var(--color-secondary)",
-      href: values.pageViews == null ? null : withDateRangeQuery("/analytics", from, to),
-    },
-    {
-      id: "blogs",
-      labelKey: "blogs",
-      icon: Icons.file,
-      accent: "var(--status-invited)",
-      href: values.blogs == null ? null : withDateRangeQuery("/seo-activities?type=blogs", from, to),
+      href: null,
     },
   ];
 
@@ -153,16 +153,16 @@ export function DashboardSeoPulse({
         );
 
         const content = isRow ? (
-          <div className="relative z-10 flex min-w-0 items-center gap-3">
-            {iconWell}
-            <div className="min-w-0">
-              <p className="truncate type-caption font-medium text-text-secondary">
-                {t(`cards.${card.labelKey}`)}
-              </p>
-              <p className="truncate type-title font-semibold tracking-tight text-text-primary tabular-nums leading-tight">
+          <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-between gap-4">
+            <div className="flex items-start justify-between gap-2">
+              <p className="truncate type-h2 font-semibold tracking-tight text-text-primary tabular-nums leading-none">
                 {display}
               </p>
+              {iconWell}
             </div>
+            <p className="truncate type-label font-medium text-text-secondary">
+              {t(`cards.${card.labelKey}`)}
+            </p>
           </div>
         ) : (
           <>
@@ -202,7 +202,7 @@ export function DashboardSeoPulse({
           elevatedCardSurfaceClass,
           "group relative min-w-0 overflow-hidden rounded-2xl bg-bg-card/20 dark:bg-text-primary/5",
           isRow
-            ? "p-3"
+            ? "flex min-h-32 flex-col p-4"
             : cn(
                 "flex h-full min-h-0 flex-col",
                 compact ? "gap-2 p-3 sm:p-3.5" : "min-h-36 gap-3 p-4 sm:p-5",

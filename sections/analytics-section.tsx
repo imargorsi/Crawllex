@@ -11,6 +11,7 @@ import { AnalyticsSummaryCards } from "@/components/analytics/analytics-summary-
 import { AnalyticsTopPagesCard } from "@/components/analytics/analytics-top-pages-card";
 import { AnalyticsTopQueriesCard } from "@/components/analytics/analytics-top-queries-card";
 import { AnalyticsTrafficSourcesCard } from "@/components/analytics/analytics-traffic-sources-card";
+import { AnalyticsTopEventsCard } from "@/components/analytics/analytics-top-events-card";
 import { SeoActivityDateRangeFilter } from "@/components/seo-activities/seo-activity-date-range-filter";
 import { Heading } from "@/components/heading";
 import { Paragraph } from "@/components/paragraph";
@@ -84,6 +85,11 @@ export function AnalyticsSection() {
     { from, to, source: "ga4", dimensionType: "country", limit: 25 },
     { enabled: rangeEnabled },
   );
+  const eventsQuery = useAnalyticsDimensionsQuery(
+    projectId,
+    { from, to, source: "ga4", dimensionType: "event_name", limit: 100 },
+    { enabled: rangeEnabled },
+  );
   const exportMutation = useAnalyticsExportMutation(projectId);
 
   useEffect(() => {
@@ -92,12 +98,14 @@ export function AnalyticsSection() {
       queriesQuery.error ||
       channelsQuery.error ||
       pagesQuery.error ||
-      geoQuery.error;
+      geoQuery.error ||
+      eventsQuery.error;
     if (!error || loadErrorNotified.current) return;
     loadErrorNotified.current = true;
     notify.error(error instanceof Error ? error.message : t("loadError"));
   }, [
     channelsQuery.error,
+    eventsQuery.error,
     geoQuery.error,
     overviewQuery.error,
     pagesQuery.error,
@@ -247,6 +255,11 @@ export function AnalyticsSection() {
             to={to}
           />
         </div>
+
+        <AnalyticsTopEventsCard
+          rows={eventsQuery.data?.rows ?? []}
+          isLoading={eventsQuery.isLoading}
+        />
 
         <AnalyticsDemographicsEngagementRow
           overview={overviewQuery.data}
