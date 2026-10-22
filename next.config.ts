@@ -2,6 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["wink-nlp", "wink-eng-lite-web-model"],
+  // Hostinger build host failed with "OS can't spawn worker thread" (os error 11)
+  // during page data collection. One CPU and no worker threads keep the build inside
+  // the host's thread limit.
+  experimental: {
+    cpus: 1,
+    workerThreads: false,
+  },
   turbopack: {
     root: import.meta.dirname,
   },
