@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: import.meta.dirname,
   },
+  // /resources/* is proxied to /api/v1/downloads, which reads public/resources from disk.
+  // Vercel does not bundle public/ into the function unless it is traced, so the plugin zip 404s there.
+  outputFileTracingIncludes: {
+    "/api/v1/downloads": ["./public/resources/**/*"],
+  },
   async headers() {
     // Hostinger/LiteSpeed often long-caches HTML while hashed chunks change on deploy.
     // Keep documents + APIs fresh; only immutable-cache content-hashed static assets.
