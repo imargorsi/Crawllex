@@ -18,6 +18,16 @@ const googleExport = `<html><head><meta charset="utf-8"><style>.c0{font-weight:7
 </body></html>`;
 
 describe("Google Docs to WordPress HTML", () => {
+  it("drops large base64 images so the text stays small", () => {
+    const bigImage = `data:image/png;base64,${"A".repeat(2 * 1024 * 1024)}`;
+    const html = `<html><body><p><span>Text before</span></p><p><img src="${bigImage}"></p><p><span>Text after</span></p></body></html>`;
+
+    const out = googleDocHtmlToWordPress(html);
+
+    // The image's paragraph stays as a blank line, like any empty Doc line.
+    expect(out).toBe("<p>Text before</p><p>&nbsp;</p><p>Text after</p>");
+  });
+
   it("keeps headings, paragraphs, blank lines, lists, bold, italic, underline and links", () => {
     const out = googleDocHtmlToWordPress(googleExport);
 

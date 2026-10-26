@@ -3,7 +3,10 @@ import * as cheerio from "cheerio";
 import { HttpError } from "@/lib/api/http-errors";
 import { parseGoogleDocId } from "@/lib/seo-activities/google-doc-url";
 
+/** Limit on the converted WordPress HTML (text only; images are dropped). */
 export const GOOGLE_DOC_MAX_CHARS = 5 * 1024 * 1024;
+/** Limit on the raw export. Image-heavy Docs embed images as base64, so this is far above GOOGLE_DOC_MAX_CHARS. */
+export const GOOGLE_DOC_MAX_DOWNLOAD_CHARS = 30 * 1024 * 1024;
 export const GOOGLE_DOC_FETCH_TIMEOUT_MS = 20_000;
 export const GOOGLE_DOC_NOT_PUBLIC_MESSAGE =
   "The Google Doc is not public. Set sharing to 'Anyone with the link can view'.";
@@ -32,8 +35,8 @@ export async function fetchPublicGoogleDocHtml(docUrl: string): Promise<string> 
   }
 
   const html = await response.text();
-  if (html.length > GOOGLE_DOC_MAX_CHARS) {
-    throw new HttpError(422, "The Google Doc is too large.");
+  if (html.length > GOOGLE_DOC_MAX_DOWNLOAD_CHARS) {
+    throw new HttpError(422, "The Google Doc is too large to download.");
   }
   return html;
 }

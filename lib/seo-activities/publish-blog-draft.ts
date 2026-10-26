@@ -1,7 +1,11 @@
 import { HttpError } from "@/lib/api/http-errors";
 import { createWpDraft, trashWpPost } from "@/lib/integrations/wordpress/wp-rest";
 import { wpConnectionForProject } from "@/lib/integrations/wordpress/wp-source";
-import { fetchPublicGoogleDocHtml, googleDocHtmlToWordPress } from "@/lib/seo-activities/google-doc";
+import {
+  GOOGLE_DOC_MAX_CHARS,
+  fetchPublicGoogleDocHtml,
+  googleDocHtmlToWordPress,
+} from "@/lib/seo-activities/google-doc";
 
 /**
  * Converts a public Google Doc into a WordPress post body and creates it as a draft.
@@ -15,6 +19,9 @@ export async function publishBlogDraft(
   const content = googleDocHtmlToWordPress(await fetchPublicGoogleDocHtml(input.docUrl));
   if (!content) {
     throw new HttpError(422, "The Google Doc has no text to publish.");
+  }
+  if (content.length > GOOGLE_DOC_MAX_CHARS) {
+    throw new HttpError(422, "The Google Doc text is too long to publish.");
   }
 
   const draft = await createWpDraft(connection, { title: input.title, content });
