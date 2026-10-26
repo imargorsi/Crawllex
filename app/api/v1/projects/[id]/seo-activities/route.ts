@@ -53,6 +53,9 @@ export const GET = withApiHandler(async (request, context) => {
   return buildListSeoActivitiesResponse(payload);
 });
 
+// A blog push uploads images to WordPress before it creates the draft.
+export const maxDuration = 60;
+
 export const POST = withApiHandler(async (request, context) => {
   await connectDb();
 

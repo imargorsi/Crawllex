@@ -1,6 +1,8 @@
 import { HttpError } from "@/lib/api/http-errors";
 
 export const WP_REQUEST_TIMEOUT_MS = 15_000;
+/** Media uploads are larger and WordPress resizes images while it stores them. */
+export const WP_MEDIA_TIMEOUT_MS = 60_000;
 
 export type TWpConnection = {
   siteUrl: string;
@@ -57,7 +59,7 @@ async function wpFetch(
     response = await fetch(wpRestUrl(connection.siteUrl, path), {
       method,
       redirect: "error",
-      signal: AbortSignal.timeout(WP_REQUEST_TIMEOUT_MS),
+      signal: AbortSignal.timeout(raw ? WP_MEDIA_TIMEOUT_MS : WP_REQUEST_TIMEOUT_MS),
       headers: {
         Authorization: wpAuthHeader(connection.username, connection.applicationPassword),
         Accept: "application/json",
@@ -71,7 +73,10 @@ async function wpFetch(
       },
       body: raw ? new Uint8Array(raw.bytes) : body ? JSON.stringify(body) : undefined,
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && error.name === "TimeoutError") {
+      throw new HttpError(502, "The WordPress site took too long to respond.");
+    }
     throw new HttpError(502, "Could not reach the WordPress site.");
   }
 
