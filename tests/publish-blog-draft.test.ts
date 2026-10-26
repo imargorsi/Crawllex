@@ -91,10 +91,11 @@ describe("publishBlogDraft", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await publishBlogDraft("project-1", {
-      title: "My post",
-      docUrl: "https://docs.google.com/document/d/1AbC/edit",
-    });
+    const result = await publishBlogDraft(
+      "project-1",
+      { title: "My post", docUrl: "https://docs.google.com/document/d/1AbC/edit" },
+      { uploadImages: true }
+    );
 
     expect(result.mediaIds).toEqual([501]);
     const mediaCall = fetchMock.mock.calls[1] as unknown as [string, RequestInit];
@@ -128,8 +129,38 @@ describe("publishBlogDraft", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     await expect(
-      publishBlogDraft("project-1", { title: "My post", docUrl: "https://docs.google.com/document/d/1AbC/edit" })
+      publishBlogDraft(
+        "project-1",
+        { title: "My post", docUrl: "https://docs.google.com/document/d/1AbC/edit" },
+        { uploadImages: true }
+      )
     ).rejects.toMatchObject({ statusCode: 422 });
     expect(deleted).toEqual(["https://scentnsplendor.scentnsplendor.com/wp-json/wp/v2/media/777?force=true"]);
+  });
+});
+
+describe("publishBlogDraft without image uploads", () => {
+  it("publishes the text and removes image placeholders when uploads are off", async () => {
+    const png = Buffer.from("png-bytes").toString("base64");
+    const imageDoc = `<html><body><p><span>Before</span></p><p><img alt="Chart" src="data:image/png;base64,${png}"></p><p><span>After</span></p></body></html>`;
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url.startsWith("https://docs.google.com/")) {
+        const response = new Response(imageDoc, { status: 200, headers: { "Content-Type": "text/html" } });
+        Object.defineProperty(response, "url", { value: url });
+        return response;
+      }
+      return new Response(JSON.stringify({ id: 5, status: "draft", link: "https://site/?p=5" }), {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await publishBlogDraft("project-1", { title: "T", docUrl: "https://docs.google.com/document/d/1AbC/edit" });
+
+    expect(fetchMock.mock.calls.some((c) => String(c[0]).endsWith("/wp/v2/media"))).toBe(false);
+    const body = JSON.parse((fetchMock.mock.calls[1] as unknown as [string, RequestInit])[1].body as string);
+    expect(body.content).toBe("<p>Before</p><p>After</p>");
   });
 });

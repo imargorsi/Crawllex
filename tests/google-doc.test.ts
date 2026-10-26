@@ -47,7 +47,7 @@ describe("Google Docs to WordPress HTML", () => {
     const out = googleDocHtmlToWordPress(html);
 
     expect(out).toBe(
-      "<table><tbody><tr><td><p>Option</p></td><td><p>Steel</p></td></tr><tr><td><p>Cost</p></td><td><p><strong>High</strong></p></td></tr></tbody></table>",
+      '<figure class="wp-block-table" style="overflow-x:auto"><table><tbody><tr><td><p>Option</p></td><td><p>Steel</p></td></tr><tr><td><p>Cost</p></td><td><p><strong>High</strong></p></td></tr></tbody></table></figure>',
     );
   });
 
@@ -57,7 +57,7 @@ describe("Google Docs to WordPress HTML", () => {
     const out = googleDocHtmlToWordPress(html);
 
     expect(out).toBe(
-      "<pre><code>const a = 1;\nconsole.log(a);</code></pre><p>Run <code>npm test</code> to check.</p>",
+      '<pre class="wp-block-code"><code>const a = 1;\nconsole.log(a);</code></pre><p>Run <code>npm test</code> to check.</p>',
     );
   });
 
@@ -66,7 +66,7 @@ describe("Google Docs to WordPress HTML", () => {
 
     const out = googleDocHtmlToWordPress(html);
 
-    expect(out).toBe("<pre><code>if (x) {\n  y();</code></pre>");
+    expect(out).toBe('<pre class="wp-block-code"><code>if (x) {\n  y();</code></pre>');
   });
 
   it("refuses more images than the limit", () => {

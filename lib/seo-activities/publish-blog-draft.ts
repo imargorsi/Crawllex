@@ -14,6 +14,21 @@ import {
   fetchPublicGoogleDocHtml,
 } from "@/lib/seo-activities/google-doc";
 
+/**
+ * Image uploads are off by default. Uploads to client WordPress hosts hit gateway timeouts (504),
+ * so the post is published without images until another media approach is in place.
+ */
+export const BLOG_UPLOAD_IMAGES = false;
+
+/** Removes the image placeholders from the content when images are not uploaded. */
+export function stripImagePlaceholders(content: string): string {
+  return content
+    .replace(/<p><img src="crawllex-image:\d+"[^>]*><\/p>/g, "")
+    .replace(/<img src="crawllex-image:\d+"[^>]*>/g, "");
+}
+
+export type TBlogPublishOptions = { uploadImages?: boolean };
+
 export type TPublishedBlogDraft = {
   postId: number;
   link: string;
@@ -29,8 +44,10 @@ export type TPublishedBlogDraft = {
  */
 export async function publishBlogDraft(
   projectId: string,
-  input: { title: string; docUrl: string }
+  input: { title: string; docUrl: string },
+  options: TBlogPublishOptions = {}
 ): Promise<TPublishedBlogDraft> {
+  const uploadImages = options.uploadImages ?? BLOG_UPLOAD_IMAGES;
   const connection = await wpConnectionForProject(projectId);
   const converted = convertGoogleDoc(await fetchPublicGoogleDocHtml(input.docUrl));
   if (!converted.content) {
@@ -43,7 +60,10 @@ export async function publishBlogDraft(
   const mediaIds: number[] = [];
   try {
     let content = converted.content;
-    for (const [index, image] of converted.images.entries()) {
+    if (!uploadImages) {
+      content = stripImagePlaceholders(content);
+    }
+    for (const [index, image] of (uploadImages ? converted.images : []).entries()) {
       const media = await uploadWpMedia(connection, {
         filename: `doc-image-${index + 1}.${image.extension}`,
         contentType: image.contentType,

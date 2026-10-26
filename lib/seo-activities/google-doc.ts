@@ -231,7 +231,8 @@ function renderNode(node: HtmlNode, ctx: TRenderContext, inHeading: boolean): st
   if (name === "table") {
     const codeOnly = CODE_ONLY_CELL_TABLE.exec(inner);
     if (codeOnly) return codeOnly[1]!;
-    return `<table>${inner}</table>`;
+    // Wrapped so a wide table scrolls on phones instead of pushing the page sideways.
+    return `<figure class="wp-block-table" style="overflow-x:auto"><table>${inner}</table></figure>`;
   }
   if (TABLE_PART_TAGS.has(name)) {
     return `<${name}>${inner}</${name}>`;
@@ -286,7 +287,7 @@ export function convertGoogleDoc(html: string): TConvertedDoc {
       const lines = [...run.matchAll(CODE_PARAGRAPH)].map((m) =>
         m[1]!.replace(/<\/?code>/g, "").replace(/&nbsp;| /g, " ")
       );
-      return `<pre><code>${lines.join("\n")}</code></pre>`;
+      return `<pre class="wp-block-code"><code>${lines.join("\n")}</code></pre>`;
     })
     .replace(/^(<p>&nbsp;<\/p>)+/, "")
     .replace(/(<p>&nbsp;<\/p>)+$/, "")
