@@ -13,12 +13,34 @@ import {
   convertGoogleDoc,
   fetchPublicGoogleDocHtml,
 } from "@/lib/seo-activities/google-doc";
+import { optimizeDocImage } from "@/lib/seo-activities/optimize-doc-image";
 
 /**
- * Image uploads are off by default. Uploads to client WordPress hosts hit gateway timeouts (504),
- * so the post is published without images until another media approach is in place.
+ * Images are shrunk before upload (see optimize-doc-image.ts) and uploaded one at a time.
+ * Turn off to publish text only.
  */
-export const BLOG_UPLOAD_IMAGES = false;
+export const BLOG_UPLOAD_IMAGES = true;
+
+/** Attempts per image. A 502/504 from the WordPress host is retried after these waits. */
+export const MEDIA_UPLOAD_ATTEMPTS = 3;
+export const MEDIA_UPLOAD_RETRY_DELAYS_MS = [2_000, 5_000];
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+async function uploadWithRetry(
+  connection: TWpConnection,
+  input: { filename: string; contentType: string; bytes: Buffer }
+): Promise<{ id: number; url: string }> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await uploadWpMedia(connection, input);
+    } catch (error) {
+      const gatewayError = error instanceof HttpError && error.statusCode === 502;
+      if (!gatewayError || attempt >= MEDIA_UPLOAD_ATTEMPTS) throw error;
+      await sleep(MEDIA_UPLOAD_RETRY_DELAYS_MS[attempt - 1] ?? 5_000);
+    }
+  }
+}
 
 /** Removes the image placeholders from the content when images are not uploaded. */
 export function stripImagePlaceholders(content: string): string {
@@ -63,9 +85,12 @@ export async function publishBlogDraft(
     if (!uploadImages) {
       content = stripImagePlaceholders(content);
     }
-    for (const [index, image] of (uploadImages ? converted.images : []).entries()) {
-      const media = await uploadWpMedia(connection, {
-        filename: `doc-image-${index + 1}.${image.extension}`,
+    // Unique per push, so a new upload never collides with files left by earlier pushes.
+    const batch = Date.now().toString(36);
+    for (const [index, original] of (uploadImages ? converted.images : []).entries()) {
+      const image = await optimizeDocImage(original);
+      const media = await uploadWithRetry(connection, {
+        filename: `doc-${batch}-${index + 1}.${image.extension}`,
         contentType: image.contentType,
         bytes: image.bytes,
       });

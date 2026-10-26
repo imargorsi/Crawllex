@@ -157,10 +157,48 @@ describe("publishBlogDraft without image uploads", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
 
-    await publishBlogDraft("project-1", { title: "T", docUrl: "https://docs.google.com/document/d/1AbC/edit" });
+    await publishBlogDraft(
+      "project-1",
+      { title: "T", docUrl: "https://docs.google.com/document/d/1AbC/edit" },
+      { uploadImages: false }
+    );
 
     expect(fetchMock.mock.calls.some((c) => String(c[0]).endsWith("/wp/v2/media"))).toBe(false);
     const body = JSON.parse((fetchMock.mock.calls[1] as unknown as [string, RequestInit])[1].body as string);
     expect(body.content).toBe("<p>Before</p><p>After</p>");
+  });
+});
+
+describe("publishBlogDraft media retry", () => {
+  it("retries a gateway error on an image upload, then succeeds", async () => {
+    const png = Buffer.from("png-bytes").toString("base64");
+    const imageDoc = `<html><body><p><img src="data:image/png;base64,${png}"></p></body></html>`;
+    let mediaAttempts = 0;
+    const fetchMock = vi.fn(async (input: string | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.startsWith("https://docs.google.com/")) {
+        const response = new Response(imageDoc, { status: 200, headers: { "Content-Type": "text/html" } });
+        Object.defineProperty(response, "url", { value: url });
+        return response;
+      }
+      if (url.endsWith("/wp-json/wp/v2/media") && init?.method === "POST") {
+        mediaAttempts += 1;
+        if (mediaAttempts === 1) {
+          return new Response("<html>504</html>", { status: 504, headers: { "Content-Type": "text/html" } });
+        }
+        return new Response(JSON.stringify({ id: 88, source_url: "https://site/doc-88.png" }), { status: 201, headers: { "Content-Type": "application/json" } });
+      }
+      return new Response(JSON.stringify({ id: 9, status: "draft", link: "https://site/?p=9" }), { status: 201, headers: { "Content-Type": "application/json" } });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await publishBlogDraft(
+      "project-1",
+      { title: "T", docUrl: "https://docs.google.com/document/d/1AbC/edit" },
+      { uploadImages: true }
+    );
+
+    expect(mediaAttempts).toBe(2);
+    expect(result.mediaIds).toEqual([88]);
   });
 });
