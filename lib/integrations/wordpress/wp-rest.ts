@@ -14,16 +14,12 @@ export type TWpDraftInput = {
   title: string;
   content: string;
   excerpt?: string;
-  /** Post meta sent with the draft, e.g. Rank Math fields. Ignored by WordPress unless registered for REST. */
-  meta?: Record<string, string>;
 };
 
 export type TWpDraftResult = {
   id: number;
   status: string;
   link: string;
-  /** Meta as WordPress returned it. Empty when the site does not expose these fields over REST. */
-  meta?: Record<string, unknown>;
 };
 
 export function wpAuthHeader(username: string, applicationPassword: string): string {
@@ -35,12 +31,11 @@ export function wpRestUrl(siteUrl: string, path: string): string {
 }
 
 /** The status is fixed to draft here. Callers cannot publish through this path. */
-export function buildWpDraftBody(input: TWpDraftInput): Record<string, unknown> {
+export function buildWpDraftBody(input: TWpDraftInput): Record<string, string> {
   return {
     title: input.title,
     content: input.content,
     ...(input.excerpt ? { excerpt: input.excerpt } : {}),
-    ...(input.meta ? { meta: input.meta } : {}),
     status: "draft",
   };
 }
@@ -52,7 +47,7 @@ async function wpFetch(
   connection: TWpConnection,
   path: string,
   method: "GET" | "POST" | "DELETE",
-  body?: Record<string, unknown>,
+  body?: Record<string, string>,
   raw?: TWpRawBody
 ): Promise<unknown> {
   if (!connection.siteUrl.startsWith("https://")) {
@@ -103,7 +98,6 @@ export async function createWpDraft(connection: TWpConnection, input: TWpDraftIn
     id: number;
     status: string;
     link: string;
-    meta?: Record<string, unknown>;
   };
 
   if (post.status !== "draft") {
@@ -111,7 +105,7 @@ export async function createWpDraft(connection: TWpConnection, input: TWpDraftIn
     await trashWpPost(connection, post.id).catch(() => undefined);
     throw new HttpError(502, `WordPress created the post as "${post.status}", not a draft.`);
   }
-  return { id: post.id, status: post.status, link: post.link, meta: post.meta };
+  return { id: post.id, status: post.status, link: post.link };
 }
 
 /** Moves a post to the WordPress trash (no force delete). Used to undo a draft Crawllex could not save. */

@@ -42,15 +42,7 @@ export async function createSeoActivity(
   // The push runs first. If it fails, nothing is saved and the user can retry.
   const wordpress =
     input.type === "blogs" && input.pushToWordpress && input.docUrl
-      ? await publishBlogDraft(projectId, {
-          title: input.title!.trim(),
-          docUrl: input.docUrl,
-          seo: {
-            metaTitle: input.metaTitle,
-            metaDescription: input.metaDescription,
-            focusKeyword: input.focusKeyword,
-          },
-        })
+      ? await publishBlogDraft(projectId, { title: input.title!.trim(), docUrl: input.docUrl })
       : null;
 
   let activity: SeoActivityDocument;

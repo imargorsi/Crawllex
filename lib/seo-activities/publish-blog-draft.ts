@@ -51,27 +51,6 @@ export function stripImagePlaceholders(content: string): string {
 
 export type TBlogPublishOptions = { uploadImages?: boolean };
 
-export type TBlogSeoFields = {
-  metaTitle?: string;
-  metaDescription?: string;
-  focusKeyword?: string;
-};
-
-/**
- * Placeholders used until the blog form has SEO inputs. Remove once the form sends real values.
- */
-export const DUMMY_META_DESCRIPTION = "Placeholder meta description. Replace before publishing.";
-export const DUMMY_FOCUS_KEYWORD = "placeholder keyword";
-
-/** Rank Math post meta keys. */
-export function rankMathMeta(title: string, seo: TBlogSeoFields = {}): Record<string, string> {
-  return {
-    rank_math_title: seo.metaTitle || title,
-    rank_math_description: seo.metaDescription || DUMMY_META_DESCRIPTION,
-    rank_math_focus_keyword: seo.focusKeyword || DUMMY_FOCUS_KEYWORD,
-  };
-}
-
 export type TPublishedBlogDraft = {
   postId: number;
   link: string;
@@ -87,7 +66,7 @@ export type TPublishedBlogDraft = {
  */
 export async function publishBlogDraft(
   projectId: string,
-  input: { title: string; docUrl: string; seo?: TBlogSeoFields },
+  input: { title: string; docUrl: string },
   options: TBlogPublishOptions = {}
 ): Promise<TPublishedBlogDraft> {
   const uploadImages = options.uploadImages ?? BLOG_UPLOAD_IMAGES;
@@ -120,12 +99,7 @@ export async function publishBlogDraft(
       content = content.replace(token, `src="${media.url.replace(/"/g, "&quot;")}"`);
     }
 
-    const meta = rankMathMeta(input.title, input.seo);
-    const draft = await createWpDraft(connection, { title: input.title, content, meta });
-    if (!draft.meta?.rank_math_title) {
-      // The post is created, but WordPress did not store the Rank Math fields over REST.
-      console.warn(`Rank Math meta not saved on WordPress post ${draft.id}. Register the fields for REST.`);
-    }
+    const draft = await createWpDraft(connection, { title: input.title, content });
     return { postId: draft.id, link: draft.link, pushedAt: new Date(), mediaIds };
   } catch (error) {
     await deleteBlogMedia(connection, mediaIds);
