@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { googleDocHtmlToWordPress } from "@/lib/seo-activities/google-doc";
+import { convertGoogleDoc, googleDocHtmlToWordPress } from "@/lib/seo-activities/google-doc";
 import { parseGoogleDocId } from "@/lib/seo-activities/google-doc-url";
 
 const googleExport = `<html><head><meta charset="utf-8"><style>.c0{font-weight:700}</style><title>My Doc</title></head>
@@ -18,14 +18,63 @@ const googleExport = `<html><head><meta charset="utf-8"><style>.c0{font-weight:7
 </body></html>`;
 
 describe("Google Docs to WordPress HTML", () => {
-  it("drops large base64 images so the text stays small", () => {
-    const bigImage = `data:image/png;base64,${"A".repeat(2 * 1024 * 1024)}`;
-    const html = `<html><body><p><span>Text before</span></p><p><img src="${bigImage}"></p><p><span>Text after</span></p></body></html>`;
+  it("returns embedded images as uploads and points the content at them with tokens", () => {
+    const png = Buffer.from("fake-png-bytes").toString("base64");
+    const html = `<html><body><p><span>Text before</span></p><p><img alt="Chart" src="data:image/png;base64,${png}"></p><p><span>Text after</span></p></body></html>`;
+
+    const out = convertGoogleDoc(html);
+
+    expect(out.images).toHaveLength(1);
+    expect(out.images[0]).toMatchObject({ contentType: "image/png", extension: "png", alt: "Chart" });
+    expect(out.images[0]!.bytes.toString()).toBe("fake-png-bytes");
+    expect(out.content).toBe(
+      '<p>Text before</p><p><img src="crawllex-image:0" alt="Chart"></p><p>Text after</p>',
+    );
+  });
+
+  it("drops remote images, which are not in the export", () => {
+    const html = `<html><body><p><span>Text</span></p><p><img src="https://lh7-rt.googleusercontent.com/x.png"></p></body></html>`;
+
+    const out = convertGoogleDoc(html);
+
+    expect(out.images).toHaveLength(0);
+    expect(out.content).toBe("<p>Text</p>");
+  });
+
+  it("keeps real Doc tables as WordPress tables", () => {
+    const html = `<html><body><table><tbody><tr><td><p><span>Option</span></p></td><td><p><span>Steel</span></p></td></tr><tr><td><p><span>Cost</span></p></td><td><p><strong>High</strong></p></td></tr></tbody></table></body></html>`;
 
     const out = googleDocHtmlToWordPress(html);
 
-    // The image's paragraph stays as a blank line, like any empty Doc line.
-    expect(out).toBe("<p>Text before</p><p>&nbsp;</p><p>Text after</p>");
+    expect(out).toBe(
+      "<table><tbody><tr><td><p>Option</p></td><td><p>Steel</p></td></tr><tr><td><p>Cost</p></td><td><p><strong>High</strong></p></td></tr></tbody></table>",
+    );
+  });
+
+  it("turns a monospace paragraph run into one code block and keeps inline code inline", () => {
+    const html = `<html><head><style>.m{font-family:Courier New}</style></head><body><p><span class="m">const a = 1;</span></p><p><span class="m">console.log(a);</span></p><p><span>Run </span><span class="m">npm test</span><span> to check.</span></p></body></html>`;
+
+    const out = googleDocHtmlToWordPress(html);
+
+    expect(out).toBe(
+      "<pre><code>const a = 1;\nconsole.log(a);</code></pre><p>Run <code>npm test</code> to check.</p>",
+    );
+  });
+
+  it("turns a one-cell code table (Doc code block) into a code block", () => {
+    const html = `<html><head><style>.m{font-family:Consolas}</style></head><body><table><tbody><tr><td><p><span class="m">if (x) {</span></p><p><span class="m">&nbsp;&nbsp;y();</span></p></td></tr></tbody></table></body></html>`;
+
+    const out = googleDocHtmlToWordPress(html);
+
+    expect(out).toBe("<pre><code>if (x) {\n  y();</code></pre>");
+  });
+
+  it("refuses more images than the limit", () => {
+    const png = Buffer.from("x").toString("base64");
+    const img = `<img src="data:image/png;base64,${png}">`;
+    const html = `<html><body>${img.repeat(31)}</body></html>`;
+
+    expect(() => convertGoogleDoc(html)).toThrow(/more than 30 images/);
   });
 
   it("keeps headings, paragraphs, blank lines, lists, bold, italic, underline and links", () => {

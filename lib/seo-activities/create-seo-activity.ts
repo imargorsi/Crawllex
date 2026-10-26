@@ -63,7 +63,7 @@ export async function createSeoActivity(
     });
   } catch (error) {
     // Saving failed after WordPress created the draft. Remove it so a retry does not duplicate it.
-    if (wordpress) await discardBlogDraft(projectId, wordpress.postId);
+    if (wordpress) await discardBlogDraft(projectId, wordpress.postId, wordpress.mediaIds);
     throw error;
   }
 

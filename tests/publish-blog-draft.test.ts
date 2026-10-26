@@ -66,4 +66,70 @@ describe("publishBlogDraft", () => {
     ).rejects.toMatchObject({ statusCode: 422 });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it("uploads embedded images to the media library and points the post at them", async () => {
+    const png = Buffer.from("png-bytes").toString("base64");
+    const imageDoc = `<html><body><p><img alt="Table picture" src="data:image/png;base64,${png}"></p><p><span>After</span></p></body></html>`;
+    const fetchMock = vi.fn(async (input: string | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.startsWith("https://docs.google.com/")) {
+        const response = new Response(imageDoc, { status: 200, headers: { "Content-Type": "text/html" } });
+        Object.defineProperty(response, "url", { value: url });
+        return response;
+      }
+      if (url.endsWith("/wp-json/wp/v2/media")) {
+        return new Response(JSON.stringify({ id: 501, source_url: "https://scentnsplendor.scentnsplendor.com/wp-content/uploads/doc-image-1.png" }), {
+          status: 201,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+      expect(init?.method).toBe("POST");
+      return new Response(JSON.stringify({ id: 99, status: "draft", link: "https://site/?p=99" }), {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await publishBlogDraft("project-1", {
+      title: "My post",
+      docUrl: "https://docs.google.com/document/d/1AbC/edit",
+    });
+
+    expect(result.mediaIds).toEqual([501]);
+    const mediaCall = fetchMock.mock.calls[1] as unknown as [string, RequestInit];
+    expect(mediaCall[1].headers).toMatchObject({ "Content-Type": "image/png" });
+    const postCall = fetchMock.mock.calls[2] as unknown as [string, RequestInit];
+    const body = JSON.parse(postCall[1].body as string);
+    expect(body.content).toContain('<img src="https://scentnsplendor.scentnsplendor.com/wp-content/uploads/doc-image-1.png" alt="Table picture">');
+    expect(body.content).not.toContain("crawllex-image:");
+  });
+
+  it("deletes uploaded media when the draft cannot be created", async () => {
+    const png = Buffer.from("png-bytes").toString("base64");
+    const imageDoc = `<html><body><p><img src="data:image/png;base64,${png}"></p></body></html>`;
+    const deleted: string[] = [];
+    const fetchMock = vi.fn(async (input: string | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.startsWith("https://docs.google.com/")) {
+        const response = new Response(imageDoc, { status: 200, headers: { "Content-Type": "text/html" } });
+        Object.defineProperty(response, "url", { value: url });
+        return response;
+      }
+      if (url.endsWith("/wp-json/wp/v2/media") && init?.method === "POST") {
+        return new Response(JSON.stringify({ id: 777, source_url: "https://site/x.png" }), { status: 201, headers: { "Content-Type": "application/json" } });
+      }
+      if (url.includes("/wp-json/wp/v2/media/777") && init?.method === "DELETE") {
+        deleted.push(url);
+        return new Response(JSON.stringify({ deleted: true }), { status: 200, headers: { "Content-Type": "application/json" } });
+      }
+      return new Response(JSON.stringify({ message: "Sorry, you cannot create posts." }), { status: 403, headers: { "Content-Type": "application/json" } });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      publishBlogDraft("project-1", { title: "My post", docUrl: "https://docs.google.com/document/d/1AbC/edit" })
+    ).rejects.toMatchObject({ statusCode: 422 });
+    expect(deleted).toEqual(["https://scentnsplendor.scentnsplendor.com/wp-json/wp/v2/media/777?force=true"]);
+  });
 });

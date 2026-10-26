@@ -3,13 +3,39 @@ import * as cheerio from "cheerio";
 import { HttpError } from "@/lib/api/http-errors";
 import { parseGoogleDocId } from "@/lib/seo-activities/google-doc-url";
 
-/** Limit on the converted WordPress HTML (text only; images are dropped). */
+/** Limit on the converted WordPress HTML (text and markup; image bytes are not included). */
 export const GOOGLE_DOC_MAX_CHARS = 5 * 1024 * 1024;
 /** Limit on the raw export. Image-heavy Docs embed images as base64, so this is far above GOOGLE_DOC_MAX_CHARS. */
 export const GOOGLE_DOC_MAX_DOWNLOAD_CHARS = 30 * 1024 * 1024;
+export const GOOGLE_DOC_MAX_IMAGES = 30;
+export const GOOGLE_DOC_MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export const GOOGLE_DOC_FETCH_TIMEOUT_MS = 20_000;
 export const GOOGLE_DOC_NOT_PUBLIC_MESSAGE =
   "The Google Doc is not public. Set sharing to 'Anyone with the link can view'.";
+
+/** Placeholder written into <img src>. publishBlogDraft swaps it for the uploaded WordPress media URL. */
+export const GOOGLE_DOC_IMAGE_TOKEN_PREFIX = "crawllex-image:";
+
+/** Image types WordPress accepts from the Doc export. */
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/gif": "gif",
+  "image/webp": "webp",
+};
+
+export type TDocImage = {
+  contentType: string;
+  extension: string;
+  bytes: Buffer;
+  alt: string;
+};
+
+export type TConvertedDoc = {
+  /** WordPress post content. Images appear as <img src="crawllex-image:N">. */
+  content: string;
+  images: TDocImage[];
+};
 
 /** Downloads a public Google Doc as HTML. Private docs redirect to a login page and are refused. */
 export async function fetchPublicGoogleDocHtml(docUrl: string): Promise<string> {
@@ -53,7 +79,6 @@ type HtmlNode = {
 const DROPPED_TAGS = new Set([
   "script",
   "style",
-  "img",
   "svg",
   "noscript",
   "head",
@@ -75,8 +100,34 @@ const DROPPED_TAGS = new Set([
 /** Block tags kept as-is, so the Doc's h1-h6, paragraphs and lists carry over. */
 const BLOCK_TAGS = new Set(["h1", "h2", "h3", "h4", "h5", "h6", "p", "ul", "ol", "li", "blockquote"]);
 
+/** Table parts kept as-is. A <table> is kept whole, except a single code cell (see below). */
+const TABLE_PART_TAGS = new Set(["tbody", "thead", "tfoot", "tr", "td", "th"]);
+
 /** Containers where whitespace-only text between children is just source formatting. */
-const CONTAINER_TAGS = new Set(["root", "body", "html", "div", "ul", "ol", "blockquote"]);
+const CONTAINER_TAGS = new Set([
+  "root",
+  "body",
+  "html",
+  "div",
+  "ul",
+  "ol",
+  "blockquote",
+  "table",
+  "tbody",
+  "thead",
+  "tfoot",
+  "tr",
+]);
+
+/** A Doc code block exported as a one-cell table: every line is a code-only paragraph. */
+const CODE_ONLY_CELL_TABLE = /^(?:<tbody>)?<tr><td>((?:<p>(?:<code>[^<]*<\/code>)+<\/p>)+)<\/td><\/tr>(?:<\/tbody>)?$/;
+
+/** Consecutive paragraphs that hold only inline code become one <pre><code> block. */
+const CODE_PARAGRAPH_RUN = /(?:<p>(?:<code>[^<]*<\/code>)+<\/p>\s*)+/g;
+const CODE_PARAGRAPH = /<p>((?:<code>[^<]*<\/code>)+)<\/p>/g;
+
+/** Font families that mark code in a Google Doc. */
+const MONO_FONT = /font-family:[^;}"]*(courier|consolas|mono|menlo|source code)/i;
 
 function escapeHtml(value: string): string {
   return value
@@ -103,44 +154,92 @@ function cleanHref(raw: string | undefined): string | null {
   return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : null;
 }
 
-/** Classes from the export's <style> block that mark bold, italic or underline text. */
-type TDocStyleClasses = { bold: Set<string>; italic: Set<string>; underline: Set<string> };
+/** Classes from the export's <style> block that mark bold, italic, underline or monospace text. */
+type TDocStyleClasses = {
+  bold: Set<string>;
+  italic: Set<string>;
+  underline: Set<string>;
+  mono: Set<string>;
+};
+
+type TRenderContext = {
+  styles: TDocStyleClasses;
+  images: TDocImage[];
+};
 
 const HEADING_TAGS = new Set(["h1", "h2", "h3", "h4", "h5", "h6"]);
 
 function readStyleClasses(css: string): TDocStyleClasses {
-  const classes: TDocStyleClasses = { bold: new Set(), italic: new Set(), underline: new Set() };
+  const classes: TDocStyleClasses = {
+    bold: new Set(),
+    italic: new Set(),
+    underline: new Set(),
+    mono: new Set(),
+  };
   for (const match of css.matchAll(/\.([A-Za-z0-9_-]+)\s*\{([^}]*)\}/g)) {
     const className = match[1]!;
     const body = match[2]!;
     if (/font-weight:\s*(bold|[6-9]00)/i.test(body)) classes.bold.add(className);
     if (/font-style:\s*italic/i.test(body)) classes.italic.add(className);
     if (/text-decoration:[^;]*underline/i.test(body)) classes.underline.add(className);
+    if (MONO_FONT.test(body)) classes.mono.add(className);
   }
   return classes;
 }
 
-function renderNode(node: HtmlNode, styles: TDocStyleClasses, inHeading: boolean): string {
+/** Keeps an embedded (base64) image for upload. Remote or non-image sources are dropped. */
+function renderImage(node: HtmlNode, ctx: TRenderContext): string {
+  const match = /^data:(image\/[a-z+]+);base64,([A-Za-z0-9+/=\s]+)$/i.exec(node.attribs?.src ?? "");
+  if (!match) return "";
+  const contentType = match[1]!.toLowerCase();
+  const extension = IMAGE_EXTENSIONS[contentType];
+  if (!extension) return "";
+
+  const bytes = Buffer.from(match[2]!.replace(/\s/g, ""), "base64");
+  if (ctx.images.length >= GOOGLE_DOC_MAX_IMAGES) {
+    throw new HttpError(422, `The Google Doc has more than ${GOOGLE_DOC_MAX_IMAGES} images.`);
+  }
+  if (bytes.length > GOOGLE_DOC_MAX_IMAGE_BYTES) {
+    throw new HttpError(422, "An image in the Google Doc is larger than 5 MB.");
+  }
+
+  const index = ctx.images.length;
+  ctx.images.push({ contentType, extension, bytes, alt: node.attribs?.alt ?? "" });
+  return `<img src="${GOOGLE_DOC_IMAGE_TOKEN_PREFIX}${index}" alt="${escapeHtml(node.attribs?.alt ?? "")}">`;
+}
+
+function renderNode(node: HtmlNode, ctx: TRenderContext, inHeading: boolean): string {
   if (node.type === "text") return escapeHtml(node.data ?? "");
   if (node.type !== "tag" && node.type !== "root") return "";
 
   const name = (node.name ?? node.type).toLowerCase();
   if (DROPPED_TAGS.has(name)) return "";
   if (name === "br") return "<br>";
+  if (name === "img") return renderImage(node, ctx);
 
   const childHeading = inHeading || HEADING_TAGS.has(name);
   const children = (node.children ?? []).filter(
     (child) => !(CONTAINER_TAGS.has(name) && child.type === "text" && /^\s*$/.test(child.data ?? ""))
   );
-  const inner = children.map((child) => renderNode(child, styles, childHeading)).join("");
+  const inner = children.map((child) => renderNode(child, ctx, childHeading)).join("");
 
   if (name === "a") {
     const href = cleanHref(node.attribs?.href);
     return href ? `<a href="${escapeHtml(href)}">${inner}</a>` : inner;
   }
 
+  if (name === "table") {
+    const codeOnly = CODE_ONLY_CELL_TABLE.exec(inner);
+    if (codeOnly) return codeOnly[1]!;
+    return `<table>${inner}</table>`;
+  }
+  if (TABLE_PART_TAGS.has(name)) {
+    return `<${name}>${inner}</${name}>`;
+  }
+
   if (BLOCK_TAGS.has(name)) {
-    if (name === "p" && inner.replace(/<[^>]+>|&nbsp;|\s/g, "") === "") {
+    // An image-only paragraph has no text but must stay, so check for the img tag first.
+    if (name === "p" && !inner.includes("<img ") && inner.replace(/<[^>]+>|&nbsp;|\s/g, "") === "") {
       return "<p>&nbsp;</p>";
     }
     return `<${name}>${inner}</${name}>`;
@@ -156,29 +255,47 @@ function renderNode(node: HtmlNode, styles: TDocStyleClasses, inHeading: boolean
   const hasClass = (set: Set<string>) => classNames.some((c) => set.has(c));
 
   let out = inner;
-  if (/font-style:\s*italic/i.test(style) || hasClass(styles.italic)) out = `<em>${out}</em>`;
-  if (!inHeading && (/font-weight:\s*(bold|[6-9]00)/i.test(style) || hasClass(styles.bold))) {
+  if (/font-style:\s*italic/i.test(style) || hasClass(ctx.styles.italic)) out = `<em>${out}</em>`;
+  if (!inHeading && (/font-weight:\s*(bold|[6-9]00)/i.test(style) || hasClass(ctx.styles.bold))) {
     out = `<strong>${out}</strong>`;
   }
-  if (/text-decoration:[^;]*underline/i.test(style) || hasClass(styles.underline)) {
+  if (/text-decoration:[^;]*underline/i.test(style) || hasClass(ctx.styles.underline)) {
     out = `<u>${out}</u>`;
+  }
+  if (MONO_FONT.test(style) || hasClass(ctx.styles.mono)) {
+    out = `<code>${out}</code>`;
   }
   return out;
 }
 
 /**
  * Converts Google Docs HTML export into WordPress-ready HTML.
- * Keeps h1-h6, paragraphs (blank Doc lines become empty paragraphs), lists, bold, italic, underline and links.
- * Drops images, styles, classes and everything else.
+ * Keeps h1-h6, paragraphs (blank Doc lines become empty paragraphs), lists, bold, italic, underline,
+ * links, tables, inline code and code blocks (monospace paragraphs). Embedded images are returned
+ * separately so the caller can upload them; the content points at them with placeholder tokens.
+ * Drops remote images, styles, classes and everything else.
  */
-export function googleDocHtmlToWordPress(html: string): string {
+export function convertGoogleDoc(html: string): TConvertedDoc {
   const $ = cheerio.load(html);
-  const styles = readStyleClasses($("style").text());
+  const ctx: TRenderContext = { styles: readStyleClasses($("style").text()), images: [] };
   const body = $("body").get(0) ?? $.root().get(0);
-  const rendered = renderNode(body as unknown as HtmlNode, styles, false);
+  const rendered = renderNode(body as unknown as HtmlNode, ctx, false);
 
-  return rendered
+  const content = rendered
+    .replace(CODE_PARAGRAPH_RUN, (run) => {
+      const lines = [...run.matchAll(CODE_PARAGRAPH)].map((m) =>
+        m[1]!.replace(/<\/?code>/g, "").replace(/&nbsp;| /g, " ")
+      );
+      return `<pre><code>${lines.join("\n")}</code></pre>`;
+    })
     .replace(/^(<p>&nbsp;<\/p>)+/, "")
     .replace(/(<p>&nbsp;<\/p>)+$/, "")
     .trim();
+
+  return { content, images: ctx.images };
+}
+
+/** Text and markup only. Use convertGoogleDoc when the images must be uploaded too. */
+export function googleDocHtmlToWordPress(html: string): string {
+  return convertGoogleDoc(html).content;
 }
