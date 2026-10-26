@@ -10,7 +10,11 @@ vi.mock("@/lib/integrations/wordpress/wp-source", () => ({
   wpConnectionForProject: vi.fn(async () => connection),
 }));
 
-import { publishBlogDraft } from "@/lib/seo-activities/publish-blog-draft";
+import {
+  DUMMY_FOCUS_KEYWORD,
+  DUMMY_META_DESCRIPTION,
+  publishBlogDraft,
+} from "@/lib/seo-activities/publish-blog-draft";
 
 const docHtml = `<html><head><style>.c0{font-weight:700}</style></head><body>
 <h2><span>Intro</span></h2><p><span class="c0">Bold line</span></p><p><span></span></p>
@@ -200,5 +204,69 @@ describe("publishBlogDraft media retry", () => {
 
     expect(mediaAttempts).toBe(2);
     expect(result.mediaIds).toEqual([88]);
+  });
+});
+
+describe("publishBlogDraft Rank Math fields", () => {
+  it("sends the SEO fields with the draft, using placeholders when none are given", async () => {
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url.startsWith("https://docs.google.com/")) {
+        const response = new Response(docHtml, { status: 200, headers: { "Content-Type": "text/html" } });
+        Object.defineProperty(response, "url", { value: url });
+        return response;
+      }
+      return new Response(JSON.stringify({ id: 12, status: "draft", link: "https://site/?p=12", meta: { rank_math_title: "My post" } }), {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await publishBlogDraft(
+      "project-1",
+      { title: "My post", docUrl: "https://docs.google.com/document/d/1AbC/edit" },
+      { uploadImages: false }
+    );
+
+    const body = JSON.parse((fetchMock.mock.calls[1] as unknown as [string, RequestInit])[1].body as string);
+    expect(body.meta).toEqual({
+      rank_math_title: "My post",
+      rank_math_description: DUMMY_META_DESCRIPTION,
+      rank_math_focus_keyword: DUMMY_FOCUS_KEYWORD,
+    });
+  });
+
+  it("uses the given SEO fields when present", async () => {
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url.startsWith("https://docs.google.com/")) {
+        const response = new Response(docHtml, { status: 200, headers: { "Content-Type": "text/html" } });
+        Object.defineProperty(response, "url", { value: url });
+        return response;
+      }
+      return new Response(JSON.stringify({ id: 13, status: "draft", link: "https://site/?p=13", meta: { rank_math_title: "SEO" } }), {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await publishBlogDraft(
+      "project-1",
+      {
+        title: "My post",
+        docUrl: "https://docs.google.com/document/d/1AbC/edit",
+        seo: { metaTitle: "SEO", metaDescription: "Desc", focusKeyword: "steel warehouse" },
+      },
+      { uploadImages: false }
+    );
+
+    const body = JSON.parse((fetchMock.mock.calls[1] as unknown as [string, RequestInit])[1].body as string);
+    expect(body.meta).toEqual({
+      rank_math_title: "SEO",
+      rank_math_description: "Desc",
+      rank_math_focus_keyword: "steel warehouse",
+    });
   });
 });

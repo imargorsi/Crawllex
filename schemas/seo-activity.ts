@@ -93,6 +93,10 @@ export const createSeoActivitySchema = z
     details: contentFields.details,
     pushToWordpress: z.boolean().optional(),
     docUrl: z.string().trim().optional(),
+    // Rank Math SEO fields for the WordPress draft. Optional until the form has inputs for them.
+    metaTitle: z.string().trim().max(70, "SEO title must be 70 characters or fewer.").optional(),
+    metaDescription: z.string().trim().max(160, "Meta description must be 160 characters or fewer.").optional(),
+    focusKeyword: z.string().trim().max(100, "Focus keyword must be 100 characters or fewer.").optional(),
   })
   .superRefine((data, ctx) => {
     refineTypeSpecificFields(data, ctx, data.type);
