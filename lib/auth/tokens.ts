@@ -19,30 +19,13 @@ function hashToken(plain: string): string {
   return crypto.createHash("sha256").update(plain).digest("hex");
 }
 
-/** Service tokens (non-expiring, for integrations such as Crawllex Lens) exist only on environments that enable them. */
-export function serviceTokensEnabled(): boolean {
-  return process.env.CRAWLEX_SERVICE_TOKENS_ENABLED === "true";
-}
-
 export async function createAccessToken(userId: Types.ObjectId, name = "api"): Promise<string> {
-  return issueToken(userId, name, { service: false });
-}
-
-export async function createServiceAccessToken(userId: Types.ObjectId, name: string): Promise<string> {
-  if (!serviceTokensEnabled()) {
-    throw new Error("Service tokens are disabled. Set CRAWLEX_SERVICE_TOKENS_ENABLED=true on this environment only.");
-  }
-  return issueToken(userId, name, { service: true });
-}
-
-async function issueToken(userId: Types.ObjectId, name: string, { service }: { service: boolean }): Promise<string> {
   const plainTextToken = randomToken(40);
   const record = await AccessToken.create({
     userId,
     name,
     tokenHash: hashToken(plainTextToken),
-    expiresAt: service ? null : new Date(Date.now() + ACCESS_TOKEN_TTL_MS),
-    serviceToken: service,
+    expiresAt: new Date(Date.now() + ACCESS_TOKEN_TTL_MS),
   });
 
   return `${record._id.toString()}|${plainTextToken}`;
@@ -66,10 +49,6 @@ export async function findAccessToken(plainToken: string | null): Promise<{
     !crypto.timingSafeEqual(Buffer.from(record.tokenHash), Buffer.from(expected))
   ) {
     return null;
-  }
-
-  if (record.serviceToken && !record.expiresAt) {
-    return serviceTokensEnabled() ? { tokenId: record._id, userId: record.userId } : null;
   }
 
   if (!record.expiresAt || record.expiresAt.getTime() < Date.now()) {
