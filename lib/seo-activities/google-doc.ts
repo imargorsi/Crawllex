@@ -67,6 +67,56 @@ export async function fetchPublicGoogleDocHtml(docUrl: string): Promise<string> 
   return html;
 }
 
+type TDocsApiInlineObject = {
+  inlineObjectProperties?: { embeddedObject?: { title?: string; description?: string } };
+};
+
+type TDocsApiDocument = {
+  body?: unknown;
+  inlineObjects?: Record<string, TDocsApiInlineObject>;
+};
+
+/** Finds every inline object id in reading order, including inside tables. */
+function collectInlineObjectIds(node: unknown, out: string[]): void {
+  if (Array.isArray(node)) {
+    for (const item of node) collectInlineObjectIds(item, out);
+    return;
+  }
+  if (!node || typeof node !== "object") return;
+  const record = node as Record<string, unknown>;
+  const element = record.inlineObjectElement as { inlineObjectId?: unknown } | undefined;
+  if (typeof element?.inlineObjectId === "string") out.push(element.inlineObjectId);
+  for (const value of Object.values(record)) collectInlineObjectIds(value, out);
+}
+
+/**
+ * Alt text for each image in a Doc, in document order. Docs keeps it under Image > Alt text
+ * (stored as the image's description, or title). The export HTML does not carry it, so the
+ * Docs API is asked. Returns null without the key, or when the call fails.
+ */
+export async function fetchDocImageAlts(docUrl: string, apiKey: string): Promise<string[] | null> {
+  const id = parseGoogleDocId(docUrl);
+  if (!id || !apiKey) return null;
+
+  try {
+    const response = await fetch(
+      `https://docs.googleapis.com/v1/documents/${id}?fields=body,inlineObjects&key=${encodeURIComponent(apiKey)}`,
+      { signal: AbortSignal.timeout(GOOGLE_DOC_FETCH_TIMEOUT_MS) },
+    );
+    if (!response.ok) return null;
+
+    const doc = (await response.json()) as TDocsApiDocument;
+    const objectIds: string[] = [];
+    collectInlineObjectIds(doc.body, objectIds);
+    return objectIds.map((objectId) => {
+      const embedded = doc.inlineObjects?.[objectId]?.inlineObjectProperties?.embeddedObject;
+      return (embedded?.description || embedded?.title || "").trim();
+    });
+  } catch {
+    return null;
+  }
+}
+
 type HtmlNode = {
   type: string;
   name?: string;
@@ -120,11 +170,45 @@ const CONTAINER_TAGS = new Set([
 ]);
 
 /** A Doc code block exported as a one-cell table: every line is a code-only paragraph. */
-const CODE_ONLY_CELL_TABLE = /^(?:<tbody>)?<tr><td>((?:<p>(?:<code>[^<]*<\/code>)+<\/p>)+)<\/td><\/tr>(?:<\/tbody>)?$/;
+const CODE_ONLY_CELL_TABLE =
+  /^(?:<tbody>)?<tr><td(?:\s[^>]*)?>((?:<p(?:\s[^>]*)?>(?:<code>[^<]*<\/code>)+<\/p>)+)<\/td><\/tr>(?:<\/tbody>)?$/;
 
 /** Consecutive paragraphs that hold only inline code become one <pre><code> block. */
-const CODE_PARAGRAPH_RUN = /(?:<p>(?:<code>[^<]*<\/code>)+<\/p>\s*)+/g;
-const CODE_PARAGRAPH = /<p>((?:<code>[^<]*<\/code>)+)<\/p>/g;
+const CODE_PARAGRAPH_RUN = /(?:<p(?:\s[^>]*)?>(?:<code>[^<]*<\/code>)+<\/p>\s*)+/g;
+const CODE_PARAGRAPH = /<p(?:\s[^>]*)?>((?:<code>[^<]*<\/code>)+)<\/p>/g;
+
+/**
+ * Doc styles kept on output: alignment, text and cell colors, cell borders.
+ * Each value must match its pattern, so nothing else from the Doc's CSS reaches WordPress.
+ */
+const COLOR_VALUE = /^(#[0-9a-f]{3,8}|rgba?\([\d\s.,%]+\))$/i;
+const BORDER_VALUE = /^(none|(solid|dashed|dotted|double)\s+#[0-9a-f]{3,6}\s+[\d.]+pt)$/i;
+const KEPT_STYLE_VALUES: Record<string, RegExp> = {
+  "text-align": /^(left|right|center|justify|start|end)$/i,
+  "vertical-align": /^(top|middle|bottom|baseline)$/i,
+  color: COLOR_VALUE,
+  "background-color": COLOR_VALUE,
+  "border-top": BORDER_VALUE,
+  "border-right": BORDER_VALUE,
+  "border-bottom": BORDER_VALUE,
+  "border-left": BORDER_VALUE,
+};
+
+/** Colors Docs writes by default. They are dropped so the WordPress theme decides the defaults. */
+const DEFAULT_COLORS = new Set(["color:#000000", "color:#000", "background-color:#ffffff", "background-color:#fff"]);
+
+/** Which kept styles each element gets. Paragraphs and headings only need alignment. */
+const BLOCK_STYLE_PROPS = ["text-align"];
+const CELL_STYLE_PROPS = [
+  "text-align",
+  "vertical-align",
+  "background-color",
+  "border-top",
+  "border-right",
+  "border-bottom",
+  "border-left",
+];
+const INLINE_STYLE_PROPS = ["color", "background-color"];
 
 /** Font families that mark code in a Google Doc. */
 const MONO_FONT = /font-family:[^;}"]*(courier|consolas|mono|menlo|source code)/i;
@@ -154,20 +238,48 @@ function cleanHref(raw: string | undefined): string | null {
   return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : null;
 }
 
-/** Classes from the export's <style> block that mark bold, italic, underline or monospace text. */
+type TStyleDeclaration = [property: string, value: string];
+
+/**
+ * Classes from the export's <style> block: which ones mark bold, italic, underline or monospace text,
+ * and the kept style declarations (alignment, colors, borders) each class carries.
+ */
 type TDocStyleClasses = {
   bold: Set<string>;
   italic: Set<string>;
   underline: Set<string>;
   mono: Set<string>;
+  declarations: Map<string, TStyleDeclaration[]>;
 };
 
 type TRenderContext = {
   styles: TDocStyleClasses;
   images: TDocImage[];
+  /** Alt texts from the Docs API, one per <img> in document order. Undefined when unavailable. */
+  imageAlts?: string[];
+  /** <img> tags seen so far, including remote ones that are dropped. */
+  imagesSeen: number;
 };
 
 const HEADING_TAGS = new Set(["h1", "h2", "h3", "h4", "h5", "h6"]);
+
+/** Splits an inline or class style into kept declarations. Anything not on the allow-list is dropped. */
+function keptDeclarations(css: string): TStyleDeclaration[] {
+  const kept: TStyleDeclaration[] = [];
+  for (const part of css.split(";")) {
+    const colon = part.indexOf(":");
+    if (colon < 0) continue;
+    const property = part.slice(0, colon).trim().toLowerCase();
+    const value = part.slice(colon + 1).trim();
+    const pattern = KEPT_STYLE_VALUES[property];
+    if (!pattern || !pattern.test(value)) continue;
+    // Docs writes black text and white backgrounds on every span. Dropping them keeps the theme's
+    // own colors, so the post stays readable on dark themes.
+    if (DEFAULT_COLORS.has(`${property}:${value.toLowerCase()}`)) continue;
+    kept.push([property, value]);
+  }
+  return kept;
+}
 
 function readStyleClasses(css: string): TDocStyleClasses {
   const classes: TDocStyleClasses = {
@@ -175,6 +287,7 @@ function readStyleClasses(css: string): TDocStyleClasses {
     italic: new Set(),
     underline: new Set(),
     mono: new Set(),
+    declarations: new Map(),
   };
   for (const match of css.matchAll(/\.([A-Za-z0-9_-]+)\s*\{([^}]*)\}/g)) {
     const className = match[1]!;
@@ -183,6 +296,10 @@ function readStyleClasses(css: string): TDocStyleClasses {
     if (/font-style:\s*italic/i.test(body)) classes.italic.add(className);
     if (/text-decoration:[^;]*underline/i.test(body)) classes.underline.add(className);
     if (MONO_FONT.test(body)) classes.mono.add(className);
+    const kept = keptDeclarations(body);
+    if (kept.length) {
+      classes.declarations.set(className, [...(classes.declarations.get(className) ?? []), ...kept]);
+    }
   }
   return classes;
 }
@@ -204,8 +321,28 @@ function renderImage(node: HtmlNode, ctx: TRenderContext): string {
   }
 
   const index = ctx.images.length;
-  ctx.images.push({ contentType, extension, bytes, alt: node.attribs?.alt ?? "" });
-  return `<img src="${GOOGLE_DOC_IMAGE_TOKEN_PREFIX}${index}" alt="${escapeHtml(node.attribs?.alt ?? "")}">`;
+  const exportedAlt = node.attribs?.alt ?? "";
+  // Alt text comes from the Docs API when available; the export's own alt is the fallback.
+  const alt = ctx.imageAlts?.[ctx.imagesSeen] || exportedAlt;
+  ctx.images.push({ contentType, extension, bytes, alt });
+  return `<img src="${GOOGLE_DOC_IMAGE_TOKEN_PREFIX}${index}" alt="${escapeHtml(alt)}">`;
+}
+
+/** Style declarations a node keeps: its classes' rules first, then its inline style. */
+function keptStyleFor(node: HtmlNode, styles: TDocStyleClasses): Map<string, string> {
+  const kept = new Map<string, string>();
+  const classNames = (node.attribs?.class ?? "").split(/\s+/).filter(Boolean);
+  for (const className of classNames) {
+    for (const [property, value] of styles.declarations.get(className) ?? []) kept.set(property, value);
+  }
+  for (const [property, value] of keptDeclarations(node.attribs?.style ?? "")) kept.set(property, value);
+  return kept;
+}
+
+/** Inline style attribute with only the kept properties allowed for this element. Empty when none. */
+function styleAttr(kept: Map<string, string>, allowed: string[]): string {
+  const parts = allowed.filter((p) => kept.has(p)).map((p) => `${p}:${kept.get(p)}`);
+  return parts.length ? ` style="${escapeHtml(parts.join(";"))}"` : "";
 }
 
 function renderNode(node: HtmlNode, ctx: TRenderContext, inHeading: boolean): string {
@@ -215,7 +352,11 @@ function renderNode(node: HtmlNode, ctx: TRenderContext, inHeading: boolean): st
   const name = (node.name ?? node.type).toLowerCase();
   if (DROPPED_TAGS.has(name)) return "";
   if (name === "br") return "<br>";
-  if (name === "img") return renderImage(node, ctx);
+  if (name === "img") {
+    const rendered = renderImage(node, ctx);
+    ctx.imagesSeen += 1;
+    return rendered;
+  }
 
   const childHeading = inHeading || HEADING_TAGS.has(name);
   const children = (node.children ?? []).filter(
@@ -234,6 +375,9 @@ function renderNode(node: HtmlNode, ctx: TRenderContext, inHeading: boolean): st
     // Wrapped so a wide table scrolls on phones instead of pushing the page sideways.
     return `<figure class="wp-block-table" style="overflow-x:auto"><table>${inner}</table></figure>`;
   }
+  if (name === "td" || name === "th") {
+    return `<${name}${styleAttr(keptStyleFor(node, ctx.styles), CELL_STYLE_PROPS)}>${inner}</${name}>`;
+  }
   if (TABLE_PART_TAGS.has(name)) {
     return `<${name}>${inner}</${name}>`;
   }
@@ -241,9 +385,9 @@ function renderNode(node: HtmlNode, ctx: TRenderContext, inHeading: boolean): st
   if (BLOCK_TAGS.has(name)) {
     // An image-only paragraph has no text but must stay, so check for the img tag first.
     if (name === "p" && !inner.includes("<img ") && inner.replace(/<[^>]+>|&nbsp;|\s/g, "") === "") {
-      return "<p>&nbsp;</p>";
+      return `<p${styleAttr(keptStyleFor(node, ctx.styles), BLOCK_STYLE_PROPS)}>&nbsp;</p>`;
     }
-    return `<${name}>${inner}</${name}>`;
+    return `<${name}${styleAttr(keptStyleFor(node, ctx.styles), BLOCK_STYLE_PROPS)}>${inner}</${name}>`;
   }
 
   if (name === "b" || name === "strong") return inHeading ? inner : `<strong>${inner}</strong>`;
@@ -266,6 +410,8 @@ function renderNode(node: HtmlNode, ctx: TRenderContext, inHeading: boolean): st
   if (MONO_FONT.test(style) || hasClass(ctx.styles.mono)) {
     out = `<code>${out}</code>`;
   }
+  const spanStyle = styleAttr(keptStyleFor(node, ctx.styles), INLINE_STYLE_PROPS);
+  if (spanStyle && name === "span") out = `<span${spanStyle}>${out}</span>`;
   return out;
 }
 
@@ -276,9 +422,17 @@ function renderNode(node: HtmlNode, ctx: TRenderContext, inHeading: boolean): st
  * separately so the caller can upload them; the content points at them with placeholder tokens.
  * Drops remote images, styles, classes and everything else.
  */
-export function convertGoogleDoc(html: string): TConvertedDoc {
+export function convertGoogleDoc(html: string, imageAlts?: string[]): TConvertedDoc {
   const $ = cheerio.load(html);
-  const ctx: TRenderContext = { styles: readStyleClasses($("style").text()), images: [] };
+  // Alt texts only apply when the Docs API listed exactly one per exported <img>. Otherwise the
+  // order cannot be trusted, so the export's own alt (usually empty) is used.
+  const alts = imageAlts?.length === $("img").length ? imageAlts : undefined;
+  const ctx: TRenderContext = {
+    styles: readStyleClasses($("style").text()),
+    images: [],
+    imageAlts: alts,
+    imagesSeen: 0,
+  };
   const body = $("body").get(0) ?? $.root().get(0);
   const rendered = renderNode(body as unknown as HtmlNode, ctx, false);
 
