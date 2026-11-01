@@ -47,7 +47,7 @@ async function uploadWithRetry(
 /** Removes the image placeholders from the content when images are not uploaded. */
 export function stripImagePlaceholders(content: string): string {
   return content
-    .replace(/<p><img src="crawllex-image:\d+"[^>]*><\/p>/g, "")
+    .replace(/<p(?:\s[^>]*)?><img src="crawllex-image:\d+"[^>]*><\/p>/g, "")
     .replace(/<img src="crawllex-image:\d+"[^>]*>/g, "");
 }
 
