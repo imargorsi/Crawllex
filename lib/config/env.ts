@@ -90,6 +90,8 @@ export const env = {
    * Google OAuth (sign-in / sign-up) — separate from analytics Service Account.
    * Redirect URI must match the Cloud Console OAuth client exactly.
    */
+  /** Docs API key (public-doc read). Used to get image alt text for blog pushes. Optional. */
+  googleDocsApiKey: () => optional("GOOGLE_DOCS_API_KEY"),
   googleOAuthClientId: () => optional("GOOGLE_OAUTH_CLIENT_ID"),
   googleOAuthClientSecret: () => optional("GOOGLE_OAUTH_CLIENT_SECRET"),
   googleOAuthRedirectUri: () =>

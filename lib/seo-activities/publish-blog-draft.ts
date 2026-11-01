@@ -1,4 +1,5 @@
 import { HttpError } from "@/lib/api/http-errors";
+import { env } from "@/lib/config/env";
 import {
   createWpDraft,
   deleteWpMedia,
@@ -11,6 +12,7 @@ import {
   GOOGLE_DOC_IMAGE_TOKEN_PREFIX,
   GOOGLE_DOC_MAX_CHARS,
   convertGoogleDoc,
+  fetchDocImageAlts,
   fetchPublicGoogleDocHtml,
 } from "@/lib/seo-activities/google-doc";
 import { optimizeDocImage } from "@/lib/seo-activities/optimize-doc-image";
@@ -71,7 +73,11 @@ export async function publishBlogDraft(
 ): Promise<TPublishedBlogDraft> {
   const uploadImages = options.uploadImages ?? BLOG_UPLOAD_IMAGES;
   const connection = await wpConnectionForProject(projectId);
-  const converted = convertGoogleDoc(await fetchPublicGoogleDocHtml(input.docUrl));
+  const [docHtml, imageAlts] = await Promise.all([
+    fetchPublicGoogleDocHtml(input.docUrl),
+    fetchDocImageAlts(input.docUrl, env.googleDocsApiKey()),
+  ]);
+  const converted = convertGoogleDoc(docHtml, imageAlts ?? undefined);
   if (!converted.content) {
     throw new HttpError(422, "The Google Doc has no text to publish.");
   }
