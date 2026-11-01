@@ -54,3 +54,12 @@ describe("Google Docs styles on blog output", () => {
     expect(convertGoogleDoc(html, ["one", "two"]).images[0]!.alt).toBe("");
   });
 });
+
+describe("image placeholder removal with styled paragraphs", () => {
+  it("removes an image-only paragraph that carries alignment", async () => {
+    const { stripImagePlaceholders } = await import("@/lib/seo-activities/publish-blog-draft");
+    const content = '<p>Before</p><p style="text-align:center"><img src="crawllex-image:0" alt="Chart"></p><p>After</p>';
+
+    expect(stripImagePlaceholders(content)).toBe("<p>Before</p><p>After</p>");
+  });
+});
