@@ -41,16 +41,6 @@ export function ReportCoverGraphic() {
       </defs>
 
 
-      <image
-        href="/report-assets/cover-art.svg"
-        x="160"
-        y="-20"
-        width="170"
-        height="170"
-        preserveAspectRatio="xMidYMid meet"
-        opacity="0.28"
-        className="motion-safe:animate-[report-cover-drift_12s_ease-in-out_infinite]"
-      />
 
       <g className="motion-safe:animate-[report-float_6s_ease-in-out_infinite]">
         <rect
