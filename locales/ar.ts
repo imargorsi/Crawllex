@@ -925,6 +925,7 @@ const translation: Translation = {
       colTitle: "التقرير",
       colPeriod: "الفترة",
       colCreated: "تاريخ الإنشاء",
+      createdOn: "تاريخ الإنشاء",
       open: "فتح",
       backToList: "العودة إلى التقارير",
       downloadPdf: "تحميل PDF",

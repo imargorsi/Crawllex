@@ -919,6 +919,7 @@ export interface Translation {
       colTitle: string;
       colPeriod: string;
       colCreated: string;
+      createdOn: string;
       open: string;
       backToList: string;
       downloadPdf: string;
@@ -2591,6 +2592,7 @@ const translation: Translation = {
       colTitle: "Report",
       colPeriod: "Period",
       colCreated: "Created",
+      createdOn: "Created on",
       open: "Open",
       backToList: "Back To Reports",
       downloadPdf: "Download PDF",

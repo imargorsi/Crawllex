@@ -11,7 +11,7 @@ import {
   elevatedCardTitleClass,
 } from "@/lib/frontend/layout/dashboard-chrome";
 import { Icons } from "@/lib/frontend/icons/app-icons";
-import { formatMonthTitle, formatPeriodLabel } from "@/lib/reports/period";
+import { formatMonthTitle } from "@/lib/reports/period";
 import { cn } from "@/lib/utils";
 import type { TReportListItemDto } from "@/types/reports.types";
 
@@ -123,13 +123,19 @@ export function ReportCard({
 
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="min-w-0">
-          <h3 className={cn("truncate type-title", elevatedCardTitleClass)}>{clientName}</h3>
-          <p className={cn("mt-1 flex items-center gap-2 text-sm", elevatedCardMutedClass)}>
-            <Icons.calendar className="size-3.5 shrink-0" aria-hidden />
-            <span className="truncate">{formatPeriodLabel(report.periodFrom, report.periodTo)}</span>
-          </p>
+          <h3 className={cn("truncate type-title", elevatedCardTitleClass)}>{monthTitle}</h3>
+          <span className="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-brand/35 bg-brand/12 px-2.5 py-0.5 text-xs font-semibold text-brand">
+            <Icons.globe className="size-3 shrink-0" aria-hidden />
+            <span className="truncate">{clientName}</span>
+          </span>
         </div>
+
+        {report.summary ? (
+          <p className={cn("line-clamp-3 text-sm leading-relaxed", elevatedCardMutedClass)}>{report.summary}</p>
+        ) : null}
+
         <p className={cn("text-xs", elevatedCardMutedClass)}>
+          {t("createdOn")}:{" "}
           {new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(report.createdAt))}
         </p>
 

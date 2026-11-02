@@ -103,6 +103,8 @@ export type TReportListItemDto = {
   periodFrom: string;
   periodTo: string;
   createdAt: string;
+  /** Short summary: first executive summary lines, for list cards. */
+  summary: string | null;
 };
 
 export type TReportDetailDto = TReportListItemDto & {
