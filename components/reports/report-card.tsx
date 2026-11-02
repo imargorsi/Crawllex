@@ -97,7 +97,17 @@ export function ReportCard({
   const monthTitle = formatMonthTitle(report.periodFrom);
 
   return (
-    <article className={cn(elevatedCardSurfaceClass, "flex flex-col overflow-hidden rounded-3xl")}>
+    <article
+      className={cn(
+        elevatedCardSurfaceClass,
+        "group relative flex flex-col overflow-hidden rounded-3xl transition-shadow duration-300 hover:shadow-[0_0_32px_-12px_var(--status-invited)]",
+      )}
+    >
+      <span
+        aria-hidden
+        className="absolute inset-x-0 top-0 z-10 h-0.5"
+        style={{ background: "linear-gradient(90deg, var(--brand), var(--status-invited))" }}
+      />
       <div className="relative h-44 overflow-hidden border-b border-border bg-bg-hover">
         <img
           src="/report-assets/dots.svg"

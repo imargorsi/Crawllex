@@ -7,6 +7,8 @@ import { useTranslation } from "react-i18next";
 import { ReportCard } from "@/components/reports/report-card";
 import { ReportCreateSheet } from "@/components/reports/report-create-sheet";
 import { ReportsTable } from "@/components/reports/reports-table";
+import { SummaryMetricCards, type TSummaryMetricCard } from "@/components/ui/summary-metric-cards";
+import { formatMonthTitle } from "@/lib/reports/period";
 import { CardGridSkeleton } from "@/components/skeletons/card-grid-skeleton";
 import { Heading } from "@/components/heading";
 import { Paragraph } from "@/components/paragraph";
@@ -115,6 +117,40 @@ export function ReportsSection() {
   }
 
   const hasReports = reports.length > 0;
+  const latest = reports[0];
+  const monthsCovered = new Set(reports.map((report) => report.periodFrom.slice(0, 7))).size;
+  const metricCards: TSummaryMetricCard[] = [
+    {
+      id: "total",
+      label: t("metricTotal"),
+      value: String(reports.length),
+      icon: Icons.file,
+      accent: "var(--brand)",
+    },
+    {
+      id: "latest",
+      label: t("metricLatest"),
+      value: latest ? formatMonthTitle(latest.periodFrom) : "–",
+      icon: Icons.calendar,
+      accent: "var(--status-invited)",
+    },
+    {
+      id: "months",
+      label: t("metricMonths"),
+      value: String(monthsCovered),
+      icon: Icons.chartLine,
+      accent: "var(--status-active)",
+    },
+    {
+      id: "created",
+      label: t("metricCreated"),
+      value: latest
+        ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(latest.createdAt))
+        : "–",
+      icon: Icons.clock,
+      accent: "var(--status-pending)",
+    },
+  ];
 
   return (
     <div className="w-full min-w-0">
@@ -136,6 +172,8 @@ export function ReportsSection() {
             ) : null}
           </div>
         </div>
+
+        {hasReports ? <SummaryMetricCards cards={metricCards} /> : null}
 
         {reportsQuery.isError ? (
           <p className="text-sm text-destructive">{t("loadError")}</p>

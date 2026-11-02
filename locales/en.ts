@@ -919,6 +919,10 @@ export interface Translation {
       colTitle: string;
       colPeriod: string;
       colSummary: string;
+      metricTotal: string;
+      metricLatest: string;
+      metricMonths: string;
+      metricCreated: string;
       colCreated: string;
       createdOn: string;
       open: string;
@@ -2593,6 +2597,10 @@ const translation: Translation = {
       colTitle: "Report",
       colPeriod: "Period",
       colSummary: "Summary",
+      metricTotal: "Total Reports",
+      metricLatest: "Latest Period",
+      metricMonths: "Months Covered",
+      metricCreated: "Last Created",
       colCreated: "Created",
       createdOn: "Created on",
       open: "Open",
