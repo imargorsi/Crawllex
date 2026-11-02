@@ -15,7 +15,7 @@ import {
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { REPORT_PALETTE } from "@/lib/reports/constants";
 import { formatInt } from "@/lib/reports/format";
-import { formatMonthTitle, formatPeriodLabel } from "@/lib/reports/period";
+import { formatCompactPeriodLabel, formatMonthTitle } from "@/lib/reports/period";
 import { cn } from "@/lib/utils";
 import type { TReportListItemDto } from "@/types/reports.types";
 
@@ -109,7 +109,7 @@ export function ReportCard({
 }: TReportCardProps) {
   const { t } = useTranslation("translation", { keyPrefix: "modules.reports" });
   const monthTitle = formatMonthTitle(report.periodFrom);
-  const periodLabel = formatPeriodLabel(report.periodFrom, report.periodTo);
+  const periodLabel = formatCompactPeriodLabel(report.periodFrom, report.periodTo);
   const kpis = report.kpis;
 
   return (

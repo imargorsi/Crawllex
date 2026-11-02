@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatPeriodLabel, monthBounds, resolveReportPeriod } from "@/lib/reports/period";
+import { formatCompactPeriodLabel, formatPeriodLabel, monthBounds, resolveReportPeriod } from "@/lib/reports/period";
 
 describe("report period", () => {
   it("returns first and last day of a month", () => {
@@ -34,5 +34,10 @@ describe("report period", () => {
 
   it("formats labels with an en dash", () => {
     expect(formatPeriodLabel("2026-01-05", "2026-01-06")).toBe("5 January 2026 – 6 January 2026");
+  });
+
+  it("formats compact labels for tight UI", () => {
+    expect(formatCompactPeriodLabel("2026-09-01", "2026-09-30")).toBe("1–30 Sep 2026");
+    expect(formatCompactPeriodLabel("2026-09-01", "2026-10-15")).toBe("1 Sep – 15 Oct 2026");
   });
 });

@@ -79,3 +79,15 @@ export function resolveReportPeriod(from: string, to: string): TReportPeriodDto 
     previousLabel: formatPeriodLabel(previousFrom, previousTo),
   };
 }
+
+const SHORT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
+
+/** Compact label for tight UI, e.g. "1–30 Sep 2026" or "1 Sep – 15 Oct 2026". Uses an en dash. */
+export function formatCompactPeriodLabel(from: string, to: string): string {
+  const [fromYear, fromMonth, fromDay] = from.split("-").map(Number);
+  const [toYear, toMonth, toDay] = to.split("-").map(Number);
+  if (fromYear === toYear && fromMonth === toMonth) {
+    return `${fromDay}–${toDay} ${SHORT_MONTHS[fromMonth - 1]} ${fromYear}`;
+  }
+  return `${fromDay} ${SHORT_MONTHS[fromMonth - 1]} – ${toDay} ${SHORT_MONTHS[toMonth - 1]} ${toYear}`;
+}
