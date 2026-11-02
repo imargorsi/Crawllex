@@ -24,6 +24,7 @@ export const ROUTE_ACCESS_RULES: readonly RouteAccessRule[] = [
   { pattern: /^\/analytics(?:\/|$)/, viewPermissions: ["analytics.view"], scope: "project" },
   { pattern: /^\/seo-activities(?:\/|$)/, viewPermissions: ["seo_activities.view"], scope: "project" },
   { pattern: /^\/leads(?:\/|$)/, viewPermissions: ["leads.view"], scope: "project" },
+  { pattern: /^\/reports(?:\/|$)/, viewPermissions: ["reports.view"], scope: "project" },
 ];
 
 export function isAuthOnlyRoute(pathname: string): boolean {
@@ -63,6 +64,7 @@ export function resolveDefaultAccessiblePath(
     { path: "/analytics", permission: "analytics.view" },
     { path: "/seo-activities", permission: "seo_activities.view" },
     { path: "/leads", permission: "leads.view" },
+    { path: "/reports", permission: "reports.view" },
   ];
 
   for (const route of projectRoutes) {

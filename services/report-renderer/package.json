@@ -1,0 +1,18 @@
+{
+  "name": "crawllex-report-renderer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HTML to PDF renderer for Crawllex monthly reports. Standalone: no imports from the Crawllex app.",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "check": "node --check server.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "puppeteer-core": "25.13.0"
+  }
+}

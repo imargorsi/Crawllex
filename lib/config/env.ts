@@ -71,6 +71,10 @@ export const env = {
   emailVerificationExpireMinutes: () => Number(optional("EMAIL_VERIFICATION_EXPIRE", "60")),
   /** Protects `/api/v1/cron/*` routes. */
   cronSecret: () => optional("CRON_SECRET"),
+  /** Base URL of the report renderer service (services/report-renderer). Empty = PDF disabled. */
+  reportRendererUrl: () => optional("REPORT_RENDERER_URL"),
+  /** Bearer token the app sends to the renderer. Must match the renderer's REPORT_RENDERER_TOKEN. */
+  reportRendererToken: () => optional("REPORT_RENDERER_TOKEN"),
   /**
    * Google Service Account — JSON blob, or email + private key.
    * Private key: local `.env` may use `\n`; Hostinger should use base64 PEM

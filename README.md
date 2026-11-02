@@ -43,5 +43,5 @@ Internal docs and agent instructions are kept outside this repo (private).
 
 ## Status (summary)
 
-Modules 1–10, 12 and 13 are built; Module 11 (Reports) is out of scope.
+Modules 1–13 are built. Module 11 (Reports) is v1: see `doc/reports.md`.
 See the internal status tracker for health, known issues and open work.

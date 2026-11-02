@@ -19,6 +19,7 @@ export {
 } from "./OAuthLoginCode";
 export { PasswordResetToken } from "./PasswordResetToken";
 export { Project, type ProjectDocument } from "./Project";
+export { Report, type ReportDocument } from "./Report";
 export {
   ProjectIntegration,
   type ProjectIntegrationDocument,

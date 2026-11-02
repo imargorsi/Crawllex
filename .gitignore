@@ -61,3 +61,6 @@ scripts/_hostinger-sa-key.b64.txt
 
 # project docs: kept here, never committed (canonical copy is this folder)
 /doc/
+
+# report renderer service dependencies (services/report-renderer)
+services/**/node_modules/

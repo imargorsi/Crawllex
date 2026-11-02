@@ -26,6 +26,7 @@ export interface Translation {
     analytics: string;
     seoActivities: string;
     leads: string;
+    reports: string;
     settings: string;
   };
   breadcrumb: {
@@ -893,6 +894,45 @@ export interface Translation {
         colUpdatedAt: string;
       };
     };
+    reports: {
+      title: string;
+      subtitle: string;
+      selectProjectTitle: string;
+      selectProjectBody: string;
+      noAccessTitle: string;
+      noAccessBody: string;
+      loadError: string;
+      newReport: string;
+      createTitle: string;
+      createBody: string;
+      periodMonth: string;
+      periodHint: string;
+      invalidPeriod: string;
+      highlightsLabel: string;
+      highlightsHint: string;
+      translationStatusLabel: string;
+      closingNoteLabel: string;
+      createSubmit: string;
+      created: string;
+      emptyTitle: string;
+      emptyBody: string;
+      colTitle: string;
+      colPeriod: string;
+      colCreated: string;
+      open: string;
+      backToList: string;
+      downloadPdf: string;
+      preparingPdf: string;
+      pdfError: string;
+      deleteAction: string;
+      deleteTitle: string;
+      deleteBody: string;
+      deleted: string;
+      previewLoading: string;
+      previewError: string;
+      notFoundTitle: string;
+      notFoundBody: string;
+    };
     analytics: {
       title: string;
       subtitle: string;
@@ -1638,6 +1678,7 @@ const translation: Translation = {
     projects: "Projects",
     analytics: "Analytics",
     seoActivities: "SEO Activities",
+    reports: "Reports",
     leads: "Leads",
     settings: "Settings",
   },
@@ -2524,6 +2565,45 @@ const translation: Translation = {
         colCreatedAt: "Created",
         colUpdatedAt: "Updated",
       },
+    },
+    reports: {
+      title: "Reports",
+      subtitle: "Monthly client reports for search, traffic and leads.",
+      selectProjectTitle: "Select A Project",
+      selectProjectBody: "Choose a project to view its reports.",
+      noAccessTitle: "No Access",
+      noAccessBody: "You do not have permission to view reports for this project.",
+      loadError: "Reports could not be loaded.",
+      newReport: "New Report",
+      createTitle: "New Monthly Report",
+      createBody: "Pick a month. The report uses cached Search Console and Google Analytics data for that month.",
+      periodMonth: "Report Month",
+      periodHint: "Covers the first to the last day of the month.",
+      invalidPeriod: "Choose a valid month.",
+      highlightsLabel: "Highlights",
+      highlightsHint: "One highlight per line. Shown in the notes section.",
+      translationStatusLabel: "Website Translation Status",
+      closingNoteLabel: "Next Steps",
+      createSubmit: "Create Report",
+      created: "Report created.",
+      emptyTitle: "No Reports Yet",
+      emptyBody: "Create the first monthly report for this project.",
+      colTitle: "Report",
+      colPeriod: "Period",
+      colCreated: "Created",
+      open: "Open",
+      backToList: "Back To Reports",
+      downloadPdf: "Download PDF",
+      preparingPdf: "Preparing PDF…",
+      pdfError: "The PDF could not be created. Try again.",
+      deleteAction: "Delete",
+      deleteTitle: "Delete This Report?",
+      deleteBody: "The saved report and its snapshot will be removed. This cannot be undone.",
+      deleted: "Report deleted.",
+      previewLoading: "Loading report…",
+      previewError: "The report preview could not be loaded.",
+      notFoundTitle: "Report Not Found",
+      notFoundBody: "This report does not exist or was deleted.",
     },
     analytics: {
       title: "Analytics",
