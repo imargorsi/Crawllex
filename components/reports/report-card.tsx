@@ -15,7 +15,7 @@ import {
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { REPORT_PALETTE } from "@/lib/reports/constants";
 import { formatInt } from "@/lib/reports/format";
-import { formatMonthTitle } from "@/lib/reports/period";
+import { formatMonthTitle, formatPeriodLabel } from "@/lib/reports/period";
 import { cn } from "@/lib/utils";
 import type { TReportListItemDto } from "@/types/reports.types";
 
@@ -67,59 +67,23 @@ function KpiTile({ label, value, tone }: { label: string; value: string; tone: T
   );
 }
 
-type TReportActionTone = "brand" | "default" | "destructive";
-
-/** Same pill treatment as the projects card "big" actions (ACTION_BUTTON_TONE). */
-const ACTION_PILL: Record<TReportActionTone, string> = {
-  brand: "border-brand/40 bg-brand/12 text-brand hover:bg-brand/20 hover:border-brand/55",
-  default: "border-brand/35 bg-brand/12 text-brand hover:bg-brand/20 hover:border-brand/50",
-  destructive:
-    "border-status-rejected/40 bg-status-rejected/12 text-status-rejected hover:bg-status-rejected/20 hover:border-status-rejected/55",
-};
-
-const ACTION_BASE =
-  "inline-flex h-9 items-center justify-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-60";
-
-type TActionProps = {
-  label: string;
-  tone: TReportActionTone;
-  icon: TAppIconComponent;
-  isLoading?: boolean;
-  iconOnly?: boolean;
-};
-
-function ActionContent({ label, icon: Icon, isLoading = false, iconOnly = false }: TActionProps) {
-  return (
-    <>
-      {isLoading ? <Spinner className="size-4" /> : <Icon className="size-4 shrink-0" aria-hidden />}
-      {iconOnly ? <span className="sr-only">{label}</span> : <span>{label}</span>}
-    </>
-  );
-}
-
-function ActionLink({ href, ...props }: TActionProps & { href: string }) {
-  return (
-    <Link
-      href={href}
-      title={props.label}
-      className={cn(ACTION_BASE, ACTION_PILL[props.tone], props.iconOnly && "size-9 px-0")}
-    >
-      <ActionContent {...props} />
-    </Link>
-  );
-}
-
-function ActionButton({ onClick, disabled, ...props }: TActionProps & { onClick: () => void; disabled?: boolean }) {
+/** Icon-only glass pill placed on the cover artwork. The label is kept for screen readers. */
+function CoverActionButton({ label, icon: Icon, onClick, isLoading = false, disabled, destructive = false }: TCoverActionProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
-      title={props.label}
-      aria-label={props.label}
-      className={cn(ACTION_BASE, ACTION_PILL[props.tone], props.iconOnly && "size-9 px-0")}
+      title={label}
+      aria-label={label}
+      className={cn(
+        "inline-flex size-9 items-center justify-center rounded-full border backdrop-blur-md transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-white/60 disabled:opacity-60",
+        destructive
+          ? "border-white/25 bg-white/10 text-white hover:border-[var(--status-rejected)] hover:bg-[var(--status-rejected)]/80"
+          : "border-white/25 bg-white/10 text-white hover:bg-white/25",
+      )}
     >
-      <ActionContent {...props} />
+      {isLoading ? <Spinner className="size-4" /> : <Icon className="size-4" aria-hidden />}
     </button>
   );
 }
@@ -136,6 +100,7 @@ export function ReportCard({
 }: TReportCardProps) {
   const { t } = useTranslation("translation", { keyPrefix: "modules.reports" });
   const monthTitle = formatMonthTitle(report.periodFrom);
+  const periodLabel = formatPeriodLabel(report.periodFrom, report.periodTo);
   const kpis = report.kpis;
 
   return (
@@ -155,14 +120,39 @@ export function ReportCard({
         className="relative h-40 overflow-hidden border-b border-border"
         style={{ background: `linear-gradient(135deg, ${REPORT_PALETTE.accentDark}, ${REPORT_PALETTE.accent})` }}
       >
-        <ReportCoverGraphic />
-        {clientLogoUrl ? (
-          <img
-            src={clientLogoUrl}
-            alt={clientName}
-            className="absolute right-4 top-4 h-8 max-w-[6.5rem] rounded-lg bg-white/90 object-contain p-1"
+        <Link
+          href={`/reports/${report.id}`}
+          aria-label={`${t("open")} ${monthTitle}`}
+          className="absolute inset-0 z-0 rounded-t-3xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        />
+        <div className="pointer-events-none absolute inset-0">
+          <ReportCoverGraphic />
+          {clientLogoUrl ? (
+            <img
+              src={clientLogoUrl}
+              alt={clientName}
+              className="absolute right-4 top-4 h-8 max-w-[6.5rem] rounded-lg bg-white/90 object-contain p-1"
+            />
+          ) : null}
+        </div>
+
+        <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
+          <CoverActionButton
+            label={t("downloadPdf")}
+            icon={Icons.cloudDownload}
+            isLoading={isDownloading}
+            disabled={isDownloading}
+            onClick={() => onDownload(report)}
           />
-        ) : null}
+          {canDelete ? (
+            <CoverActionButton
+              label={t("deleteAction")}
+              icon={Icons.delete}
+              destructive
+              onClick={() => onDelete(report)}
+            />
+          ) : null}
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-4 p-5">
@@ -170,14 +160,13 @@ export function ReportCard({
           <div className="min-w-0">
             <h3 className={cn("truncate text-lg font-semibold", elevatedCardTitleClass)}>{monthTitle}</h3>
             <p className={cn("mt-1 flex items-center gap-1.5 text-xs", elevatedCardMutedClass)}>
-              <Icons.calendar className="size-3.5 shrink-0" aria-hidden />
               {t("createdOn")}:{" "}
               {new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(report.createdAt))}
             </p>
           </div>
-          <span className="inline-flex max-w-[45%] shrink-0 items-center gap-1.5 rounded-full border border-brand/35 bg-brand/12 px-2.5 py-1 text-xs font-semibold text-brand">
-            <Icons.globe className="size-3 shrink-0" aria-hidden />
-            <span className="truncate">{clientName}</span>
+          <span className="inline-flex max-w-[55%] shrink-0 items-center gap-1.5 rounded-full border border-border bg-bg-hover px-2.5 py-1 text-xs font-medium text-text-primary">
+            <Icons.calendar className="size-3 shrink-0" aria-hidden />
+            <span className="truncate">{periodLabel}</span>
           </span>
         </div>
 
@@ -199,26 +188,6 @@ export function ReportCard({
           </div>
         ) : null}
 
-        <div className="mt-auto flex flex-wrap items-center gap-2 pt-1">
-          <ActionLink href={`/reports/${report.id}`} label={t("open")} tone="brand" icon={Icons.view} />
-          <ActionButton
-            label={t("downloadPdf")}
-            tone="default"
-            icon={Icons.cloudDownload}
-            disabled={isDownloading}
-            isLoading={isDownloading}
-            onClick={() => onDownload(report)}
-          />
-          {canDelete ? (
-            <ActionButton
-              label={t("deleteAction")}
-              tone="destructive"
-              icon={Icons.delete}
-              iconOnly
-              onClick={() => onDelete(report)}
-            />
-          ) : null}
-        </div>
       </div>
     </article>
   );
