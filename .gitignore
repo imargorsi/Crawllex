@@ -58,3 +58,6 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 scripts/_hostinger-sa-key.b64.txt
+
+# project docs: kept here, never committed (canonical copy is this folder)
+/doc/
