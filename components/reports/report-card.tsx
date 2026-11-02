@@ -152,11 +152,11 @@ export function ReportCard({
         ) : null}
 
         {kpis ? (
-          <div className="flex flex-wrap gap-2">
-            <ReportStatChip value={formatInt(kpis.clicks)} label={t("kpiClicks")} tone="brand" size="md" />
-            <ReportStatChip value={formatInt(kpis.sessions)} label={t("kpiSessions")} tone="cyan" size="md" />
-            <ReportStatChip value={formatInt(kpis.leads)} label={t("kpiLeads")} tone="emerald" size="md" />
-            <ReportStatChip value={formatInt(kpis.calls)} label={t("kpiCalls")} tone="amber" size="md" />
+          <div className="flex flex-nowrap gap-1.5">
+            <ReportStatChip value={formatInt(kpis.clicks)} label={t("kpiClicks")} tone="brand" size="sm" className="min-w-0 flex-1 justify-center truncate" />
+            <ReportStatChip value={formatInt(kpis.sessions)} label={t("kpiSessions")} tone="cyan" size="sm" className="min-w-0 flex-1 justify-center truncate" />
+            <ReportStatChip value={formatInt(kpis.leads)} label={t("kpiLeads")} tone="emerald" size="sm" className="min-w-0 flex-1 justify-center truncate" />
+            <ReportStatChip value={formatInt(kpis.calls)} label={t("kpiCalls")} tone="amber" size="sm" className="min-w-0 flex-1 justify-center truncate" />
           </div>
         ) : null}
 
