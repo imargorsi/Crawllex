@@ -4,7 +4,7 @@ import { useId } from "react";
 import { Area, AreaChart, Cell, CartesianGrid, Pie, PieChart, XAxis, YAxis } from "recharts";
 
 import { AppTable, type TAppTableColumn } from "@/components/table/app-table";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import type { TAppIconComponent } from "@/components/ui/app-icon";
 import { elevatedCardMutedClass, elevatedCardSurfaceClass, elevatedCardTitleClass } from "@/lib/frontend/layout/dashboard-chrome";
 import { Icons } from "@/lib/frontend/icons/app-icons";
@@ -27,7 +27,8 @@ const CHANGE_TEXT = {
   none: "text-text-muted",
 } as const;
 
-const CHART_COLORS = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)"] as const;
+/** Series colours: brand, cyan, emerald, amber. Distinct per series, same tokens as the KPI tones. */
+const CHART_COLORS = [TONE_VAR.brand, TONE_VAR.cyan, TONE_VAR.emerald, TONE_VAR.amber] as const;
 
 /** Icon per KPI label, so the same metric looks the same wherever it appears. */
 const KPI_ICON: Record<string, TAppIconComponent> = {
@@ -55,12 +56,14 @@ const KPI_ICON: Record<string, TAppIconComponent> = {
 };
 
 export function ReportPanel({
+  id,
   title,
   icon: Icon,
   number,
   children,
   className,
 }: {
+  id?: string;
   title: string;
   icon?: TAppIconComponent;
   number?: string;
@@ -68,15 +71,22 @@ export function ReportPanel({
   className?: string;
 }) {
   return (
-    <section className={cn(elevatedCardSurfaceClass, "flex min-w-0 flex-col gap-5 rounded-3xl p-5 sm:p-6", className)}>
+    <section
+      id={id}
+      className={cn(elevatedCardSurfaceClass, "flex min-w-0 scroll-mt-24 flex-col gap-5 rounded-3xl p-6 sm:p-7", className)}
+    >
       <header className="flex items-center gap-3 border-b border-border/60 pb-4">
         {Icon ? (
           <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-brand/35 bg-brand/12 text-brand">
             <Icon className="size-4" aria-hidden />
           </span>
         ) : null}
-        <h2 className={cn("min-w-0 flex-1 text-base font-semibold", elevatedCardTitleClass)}>{title}</h2>
-        {number ? <span className="text-xs font-semibold tabular-nums text-text-muted">{number}</span> : null}
+        <h2 className={cn("min-w-0 flex-1 text-lg font-semibold tracking-tight", elevatedCardTitleClass)}>{title}</h2>
+        {number ? (
+          <span className="rounded-full border border-border/70 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-text-muted">
+            {number}
+          </span>
+        ) : null}
       </header>
       {children}
     </section>
@@ -128,8 +138,8 @@ export function ReportAreaChart({ chart }: { chart: TSeriesView }) {
     chart.series.map((series, index) => [keys[index], { label: series.name, color: CHART_COLORS[index % CHART_COLORS.length] }]),
   );
   return (
-    <ChartContainer config={config} className="aspect-auto h-64 w-full" initialDimension={{ width: 640, height: 256 }}>
-      <AreaChart data={data} margin={{ top: 12, right: 8, left: 0, bottom: 0 }}>
+    <ChartContainer config={config} className="aspect-auto h-72 w-full" initialDimension={{ width: 640, height: 288 }}>
+      <AreaChart data={data} margin={{ top: 16, right: 8, left: 0, bottom: 0 }}>
         <defs>
           {keys.map((key) => (
             <linearGradient key={key} id={`fill-${gradientId}-${key}`} x1="0" y1="0" x2="0" y2="1">
@@ -142,14 +152,17 @@ export function ReportAreaChart({ chart }: { chart: TSeriesView }) {
         <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={10} minTickGap={24} />
         <YAxis tickLine={false} axisLine={false} width={44} />
         <ChartTooltip content={<ChartTooltipContent />} />
+        <ChartLegend content={<ChartLegendContent />} />
         {keys.map((key) => (
           <Area
             key={key}
             dataKey={key}
-            type="monotone"
+            type="linear"
             stroke={`var(--color-${key})`}
             strokeWidth={2.5}
             fill={`url(#fill-${gradientId}-${key})`}
+            dot={false}
+            activeDot={{ r: 4 }}
           />
         ))}
       </AreaChart>

@@ -15,6 +15,7 @@ import {
 } from "@/components/reports/report-view/report-view-blocks";
 import { Modal } from "@/components/ui/modal";
 import { Icons } from "@/lib/frontend/icons/app-icons";
+import type { TAppIconComponent } from "@/components/ui/app-icon";
 import type { TBlockView, TReportTone, TReportView, TSectionView, TTableView } from "@/lib/reports/view-model";
 
 type TBlockOf<T extends TBlockView["type"]> = Extract<TBlockView, { type: T }>;
@@ -33,26 +34,50 @@ function sectionById(view: TReportView, id: TSectionView["id"]): TSectionView | 
 function DrilldownPill({
   label,
   count,
+  icon: Icon,
   onOpen,
 }: {
   label: string;
   count: number;
+  icon: TAppIconComponent;
   onOpen: () => void;
 }) {
   return (
     <button
       type="button"
       onClick={onOpen}
-      className="group flex w-full items-center justify-between gap-4 rounded-2xl border border-brand/35 bg-gradient-to-r from-brand/15 via-brand/5 to-transparent px-5 py-4 text-start transition-all duration-200 hover:border-brand/65 hover:shadow-[0_12px_28px_-14px_var(--brand)]"
+      className="group flex w-full items-center gap-4 rounded-2xl border border-border/70 bg-bg-card/40 px-4 py-3.5 text-start transition-all duration-200 hover:border-brand/55 hover:bg-brand/8 hover:shadow-[0_12px_28px_-16px_var(--brand)]"
     >
-      <span className="min-w-0">
-        <span className="block truncate text-sm font-semibold text-text-primary">{label}</span>
-        <span className="mt-0.5 block text-xs text-text-muted">{count} rows this month</span>
+      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-brand/40 bg-brand/12 text-brand">
+        <Icon className="size-4" aria-hidden />
       </span>
-      <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-brand/45 bg-brand/15 text-brand transition-transform duration-200 group-hover:translate-x-0.5">
-        <Icons.arrowRight className="size-4" aria-hidden />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-sm font-semibold text-text-primary">{label}</span>
+        <span className="mt-0.5 block text-xs text-text-muted">
+          {count} {count === 1 ? "row" : "rows"} this month
+        </span>
+      </span>
+      <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border/70 text-text-muted transition-all duration-200 group-hover:border-brand/55 group-hover:text-brand">
+        <Icons.arrowRight className="size-3.5" aria-hidden />
       </span>
     </button>
+  );
+}
+
+/** Jump links to each section, so the page reads like a dashboard with a clear outline. */
+function SectionNav({ items }: { items: { id: string; label: string }[] }) {
+  return (
+    <nav aria-label="Report sections" className="sticky top-3 z-20 -mx-1 flex flex-wrap gap-2 rounded-2xl border border-border/60 bg-bg-card/70 p-1.5 backdrop-blur-xl">
+      {items.map((item) => (
+        <a
+          key={item.id}
+          href={`#${item.id}`}
+          className="rounded-xl px-3.5 py-1.5 text-xs font-semibold text-text-muted transition-colors hover:bg-bg-hover hover:text-text-primary"
+        >
+          {item.label}
+        </a>
+      ))}
+    </nav>
   );
 }
 
@@ -101,10 +126,20 @@ export function ReportDetailView({ view }: { view: TReportView }) {
     setDrilldown({ ...item, description });
   };
 
+  const navItems = [
+    summary && { id: "summary", label: summary.title },
+    search && { id: "search", label: search.title },
+    traffic && { id: "traffic", label: traffic.title },
+    engagement && { id: "engagement", label: engagement.title },
+    leads && { id: "leads", label: leads.title },
+  ].filter((item): item is { id: string; label: string } => Boolean(item));
+
   return (
     <div className="space-y-6">
+      <SectionNav items={navItems} />
+
       {summary ? (
-        <ReportPanel title={summary.title} icon={Icons.analytics} number={summary.number}>
+        <ReportPanel id="summary" title={summary.title} icon={Icons.analytics} number={summary.number}>
           {blocksOf(summary, "kpis").map((block, index) => (
             <ReportKpiGrid key={index} items={block.items} />
           ))}
@@ -122,7 +157,7 @@ export function ReportDetailView({ view }: { view: TReportView }) {
       ) : null}
 
       {search ? (
-        <ReportPanel title={search.title} icon={Icons.cursorPointer} number={search.number}>
+        <ReportPanel id="search" title={search.title} icon={Icons.cursorPointer} number={search.number}>
           {blocksOf(search, "kpis").map((block, index) => (
             <ReportKpiGrid key={index} items={block.items} />
           ))}
@@ -133,8 +168,8 @@ export function ReportDetailView({ view }: { view: TReportView }) {
               ))}
             </div>
             <div className="space-y-3 lg:col-span-2">
-              {queries ? <DrilldownPill label={queries.title} count={queries.table.rows.length} onOpen={() => open(queries, search.title)} /> : null}
-              {pages ? <DrilldownPill label={pages.title} count={pages.table.rows.length} onOpen={() => open(pages, search.title)} /> : null}
+              {queries ? <DrilldownPill label={queries.title} count={queries.table.rows.length} icon={Icons.cursorPointer} onOpen={() => open(queries, search.title)} /> : null}
+              {pages ? <DrilldownPill label={pages.title} count={pages.table.rows.length} icon={Icons.file} onOpen={() => open(pages, search.title)} /> : null}
             </div>
           </div>
           {blocksOf(search, "line").map((block, index) => (
@@ -147,7 +182,7 @@ export function ReportDetailView({ view }: { view: TReportView }) {
       ) : null}
 
       {traffic ? (
-        <ReportPanel title={traffic.title} icon={Icons.chartLine} number={traffic.number}>
+        <ReportPanel id="traffic" title={traffic.title} icon={Icons.chartLine} number={traffic.number}>
           {blocksOf(traffic, "kpis").map((block, index) => (
             <ReportKpiGrid key={index} items={block.items} />
           ))}
@@ -158,8 +193,8 @@ export function ReportDetailView({ view }: { view: TReportView }) {
               ))}
             </div>
             <div className="space-y-3 lg:col-span-2">
-              {countries ? <DrilldownPill label={countries.title} count={countries.table.rows.length} onOpen={() => open(countries, traffic.title)} /> : null}
-              {landing ? <DrilldownPill label={landing.title} count={landing.table.rows.length} onOpen={() => open(landing, traffic.title)} /> : null}
+              {countries ? <DrilldownPill label={countries.title} count={countries.table.rows.length} icon={Icons.globe} onOpen={() => open(countries, traffic.title)} /> : null}
+              {landing ? <DrilldownPill label={landing.title} count={landing.table.rows.length} icon={Icons.megaphone} onOpen={() => open(landing, traffic.title)} /> : null}
             </div>
           </div>
           {blocksOf(traffic, "line").map((block, index) => (
@@ -174,7 +209,7 @@ export function ReportDetailView({ view }: { view: TReportView }) {
       {engagement || leads ? (
         <div className="grid gap-6 xl:grid-cols-2">
           {engagement ? (
-            <ReportPanel title={engagement.title} icon={Icons.userGroup} number={engagement.number}>
+            <ReportPanel id="engagement" title={engagement.title} icon={Icons.userGroup} number={engagement.number}>
               {blocksOf(engagement, "kpis").map((block, index) => (
                 <ReportKpiGrid key={index} items={block.items} columns={2} />
               ))}
@@ -186,12 +221,12 @@ export function ReportDetailView({ view }: { view: TReportView }) {
               {blocksOf(engagement, "paragraphs").map((block, index) => (
                 <ReportParagraphs key={index} items={block.items} />
               ))}
-              {actions ? <DrilldownPill label={actions.title} count={actions.table.rows.length} onOpen={() => open(actions, engagement.title)} /> : null}
+              {actions ? <DrilldownPill label={actions.title} count={actions.table.rows.length} icon={Icons.view} onOpen={() => open(actions, engagement.title)} /> : null}
             </ReportPanel>
           ) : null}
 
           {leads ? (
-            <ReportPanel title={leads.title} icon={Icons.userGroup} number={leads.number}>
+            <ReportPanel id="leads" title={leads.title} icon={Icons.userGroup} number={leads.number}>
               {blocksOf(leads, "kpis").map((block, index) => (
                 <ReportKpiGrid key={index} items={block.items} columns={2} />
               ))}
@@ -209,8 +244,8 @@ export function ReportDetailView({ view }: { view: TReportView }) {
                 <ReportParagraphs key={index} items={block.items} />
               ))}
               <div className="grid gap-3">
-                {work ? <DrilldownPill label={work.title} count={work.table.rows.length} onOpen={() => open(work, leads.title)} /> : null}
-                {blogs ? <DrilldownPill label={blogs.title} count={blogs.table.rows.length} onOpen={() => open(blogs, leads.title)} /> : null}
+                {work ? <DrilldownPill label={work.title} count={work.table.rows.length} icon={Icons.chartLine} onOpen={() => open(work, leads.title)} /> : null}
+                {blogs ? <DrilldownPill label={blogs.title} count={blogs.table.rows.length} icon={Icons.file} onOpen={() => open(blogs, leads.title)} /> : null}
               </div>
             </ReportPanel>
           ) : null}
