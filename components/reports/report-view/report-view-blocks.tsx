@@ -197,25 +197,6 @@ export function ReportDonut({ rows }: { rows: { label: string; value: number }[]
   );
 }
 
-export function ReportBars({ rows }: { rows: { label: string; value: number }[] }) {
-  const max = Math.max(1, ...rows.map((row) => row.value));
-  return (
-    <ul className="space-y-3">
-      {rows.map((row) => (
-        <li key={row.label} className="space-y-1.5">
-          <div className="flex items-center justify-between gap-3 text-sm">
-            <span className="truncate text-text-primary">{row.label}</span>
-            <span className="font-semibold tabular-nums text-text-primary">{row.value.toLocaleString("en-US")}</span>
-          </div>
-          <span className="block h-2 overflow-hidden rounded-full bg-bg-hover">
-            <span className="block h-full rounded-full bg-brand" style={{ width: `${(row.value / max) * 100}%` }} />
-          </span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 export function ReportTable({ table }: { table: TTableView }) {
   const columns: TAppTableColumn<{ id: string; cells: string[] }>[] = table.headers.map((header, index) => ({
     key: `col-${index}`,

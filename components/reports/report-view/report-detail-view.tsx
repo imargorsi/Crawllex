@@ -2,7 +2,6 @@
 
 import {
   ReportAreaChart,
-  ReportBars,
   ReportCallout,
   ReportDonut,
   ReportKpiGrid,

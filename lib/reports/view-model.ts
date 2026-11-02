@@ -29,7 +29,6 @@ export type TBlockView =
   | { type: "kpis"; items: TKpiView[] }
   | { type: "chips"; items: { label: string; value: string; tone: TReportTone }[] }
   | { type: "line"; title: string | null; chart: TSeriesView }
-  | { type: "bars"; title: string; rows: { label: string; value: number }[] }
   | { type: "donut"; title: string; rows: { label: string; value: number }[] }
   | { type: "table"; title: string; table: TTableView }
   | { type: "callout"; title: string; text: string }

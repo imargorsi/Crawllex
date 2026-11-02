@@ -130,7 +130,6 @@ function blockHtml(block: TBlockView): string {
       return `<div class="kpis">${block.items.map((item) => kpiHtml({ label: item.label, value: item.value, change: null, tone: item.tone })).join("")}</div>`;
     case "line":
       return `<div class="chart">${lineChartSvg(block.chart.dates, block.chart.series)}</div>`;
-    case "bars":
     case "donut":
       return `<h3>${escapeHtml(block.title)}</h3><div class="chart">${barChartSvg(block.rows)}</div>`;
     case "table":
