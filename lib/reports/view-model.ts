@@ -35,7 +35,7 @@ export type TBlockView =
   | { type: "note"; text: string };
 
 export type TSectionView = {
-  id: "summary" | "search" | "searchPages" | "traffic" | "audience" | "engagement" | "leads" | "notes";
+  id: "summary" | "search" | "searchPages" | "traffic" | "audience" | "engagement" | "leads";
   number: string;
   title: string;
   blocks: TBlockView[];
@@ -306,17 +306,6 @@ function leadsSection(snapshot: TReportSnapshotDto): TSectionView {
   return { id: "leads", number: copy.number, title: copy.title, blocks };
 }
 
-function notesSection(snapshot: TReportSnapshotDto): TSectionView {
-  const { notes } = snapshot;
-  const copy = REPORT_COPY.sections.notes;
-  const blocks: TBlockView[] = [];
-  if (notes.highlights.length > 0) blocks.push({ type: "list", title: copy.highlightsHeading, items: notes.highlights });
-  if (notes.translationStatus) blocks.push({ type: "callout", title: copy.translationHeading, text: notes.translationStatus });
-  if (notes.closingNote) blocks.push({ type: "list", title: copy.nextStepsHeading, items: [notes.closingNote] });
-  if (blocks.length === 0) blocks.push({ type: "note", text: copy.none });
-  return { id: "notes", number: copy.number, title: copy.title, blocks };
-}
-
 function summarySection(snapshot: TReportSnapshotDto): TSectionView {
   const { gsc, ga4, leads, activities, sources, narrative: story } = snapshot;
   const copy = REPORT_COPY.sections.summary;
@@ -365,7 +354,6 @@ export function buildReportView(snapshot: TReportSnapshotDto): TReportView {
       audienceSection(snapshot),
       engagementSection(snapshot),
       leadsSection(snapshot),
-      notesSection(snapshot),
     ],
     contact: {
       phones: [...REPORT_BRAND.phones],

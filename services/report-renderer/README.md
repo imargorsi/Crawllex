@@ -1,7 +1,7 @@
 # Crawllex report renderer
 
 Turns one HTML report into one A4 PDF. Standalone Node service. It does not import from the Crawllex app,
-so it can run on leocore now and on any other server later.
+so it runs on logibox now and can move to any other server later.
 
 ## Contract
 
@@ -51,12 +51,13 @@ REPORT_RENDERER_TOKEN=<same secret>
 If the app runs on another machine, expose the renderer only through a private network (Tailscale, VPN)
 or a tunnel with access control. Do not publish port 8788.
 
-## leocore (planned)
+## logibox (deployed 2026-11-02)
 
-- Run under systemd (`report-renderer.service`): `WorkingDirectory` = this folder, `EnvironmentFile` with the
-  token and `CHROME_PATH`, `Restart=on-failure`, run as a non-root user.
-- Log each change to `SETUP_LOG.md` in the leocore dossier and publish with `tools/publish.sh`
-  (see `doc/` rules in the leocore dossier).
+- Runs as a systemd **user** unit on logibox (`~/.config/systemd/user/report-renderer.service`, linger on).
+  Code in `~/apps/report-renderer`; env file `.env` (mode 600) with the token, `CHROME_PATH=/usr/bin/google-chrome-stable`,
+  `HOST=0.0.0.0`, `PORT=8788`. UFW allows 8788 only on tailscale0 (LAN is blocked). Node 26.8.1 via mise.
+  Dev app URL: `http://100.90.184.0:8788`.
+- Changes are logged in the logibox dossier (`/mnt/projects/logibox-dossier`, SETUP_LOG.md) and published with its `tools/publish.sh`.
 - No secrets in git. The token lives only in the environment file on each host.
 
 ## Security notes

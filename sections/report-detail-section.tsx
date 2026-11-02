@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { ReportDetailView } from "@/components/reports/report-view/report-detail-view";
 import { ReportHero } from "@/components/reports/report-view/report-hero";
+import { DashboardModuleBreadcrumbSection } from "@/components/layout/dashboard-module-breadcrumb-section";
 import { AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -106,12 +106,13 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
 
   return (
     <div className="w-full min-w-0">
-      <div className="space-y-6 px-4 py-6 sm:px-6">
-        <Link href="/reports" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary">
-          <Icons.arrowLeft className="size-4" aria-hidden />
-          {t("backToList")}
-        </Link>
+      {report ? (
+        <DashboardModuleBreadcrumbSection
+          items={[{ label: t("title"), href: "/reports" }, { label: formatMonthTitle(report.periodFrom) }]}
+        />
+      ) : null}
 
+      <div className="space-y-6 px-4 py-6 sm:px-6">
         {report && view ? (
           <>
             <ReportHero

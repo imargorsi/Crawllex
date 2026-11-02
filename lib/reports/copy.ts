@@ -17,7 +17,6 @@ export const REPORT_COPY = {
     audience: { number: "05", title: "Audience and landing pages", countriesHeading: "Top countries", noCountries: "No country data for this period.", landingHeading: "Top landing pages", noPages: "No page data for this period." },
     engagement: { number: "06", title: "Engagement and contact actions", actionsHeading: "Tracked actions" },
     leads: { number: "07", title: "Leads and content", sourcesHeading: "Leads by source", workHeading: "Work logged", blogsHeading: "Published blog posts" },
-    notes: { number: "08", title: "Notes and next steps", highlightsHeading: "Highlights", translationHeading: "Website translation", nextStepsHeading: "Next steps", none: "No additional notes for this period." },
   },
   kpi: {
     searchClicks: "Search clicks",
