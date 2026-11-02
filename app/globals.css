@@ -969,3 +969,26 @@ code {
     bottom: 1.25rem !important;
   }
 }
+
+/* Report cards: slow drift for the cover artwork (respects reduced motion via motion-safe). */
+@keyframes report-cover-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-3%, -2%, 0);
+  }
+}
+
+@keyframes report-cover-dots {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: rotate(8deg) scale(1.04);
+    opacity: 1;
+  }
+}
