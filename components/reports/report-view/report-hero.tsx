@@ -29,7 +29,7 @@ export function ReportHero({
         className="absolute inset-0 h-full w-full object-cover opacity-60 motion-safe:animate-[report-cover-pan_18s_ease-in-out_infinite]"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" aria-hidden />
-      <div className="relative flex flex-wrap items-end justify-between gap-6 p-6 sm:p-8">
+      <div className="relative flex flex-wrap items-end justify-between gap-6 p-8 sm:p-10">
         <div className="min-w-0 space-y-3">
           <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-white/70">
             <Icons.globe className="size-3.5" aria-hidden />

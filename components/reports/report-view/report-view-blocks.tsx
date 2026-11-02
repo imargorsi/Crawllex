@@ -69,7 +69,7 @@ export function ReportPanel({
 }) {
   return (
     <section className={cn(elevatedCardSurfaceClass, "flex min-w-0 flex-col gap-5 rounded-3xl p-5 sm:p-6", className)}>
-      <header className="flex items-center gap-3">
+      <header className="flex items-center gap-3 border-b border-border/60 pb-4">
         {Icon ? (
           <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-brand/35 bg-brand/12 text-brand">
             <Icon className="size-4" aria-hidden />
@@ -95,7 +95,7 @@ export function ReportKpi({ item }: { item: TKpiView }) {
       </span>
       <div className="min-w-0">
         <p className={cn("truncate text-xs font-medium", elevatedCardMutedClass)}>{item.label}</p>
-        <p className={cn("mt-1 text-2xl font-bold tabular-nums", elevatedCardTitleClass)}>{item.value}</p>
+        <p className={cn("mt-1 text-3xl font-bold tabular-nums tracking-tight", elevatedCardTitleClass)}>{item.value}</p>
         {item.change ? (
           <p className={cn("mt-1 text-xs font-medium", CHANGE_TEXT[item.change.direction])}>{item.change.text}</p>
         ) : null}
