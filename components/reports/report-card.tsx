@@ -98,7 +98,7 @@ export function ReportCard({
         />
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <img
-            src="/report-assets/cover-futuristic.jpg"
+            src="/report-assets/cover-neon-dashboard.jpg"
             alt=""
             aria-hidden
             className="absolute inset-0 h-full w-full origin-center object-cover motion-safe:animate-[report-cover-pan_14s_ease-in-out_infinite]"
