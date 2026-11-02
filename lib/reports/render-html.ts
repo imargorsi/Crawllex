@@ -70,6 +70,8 @@ td.url { word-break: break-all; color: var(--muted); font-size: 8.5pt; }
 .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-bottom: 5mm; }
 .cover { background: linear-gradient(160deg, #fff 55%, #e6f4ff 100%); }
 .cover .lc-logo svg { width: 46mm; height: auto; display: block; }
+.cover .cover-art { position: absolute; left: 0; right: 0; bottom: 0; }
+.cover .cover-art svg { width: 100%; height: auto; display: block; }
 .cover .dots { position: absolute; top: 6mm; right: 2mm; width: 92mm; }
 .cover .dots svg { width: 100%; height: auto; display: block; }
 .cover .client-logo img { max-height: 22mm; max-width: 70mm; display: block; }
@@ -173,6 +175,7 @@ function coverPage(snapshot: TReportSnapshotDto, assets: TReportAssets): string 
     ? `<img alt="${escapeHtml(snapshot.project.name)}" src="${snapshot.project.logoDataUri}" />`
     : `<div class="fallback">${escapeHtml(snapshot.project.name)}</div>`;
   return `<section class="page cover">
+<div class="cover-art">${assets.coverArtSvg}</div>
 <div class="dots">${assets.dotsSvg}</div>
 <div class="lc-logo">${assets.lcLogoSvg}</div>
 <div class="client-logo" style="margin-top:22mm">${clientLogo}</div>
