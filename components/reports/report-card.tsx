@@ -67,6 +67,15 @@ function KpiTile({ label, value, tone }: { label: string; value: string; tone: T
   );
 }
 
+type TCoverActionProps = {
+  label: string;
+  icon: TAppIconComponent;
+  onClick: () => void;
+  isLoading?: boolean;
+  disabled?: boolean;
+  destructive?: boolean;
+};
+
 /** Icon-only glass pill placed on the cover artwork. The label is kept for screen readers. */
 function CoverActionButton({ label, icon: Icon, onClick, isLoading = false, disabled, destructive = false }: TCoverActionProps) {
   return (
