@@ -151,7 +151,6 @@ export function ReportsSection() {
         ) : viewMode === "table" ? (
           <ReportsTable
             reports={reports}
-            clientName={clientName}
             isLoading={false}
             canDelete={canDelete}
             downloadingId={downloadingId}

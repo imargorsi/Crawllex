@@ -28,15 +28,52 @@ export type TReportCardProps = {
   onDelete: (report: TReportListItemDto) => void;
 };
 
-/** Glass tile with a light outline. No colour, so the cover carries the accent. */
-function KpiTile({ label, value, icon: Icon }: { label: string; value: string; icon: TAppIconComponent }) {
+type TKpiTone = "brand" | "cyan" | "emerald" | "amber";
+
+const KPI_TONE: Record<TKpiTone, { outline: string; icon: string; value: string }> = {
+  brand: { outline: "border-brand/55", icon: "text-brand", value: "text-brand" },
+  cyan: {
+    outline: "border-[var(--status-invited)]/55",
+    icon: "text-[var(--status-invited)]",
+    value: "text-[var(--status-invited)]",
+  },
+  emerald: {
+    outline: "border-[var(--status-active)]/55",
+    icon: "text-[var(--status-active)]",
+    value: "text-[var(--status-active)]",
+  },
+  amber: {
+    outline: "border-[var(--status-pending)]/55",
+    icon: "text-[var(--status-pending)]",
+    value: "text-[var(--status-pending)]",
+  },
+};
+
+/** Transparent tile with a coloured outline and a drop shadow, so it floats above the card. */
+function KpiTile({
+  label,
+  value,
+  icon: Icon,
+  tone,
+}: {
+  label: string;
+  value: string;
+  icon: TAppIconComponent;
+  tone: TKpiTone;
+}) {
+  const style = KPI_TONE[tone];
   return (
-    <div className="rounded-2xl border border-white/35 bg-transparent px-3.5 py-3 shadow-[0_14px_28px_-12px_rgba(0,0,0,0.65)]">
+    <div
+      className={cn(
+        "rounded-2xl border-[1.5px] bg-transparent px-3.5 py-3 shadow-[0_14px_28px_-12px_rgba(0,0,0,0.65)]",
+        style.outline,
+      )}
+    >
       <p className={cn("flex items-center gap-2 text-xs font-semibold", elevatedCardMutedClass)}>
-        <Icon className="size-4 shrink-0" aria-hidden />
+        <Icon className={cn("size-4 shrink-0", style.icon)} aria-hidden />
         {label}
       </p>
-      <p className={cn("mt-1.5 text-2xl font-bold tabular-nums", elevatedCardTitleClass)}>{value}</p>
+      <p className={cn("mt-1.5 text-2xl font-bold tabular-nums", style.value)}>{value}</p>
     </div>
   );
 }
@@ -149,13 +186,7 @@ export function ReportCard({
 
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className={cn("truncate text-lg font-semibold", elevatedCardTitleClass)}>{monthTitle}</h3>
-            <p className={cn("mt-1 flex items-center gap-1.5 text-xs", elevatedCardMutedClass)}>
-              {t("createdOn")}:{" "}
-              {new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(report.createdAt))}
-            </p>
-          </div>
+          <h3 className={cn("min-w-0 truncate text-lg font-semibold", elevatedCardTitleClass)}>{monthTitle}</h3>
           <span className="inline-flex max-w-[55%] shrink-0 items-center gap-1.5 rounded-full border border-brand/45 bg-brand/15 px-2.5 py-1 text-xs font-semibold text-brand backdrop-blur-sm">
             <Icons.calendar className="size-3 shrink-0" aria-hidden />
             <span className="truncate">{periodLabel}</span>
@@ -164,23 +195,33 @@ export function ReportCard({
 
         {report.summary ? (
           <div className="space-y-1.5">
-            <h4 className={cn("text-sm font-semibold", elevatedCardTitleClass)}>
-              {t("summary")}
-            </h4>
+            <h4 className={cn("text-sm font-semibold", elevatedCardTitleClass)}>{t("summary")}</h4>
             <p className={cn("line-clamp-3 text-sm leading-relaxed", elevatedCardBodyClass)}>{report.summary}</p>
           </div>
         ) : null}
 
         {kpis ? (
-          <div className="grid grid-cols-2 gap-2.5">
-            <KpiTile label={t("kpiClicks")} value={formatInt(kpis.clicks)} icon={Icons.cursorPointer} />
-            <KpiTile label={t("kpiSessions")} value={formatInt(kpis.sessions)} icon={Icons.view} />
-            <KpiTile label={t("kpiLeads")} value={formatInt(kpis.leads)} icon={Icons.userGroup} />
-            <KpiTile label={t("kpiCalls")} value={formatInt(kpis.calls)} icon={Icons.call} />
+          <div className="grid grid-cols-2 gap-3">
+            <KpiTile label={t("kpiClicks")} value={formatInt(kpis.clicks)} icon={Icons.cursorPointer} tone="brand" />
+            <KpiTile label={t("kpiSessions")} value={formatInt(kpis.sessions)} icon={Icons.view} tone="cyan" />
+            <KpiTile label={t("kpiLeads")} value={formatInt(kpis.leads)} icon={Icons.userGroup} tone="emerald" />
+            <KpiTile label={t("kpiCalls")} value={formatInt(kpis.calls)} icon={Icons.call} tone="amber" />
           </div>
         ) : null}
 
-
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-border/60 pt-3">
+          <p className={cn("text-xs", elevatedCardMutedClass)}>
+            {t("createdOn")}:{" "}
+            {new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(report.createdAt))}
+          </p>
+          <Link
+            href={`/reports/${report.id}`}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline"
+          >
+            {t("open")}
+            <Icons.arrowRight className="size-3.5" aria-hidden />
+          </Link>
+        </div>
       </div>
     </article>
   );

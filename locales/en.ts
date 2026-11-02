@@ -919,6 +919,7 @@ export interface Translation {
       colTitle: string;
       colPeriod: string;
       colSummary: string;
+      colPerformance: string;
       summary: string;
       kpiClicks: string;
       kpiSessions: string;
@@ -2598,6 +2599,7 @@ const translation: Translation = {
       colTitle: "Report",
       colPeriod: "Period",
       colSummary: "Summary",
+      colPerformance: "Performance",
       summary: "Summary",
       kpiClicks: "Clicks",
       kpiSessions: "Sessions",

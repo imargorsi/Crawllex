@@ -925,6 +925,7 @@ const translation: Translation = {
       colTitle: "التقرير",
       colPeriod: "الفترة",
       colSummary: "الملخص",
+      colPerformance: "الأداء",
       summary: "الملخص",
       kpiClicks: "النقرات",
       kpiSessions: "الجلسات",
