@@ -1,86 +1,108 @@
 "use client";
 
 /**
- * Animated cover for a report card: a mini report page with bars rising and a trend line drawing.
- * Pure SVG + CSS keyframes (see app/globals.css), so no animation library is needed.
- * Motion is limited to motion-safe, so reduced-motion users see the static graphic.
+ * Animated report cover: isometric cube field drifts behind a floating "report page" whose bars
+ * rise and whose trend line draws itself. Pure SVG + CSS keyframes (app/globals.css), so no
+ * animation library is needed. Motion is limited to motion-safe.
  */
 const BARS = [
-  { x: 14, height: 34, delay: 0.1 },
-  { x: 36, height: 52, delay: 0.25 },
-  { x: 58, height: 40, delay: 0.4 },
-  { x: 80, height: 66, delay: 0.55 },
-  { x: 102, height: 48, delay: 0.7 },
-  { x: 124, height: 74, delay: 0.85 },
+  { x: 24, height: 38, delay: 0.15 },
+  { x: 48, height: 56, delay: 0.3 },
+  { x: 72, height: 44, delay: 0.45 },
+  { x: 96, height: 72, delay: 0.6 },
+  { x: 120, height: 58, delay: 0.75 },
+  { x: 144, height: 86, delay: 0.9 },
 ] as const;
 
-const BASE_Y = 96;
+const PAGE_X = 84;
+const PAGE_Y = 22;
+const BASE_Y = 118;
 
 export function ReportCoverGraphic() {
   return (
     <svg
-      viewBox="0 0 220 120"
+      viewBox="0 0 320 170"
       className="absolute inset-0 h-full w-full"
       preserveAspectRatio="xMidYMid slice"
       aria-hidden
     >
       <defs>
-        <linearGradient id="report-bar-fill" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="var(--brand)" />
-          <stop offset="100%" stopColor="var(--status-invited)" stopOpacity="0.55" />
+        <linearGradient id="report-cover-bg" x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0%" stopColor="var(--accent-dark)" />
+          <stop offset="100%" stopColor="var(--accent)" />
         </linearGradient>
-        <linearGradient id="report-line-stroke" x1="0" x2="1" y1="0" y2="0">
+        <linearGradient id="report-bar-fill" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%" stopColor="var(--status-invited)" />
           <stop offset="100%" stopColor="var(--brand)" />
         </linearGradient>
+        <linearGradient id="report-line-stroke" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%" stopColor="var(--brand)" />
+          <stop offset="100%" stopColor="var(--status-invited)" />
+        </linearGradient>
+        <filter id="report-page-shadow" x="-20%" y="-20%" width="140%" height="150%">
+          <feDropShadow dx="0" dy="6" stdDeviation="7" floodColor="#000" floodOpacity="0.35" />
+        </filter>
       </defs>
 
-      <g opacity="0.18" stroke="var(--border)" strokeWidth="0.6">
-        {[24, 48, 72, 96].map((y) => (
-          <line key={y} x1="0" x2="220" y1={y} y2={y} />
-        ))}
-      </g>
+      <rect width="320" height="170" fill="url(#report-cover-bg)" />
 
-      {BARS.map((bar) => (
-        <rect
-          key={bar.x}
-          x={bar.x}
-          y={BASE_Y - bar.height}
-          width="12"
-          height={bar.height}
-          rx="3"
-          fill="url(#report-bar-fill)"
-          className="motion-safe:animate-[report-bar-rise_1.1s_cubic-bezier(.2,.8,.2,1)_both]"
-          style={{ transformOrigin: `${bar.x + 6}px ${BASE_Y}px`, animationDelay: `${bar.delay}s` }}
-        />
-      ))}
-
-      <path
-        d="M10 80 C 40 60, 60 70, 84 50 S 130 30, 152 40 S 190 18, 210 14"
-        fill="none"
-        stroke="url(#report-line-stroke)"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeDasharray="320"
-        strokeDashoffset="0"
-        className="motion-safe:animate-[report-line-draw_1.8s_ease-out_0.4s_both]"
+      <image
+        href="/report-assets/cover-art.svg"
+        x="150"
+        y="-10"
+        width="200"
+        height="200"
+        preserveAspectRatio="xMidYMid meet"
+        opacity="0.28"
+        className="motion-safe:animate-[report-cover-drift_12s_ease-in-out_infinite]"
       />
 
-      {[
-        { cx: 84, cy: 50, delay: 1.2 },
-        { cx: 152, cy: 40, delay: 1.4 },
-        { cx: 210, cy: 14, delay: 1.6 },
-      ].map((dot) => (
-        <circle
-          key={dot.cx}
-          cx={dot.cx}
-          cy={dot.cy}
-          r="3.2"
-          fill="var(--status-invited)"
-          className="motion-safe:animate-[report-float_3.6s_ease-in-out_infinite]"
-          style={{ animationDelay: `${dot.delay}s` }}
+      <g className="motion-safe:animate-[report-float_6s_ease-in-out_infinite]">
+        <rect
+          x={PAGE_X}
+          y={PAGE_Y}
+          width="200"
+          height="132"
+          rx="14"
+          fill="#ffffff"
+          fillOpacity="0.96"
+          filter="url(#report-page-shadow)"
         />
-      ))}
+        <rect x={PAGE_X + 14} y={PAGE_Y + 14} width="46" height="6" rx="3" fill="var(--brand)" />
+        <rect x={PAGE_X + 14} y={PAGE_Y + 26} width="78" height="4" rx="2" fill="#c9d1e6" />
+        <circle cx={PAGE_X + 176} cy={PAGE_Y + 17} r="5" fill="var(--status-invited)" />
+
+        <g opacity="0.18" stroke="#1f2138" strokeWidth="0.6">
+          {[62, 80, 98].map((y) => (
+            <line key={y} x1={PAGE_X + 14} x2={PAGE_X + 186} y1={y} y2={y} />
+          ))}
+        </g>
+
+        {BARS.map((bar) => (
+          <rect
+            key={bar.x}
+            x={PAGE_X + bar.x - 6}
+            y={BASE_Y - bar.height}
+            width="12"
+            height={bar.height}
+            rx="3"
+            fill="url(#report-bar-fill)"
+            className="motion-safe:animate-[report-bar-rise_1.1s_cubic-bezier(.2,.8,.2,1)_both]"
+            style={{ transformOrigin: `${PAGE_X + bar.x}px ${BASE_Y}px`, animationDelay: `${bar.delay}s` }}
+          />
+        ))}
+
+        <path
+          d={`M${PAGE_X + 18} 100 C ${PAGE_X + 50} 84, ${PAGE_X + 66} 92, ${PAGE_X + 92} 74 S ${PAGE_X + 140} 56, ${PAGE_X + 160} 62 S ${PAGE_X + 186} 40, ${PAGE_X + 190} 36`}
+          fill="none"
+          stroke="url(#report-line-stroke)"
+          strokeWidth="2.4"
+          strokeLinecap="round"
+          strokeDasharray="320"
+          strokeDashoffset="0"
+          className="motion-safe:animate-[report-line-draw_1.8s_ease-out_0.5s_both]"
+        />
+      </g>
     </svg>
   );
 }

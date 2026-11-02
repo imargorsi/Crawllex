@@ -30,21 +30,38 @@ export type TReportCardProps = {
 
 type TReportKpiTone = "brand" | "cyan" | "emerald" | "amber";
 
-const KPI_DOT: Record<TReportKpiTone, string> = {
-  brand: "bg-brand",
-  cyan: "bg-[var(--status-invited)]",
-  emerald: "bg-[var(--status-active)]",
-  amber: "bg-[var(--status-pending)]",
+const KPI_TONE: Record<TReportKpiTone, { tile: string; dot: string; value: string }> = {
+  brand: {
+    tile: "border-brand/45 bg-brand/12",
+    dot: "bg-brand",
+    value: "text-brand",
+  },
+  cyan: {
+    tile: "border-[var(--status-invited)]/45 bg-[var(--status-invited)]/12",
+    dot: "bg-[var(--status-invited)]",
+    value: "text-[var(--status-invited)]",
+  },
+  emerald: {
+    tile: "border-[var(--status-active)]/45 bg-[var(--status-active)]/12",
+    dot: "bg-[var(--status-active)]",
+    value: "text-[var(--status-active)]",
+  },
+  amber: {
+    tile: "border-[var(--status-pending)]/45 bg-[var(--status-pending)]/12",
+    dot: "bg-[var(--status-pending)]",
+    value: "text-[var(--status-pending)]",
+  },
 };
 
 function KpiTile({ label, value, tone }: { label: string; value: string; tone: TReportKpiTone }) {
+  const style = KPI_TONE[tone];
   return (
-    <div className="rounded-2xl border border-border/60 bg-bg-card/40 px-3 py-2.5">
-      <p className={cn("flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide", elevatedCardMutedClass)}>
-        <span className={cn("size-1.5 rounded-full", KPI_DOT[tone])} aria-hidden />
+    <div className={cn("rounded-2xl border-[1.5px] px-3.5 py-3", style.tile)}>
+      <p className={cn("flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider", elevatedCardTitleClass)}>
+        <span className={cn("size-2 rounded-full", style.dot)} aria-hidden />
         {label}
       </p>
-      <p className={cn("mt-1 text-lg font-semibold tabular-nums", elevatedCardTitleClass)}>{value}</p>
+      <p className={cn("mt-1.5 text-2xl font-bold tabular-nums", style.value)}>{value}</p>
     </div>
   );
 }
@@ -124,7 +141,7 @@ export function ReportCard({
     <article
       className={cn(
         elevatedCardSurfaceClass,
-        "group relative flex flex-col overflow-hidden rounded-3xl transition-shadow duration-300 hover:shadow-[0_0_32px_-12px_var(--status-invited)]",
+        "relative flex flex-col overflow-hidden rounded-3xl",
       )}
     >
       <span
@@ -135,7 +152,6 @@ export function ReportCard({
 
       <div className="relative h-40 overflow-hidden border-b border-border bg-bg-hover">
         <ReportCoverGraphic />
-        <img src="/report-assets/lc-logo.svg" alt="Logical Creations" className="absolute left-4 top-4 h-7 w-auto" />
         {clientLogoUrl ? (
           <img
             src={clientLogoUrl}
