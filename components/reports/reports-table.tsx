@@ -7,7 +7,7 @@ import { AppTable, type TAppTableColumn } from "@/components/table/app-table";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { formatInt } from "@/lib/reports/format";
 import { formatCompactPeriodLabel, formatMonthTitle } from "@/lib/reports/period";
-import { cn } from "@/lib/utils";
+import { ReportStatChip } from "@/components/reports/report-stat-chip";
 import type { TReportListItemDto } from "@/types/reports.types";
 
 type TReportsTableProps = {
@@ -18,27 +18,6 @@ type TReportsTableProps = {
   onDownload: (report: TReportListItemDto) => void;
   onDelete: (report: TReportListItemDto) => void;
 };
-
-const STAT_TONE = {
-  brand: "border-brand/50 text-brand",
-  cyan: "border-[var(--status-invited)]/50 text-[var(--status-invited)]",
-  emerald: "border-[var(--status-active)]/50 text-[var(--status-active)]",
-  amber: "border-[var(--status-pending)]/50 text-[var(--status-pending)]",
-} as const;
-
-function Stat({ value, label, tone }: { value: string; label: string; tone: keyof typeof STAT_TONE }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border bg-transparent px-2.5 py-1 text-xs shadow-[0_6px_14px_-8px_rgba(0,0,0,0.6)]",
-        STAT_TONE[tone],
-      )}
-    >
-      <span className="font-bold tabular-nums">{value}</span>
-      <span className="text-text-muted">{label}</span>
-    </span>
-  );
-}
 
 const ICON_BUTTON =
   "inline-flex size-9 items-center justify-center rounded-full border border-border bg-transparent text-text-secondary transition-colors hover:border-brand/50 hover:text-brand disabled:opacity-60";
@@ -60,17 +39,6 @@ export function ReportsTable({
       label: t("colTitle"),
       render: (report) => (
         <div className="flex items-center gap-3">
-          <div
-            className="relative h-11 w-16 shrink-0 overflow-hidden rounded-lg border border-border"
-            style={{ background: "linear-gradient(135deg, #0B2298, #0A3EC5)" }}
-          >
-            <img
-              src="/report-assets/cover-neon.jpg"
-              alt=""
-              aria-hidden
-              className="h-full w-full object-cover"
-            />
-          </div>
           <div className="min-w-0">
             <p className="truncate font-semibold text-text-primary">{formatMonthTitle(report.periodFrom)}</p>
             <p className="truncate text-xs text-text-muted">{formatCompactPeriodLabel(report.periodFrom, report.periodTo)}</p>
@@ -84,10 +52,10 @@ export function ReportsTable({
       render: (report) =>
         report.kpis ? (
           <div className="flex flex-wrap gap-1.5">
-            <Stat value={formatInt(report.kpis.clicks)} label={t("kpiClicks")} tone="brand" />
-            <Stat value={formatInt(report.kpis.sessions)} label={t("kpiSessions")} tone="cyan" />
-            <Stat value={formatInt(report.kpis.leads)} label={t("kpiLeads")} tone="emerald" />
-            <Stat value={formatInt(report.kpis.calls)} label={t("kpiCalls")} tone="amber" />
+            <ReportStatChip value={formatInt(report.kpis.clicks)} label={t("kpiClicks")} tone="brand" />
+            <ReportStatChip value={formatInt(report.kpis.sessions)} label={t("kpiSessions")} tone="cyan" />
+            <ReportStatChip value={formatInt(report.kpis.leads)} label={t("kpiLeads")} tone="emerald" />
+            <ReportStatChip value={formatInt(report.kpis.calls)} label={t("kpiCalls")} tone="amber" />
           </div>
         ) : (
           <span className="text-sm text-text-muted">–</span>

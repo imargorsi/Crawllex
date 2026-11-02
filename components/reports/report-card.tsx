@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
+import { ReportStatChip } from "@/components/reports/report-stat-chip";
 import { Spinner } from "@/components/ui/spinner";
 import type { TAppIconComponent } from "@/components/ui/app-icon";
 import {
@@ -27,56 +28,6 @@ export type TReportCardProps = {
   onDownload: (report: TReportListItemDto) => void;
   onDelete: (report: TReportListItemDto) => void;
 };
-
-type TKpiTone = "brand" | "cyan" | "emerald" | "amber";
-
-const KPI_TONE: Record<TKpiTone, { outline: string; icon: string; value: string }> = {
-  brand: { outline: "border-brand/55", icon: "text-brand", value: "text-brand" },
-  cyan: {
-    outline: "border-[var(--status-invited)]/55",
-    icon: "text-[var(--status-invited)]",
-    value: "text-[var(--status-invited)]",
-  },
-  emerald: {
-    outline: "border-[var(--status-active)]/55",
-    icon: "text-[var(--status-active)]",
-    value: "text-[var(--status-active)]",
-  },
-  amber: {
-    outline: "border-[var(--status-pending)]/55",
-    icon: "text-[var(--status-pending)]",
-    value: "text-[var(--status-pending)]",
-  },
-};
-
-/** Transparent tile with a coloured outline and a drop shadow, so it floats above the card. */
-function KpiTile({
-  label,
-  value,
-  icon: Icon,
-  tone,
-}: {
-  label: string;
-  value: string;
-  icon: TAppIconComponent;
-  tone: TKpiTone;
-}) {
-  const style = KPI_TONE[tone];
-  return (
-    <div
-      className={cn(
-        "rounded-2xl border-[1.5px] bg-transparent px-3.5 py-3 shadow-[0_14px_28px_-12px_rgba(0,0,0,0.65)]",
-        style.outline,
-      )}
-    >
-      <p className={cn("flex items-center gap-2 text-xs font-semibold", elevatedCardMutedClass)}>
-        <Icon className={cn("size-4 shrink-0", style.icon)} aria-hidden />
-        {label}
-      </p>
-      <p className={cn("mt-1.5 text-2xl font-bold tabular-nums", style.value)}>{value}</p>
-    </div>
-  );
-}
 
 type TCoverActionProps = {
   label: string;
@@ -201,11 +152,11 @@ export function ReportCard({
         ) : null}
 
         {kpis ? (
-          <div className="grid grid-cols-2 gap-3">
-            <KpiTile label={t("kpiClicks")} value={formatInt(kpis.clicks)} icon={Icons.cursorPointer} tone="brand" />
-            <KpiTile label={t("kpiSessions")} value={formatInt(kpis.sessions)} icon={Icons.view} tone="cyan" />
-            <KpiTile label={t("kpiLeads")} value={formatInt(kpis.leads)} icon={Icons.userGroup} tone="emerald" />
-            <KpiTile label={t("kpiCalls")} value={formatInt(kpis.calls)} icon={Icons.call} tone="amber" />
+          <div className="flex flex-wrap gap-2">
+            <ReportStatChip value={formatInt(kpis.clicks)} label={t("kpiClicks")} tone="brand" size="md" />
+            <ReportStatChip value={formatInt(kpis.sessions)} label={t("kpiSessions")} tone="cyan" size="md" />
+            <ReportStatChip value={formatInt(kpis.leads)} label={t("kpiLeads")} tone="emerald" size="md" />
+            <ReportStatChip value={formatInt(kpis.calls)} label={t("kpiCalls")} tone="amber" size="md" />
           </div>
         ) : null}
 
