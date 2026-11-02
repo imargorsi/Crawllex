@@ -44,6 +44,8 @@ h2, h3, .kpi .value { font-family: "Red Hat Display", "Poppins", Arial, sans-ser
 .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--accent); padding-bottom: 6mm; margin-bottom: 8mm; }
 .header h2 { margin: 0; font-size: 22pt; color: var(--accent); text-transform: uppercase; letter-spacing: .02em; }
 .header .number { font-size: 28pt; color: #c7cbd1; font-weight: 700; }
+.chevrons { position: absolute; left: 0; right: 0; bottom: 0; }
+.chevrons svg { width: 100%; height: auto; display: block; }
 .footer { position: absolute; left: 16mm; right: 16mm; bottom: 8mm; display: flex; justify-content: space-between; font-size: 8.5pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 3mm; }
 h3 { font-size: 13pt; margin: 6mm 0 2mm; color: var(--ink); }
 p { margin: 0 0 3mm; }
@@ -111,10 +113,18 @@ function kpi(label: string, value: string, change?: TChange): string {
 }
 
 /** One printed page. `number` is the two-digit section number shown in the header. */
-function page(number: string, title: string, body: string, footerLeft: string, pageNo: number): string {
+function page(
+  number: string,
+  title: string,
+  body: string,
+  footerLeft: string,
+  pageNo: number,
+  chevronsSvg: string,
+): string {
   return `<section class="page">
 <div class="header"><h2>${escapeHtml(title)}</h2><div class="number">${escapeHtml(number)}</div></div>
 ${body}
+<div class="chevrons">${chevronsSvg}</div>
 <div class="footer"><span>${escapeHtml(footerLeft)}</span><span>${pageNo}</span></div>
 </section>`;
 }
@@ -416,7 +426,7 @@ export function renderReportHtml(
   const pages = [
     coverPage(snapshot, assets),
     ...specs.map((spec, index) =>
-      page(String(index + 1).padStart(2, "0"), spec.title, spec.body, footer, index + 1),
+      page(String(index + 1).padStart(2, "0"), spec.title, spec.body, footer, index + 1, assets.chevronsSvg),
     ),
     closingPage(assets),
   ];

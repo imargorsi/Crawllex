@@ -8,6 +8,7 @@ import path from "node:path";
 export type TReportAssets = {
   lcLogoSvg: string;
   dotsSvg: string;
+  chevronsSvg: string;
   fontFaceCss: string;
 };
 
@@ -33,10 +34,11 @@ export function loadReportAssets(): TReportAssets {
   cached = {
     lcLogoSvg: readFileSync(path.join(ASSET_DIR, "lc-logo.svg"), "utf8"),
     dotsSvg: readFileSync(path.join(ASSET_DIR, "dots.svg"), "utf8"),
+    chevronsSvg: readFileSync(path.join(ASSET_DIR, "chevrons.svg"), "utf8"),
     fontFaceCss,
   };
   return cached;
 }
 
 /** No artwork: used by tests and when files are missing. Text fallbacks render instead. */
-export const EMPTY_REPORT_ASSETS: TReportAssets = { lcLogoSvg: "", dotsSvg: "", fontFaceCss: "" };
+export const EMPTY_REPORT_ASSETS: TReportAssets = { lcLogoSvg: "", dotsSvg: "", chevronsSvg: "", fontFaceCss: "" };
