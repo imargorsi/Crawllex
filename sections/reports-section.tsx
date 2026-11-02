@@ -140,7 +140,7 @@ export function ReportsSection() {
         {reportsQuery.isError ? (
           <p className="text-sm text-destructive">{t("loadError")}</p>
         ) : reportsQuery.isPending ? (
-          <CardGridSkeleton count={3} className="xl:grid-cols-3" />
+          <CardGridSkeleton count={4} className="xl:grid-cols-4" />
         ) : !hasReports ? (
           <div className="flex flex-col items-center gap-4">
             <EmptyState icon={Icons.file} title={t("emptyTitle")} description={t("emptyBody")} />
@@ -158,7 +158,7 @@ export function ReportsSection() {
             onDelete={(report) => setDeleteTarget(report)}
           />
         ) : (
-          <div className={cn("grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3")}>
+          <div className={cn("grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4")}>
             {reports.map((report) => (
               <ReportCard
                 key={report.id}
