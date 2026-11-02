@@ -23,14 +23,10 @@ export function ReportCoverGraphic() {
     <svg
       viewBox="0 0 300 165"
       className="absolute inset-0 h-full w-full"
-      preserveAspectRatio="xMidYMid slice"
+      preserveAspectRatio="xMidYMid meet"
       aria-hidden
     >
       <defs>
-        <linearGradient id="report-cover-bg" x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0%" stopColor="var(--accent-dark)" />
-          <stop offset="100%" stopColor="var(--accent)" />
-        </linearGradient>
         <linearGradient id="report-bar-fill" x1="0" x2="0" y1="0" y2="1">
           <stop offset="0%" stopColor="var(--status-invited)" />
           <stop offset="100%" stopColor="var(--brand)" />
@@ -44,7 +40,6 @@ export function ReportCoverGraphic() {
         </filter>
       </defs>
 
-      <rect width="300" height="165" fill="url(#report-cover-bg)" />
 
       <image
         href="/report-assets/cover-art.svg"

@@ -150,7 +150,10 @@ export function ReportCard({
         style={{ background: "linear-gradient(90deg, var(--brand), var(--status-invited))" }}
       />
 
-      <div className="relative h-40 overflow-hidden border-b border-border bg-bg-hover">
+      <div
+        className="relative h-40 overflow-hidden border-b border-border"
+        style={{ background: "linear-gradient(135deg, var(--accent-dark), var(--accent))" }}
+      >
         <ReportCoverGraphic />
         {clientLogoUrl ? (
           <img
