@@ -41,12 +41,12 @@ html, body { margin: 0; padding: 0; color: var(--ink); font-family: "Poppins", A
 h2, h3, .kpi .value { font-family: "Red Hat Display", "Poppins", Arial, sans-serif; }
 .page { width: 210mm; height: 297mm; padding: 16mm 16mm 14mm; position: relative; overflow: hidden; page-break-after: always; background: #fff; }
 .page:last-child { page-break-after: auto; }
-.header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--accent); padding-bottom: 6mm; margin-bottom: 8mm; }
-.header h2 { margin: 0; font-size: 22pt; color: var(--accent); text-transform: uppercase; letter-spacing: .02em; }
-.header .number { font-size: 28pt; color: #c7cbd1; font-weight: 700; }
+.header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8mm; }
+.header h2 { margin: 0; font-size: 18pt; color: #fff; background: var(--accent-dark); padding: 3mm 6mm; text-transform: uppercase; letter-spacing: .03em; border-radius: 1mm; }
+.header .number { font-size: 26pt; color: #b9c2e6; font-weight: 700; }
 .chevrons { position: absolute; left: 0; right: 0; bottom: 0; }
 .chevrons svg { width: 100%; height: auto; display: block; }
-.footer { position: absolute; left: 16mm; right: 16mm; bottom: 8mm; display: flex; justify-content: space-between; font-size: 8.5pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 3mm; }
+.footer { position: absolute; left: 16mm; right: 16mm; bottom: 20mm; display: flex; justify-content: space-between; font-size: 8.5pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 3mm; }
 h3 { font-size: 13pt; margin: 6mm 0 2mm; color: var(--ink); }
 p { margin: 0 0 3mm; }
 ul { margin: 0 0 3mm; padding-left: 5mm; }
