@@ -84,41 +84,46 @@ export function ReportDetailView({ view }: { view: TReportView }) {
         </ReportPanel>
       ) : null}
 
-      <Row>
-        {search ? (
-          <Span cols={8}>
-            <ReportPanel title={search.title} icon={Icons.cursorPointer} number={search.number} className="h-full">
+      {search ? (
+        <ReportPanel title={search.title} icon={Icons.cursorPointer} number={search.number}>
+          <Row>
+            <Span cols={12}>
               {blocksOf(search, "kpis").map((block, index) => (
                 <ReportKpiGrid key={index} items={block.items} />
               ))}
-              {blocksOf(search, "paragraphs").map((block, index) => (
-                <ReportParagraphs key={index} items={block.items} />
-              ))}
-              {blocksOf(search, "line").map((block, index) => (
-                <ReportAreaChart key={index} chart={block.chart} />
-              ))}
-              {blocksOf(search, "note").map((block, index) => (
-                <ReportNote key={index} text={block.text} />
-              ))}
+            </Span>
+            <Span cols={7}>
+              <div className="space-y-5">
+                {blocksOf(search, "paragraphs").map((block, index) => (
+                  <ReportParagraphs key={index} items={block.items} />
+                ))}
+                {blocksOf(search, "line").map((block, index) => (
+                  <ReportAreaChart key={index} chart={block.chart} />
+                ))}
+                {blocksOf(search, "note").map((block, index) => (
+                  <ReportNote key={index} text={block.text} />
+                ))}
+              </div>
+            </Span>
+            <Span cols={5}>
               {blocksOf(search, "table").map((block, index) => (
                 <div key={index} className="space-y-3">
                   <ReportSubheading>{block.title}</ReportSubheading>
                   <ReportTable table={block.table} />
                 </div>
               ))}
-            </ReportPanel>
-          </Span>
-        ) : null}
-        {searchPages ? (
-          <Span cols={4}>
-            <ReportPanel title={searchPages.title} icon={Icons.file} number={searchPages.number} className="h-full">
-              {blocksOf(searchPages, "table").map((block, index) => (
-                <ReportTable key={index} table={block.table} />
-              ))}
-            </ReportPanel>
-          </Span>
-        ) : null}
-      </Row>
+            </Span>
+          </Row>
+        </ReportPanel>
+      ) : null}
+
+      {searchPages ? (
+        <ReportPanel title={searchPages.title} icon={Icons.file} number={searchPages.number}>
+          {blocksOf(searchPages, "table").map((block, index) => (
+            <ReportTable key={index} table={block.table} />
+          ))}
+        </ReportPanel>
+      ) : null}
 
       <Row>
         {traffic ? (

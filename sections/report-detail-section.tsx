@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { ReportDetailView } from "@/components/reports/report-view/report-detail-view";
-import { Heading } from "@/components/heading";
-import { Paragraph } from "@/components/paragraph";
+import { ReportHero } from "@/components/reports/report-view/report-hero";
 import { AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -115,37 +114,35 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
 
         {report && view ? (
           <>
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="type-stack-md min-w-0">
-                <Heading id="report-title" pageTitle>
-                  {formatMonthTitle(report.periodFrom)}
-                </Heading>
-                <Paragraph className="text-text-muted">
-                  {view.cover.clientName} · {formatCompactPeriodLabel(report.periodFrom, report.periodTo)}
-                </Paragraph>
-              </div>
-              <div className="flex shrink-0 flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => void downloadPdf()}
-                  disabled={isDownloading}
-                  className={cn(buttonVariants({ variant: "primary", size: "md" }), "rounded-full")}
-                >
-                  {isDownloading ? <Spinner className="size-4" /> : <Icons.download className="size-4" aria-hidden />}
-                  {t("downloadPdf")}
-                </button>
-                {canDelete ? (
+            <ReportHero
+              clientName={view.cover.clientName}
+              monthTitle={formatMonthTitle(report.periodFrom)}
+              periodLabel={formatCompactPeriodLabel(report.periodFrom, report.periodTo)}
+              createdAt={report.createdAt}
+              actions={
+                <>
                   <button
                     type="button"
-                    onClick={() => setDeleteOpen(true)}
-                    className="inline-flex h-9 items-center gap-2 rounded-full border border-status-rejected/40 bg-transparent px-4 text-sm font-semibold text-status-rejected transition-colors hover:bg-status-rejected/12"
+                    onClick={() => void downloadPdf()}
+                    disabled={isDownloading}
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/25 disabled:opacity-60"
                   >
-                    <Icons.delete className="size-4" aria-hidden />
-                    {t("deleteAction")}
+                    {isDownloading ? <Spinner className="size-4" /> : <Icons.download className="size-4" aria-hidden />}
+                    {t("downloadPdf")}
                   </button>
-                ) : null}
-              </div>
-            </div>
+                  {canDelete ? (
+                    <button
+                      type="button"
+                      onClick={() => setDeleteOpen(true)}
+                      className="inline-flex h-10 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:border-[var(--status-rejected)] hover:bg-[var(--status-rejected)]/80"
+                    >
+                      <Icons.delete className="size-4" aria-hidden />
+                      {t("deleteAction")}
+                    </button>
+                  ) : null}
+                </>
+              }
+            />
 
             <ReportDetailView view={view} />
           </>
