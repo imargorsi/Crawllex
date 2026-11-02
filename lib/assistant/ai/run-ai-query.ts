@@ -3,7 +3,7 @@ import {
   type TAssistantMessage,
   type TChatMessage,
   type TChatRequest,
-} from "@/lib/assistant/ai/openrouter-client";
+} from "@/lib/assistant/ai/llm-client";
 import {
   assistantToolDeclarations,
   type TAssistantToolResult,

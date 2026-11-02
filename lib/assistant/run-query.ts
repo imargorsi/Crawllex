@@ -1,4 +1,4 @@
-import { generateChatCompletion, openRouterApiKey } from "@/lib/assistant/ai/openrouter-client";
+import { generateChatCompletion, llmConfig } from "@/lib/assistant/ai/llm-client";
 import { executeAssistantTool } from "@/lib/assistant/ai/tools";
 import { tryAnswerWithAi } from "@/lib/assistant/ai/run-ai-query";
 import type { AuthContext } from "@/lib/auth/guards";
@@ -24,7 +24,7 @@ function denyModule(
 }
 
 export function isAssistantAiEnabled(): boolean {
-  return process.env.ASSISTANT_AI_ENABLED === "true" && Boolean(openRouterApiKey());
+  return process.env.ASSISTANT_AI_ENABLED === "true" && llmConfig() !== null;
 }
 
 async function tryAiAnswer(

@@ -33,7 +33,7 @@ import {
   generateChatCompletion,
   type TAssistantMessage,
   type TChatRequest,
-} from "@/lib/assistant/ai/openrouter-client";
+} from "@/lib/assistant/ai/llm-client";
 import {
   answerWithAi,
   aiBreakerOpen,
@@ -41,7 +41,7 @@ import {
   resetAiBreakerForTests,
   tryAnswerWithAi,
 } from "@/lib/assistant/ai/run-ai-query";
-import { executeAssistantTool } from "@/lib/assistant/ai/tools";
+import { assistantToolDeclarations, executeAssistantTool } from "@/lib/assistant/ai/tools";
 
 const PROJECT = "507f1f77bcf86cd799439011";
 const ALL = ["leads.view", "analytics.view", "seo_activities.view"];
@@ -299,37 +299,31 @@ describe("tryAnswerWithAi fallback", () => {
   });
 });
 
-describe("openrouter client", () => {
+describe("llm client", () => {
   const request = { messages: [{ role: "user" as const, content: "q" }], tools: [] };
+  const setLlm = () => {
+    vi.stubEnv("LLM_BASE_URL", "http://100.90.184.0:8092");
+    vi.stubEnv("LLM_USER", "owner");
+    vi.stubEnv("LLM_PASSWORD", "test-pass");
+    vi.stubEnv("LLM_MODEL", "qwen3-8b");
+  };
 
-  it("throws disabled without an API key", async () => {
-    vi.stubEnv("OPENROUTER_API_KEY", "");
+  it("throws disabled when any LLM variable is missing", async () => {
+    setLlm();
+    vi.stubEnv("LLM_PASSWORD", "");
     await expect(generateChatCompletion(request)).rejects.toMatchObject({ reason: "disabled" });
   });
 
-  it("retries once on 429 and returns the second response", async () => {
-    vi.stubEnv("OPENROUTER_API_KEY", "test-key");
-    const body = { choices: [{ message: { role: "assistant", content: "ok" } }] };
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce(new Response("{}", { status: 429 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify(body), { status: 200 }));
+  it("returns http with status on a non-OK reply and does not retry", async () => {
+    setLlm();
+    const fetchMock = vi.fn(async () => new Response("{}", { status: 503 }));
     vi.stubGlobal("fetch", fetchMock);
-
-    const reply = await generateChatCompletion(request);
-    expect(reply.content).toBe("ok");
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await expect(generateChatCompletion(request)).rejects.toMatchObject({ reason: "http", status: 503 });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it("gives up after a second 429 and keeps the status", async () => {
-    vi.stubEnv("OPENROUTER_API_KEY", "test-key");
-    vi.stubGlobal("fetch", vi.fn(async () => new Response("{}", { status: 429 })));
-    await expect(generateChatCompletion(request)).rejects.toMatchObject({ reason: "http", status: 429 });
-  });
-
-  it("sends Bearer auth, the model and tool declarations", async () => {
-    vi.stubEnv("OPENROUTER_API_KEY", "test-key");
-    vi.stubEnv("OPENROUTER_MODEL", "dots-studio/dots-3-note-preview:free");
+  it("sends Basic auth to the tailnet endpoint, the model, reasoning off and tool declarations", async () => {
+    setLlm();
     const fetchMock = vi.fn(
       async () =>
         new Response(JSON.stringify({ choices: [{ message: { role: "assistant", content: "ok" } }] }), {
@@ -343,18 +337,36 @@ describe("openrouter client", () => {
       tools: [{ name: "t", description: "d", parameters: { type: "object", properties: {} } }],
     });
 
-    const init = (fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1];
-    expect((init.headers as Record<string, string>).Authorization).toBe("Bearer test-key");
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe("http://100.90.184.0:8092/v1/chat/completions");
+    expect((init.headers as Record<string, string>).Authorization).toBe(
+      `Basic ${Buffer.from("owner:test-pass").toString("base64")}`,
+    );
     const sent = JSON.parse(String(init.body));
-    expect(sent.model).toBe("dots-studio/dots-3-note-preview:free");
+    expect(sent.model).toBe("qwen3-8b");
+    expect(sent.chat_template_kwargs).toEqual({ enable_thinking: false });
     expect(sent.tools[0]).toEqual({
       type: "function",
       function: { name: "t", description: "d", parameters: { type: "object", properties: {} } },
     });
   });
 
+  it("sends the real assistant tool schemas with lowercase JSON Schema types", async () => {
+    setLlm();
+    const fetchMock = vi.fn(
+      async () => new Response(JSON.stringify({ choices: [{ message: { role: "assistant", content: "ok" } }] }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await generateChatCompletion({ messages: [{ role: "user", content: "q" }], tools: assistantToolDeclarations() });
+    const init = (fetchMock.mock.calls[0] as unknown as [string, RequestInit])[1];
+    const sent = JSON.parse(String(init.body));
+    const serialized = JSON.stringify(sent.tools);
+    expect(serialized).not.toMatch(/"type":"(OBJECT|STRING|INTEGER|NUMBER|BOOLEAN|ARRAY)"/);
+    expect(sent.tools[0].function.parameters.type).toBe("object");
+  });
+
   it("returns tool calls from the reply", async () => {
-    vi.stubEnv("OPENROUTER_API_KEY", "test-key");
+    setLlm();
     const body = {
       choices: [
         {
@@ -371,4 +383,3 @@ describe("openrouter client", () => {
     expect(reply.tool_calls?.[0].function.name).toBe("get_leads_count");
   });
 });
-
