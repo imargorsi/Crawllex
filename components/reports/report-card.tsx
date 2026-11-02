@@ -13,6 +13,7 @@ import {
   elevatedCardTitleClass,
 } from "@/lib/frontend/layout/dashboard-chrome";
 import { Icons } from "@/lib/frontend/icons/app-icons";
+import { REPORT_PALETTE } from "@/lib/reports/constants";
 import { formatInt } from "@/lib/reports/format";
 import { formatMonthTitle } from "@/lib/reports/period";
 import { cn } from "@/lib/utils";
@@ -152,7 +153,7 @@ export function ReportCard({
 
       <div
         className="relative h-40 overflow-hidden border-b border-border"
-        style={{ background: "linear-gradient(135deg, var(--accent-dark), var(--accent))" }}
+        style={{ background: `linear-gradient(135deg, ${REPORT_PALETTE.accentDark}, ${REPORT_PALETTE.accent})` }}
       >
         <ReportCoverGraphic />
         {clientLogoUrl ? (
