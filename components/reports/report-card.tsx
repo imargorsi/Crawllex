@@ -136,11 +136,11 @@ export function ReportCard({
       </div>
 
       <div className="flex flex-1 flex-col gap-4 p-5">
-        <div className="flex items-start justify-between gap-3">
-          <h3 className={cn("min-w-0 truncate text-lg font-semibold", elevatedCardTitleClass)}>{monthTitle}</h3>
-          <span className="inline-flex max-w-[55%] shrink-0 items-center gap-1.5 rounded-full border border-brand/45 bg-brand/15 px-2.5 py-1 text-xs font-semibold text-brand backdrop-blur-sm">
+        <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+          <h3 className={cn("min-w-0 flex-1 break-words text-lg font-semibold leading-tight", elevatedCardTitleClass)}>{monthTitle}</h3>
+          <span className="inline-flex max-w-full shrink-0 items-center gap-1.5 rounded-full border border-brand/45 bg-brand/15 px-2.5 py-1 text-xs font-semibold text-brand backdrop-blur-sm">
             <Icons.calendar className="size-3 shrink-0" aria-hidden />
-            <span className="truncate">{periodLabel}</span>
+            <span>{periodLabel}</span>
           </span>
         </div>
 
