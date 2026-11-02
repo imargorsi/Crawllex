@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Spinner } from "@/components/ui/spinner";
 import type { TAppIconComponent } from "@/components/ui/app-icon";
 import {
+  elevatedCardBodyClass,
   elevatedCardMutedClass,
   elevatedCardSurfaceClass,
   elevatedCardTitleClass,
@@ -27,55 +28,57 @@ export type TReportCardProps = {
 
 type TReportActionTone = "brand" | "default" | "destructive";
 
-const ACTION_WELL: Record<TReportActionTone, string> = {
-  brand: "border-brand/35 bg-brand/12 text-brand",
-  default: "border-brand/30 bg-brand/15 text-brand",
-  destructive: "border-status-rejected/35 bg-status-rejected/12 text-status-rejected",
+/** Same pill treatment as the projects card "big" actions (ACTION_BUTTON_TONE). */
+const ACTION_PILL: Record<TReportActionTone, string> = {
+  brand:
+    "border-brand/40 bg-brand/12 text-brand hover:bg-brand/20 hover:border-brand/55",
+  default:
+    "border-brand/35 bg-brand/12 text-brand hover:bg-brand/20 hover:border-brand/50",
+  destructive:
+    "border-status-rejected/40 bg-status-rejected/12 text-status-rejected hover:bg-status-rejected/20 hover:border-status-rejected/55",
 };
 
-const ACTION_CLASS =
-  "group flex min-w-0 flex-1 flex-col items-center gap-2 rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-60";
+const ACTION_BASE =
+  "inline-flex h-9 items-center justify-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-60";
 
 type TReportActionContentProps = {
   label: string;
   tone: TReportActionTone;
   icon: TAppIconComponent;
   isLoading?: boolean;
+  iconOnly?: boolean;
 };
 
-function ReportActionContent({ label, tone, icon: Icon, isLoading = false }: TReportActionContentProps) {
+function ReportActionContent({ label, icon: Icon, isLoading = false, iconOnly = false }: TReportActionContentProps) {
   return (
     <>
-      <span
-        className={cn(
-          "flex size-11 shrink-0 items-center justify-center rounded-full border transition-transform duration-200 group-hover:scale-105",
-          ACTION_WELL[tone],
-        )}
-        aria-hidden
-      >
-        {isLoading ? <Spinner className="size-5" /> : <Icon className="size-5" />}
-      </span>
-      <span className={cn("type-caption-xs text-center font-semibold leading-tight", elevatedCardTitleClass)}>
-        {label}
-      </span>
+      {isLoading ? <Spinner className="size-4" /> : <Icon className="size-4 shrink-0" aria-hidden />}
+      {iconOnly ? <span className="sr-only">{label}</span> : <span>{label}</span>}
     </>
   );
 }
 
 function ReportActionLink(props: TReportActionContentProps & { href: string }) {
-  const { href, ...content } = props;
+  const { href, tone, iconOnly, ...content } = props;
   return (
-    <Link href={href} className={ACTION_CLASS}>
-      <ReportActionContent {...content} />
+    <Link href={href} className={cn(ACTION_BASE, ACTION_PILL[tone], iconOnly && "size-9 px-0")} title={content.label}>
+      <ReportActionContent tone={tone} iconOnly={iconOnly} {...content} />
     </Link>
   );
 }
 
 function ReportActionButton(props: TReportActionContentProps & { onClick: () => void; disabled?: boolean }) {
-  const { onClick, disabled, ...content } = props;
+  const { onClick, disabled, tone, iconOnly, ...content } = props;
   return (
-    <button type="button" onClick={onClick} disabled={disabled} className={ACTION_CLASS} aria-label={content.label}>
-      <ReportActionContent {...content} />
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={content.label}
+      aria-label={content.label}
+      className={cn(ACTION_BASE, ACTION_PILL[tone], iconOnly && "size-9 px-0")}
+    >
+      <ReportActionContent tone={tone} iconOnly={iconOnly} {...content} />
     </button>
   );
 }
@@ -121,25 +124,28 @@ export function ReportCard({
         </span>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 p-5">
-        <div className="min-w-0">
-          <h3 className={cn("truncate type-title", elevatedCardTitleClass)}>{monthTitle}</h3>
-          <span className="mt-2 inline-flex max-w-full items-center gap-1.5 rounded-full border border-brand/35 bg-brand/12 px-2.5 py-0.5 text-xs font-semibold text-brand">
+      <div className="flex flex-1 flex-col gap-4 p-5">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className={cn("min-w-0 truncate text-lg font-semibold", elevatedCardTitleClass)}>{monthTitle}</h3>
+          <span className="inline-flex max-w-[45%] shrink-0 items-center gap-1.5 rounded-full border border-brand/35 bg-brand/12 px-2.5 py-1 text-xs font-semibold text-brand">
             <Icons.globe className="size-3 shrink-0" aria-hidden />
             <span className="truncate">{clientName}</span>
           </span>
         </div>
 
-        {report.summary ? (
-          <p className={cn("line-clamp-3 text-sm leading-relaxed", elevatedCardMutedClass)}>{report.summary}</p>
-        ) : null}
-
-        <p className={cn("text-xs", elevatedCardMutedClass)}>
+        <p className={cn("flex items-center gap-1.5 text-xs", elevatedCardMutedClass)}>
+          <Icons.calendar className="size-3.5 shrink-0" aria-hidden />
           {t("createdOn")}:{" "}
           {new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(report.createdAt))}
         </p>
 
-        <div className="mt-auto flex items-start justify-around gap-2 pt-3">
+        {report.summary ? (
+          <div className="rounded-2xl border border-border bg-bg-hover/60 p-3.5">
+            <p className={cn("line-clamp-3 text-sm leading-relaxed", elevatedCardBodyClass)}>{report.summary}</p>
+          </div>
+        ) : null}
+
+        <div className="mt-auto flex flex-wrap items-center gap-2 pt-1">
           <ReportActionLink href={`/reports/${report.id}`} label={t("open")} tone="brand" icon={Icons.view} />
           <ReportActionButton
             label={t("downloadPdf")}
@@ -154,6 +160,7 @@ export function ReportCard({
               label={t("deleteAction")}
               tone="destructive"
               icon={Icons.delete}
+              iconOnly
               onClick={() => onDelete(report)}
             />
           ) : null}
