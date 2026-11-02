@@ -917,7 +917,6 @@ export interface Translation {
       emptyTitle: string;
       emptyBody: string;
       colTitle: string;
-      colPeriod: string;
       colSummary: string;
       colPerformance: string;
       summary: string;
@@ -2597,7 +2596,6 @@ const translation: Translation = {
       emptyTitle: "No Reports Yet",
       emptyBody: "Create the first monthly report for this project.",
       colTitle: "Report",
-      colPeriod: "Period",
       colSummary: "Summary",
       colPerformance: "Performance",
       summary: "Summary",

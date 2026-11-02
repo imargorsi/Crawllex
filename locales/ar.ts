@@ -923,7 +923,6 @@ const translation: Translation = {
       emptyTitle: "لا توجد تقارير بعد",
       emptyBody: "أنشئ أول تقرير شهري لهذا المشروع.",
       colTitle: "التقرير",
-      colPeriod: "الفترة",
       colSummary: "الملخص",
       colPerformance: "الأداء",
       summary: "الملخص",

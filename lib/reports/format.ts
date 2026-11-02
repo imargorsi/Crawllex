@@ -43,10 +43,6 @@ export function relativeChange(current: number, previous: number | null | undefi
   return { direction: ratio > 0.0005 ? "up" : ratio < -0.0005 ? "down" : "flat", ratio };
 }
 
-export function formatChangeRatio(change: TChange): string {
-  if (change.ratio == null) return "";
-  return `${change.ratio >= 0 ? "+" : "−"}${Math.abs(change.ratio * 100).toFixed(1)}%`;
-}
 
 /** Count with the right noun: "no clicks", "1 click", "29 clicks". */
 export function countPhrase(value: number, singular: string, plural: string): string {

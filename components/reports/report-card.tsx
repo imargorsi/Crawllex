@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
 import { ReportStatChip } from "@/components/reports/report-stat-chip";
-import { Spinner } from "@/components/ui/spinner";
 import type { TAppIconComponent } from "@/components/ui/app-icon";
+import { Spinner } from "@/components/ui/spinner";
 import {
   elevatedCardBodyClass,
   elevatedCardMutedClass,
@@ -18,6 +18,8 @@ import { formatInt } from "@/lib/reports/format";
 import { formatCompactPeriodLabel, formatMonthTitle } from "@/lib/reports/period";
 import { cn } from "@/lib/utils";
 import type { TReportListItemDto } from "@/types/reports.types";
+
+const COVER_IMAGE = "/report-assets/cover-report.jpg";
 
 export type TReportCardProps = {
   report: TReportListItemDto;
@@ -38,7 +40,7 @@ type TCoverActionProps = {
   destructive?: boolean;
 };
 
-/** Icon-only glass pill placed on the cover artwork. The label is kept for screen readers. */
+/** Icon-only glass button on the cover. The label stays available to screen readers. */
 function CoverActionButton({ label, icon: Icon, onClick, isLoading = false, disabled, destructive = false }: TCoverActionProps) {
   return (
     <button
@@ -48,10 +50,8 @@ function CoverActionButton({ label, icon: Icon, onClick, isLoading = false, disa
       title={label}
       aria-label={label}
       className={cn(
-        "inline-flex size-9 items-center justify-center rounded-full border backdrop-blur-md transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-white/60 disabled:opacity-60",
-        destructive
-          ? "border-white/25 bg-white/10 text-white hover:border-[var(--status-rejected)] hover:bg-[var(--status-rejected)]/80"
-          : "border-white/25 bg-white/10 text-white hover:bg-white/25",
+        "inline-flex size-9 items-center justify-center rounded-full border border-white/25 bg-white/10 text-white backdrop-blur-md transition-colors outline-none focus-visible:ring-[3px] focus-visible:ring-white/60 disabled:opacity-60",
+        destructive ? "hover:border-[var(--status-rejected)] hover:bg-[var(--status-rejected)]/80" : "hover:bg-white/25",
       )}
     >
       {isLoading ? <Spinner className="size-4" /> : <Icon className="size-4" aria-hidden />}
@@ -59,7 +59,7 @@ function CoverActionButton({ label, icon: Icon, onClick, isLoading = false, disa
   );
 }
 
-/** One saved report: animated cover, title and project, KPIs, summary, created date and actions. */
+/** One saved report: cover, title and period, summary, KPI chips, and footer. */
 export function ReportCard({
   report,
   clientName,
@@ -75,12 +75,7 @@ export function ReportCard({
   const kpis = report.kpis;
 
   return (
-    <article
-      className={cn(
-        elevatedCardSurfaceClass,
-        "relative flex flex-col overflow-hidden rounded-3xl",
-      )}
-    >
+    <article className={cn(elevatedCardSurfaceClass, "relative flex flex-col overflow-hidden rounded-3xl")}>
       <span
         aria-hidden
         className="absolute inset-x-0 top-0 z-10 h-0.5"
@@ -96,9 +91,10 @@ export function ReportCard({
           aria-label={`${t("open")} ${monthTitle}`}
           className="absolute inset-0 z-0 rounded-t-3xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
+
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <img
-            src="/report-assets/cover-neon-dashboard-2.jpg"
+            src={COVER_IMAGE}
             alt=""
             aria-hidden
             className="absolute inset-0 h-full w-full origin-center object-cover motion-safe:animate-[report-cover-pan_14s_ease-in-out_infinite]"
@@ -125,19 +121,16 @@ export function ReportCard({
             onClick={() => onDownload(report)}
           />
           {canDelete ? (
-            <CoverActionButton
-              label={t("deleteAction")}
-              icon={Icons.delete}
-              destructive
-              onClick={() => onDelete(report)}
-            />
+            <CoverActionButton label={t("deleteAction")} icon={Icons.delete} destructive onClick={() => onDelete(report)} />
           ) : null}
         </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
-          <h3 className={cn("min-w-0 flex-1 break-words text-lg font-semibold leading-tight", elevatedCardTitleClass)}>{monthTitle}</h3>
+          <h3 className={cn("min-w-0 flex-1 break-words text-lg font-semibold leading-tight", elevatedCardTitleClass)}>
+            {monthTitle}
+          </h3>
           <span className="inline-flex max-w-full shrink-0 items-center gap-1.5 rounded-full border border-brand/45 bg-brand/15 px-2.5 py-1 text-xs font-semibold text-brand backdrop-blur-sm">
             <Icons.calendar className="size-3 shrink-0" aria-hidden />
             <span>{periodLabel}</span>
@@ -153,10 +146,10 @@ export function ReportCard({
 
         {kpis ? (
           <div className="flex flex-nowrap gap-1.5">
-            <ReportStatChip value={formatInt(kpis.clicks)} label={t("kpiClicks")} tone="brand" size="sm" className="min-w-0 flex-1 justify-center truncate" />
-            <ReportStatChip value={formatInt(kpis.sessions)} label={t("kpiSessions")} tone="cyan" size="sm" className="min-w-0 flex-1 justify-center truncate" />
-            <ReportStatChip value={formatInt(kpis.leads)} label={t("kpiLeads")} tone="emerald" size="sm" className="min-w-0 flex-1 justify-center truncate" />
-            <ReportStatChip value={formatInt(kpis.calls)} label={t("kpiCalls")} tone="amber" size="sm" className="min-w-0 flex-1 justify-center truncate" />
+            <ReportStatChip value={formatInt(kpis.clicks)} label={t("kpiClicks")} tone="brand" className="min-w-0 flex-1 justify-center" />
+            <ReportStatChip value={formatInt(kpis.sessions)} label={t("kpiSessions")} tone="cyan" className="min-w-0 flex-1 justify-center" />
+            <ReportStatChip value={formatInt(kpis.leads)} label={t("kpiLeads")} tone="emerald" className="min-w-0 flex-1 justify-center" />
+            <ReportStatChip value={formatInt(kpis.calls)} label={t("kpiCalls")} tone="amber" className="min-w-0 flex-1 justify-center" />
           </div>
         ) : null}
 

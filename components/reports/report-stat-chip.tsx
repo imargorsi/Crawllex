@@ -9,31 +9,28 @@ export const REPORT_STAT_TONE = {
 
 export type TReportStatTone = keyof typeof REPORT_STAT_TONE;
 
-/** Transparent pill with a coloured outline. Used in the reports table and on report cards. */
+/** Transparent pill with a coloured outline. Used on report cards and in the reports table. */
 export function ReportStatChip({
   value,
   label,
   tone,
-  size = "sm",
   className,
 }: {
   value: string;
   label: string;
   tone: TReportStatTone;
-  size?: "sm" | "md";
   className?: string;
 }) {
   return (
     <span
       className={cn(
-        "inline-flex min-w-0 items-center gap-1.5 whitespace-nowrap rounded-full border bg-transparent shadow-[0_6px_14px_-8px_rgba(0,0,0,0.6)]",
-        size === "md" ? "px-3 py-1.5 text-sm" : "px-2.5 py-1 text-xs",
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border bg-transparent px-2.5 py-1 text-xs shadow-[0_6px_14px_-8px_rgba(0,0,0,0.6)]",
         REPORT_STAT_TONE[tone],
         className,
       )}
     >
       <span className="font-bold tabular-nums">{value}</span>
-      <span className="text-text-muted">{label}</span>
+      <span className="truncate text-text-muted">{label}</span>
     </span>
   );
 }
