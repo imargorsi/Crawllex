@@ -10,6 +10,7 @@ export type TReportAssets = {
   dotsSvg: string;
   chevronsSvg: string;
   coverArtSvg: string;
+  contactBgDataUri: string;
   fontFaceCss: string;
 };
 
@@ -37,10 +38,11 @@ export function loadReportAssets(): TReportAssets {
     dotsSvg: readFileSync(path.join(ASSET_DIR, "dots.svg"), "utf8"),
     chevronsSvg: readFileSync(path.join(ASSET_DIR, "chevrons.svg"), "utf8"),
     coverArtSvg: readFileSync(path.join(ASSET_DIR, "cover-art.svg"), "utf8"),
+    contactBgDataUri: `data:image/jpeg;base64,${readFileSync(path.join(ASSET_DIR, "contact-bg.jpg")).toString("base64")}`,
     fontFaceCss,
   };
   return cached;
 }
 
 /** No artwork: used by tests and when files are missing. Text fallbacks render instead. */
-export const EMPTY_REPORT_ASSETS: TReportAssets = { lcLogoSvg: "", dotsSvg: "", chevronsSvg: "", coverArtSvg: "", fontFaceCss: "" };
+export const EMPTY_REPORT_ASSETS: TReportAssets = { lcLogoSvg: "", dotsSvg: "", chevronsSvg: "", coverArtSvg: "", contactBgDataUri: "", fontFaceCss: "" };

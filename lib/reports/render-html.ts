@@ -70,7 +70,7 @@ td.url { word-break: break-all; color: var(--muted); font-size: 8.5pt; }
 .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-bottom: 5mm; }
 .cover { background: linear-gradient(160deg, #fff 55%, #e6f4ff 100%); }
 .cover .lc-logo svg { width: 46mm; height: auto; display: block; }
-.cover .cover-art { position: absolute; left: 0; right: 0; bottom: 0; }
+.cover .cover-art { position: absolute; left: 0; right: 0; top: 118mm; bottom: 0; mix-blend-mode: multiply; overflow: hidden; }
 .cover .cover-art svg { width: 100%; height: auto; display: block; }
 .cover .dots { position: absolute; top: 6mm; right: 2mm; width: 92mm; }
 .cover .dots svg { width: 100%; height: auto; display: block; }
@@ -86,7 +86,7 @@ td.url { word-break: break-all; color: var(--muted); font-size: 8.5pt; }
 .cover .client { font-size: 20pt; margin-top: 8mm; font-weight: 600; }
 .cover .period { font-size: 13pt; color: var(--muted); margin-top: 2mm; }
 .closing-page { padding: 0; }
-.closing { display: flex; flex-direction: column; justify-content: center; height: 297mm; color: #fff; background: linear-gradient(160deg, var(--accent-dark) 0%, var(--accent) 100%); padding: 22mm 18mm; }
+.closing { display: flex; flex-direction: column; justify-content: center; height: 297mm; color: #fff; padding: 22mm 18mm; }
 .closing .lc-logo { display: inline-block; align-self: flex-start; background: #fff; padding: 4mm 5mm; border-radius: 2mm; }
 .closing .lc-logo svg { width: 46mm; height: auto; display: block; }
 .closing h2 { font-size: 40pt; color: #fff; margin: 14mm 0 8mm; letter-spacing: .02em; }
@@ -396,7 +396,7 @@ function notesPage(snapshot: TReportSnapshotDto): TPageSpec {
 function closingPage(assets: TReportAssets): string {
   const phones = REPORT_BRAND.phones.map((phone) => `<div>${escapeHtml(phone)}</div>`).join("");
   const addresses = REPORT_BRAND.addresses.map((address) => `<div>${escapeHtml(address)}</div>`).join("");
-  return `<section class="page closing-page"><div class="closing">
+  return `<section class="page closing-page" style="background-image:url(${assets.contactBgDataUri});background-size:cover;background-position:center"><div class="closing">
 <div class="lc-logo">${assets.lcLogoSvg}</div>
 <h2>CONTACT US</h2>
 <div class="grid">
