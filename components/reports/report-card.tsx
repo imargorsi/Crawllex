@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
-import { ReportCoverGraphic } from "@/components/reports/report-cover-graphic";
 import { Spinner } from "@/components/ui/spinner";
 import type { TAppIconComponent } from "@/components/ui/app-icon";
 import {
@@ -31,35 +30,45 @@ export type TReportCardProps = {
 
 type TReportKpiTone = "brand" | "cyan" | "emerald" | "amber";
 
-const KPI_TONE: Record<TReportKpiTone, { tile: string; dot: string; value: string }> = {
+const KPI_TONE: Record<TReportKpiTone, { tile: string; icon: string; value: string }> = {
   brand: {
     tile: "border-brand/45 bg-brand/12",
-    dot: "bg-brand",
+    icon: "text-brand",
     value: "text-brand",
   },
   cyan: {
     tile: "border-[var(--status-invited)]/45 bg-[var(--status-invited)]/12",
-    dot: "bg-[var(--status-invited)]",
+    icon: "text-[var(--status-invited)]",
     value: "text-[var(--status-invited)]",
   },
   emerald: {
     tile: "border-[var(--status-active)]/45 bg-[var(--status-active)]/12",
-    dot: "bg-[var(--status-active)]",
+    icon: "text-[var(--status-active)]",
     value: "text-[var(--status-active)]",
   },
   amber: {
     tile: "border-[var(--status-pending)]/45 bg-[var(--status-pending)]/12",
-    dot: "bg-[var(--status-pending)]",
+    icon: "text-[var(--status-pending)]",
     value: "text-[var(--status-pending)]",
   },
 };
 
-function KpiTile({ label, value, tone }: { label: string; value: string; tone: TReportKpiTone }) {
+function KpiTile({
+  label,
+  value,
+  tone,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  tone: TReportKpiTone;
+  icon: TAppIconComponent;
+}) {
   const style = KPI_TONE[tone];
   return (
     <div className={cn("rounded-2xl border-[1.5px] px-3.5 py-3", style.tile)}>
-      <p className={cn("flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider", elevatedCardTitleClass)}>
-        <span className={cn("size-2 rounded-full", style.dot)} aria-hidden />
+      <p className={cn("flex items-center gap-2 text-xs font-semibold", elevatedCardTitleClass)}>
+        <Icon className={cn("size-4 shrink-0", style.icon)} aria-hidden />
         {label}
       </p>
       <p className={cn("mt-1.5 text-2xl font-bold tabular-nums", style.value)}>{value}</p>
@@ -134,8 +143,17 @@ export function ReportCard({
           aria-label={`${t("open")} ${monthTitle}`}
           className="absolute inset-0 z-0 rounded-t-3xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
         />
-        <div className="pointer-events-none absolute inset-0">
-          <ReportCoverGraphic />
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <img
+            src="/report-assets/cover-neon.jpg"
+            alt=""
+            aria-hidden
+            className="absolute inset-0 h-full w-full origin-center object-cover motion-safe:animate-[report-cover-pan_14s_ease-in-out_infinite]"
+          />
+          <span
+            aria-hidden
+            className="absolute inset-y-0 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-white/15 to-transparent motion-safe:animate-[report-cover-sweep_6s_ease-in-out_infinite]"
+          />
           {clientLogoUrl ? (
             <img
               src={clientLogoUrl}
@@ -148,7 +166,7 @@ export function ReportCard({
         <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
           <CoverActionButton
             label={t("downloadPdf")}
-            icon={Icons.cloudDownload}
+            icon={Icons.download}
             isLoading={isDownloading}
             disabled={isDownloading}
             onClick={() => onDownload(report)}
@@ -173,29 +191,30 @@ export function ReportCard({
               {new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(report.createdAt))}
             </p>
           </div>
-          <span className="inline-flex max-w-[55%] shrink-0 items-center gap-1.5 rounded-full border border-border bg-bg-hover px-2.5 py-1 text-xs font-medium text-text-primary">
+          <span className="inline-flex max-w-[55%] shrink-0 items-center gap-1.5 rounded-full border border-brand/45 bg-brand/15 px-2.5 py-1 text-xs font-semibold text-brand backdrop-blur-sm">
             <Icons.calendar className="size-3 shrink-0" aria-hidden />
             <span className="truncate">{periodLabel}</span>
           </span>
         </div>
 
-        {kpis ? (
-          <div className="grid grid-cols-2 gap-2.5">
-            <KpiTile label={t("kpiClicks")} value={formatInt(kpis.clicks)} tone="brand" />
-            <KpiTile label={t("kpiSessions")} value={formatInt(kpis.sessions)} tone="cyan" />
-            <KpiTile label={t("kpiLeads")} value={formatInt(kpis.leads)} tone="emerald" />
-            <KpiTile label={t("kpiCalls")} value={formatInt(kpis.calls)} tone="amber" />
-          </div>
-        ) : null}
-
         {report.summary ? (
           <div className="space-y-1.5">
-            <h4 className={cn("text-xs font-semibold uppercase tracking-wide", elevatedCardMutedClass)}>
+            <h4 className={cn("text-sm font-semibold", elevatedCardTitleClass)}>
               {t("summary")}
             </h4>
             <p className={cn("line-clamp-3 text-sm leading-relaxed", elevatedCardBodyClass)}>{report.summary}</p>
           </div>
         ) : null}
+
+        {kpis ? (
+          <div className="grid grid-cols-2 gap-2.5">
+            <KpiTile label={t("kpiClicks")} value={formatInt(kpis.clicks)} tone="brand" icon={Icons.cursorPointer} />
+            <KpiTile label={t("kpiSessions")} value={formatInt(kpis.sessions)} tone="cyan" icon={Icons.view} />
+            <KpiTile label={t("kpiLeads")} value={formatInt(kpis.leads)} tone="emerald" icon={Icons.userGroup} />
+            <KpiTile label={t("kpiCalls")} value={formatInt(kpis.calls)} tone="amber" icon={Icons.call} />
+          </div>
+        ) : null}
+
 
       </div>
     </article>

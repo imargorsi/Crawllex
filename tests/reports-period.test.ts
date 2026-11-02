@@ -37,7 +37,7 @@ describe("report period", () => {
   });
 
   it("formats compact labels for tight UI", () => {
-    expect(formatCompactPeriodLabel("2026-09-01", "2026-09-30")).toBe("1–30 Sep 2026");
-    expect(formatCompactPeriodLabel("2026-09-01", "2026-10-15")).toBe("1 Sep – 15 Oct 2026");
+    expect(formatCompactPeriodLabel("2026-09-01", "2026-09-30")).toBe("1 Sep 2026 - 30 Sep 2026");
+    expect(formatCompactPeriodLabel("2026-09-01", "2026-10-15")).toBe("1 Sep 2026 - 15 Oct 2026");
   });
 });

@@ -970,54 +970,29 @@ code {
   }
 }
 
-/* Report cards: slow drift for the cover artwork (respects reduced motion via motion-safe). */
-@keyframes report-cover-drift {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
+
+
+
+
+
+/* Report cover: slow pan and zoom on the neon image, plus a faint light sweep. Motion-safe only. */
+@keyframes report-cover-pan {
+  0% {
+    transform: scale(1.06) translate3d(-1.5%, 0.5%, 0);
   }
   50% {
-    transform: translate3d(-3%, -2%, 0);
+    transform: scale(1.12) translate3d(1.5%, -1%, 0);
   }
-}
-
-@keyframes report-cover-dots {
-  0%,
   100% {
-    transform: rotate(0deg) scale(1);
-    opacity: 0.8;
-  }
-  50% {
-    transform: rotate(8deg) scale(1.04);
-    opacity: 1;
+    transform: scale(1.06) translate3d(-1.5%, 0.5%, 0);
   }
 }
 
-/* Report cover graphic: bars rise, trend line draws, dots float. Disabled for reduced motion. */
-@keyframes report-bar-rise {
-  from {
-    transform: scaleY(0);
+@keyframes report-cover-sweep {
+  0% {
+    transform: translateX(-120%);
   }
-  to {
-    transform: scaleY(1);
-  }
-}
-
-@keyframes report-line-draw {
-  from {
-    stroke-dashoffset: 320;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-@keyframes report-float {
-  0%,
   100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
+    transform: translateX(220%);
   }
 }
