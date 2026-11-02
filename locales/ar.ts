@@ -924,6 +924,7 @@ const translation: Translation = {
       emptyBody: "أنشئ أول تقرير شهري لهذا المشروع.",
       colTitle: "التقرير",
       colPeriod: "الفترة",
+      colSummary: "الملخص",
       colCreated: "تاريخ الإنشاء",
       createdOn: "تاريخ الإنشاء",
       open: "فتح",
