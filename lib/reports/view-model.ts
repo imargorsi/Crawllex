@@ -30,6 +30,7 @@ export type TBlockView =
   | { type: "chips"; items: { label: string; value: string; tone: TReportTone }[] }
   | { type: "line"; title: string | null; chart: TSeriesView }
   | { type: "bars"; title: string; rows: { label: string; value: number }[] }
+  | { type: "donut"; title: string; rows: { label: string; value: number }[] }
   | { type: "table"; title: string; table: TTableView }
   | { type: "callout"; title: string; text: string }
   | { type: "note"; text: string };
@@ -180,7 +181,7 @@ function trafficSection(snapshot: TReportSnapshotDto): TSectionView {
   const channels = ga4.channels.filter((row) => (row.sessions ?? 0) > 0).slice(0, 6);
   if (channels.length > 0) {
     blocks.push({
-      type: "bars",
+      type: "donut",
       title: copy.channelsHeading,
       rows: channels.map((row) => ({ label: row.value, value: row.sessions ?? 0 })),
     });
@@ -269,7 +270,13 @@ function leadsSection(snapshot: TReportSnapshotDto): TSectionView {
     { type: "paragraphs", items: narrative(snapshot, "leads") },
   ];
   if (origins.length > 0) {
-    blocks.push({ type: "table", title: copy.sourcesHeading, table: { headers: [REPORT_COPY.table.source, REPORT_COPY.table.leads], rows: origins, emptyText: "" } });
+    blocks.push({
+      type: "donut",
+      title: copy.sourcesHeading,
+      rows: Object.entries(leads.byOrigin)
+        .filter(([, count]) => count > 0)
+        .map(([origin, count]) => ({ label: REPORT_COPY.origins[origin as keyof typeof REPORT_COPY.origins] ?? origin, value: count })),
+    });
   }
   blocks.push({
     type: "table",

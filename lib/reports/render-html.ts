@@ -131,6 +131,7 @@ function blockHtml(block: TBlockView): string {
     case "line":
       return `<div class="chart">${lineChartSvg(block.chart.dates, block.chart.series)}</div>`;
     case "bars":
+    case "donut":
       return `<h3>${escapeHtml(block.title)}</h3><div class="chart">${barChartSvg(block.rows)}</div>`;
     case "table":
       return `<h3>${escapeHtml(block.title)}</h3>${tableHtml(block.table)}`;
