@@ -28,50 +28,15 @@ export type TReportCardProps = {
   onDelete: (report: TReportListItemDto) => void;
 };
 
-type TReportKpiTone = "brand" | "cyan" | "emerald" | "amber";
-
-const KPI_TONE: Record<TReportKpiTone, { tile: string; icon: string; value: string }> = {
-  brand: {
-    tile: "border-brand/45 bg-brand/12",
-    icon: "text-brand",
-    value: "text-brand",
-  },
-  cyan: {
-    tile: "border-[var(--status-invited)]/45 bg-[var(--status-invited)]/12",
-    icon: "text-[var(--status-invited)]",
-    value: "text-[var(--status-invited)]",
-  },
-  emerald: {
-    tile: "border-[var(--status-active)]/45 bg-[var(--status-active)]/12",
-    icon: "text-[var(--status-active)]",
-    value: "text-[var(--status-active)]",
-  },
-  amber: {
-    tile: "border-[var(--status-pending)]/45 bg-[var(--status-pending)]/12",
-    icon: "text-[var(--status-pending)]",
-    value: "text-[var(--status-pending)]",
-  },
-};
-
-function KpiTile({
-  label,
-  value,
-  tone,
-  icon: Icon,
-}: {
-  label: string;
-  value: string;
-  tone: TReportKpiTone;
-  icon: TAppIconComponent;
-}) {
-  const style = KPI_TONE[tone];
+/** Glass tile with a light outline. No colour, so the cover carries the accent. */
+function KpiTile({ label, value, icon: Icon }: { label: string; value: string; icon: TAppIconComponent }) {
   return (
-    <div className={cn("rounded-2xl border-[1.5px] px-3.5 py-3", style.tile)}>
-      <p className={cn("flex items-center gap-2 text-xs font-semibold", elevatedCardTitleClass)}>
-        <Icon className={cn("size-4 shrink-0", style.icon)} aria-hidden />
+    <div className="rounded-2xl border border-white/30 bg-white/[0.06] px-3.5 py-3 shadow-sm backdrop-blur-md backdrop-saturate-150">
+      <p className={cn("flex items-center gap-2 text-xs font-semibold", elevatedCardMutedClass)}>
+        <Icon className="size-4 shrink-0" aria-hidden />
         {label}
       </p>
-      <p className={cn("mt-1.5 text-2xl font-bold tabular-nums", style.value)}>{value}</p>
+      <p className={cn("mt-1.5 text-2xl font-bold tabular-nums", elevatedCardTitleClass)}>{value}</p>
     </div>
   );
 }
@@ -135,7 +100,7 @@ export function ReportCard({
       />
 
       <div
-        className="relative h-40 overflow-hidden border-b border-border"
+        className="relative h-56 overflow-hidden border-b border-border"
         style={{ background: `linear-gradient(135deg, ${REPORT_PALETTE.accentDark}, ${REPORT_PALETTE.accent})` }}
       >
         <Link
@@ -208,10 +173,10 @@ export function ReportCard({
 
         {kpis ? (
           <div className="grid grid-cols-2 gap-2.5">
-            <KpiTile label={t("kpiClicks")} value={formatInt(kpis.clicks)} tone="brand" icon={Icons.cursorPointer} />
-            <KpiTile label={t("kpiSessions")} value={formatInt(kpis.sessions)} tone="cyan" icon={Icons.view} />
-            <KpiTile label={t("kpiLeads")} value={formatInt(kpis.leads)} tone="emerald" icon={Icons.userGroup} />
-            <KpiTile label={t("kpiCalls")} value={formatInt(kpis.calls)} tone="amber" icon={Icons.call} />
+            <KpiTile label={t("kpiClicks")} value={formatInt(kpis.clicks)} icon={Icons.cursorPointer} />
+            <KpiTile label={t("kpiSessions")} value={formatInt(kpis.sessions)} icon={Icons.view} />
+            <KpiTile label={t("kpiLeads")} value={formatInt(kpis.leads)} icon={Icons.userGroup} />
+            <KpiTile label={t("kpiCalls")} value={formatInt(kpis.calls)} icon={Icons.call} />
           </div>
         ) : null}
 
