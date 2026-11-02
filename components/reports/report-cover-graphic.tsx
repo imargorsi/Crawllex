@@ -14,14 +14,14 @@ const BARS = [
   { x: 144, height: 86, delay: 0.9 },
 ] as const;
 
-const PAGE_X = 84;
-const PAGE_Y = 22;
-const BASE_Y = 118;
+const PAGE_X = 50;
+const PAGE_Y = 20;
+const BASE_Y = 126;
 
 export function ReportCoverGraphic() {
   return (
     <svg
-      viewBox="0 0 320 170"
+      viewBox="0 0 300 165"
       className="absolute inset-0 h-full w-full"
       preserveAspectRatio="xMidYMid slice"
       aria-hidden
@@ -44,14 +44,14 @@ export function ReportCoverGraphic() {
         </filter>
       </defs>
 
-      <rect width="320" height="170" fill="url(#report-cover-bg)" />
+      <rect width="300" height="165" fill="url(#report-cover-bg)" />
 
       <image
         href="/report-assets/cover-art.svg"
-        x="150"
-        y="-10"
-        width="200"
-        height="200"
+        x="160"
+        y="-20"
+        width="170"
+        height="170"
         preserveAspectRatio="xMidYMid meet"
         opacity="0.28"
         className="motion-safe:animate-[report-cover-drift_12s_ease-in-out_infinite]"
@@ -62,7 +62,7 @@ export function ReportCoverGraphic() {
           x={PAGE_X}
           y={PAGE_Y}
           width="200"
-          height="132"
+          height="128"
           rx="14"
           fill="#ffffff"
           fillOpacity="0.96"
