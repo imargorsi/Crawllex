@@ -31,7 +31,7 @@ export type TReportCardProps = {
 /** Glass tile with a light outline. No colour, so the cover carries the accent. */
 function KpiTile({ label, value, icon: Icon }: { label: string; value: string; icon: TAppIconComponent }) {
   return (
-    <div className="rounded-2xl border border-white/30 bg-white/[0.06] px-3.5 py-3 shadow-sm backdrop-blur-md backdrop-saturate-150">
+    <div className="rounded-2xl border border-white/35 bg-transparent px-3.5 py-3 shadow-[0_14px_28px_-12px_rgba(0,0,0,0.65)]">
       <p className={cn("flex items-center gap-2 text-xs font-semibold", elevatedCardMutedClass)}>
         <Icon className="size-4 shrink-0" aria-hidden />
         {label}
@@ -100,7 +100,7 @@ export function ReportCard({
       />
 
       <div
-        className="relative h-56 overflow-hidden border-b border-border"
+        className="relative h-48 overflow-hidden border-b border-border"
         style={{ background: `linear-gradient(135deg, ${REPORT_PALETTE.accentDark}, ${REPORT_PALETTE.accent})` }}
       >
         <Link
