@@ -20,7 +20,7 @@ function snapshot(name: string, highlight: string): TReportSnapshotDto {
     pageViews: null,
   };
   const base = {
-    project: { id: "p1", name, websiteUrl: "https://example.com" },
+    project: { id: "p1", name, websiteUrl: "https://example.com", logoDataUri: null },
     period,
     sources: { gsc: false, ga4: false },
     gsc: { current: zeroTotals, previous: zeroTotals, series: [], topQueries: [], topPages: [] },
@@ -66,7 +66,7 @@ describe("renderReportHtml", () => {
     expect(html).toContain("Search performance");
     expect(html).toContain("Website traffic");
     expect(html).toContain("Leads and content");
-    expect(html).toContain("Contact us");
+    expect(html).toContain("CONTACT US");
   });
 
   it("never prints undefined or NaN", () => {

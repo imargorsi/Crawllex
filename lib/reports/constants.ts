@@ -5,25 +5,29 @@
  * instead of the app theme tokens (AGENTS.md rule 10 covers the app UI only).
  */
 
-/** Agency that issues the report. Confirm these values before the first client send. */
+/** Agency that issues the report. Values from the "LC New Report Template" (Canva, 2026-11-02). */
 export const REPORT_BRAND = {
   name: "Logical Creations",
   website: "www.logicalcreations.net",
-  email: "info@logicalcreation.net",
-  phone: "+966 55 358 0527",
+  email: "info@logicalcreations.net",
+  phones: ["+92 333 1413510", "+966 55 358 0527"],
+  addresses: ["Johar Town, Lahore", "Wadi Laban Riyadh, Saudi Arabia"],
 } as const;
 
+/** Palette from the LC template. The report is a print document, so it does not use app theme tokens. */
 export const REPORT_PALETTE = {
-  accent: "#e0362c",
-  accentDark: "#9e1f18",
-  ink: "#1f2328",
-  muted: "#6b7280",
-  line: "#e5e7eb",
-  surface: "#f7f7f8",
+  accent: "#0A3EC5",
+  accentDark: "#0B2298",
+  accentBright: "#0671DF",
+  cyan: "#7FF2FF",
+  ink: "#1F2138",
+  muted: "#5568B7",
+  line: "#D6DCEB",
+  surface: "#EFFDFF",
   positive: "#15803d",
   negative: "#b91c1c",
-  neutral: "#6b7280",
-  series: ["#e0362c", "#374151", "#9ca3af", "#f59e0b"],
+  neutral: "#5568B7",
+  series: ["#0A3EC5", "#0671DF", "#7FF2FF", "#0B2298"],
 } as const;
 
 /** Rows per ranked table (queries, pages, channels, countries). */

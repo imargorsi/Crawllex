@@ -1,11 +1,13 @@
 import { Types } from "mongoose";
 
+import { loadReportAssets } from "@/lib/reports/assets";
+import { loadClientLogoDataUri } from "@/lib/reports/client-logo";
 import { collectReportData } from "@/lib/reports/collect";
 import { renderReportPdf } from "@/lib/reports/pdf-client";
 import { buildNarrative } from "@/lib/reports/narrative";
 import { formatMonthTitle, isFullCalendarMonth } from "@/lib/reports/period";
 import { renderReportHtml } from "@/lib/reports/render-html";
-import { Report } from "@/models";
+import { Project, Report } from "@/models";
 import type { CreateReportInput } from "@/schemas/reports";
 import type {
   TReportDetailDto,
@@ -59,10 +61,13 @@ export async function createReport(
   };
 
   const { base, period } = await collectReportData(projectId, input.periodFrom, input.periodTo);
+  const project = await Project.findById(projectId).select("logoImage").lean();
+  const logoDataUri = await loadClientLogoDataUri(project?.logoImage ?? null).catch(() => null);
   const snapshot: TReportSnapshotDto = {
     version: 1,
     generatedAt: new Date().toISOString(),
     ...base,
+    project: { ...base.project, logoDataUri },
     narrative: buildNarrative(base, notes),
     notes,
   };
@@ -103,7 +108,7 @@ export async function deleteReport(projectId: string, reportId: string): Promise
 }
 
 export function reportHtml(report: TReportDetailDto): string {
-  return renderReportHtml(report.snapshot);
+  return renderReportHtml(report.snapshot, loadReportAssets());
 }
 
 export function reportPdf(report: TReportDetailDto): Promise<Buffer> {

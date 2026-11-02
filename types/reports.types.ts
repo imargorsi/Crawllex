@@ -52,7 +52,7 @@ export type TReportNarrativeSectionDto = {
 export type TReportSnapshotDto = {
   version: 1;
   generatedAt: string;
-  project: { id: string; name: string; websiteUrl: string };
+  project: { id: string; name: string; websiteUrl: string; logoDataUri: string | null };
   period: TReportPeriodDto;
   sources: { gsc: boolean; ga4: boolean };
   gsc: {

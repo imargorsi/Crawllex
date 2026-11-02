@@ -25,7 +25,7 @@ function baseFixture(overrides: Partial<TBase> = {}): TBase {
     pageViews: 1885,
   };
   return {
-    project: { id: "p1", name: "Silver Foundation", websiteUrl: "https://example.com" },
+    project: { id: "p1", name: "Silver Foundation", websiteUrl: "https://example.com", logoDataUri: null },
     period,
     sources: { gsc: true, ga4: true },
     gsc: {

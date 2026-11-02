@@ -190,6 +190,7 @@ export async function collectReportData(
       id: projectId,
       name: project.businessName,
       websiteUrl: project.websiteUrl,
+      logoDataUri: null,
     },
     period,
     // A source counts as available when it is connected or has cached rows for the period.

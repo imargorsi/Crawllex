@@ -1,4 +1,5 @@
 import { REPORT_BRAND, REPORT_PALETTE } from "@/lib/reports/constants";
+import { EMPTY_REPORT_ASSETS, type TReportAssets } from "@/lib/reports/assets";
 import { escapeHtml } from "@/lib/reports/escape";
 import {
   formatInt,
@@ -21,10 +22,12 @@ import type {
  * The PDF renderer receives this HTML unchanged. All data and notes are escaped here.
  */
 
-const CSS = `
+const buildCss = (assets: TReportAssets) => `
+${assets.fontFaceCss}
 :root {
   --accent: ${REPORT_PALETTE.accent};
   --accent-dark: ${REPORT_PALETTE.accentDark};
+  --cyan: ${REPORT_PALETTE.cyan};
   --ink: ${REPORT_PALETTE.ink};
   --muted: ${REPORT_PALETTE.muted};
   --line: ${REPORT_PALETTE.line};
@@ -34,7 +37,8 @@ const CSS = `
 }
 @page { size: A4; margin: 0; }
 * { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; color: var(--ink); font-family: "Helvetica Neue", Arial, sans-serif; font-size: 11pt; line-height: 1.5; }
+html, body { margin: 0; padding: 0; color: var(--ink); font-family: "Poppins", Arial, sans-serif; font-size: 10.5pt; line-height: 1.6; }
+h2, h3, .kpi .value { font-family: "Red Hat Display", "Poppins", Arial, sans-serif; }
 .page { width: 210mm; height: 297mm; padding: 16mm 16mm 14mm; position: relative; overflow: hidden; page-break-after: always; background: #fff; }
 .page:last-child { page-break-after: auto; }
 .header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid var(--accent); padding-bottom: 6mm; margin-bottom: 8mm; }
@@ -62,17 +66,27 @@ td.url { word-break: break-all; color: var(--muted); font-size: 8.5pt; }
 .note { font-size: 9.5pt; color: var(--muted); font-style: italic; }
 .callout { border-left: 3px solid var(--accent); background: var(--surface); padding: 3mm 4mm; border-radius: 0 2mm 2mm 0; margin-bottom: 4mm; }
 .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-bottom: 5mm; }
-.cover { background: linear-gradient(160deg, #fff 45%, #fde7e5 100%); }
+.cover { background: linear-gradient(160deg, #fff 55%, #e6f4ff 100%); }
+.cover .lc-logo svg { width: 46mm; height: auto; display: block; }
+.cover .client-logo img { max-height: 22mm; max-width: 70mm; display: block; }
+.cover .client-logo .fallback { font-family: "Red Hat Display", sans-serif; font-size: 18pt; font-weight: 700; color: var(--accent-dark); }
+.cover .monthly { display: inline-block; background: var(--accent-dark); color: #fff; font-family: "Red Hat Display", sans-serif; font-weight: 700; font-size: 44pt; padding: 2mm 5mm; border-radius: 2mm; margin-top: 10mm; }
+.cover .report-word { font-family: "Red Hat Display", sans-serif; font-weight: 700; font-size: 44pt; color: var(--accent); margin: 1mm 0 0 0; }
+.cover .rule { width: 60mm; height: 1.4mm; background: var(--cyan); margin-top: 4mm; border-radius: 1mm; }
 .cover .brand { font-size: 18pt; font-weight: 700; color: var(--ink); }
 .cover .brand span { color: var(--accent); }
 .cover .eyebrow { margin-top: 60mm; font-size: 12pt; color: var(--muted); text-transform: uppercase; letter-spacing: .15em; }
 .cover h1 { font-size: 46pt; margin: 2mm 0 0; color: var(--accent); line-height: 1.05; }
 .cover .client { font-size: 20pt; margin-top: 8mm; font-weight: 600; }
 .cover .period { font-size: 13pt; color: var(--muted); margin-top: 2mm; }
-.closing { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; }
-.closing h2 { font-size: 26pt; color: var(--accent); margin: 0 0 8mm; }
-.closing .line { font-size: 12pt; margin: 2mm 0; }
-.legal { font-size: 8.5pt; color: var(--muted); margin-top: 10mm; max-width: 140mm; }
+.closing-page { padding: 0; }
+.closing { display: flex; flex-direction: column; justify-content: center; height: 297mm; color: #fff; background: linear-gradient(160deg, var(--accent-dark) 0%, var(--accent) 100%); padding: 22mm 18mm; }
+.closing .lc-logo { display: inline-block; align-self: flex-start; background: #fff; padding: 4mm 5mm; border-radius: 2mm; }
+.closing .lc-logo svg { width: 46mm; height: auto; display: block; }
+.closing h2 { font-size: 40pt; color: #fff; margin: 14mm 0 8mm; letter-spacing: .02em; }
+.closing .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm 8mm; font-size: 11pt; }
+.closing .legal { color: #cfd6f2; }
+.legal { font-size: 8.5pt; color: var(--muted); margin-top: 10mm; max-width: 150mm; }
 `;
 
 function changeClass(change: TChange): string {
@@ -142,14 +156,21 @@ function ctrText(value: number | null): string {
   return formatPercent(value);
 }
 
-function coverPage(snapshot: TReportSnapshotDto): string {
+function coverPage(snapshot: TReportSnapshotDto, assets: TReportAssets): string {
+  const clientLogo = snapshot.project.logoDataUri
+    ? `<img alt="${escapeHtml(snapshot.project.name)}" src="${snapshot.project.logoDataUri}" />`
+    : `<div class="fallback">${escapeHtml(snapshot.project.name)}</div>`;
   return `<section class="page cover">
-<div class="brand">${escapeHtml(REPORT_BRAND.name.split(" ")[0])}<span> ${escapeHtml(REPORT_BRAND.name.split(" ").slice(1).join(" "))}</span></div>
-<div class="eyebrow">Monthly SEO report</div>
-<h1>${escapeHtml(formatMonthTitle(snapshot.period.from))}</h1>
-<div class="client">${escapeHtml(snapshot.project.name)}</div>
-<div class="period">${escapeHtml(snapshot.period.label)}</div>
-<div class="period">${escapeHtml(snapshot.project.websiteUrl)}</div>
+<div class="lc-logo">${assets.lcLogoSvg}</div>
+<div class="client-logo" style="margin-top:22mm">${clientLogo}</div>
+<div class="monthly">MONTHLY</div>
+<h1 class="report-word">REPORT</h1>
+<div class="rule"></div>
+<div style="margin-top:10mm;font-size:10pt;color:var(--muted)">Date</div>
+<div style="font-weight:600">${escapeHtml(formatMonthTitle(snapshot.period.to))}</div>
+<div style="margin-top:6mm;font-size:10pt;color:var(--muted)">Prepared by</div>
+<div style="font-weight:600">${escapeHtml(REPORT_BRAND.name)}</div>
+<div style="margin-top:4mm;font-size:10pt;color:var(--muted)">${escapeHtml(snapshot.period.label)}</div>
 </section>`;
 }
 
@@ -356,18 +377,27 @@ function notesPage(snapshot: TReportSnapshotDto): TPageSpec {
   };
 }
 
-function closingPage(): string {
-  return `<section class="page"><div class="closing">
-<h2>Contact us</h2>
-<div class="line">${escapeHtml(REPORT_BRAND.phone)}</div>
-<div class="line">${escapeHtml(REPORT_BRAND.email)}</div>
-<div class="line">${escapeHtml(REPORT_BRAND.website)}</div>
+function closingPage(assets: TReportAssets): string {
+  const phones = REPORT_BRAND.phones.map((phone) => `<div>${escapeHtml(phone)}</div>`).join("");
+  const addresses = REPORT_BRAND.addresses.map((address) => `<div>${escapeHtml(address)}</div>`).join("");
+  return `<section class="page closing-page"><div class="closing">
+<div class="lc-logo">${assets.lcLogoSvg}</div>
+<h2>CONTACT US</h2>
+<div class="grid">
+  <div>${phones}</div>
+  <div>${addresses}</div>
+  <div>${escapeHtml(REPORT_BRAND.email)}</div>
+  <div>${escapeHtml(REPORT_BRAND.website)}</div>
+</div>
 <p class="legal">Figures come from Google Search Console and Google Analytics as cached by Crawllex. Minor differences from the source dashboards can occur due to data sampling and the ranking of top rows.</p>
 </div></section>`;
 }
 
 /** Full print document for one report. Pages are numbered in order. */
-export function renderReportHtml(snapshot: TReportSnapshotDto): string {
+export function renderReportHtml(
+  snapshot: TReportSnapshotDto,
+  assets: TReportAssets = EMPTY_REPORT_ASSETS,
+): string {
   const title = `${snapshot.project.name} — ${formatMonthTitle(snapshot.period.from)}`;
   const footer = snapshot.project.name;
 
@@ -381,11 +411,11 @@ export function renderReportHtml(snapshot: TReportSnapshotDto): string {
   ];
 
   const pages = [
-    coverPage(snapshot),
+    coverPage(snapshot, assets),
     ...specs.map((spec, index) =>
       page(String(index + 1).padStart(2, "0"), spec.title, spec.body, footer, index + 1),
     ),
-    closingPage(),
+    closingPage(assets),
   ];
 
   return `<!doctype html>
@@ -394,7 +424,7 @@ export function renderReportHtml(snapshot: TReportSnapshotDto): string {
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>${escapeHtml(title)}</title>
-<style>${CSS}</style>
+<style>${buildCss(assets)}</style>
 </head>
 <body>
 ${pages.join("\n")}
