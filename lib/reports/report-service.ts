@@ -12,6 +12,7 @@ import type { CreateReportInput } from "@/schemas/reports";
 import type {
   TReportDetailDto,
   TReportListItemDto,
+  TReportListKpisDto,
   TReportSnapshotDto,
 } from "@/types/reports.types";
 
@@ -22,10 +23,25 @@ type TReportLean = {
   periodFrom: string;
   periodTo: string;
   createdAt: Date;
-  snapshot?: TReportSnapshotDto;
+  snapshot?: Partial<TReportSnapshotDto>;
 };
 
 const SUMMARY_LINES = 2;
+
+function listKpis(doc: TReportLean): TReportListKpisDto | null {
+  const snapshot = doc.snapshot;
+  if (!snapshot?.gsc?.current || !snapshot.ga4?.current || !snapshot.leads || !snapshot.events) {
+    return null;
+  }
+  return {
+    clicks: snapshot.gsc.current.clicks,
+    impressions: snapshot.gsc.current.impressions,
+    sessions: snapshot.ga4.current.sessions,
+    leads: snapshot.leads.total,
+    calls: snapshot.events.contacts.call,
+    emails: snapshot.events.contacts.email,
+  };
+}
 
 function shortSummary(doc: TReportLean): string | null {
   const lines = doc.snapshot?.narrative?.executiveSummary ?? [];
@@ -42,6 +58,7 @@ function toListItem(doc: TReportLean): TReportListItemDto {
     periodTo: doc.periodTo,
     createdAt: doc.createdAt.toISOString(),
     summary: shortSummary(doc),
+    kpis: listKpis(doc),
   };
 }
 
@@ -49,7 +66,7 @@ function toDetail(doc: TReportLean): TReportDetailDto {
   if (!doc.snapshot) {
     throw new Error("Report snapshot is missing.");
   }
-  return { ...toListItem(doc), snapshot: doc.snapshot };
+  return { ...toListItem(doc), snapshot: doc.snapshot as TReportSnapshotDto };
 }
 
 function reportTitle(projectName: string, from: string, to: string, label: string): string {
@@ -99,7 +116,9 @@ export async function createReport(
 export async function listReports(projectId: string): Promise<TReportListItemDto[]> {
   const docs = await Report.find({ projectId })
     .sort({ createdAt: -1 })
-    .select("title periodFrom periodTo createdAt projectId snapshot.narrative.executiveSummary")
+    .select(
+      "title periodFrom periodTo createdAt projectId snapshot.narrative.executiveSummary snapshot.gsc.current snapshot.ga4.current snapshot.leads snapshot.events.contacts",
+    )
     .lean<TReportLean[]>();
   return docs.map((doc) => toListItem(doc));
 }

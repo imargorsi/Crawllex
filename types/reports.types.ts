@@ -105,6 +105,17 @@ export type TReportListItemDto = {
   createdAt: string;
   /** Short summary: first executive summary lines, for list cards. */
   summary: string | null;
+  /** Headline numbers for list cards. Null for reports saved before this field existed. */
+  kpis: TReportListKpisDto | null;
+};
+
+export type TReportListKpisDto = {
+  clicks: number;
+  impressions: number;
+  sessions: number;
+  leads: number;
+  calls: number;
+  emails: number;
 };
 
 export type TReportDetailDto = TReportListItemDto & {
