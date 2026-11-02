@@ -84,9 +84,9 @@ export function useDeleteReportMutation(projectId: string | null | undefined) {
  * Binary and HTML endpoints bypass the JSON envelope, so they are fetched with the Bearer token
  * directly. Errors are read from the JSON error body when present.
  */
-async function fetchReportResponse(projectId: string, reportId: string, asset: "html" | "pdf") {
+async function fetchReportResponse(projectId: string, reportId: string) {
   const token = getAccessToken();
-  const response = await fetch(`/api/v1/projects/${projectId}/reports/${reportId}/${asset}`, {
+  const response = await fetch(`/api/v1/projects/${projectId}/reports/${reportId}/pdf`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (!response.ok) {
@@ -97,23 +97,7 @@ async function fetchReportResponse(projectId: string, reportId: string, asset: "
 }
 
 export async function fetchReportPdf(projectId: string, reportId: string): Promise<Blob> {
-  const response = await fetchReportResponse(projectId, reportId, "pdf");
+  const response = await fetchReportResponse(projectId, reportId);
   return response.blob();
 }
 
-export function useReportHtmlQuery(
-  projectId: string | null | undefined,
-  reportId: string,
-  enabled: boolean,
-) {
-  const token = useAccessToken();
-  return useQuery({
-    queryKey: [...reportsKeys.detail(projectId ?? "", reportId), "html"],
-    queryFn: async () => {
-      const response = await fetchReportResponse(projectId!, reportId, "html");
-      return response.text();
-    },
-    enabled: Boolean(projectId) && Boolean(token) && Boolean(reportId) && enabled,
-    staleTime: Infinity,
-  });
-}

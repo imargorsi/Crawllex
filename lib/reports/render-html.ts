@@ -1,25 +1,14 @@
 import { REPORT_BRAND, REPORT_PALETTE } from "@/lib/reports/constants";
 import { EMPTY_REPORT_ASSETS, type TReportAssets } from "@/lib/reports/assets";
 import { escapeHtml } from "@/lib/reports/escape";
-import {
-  formatInt,
-  formatDuration,
-  formatPercent,
-  formatPosition,
-  relativeChange,
-  type TChange,
-} from "@/lib/reports/format";
-import { formatMonthTitle } from "@/lib/reports/period";
+import { REPORT_COPY } from "@/lib/reports/copy";
 import { barChartSvg, lineChartSvg } from "@/lib/reports/svg-charts";
-import type {
-  TReportNarrativeSectionDto,
-  TReportRankedRowDto,
-  TReportSnapshotDto,
-} from "@/types/reports.types";
+import { buildReportView, type TBlockView, type TKpiView, type TReportView, type TSectionView, type TTableView } from "@/lib/reports/view-model";
+import type { TReportSnapshotDto } from "@/types/reports.types";
 
 /**
- * Builds the print-ready HTML document for a report snapshot. Pure function: no I/O.
- * The PDF renderer receives this HTML unchanged. All data and notes are escaped here.
+ * Print document for the PDF. Renders the shared report view (lib/reports/view-model.ts), so the
+ * PDF and the in-app report show the same sections, wording and numbers.
  */
 
 const buildCss = (assets: TReportAssets) => `
@@ -95,34 +84,16 @@ td.url { word-break: break-all; color: var(--muted); font-size: 8.5pt; }
 .legal { font-size: 8.5pt; color: var(--muted); margin-top: 10mm; max-width: 150mm; }
 `;
 
-function changeClass(change: TChange): string {
-  if (change.direction === "up") return "up";
-  if (change.direction === "down") return "down";
-  return "flat";
-}
 
-function changeLabel(change: TChange): string {
-  if (change.ratio == null) return "";
-  const arrow = change.direction === "up" ? "▲" : change.direction === "down" ? "▼" : "■";
-  return `${arrow} ${Math.abs(change.ratio * 100).toFixed(1)}% vs previous`;
-}
+const TONE_COLOR: Record<TKpiView["tone"], string> = {
+  brand: REPORT_PALETTE.accent,
+  cyan: REPORT_PALETTE.cyan,
+  emerald: REPORT_PALETTE.positive,
+  amber: "#f59e0b",
+  neutral: REPORT_PALETTE.muted,
+};
 
-function kpi(label: string, value: string, change?: TChange): string {
-  const changeHtml = change && change.ratio != null
-    ? `<div class="change ${changeClass(change)}">${escapeHtml(changeLabel(change))}</div>`
-    : "";
-  return `<div class="kpi"><div class="label">${escapeHtml(label)}</div><div class="value">${escapeHtml(value)}</div>${changeHtml}</div>`;
-}
-
-/** One printed page. `number` is the two-digit section number shown in the header. */
-function page(
-  number: string,
-  title: string,
-  body: string,
-  footerLeft: string,
-  pageNo: number,
-  chevronsSvg: string,
-): string {
+function page(number: string, title: string, body: string, footerLeft: string, pageNo: number, chevronsSvg: string): string {
   return `<section class="page">
 <div class="header"><h2>${escapeHtml(title)}</h2><div class="number">${escapeHtml(number)}</div></div>
 ${body}
@@ -131,49 +102,54 @@ ${body}
 </section>`;
 }
 
-function paragraphs(items: string[]): string {
-  return items.map((text) => `<p>${escapeHtml(text)}</p>`).join("\n");
+function kpiHtml(item: TKpiView): string {
+  const change = item.change
+    ? `<div class="change ${item.change.direction === "up" ? "up" : item.change.direction === "down" ? "down" : "flat"}">${escapeHtml(item.change.text)}</div>`
+    : "";
+  return `<div class="kpi" style="border-top-color:${TONE_COLOR[item.tone]}"><div class="label">${escapeHtml(item.label)}</div><div class="value">${escapeHtml(item.value)}</div>${change}</div>`;
 }
 
-function sectionByKey(
-  sections: TReportNarrativeSectionDto[],
-  key: TReportNarrativeSectionDto["key"],
-): TReportNarrativeSectionDto | undefined {
-  return sections.find((section) => section.key === key);
-}
-
-function rankedTable(
-  headers: string[],
-  rows: TReportRankedRowDto[],
-  columns: (row: TReportRankedRowDto) => string[],
-  emptyText: string,
-): string {
-  if (rows.length === 0) return `<p class="note">${escapeHtml(emptyText)}</p>`;
-  const head = headers
-    .map((header, index) => `<th${index > 0 ? ' class="num"' : ""}>${escapeHtml(header)}</th>`)
-    .join("");
-  const body = rows
-    .map((row) => {
-      const cells = columns(row)
-        .map((cell, index) => {
-          const cls = index === 0 ? ' class="url"' : ' class="num"';
-          return `<td${cls}>${escapeHtml(cell)}</td>`;
-        })
-        .join("");
-      return `<tr>${cells}</tr>`;
-    })
+function tableHtml(table: TTableView): string {
+  if (table.rows.length === 0) return `<p class="note">${escapeHtml(table.emptyText)}</p>`;
+  const head = table.headers.map((header, index) => `<th${index > 0 ? ' class="num"' : ""}>${escapeHtml(header)}</th>`).join("");
+  const body = table.rows
+    .map((row) => `<tr>${row.map((cell, index) => `<td${index === 0 ? ' class="url"' : ' class="num"'}>${escapeHtml(cell)}</td>`).join("")}</tr>`)
     .join("");
   return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
 }
 
-function ctrText(value: number | null): string {
-  return formatPercent(value);
+function blockHtml(block: TBlockView): string {
+  switch (block.type) {
+    case "paragraphs":
+      return block.items.map((text) => `<p>${escapeHtml(text)}</p>`).join("");
+    case "list":
+      return `<h3>${escapeHtml(block.title)}</h3><ul>${block.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+    case "kpis":
+      return `<div class="kpis">${block.items.map(kpiHtml).join("")}</div>`;
+    case "chips":
+      return `<div class="kpis">${block.items.map((item) => kpiHtml({ label: item.label, value: item.value, change: null, tone: item.tone })).join("")}</div>`;
+    case "line":
+      return `<div class="chart">${lineChartSvg(block.chart.dates, block.chart.series)}</div>`;
+    case "bars":
+      return `<h3>${escapeHtml(block.title)}</h3><div class="chart">${barChartSvg(block.rows)}</div>`;
+    case "table":
+      return `<h3>${escapeHtml(block.title)}</h3>${tableHtml(block.table)}`;
+    case "callout":
+      return `<h3>${escapeHtml(block.title)}</h3><div class="callout">${escapeHtml(block.text)}</div>`;
+    case "note":
+      return `<p class="note">${escapeHtml(block.text)}</p>`;
+  }
 }
 
-function coverPage(snapshot: TReportSnapshotDto, assets: TReportAssets): string {
-  const clientLogo = snapshot.project.logoDataUri
-    ? `<img alt="${escapeHtml(snapshot.project.name)}" src="${snapshot.project.logoDataUri}" />`
-    : `<div class="fallback">${escapeHtml(snapshot.project.name)}</div>`;
+function sectionPage(section: TSectionView, pageNo: number, footer: string, assets: TReportAssets): string {
+  const body = section.blocks.map(blockHtml).join("\n");
+  return page(section.number, section.title, body, footer, pageNo, assets.chevronsSvg);
+}
+
+function coverPage(view: TReportView, assets: TReportAssets): string {
+  const clientLogo = view.cover.clientLogoDataUri
+    ? `<img alt="${escapeHtml(view.cover.clientName)}" src="${view.cover.clientLogoDataUri}" />`
+    : `<div class="fallback">${escapeHtml(view.cover.clientName)}</div>`;
   return `<section class="page cover">
 <div class="cover-art">${assets.coverArtSvg}</div>
 <div class="dots">${assets.dotsSvg}</div>
@@ -182,264 +158,45 @@ function coverPage(snapshot: TReportSnapshotDto, assets: TReportAssets): string 
 <div class="monthly">MONTHLY</div>
 <h1 class="report-word">REPORT</h1>
 <div class="rule"></div>
-<div style="margin-top:10mm;font-size:10pt;color:var(--muted)">Date</div>
-<div style="font-weight:600">${escapeHtml(formatMonthTitle(snapshot.period.to))}</div>
-<div style="margin-top:6mm;font-size:10pt;color:var(--muted)">Prepared by</div>
+<div style="margin-top:10mm;font-size:10pt;color:var(--muted)">${escapeHtml(REPORT_COPY.cover.dateLabel)}</div>
+<div style="font-weight:600">${escapeHtml(view.cover.dateLabel)}</div>
+<div style="margin-top:6mm;font-size:10pt;color:var(--muted)">${escapeHtml(REPORT_COPY.cover.preparedBy)}</div>
 <div style="font-weight:600">${escapeHtml(REPORT_BRAND.name)}</div>
-<div style="margin-top:4mm;font-size:10pt;color:var(--muted)">${escapeHtml(snapshot.period.label)}</div>
+<div style="margin-top:4mm;font-size:10pt;color:var(--muted)">${escapeHtml(view.cover.periodLabel)}</div>
 </section>`;
 }
 
-function summaryBody(snapshot: TReportSnapshotDto): string {
-  const { gsc, ga4, leads, activities, narrative } = snapshot;
-  const cards = [
-    kpi("Search clicks", formatInt(gsc.current.clicks), relativeChange(gsc.current.clicks, gsc.previous.clicks)),
-    kpi("Impressions", formatInt(gsc.current.impressions), relativeChange(gsc.current.impressions, gsc.previous.impressions)),
-    kpi("Sessions", formatInt(ga4.current.sessions), relativeChange(ga4.current.sessions, ga4.previous.sessions)),
-    kpi("Users", formatInt(ga4.current.totalUsers), relativeChange(ga4.current.totalUsers, ga4.previous.totalUsers)),
-    kpi("Leads", formatInt(leads.total), relativeChange(leads.total, leads.previousTotal)),
-    kpi("Blog posts", formatInt(activities.current.blogs), relativeChange(activities.current.blogs, activities.previous.blogs)),
-    kpi("Avg position", formatPosition(gsc.current.position)),
-    kpi("Click-through rate", ctrText(gsc.current.ctr)),
-  ].join("");
-
-  const findings = narrative.keyFindings.length
-    ? `<h3>Key findings</h3><ul>${narrative.keyFindings.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-    : "";
-
-  return `<div class="kpis">${cards}</div>
-<h3>Executive summary</h3>
-<ul>${narrative.executiveSummary.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
-${findings}`;
-}
-
-/** Body and title of one page. Page numbers are assigned in order by `renderReportHtml`. */
-type TPageSpec = { title: string; body: string };
-
-function searchPages(snapshot: TReportSnapshotDto): TPageSpec[] {
-  const section = sectionByKey(snapshot.narrative.sections, "search");
-  const { gsc, sources } = snapshot;
-  const dates = gsc.series.map((point) => point.date);
-  const chart =
-    sources.gsc && gsc.series.length > 1
-      ? `<div class="chart">${lineChartSvg(dates, [
-          { name: "Clicks", color: REPORT_PALETTE.series[0], values: gsc.series.map((p) => p.clicks) },
-          { name: "Impressions", color: REPORT_PALETTE.series[1], values: gsc.series.map((p) => p.impressions) },
-        ])}</div>`
-      : `<p class="note">No daily search data for this period.</p>`;
-
-  const cards = sources.gsc
-    ? `<div class="kpis">${[
-        kpi("Clicks", formatInt(gsc.current.clicks), relativeChange(gsc.current.clicks, gsc.previous.clicks)),
-        kpi("Impressions", formatInt(gsc.current.impressions), relativeChange(gsc.current.impressions, gsc.previous.impressions)),
-        kpi("CTR", ctrText(gsc.current.ctr)),
-        kpi("Avg position", formatPosition(gsc.current.position)),
-      ].join("")}</div>`
-    : "";
-
-  const searchColumns = (row: TReportRankedRowDto) => [
-    row.value,
-    formatInt(row.clicks),
-    formatInt(row.impressions),
-    ctrText(row.ctr),
-    formatPosition(row.position),
-  ];
-  const headers = ["Query", "Clicks", "Impressions", "CTR", "Position"];
-
-  return [
-    {
-      title: "Search performance",
-      body: `${cards}${paragraphs(section?.paragraphs ?? [])}${chart}
-<h3>Top search queries</h3>
-${rankedTable(headers, gsc.topQueries, searchColumns, "No search queries for this period.")}`,
-    },
-    {
-      title: "Top search pages",
-      body: `<h3>Top search pages</h3>
-${rankedTable(headers.map((h) => (h === "Query" ? "Page" : h)), gsc.topPages, searchColumns, "No search pages for this period.")}`,
-    },
-  ];
-}
-
-function trafficPages(snapshot: TReportSnapshotDto): TPageSpec[] {
-  const section = sectionByKey(snapshot.narrative.sections, "traffic");
-  const { ga4, sources } = snapshot;
-  const dates = ga4.series.map((p) => p.date);
-  const chart =
-    sources.ga4 && ga4.series.length > 1
-      ? `<div class="chart">${lineChartSvg(dates, [
-          { name: "Sessions", color: REPORT_PALETTE.series[0], values: ga4.series.map((p) => p.sessions) },
-        ])}</div>`
-      : `<p class="note">No daily traffic data for this period.</p>`;
-
-  const channels = ga4.channels.filter((row) => (row.sessions ?? 0) > 0).slice(0, 6);
-  const channelChart = channels.length
-    ? `<h3>Traffic by channel</h3><div class="chart">${barChartSvg(
-        channels.map((row) => ({ label: row.value, value: row.sessions ?? 0 })),
-      )}</div>`
-    : "";
-
-  const cards = sources.ga4
-    ? `<div class="kpis">${[
-        kpi("Sessions", formatInt(ga4.current.sessions), relativeChange(ga4.current.sessions, ga4.previous.sessions)),
-        kpi("Users", formatInt(ga4.current.totalUsers), relativeChange(ga4.current.totalUsers, ga4.previous.totalUsers)),
-        kpi("New users", formatInt(ga4.current.newUsers), relativeChange(ga4.current.newUsers, ga4.previous.newUsers)),
-        kpi("Organic sessions", formatInt(ga4.current.organicSessions), relativeChange(ga4.current.organicSessions, ga4.previous.organicSessions)),
-      ].join("")}</div>`
-    : "";
-
-  return [
-    {
-      title: "Website traffic",
-      body: `${cards}${paragraphs(section?.paragraphs ?? [])}${chart}${channelChart}`,
-    },
-    {
-      title: "Audience and landing pages",
-      body: `<h3>Top countries</h3>
-${rankedTable(["Country", "Sessions"], ga4.countries, (row) => [row.value, formatInt(row.sessions)], "No country data for this period.")}
-<h3>Top landing pages</h3>
-${rankedTable(["Page", "Sessions"], ga4.topPages, (row) => [row.value, formatInt(row.sessions)], "No page data for this period.")}`,
-    },
-  ];
-}
-
-function engagementPage(snapshot: TReportSnapshotDto): TPageSpec {
-  const section = sectionByKey(snapshot.narrative.sections, "engagement");
-  const { ga4, events } = snapshot;
-  const contactCards = [
-    kpi("Calls", formatInt(events.contacts.call)),
-    kpi("Email clicks", formatInt(events.contacts.email)),
-    kpi("WhatsApp clicks", formatInt(events.contacts.whatsapp)),
-  ].join("");
-
-  const cards = snapshot.sources.ga4
-    ? `<div class="kpis">${[
-        kpi("Engagement rate", formatPercent(ga4.current.engagementRate)),
-        kpi("Avg time on site", formatDuration(ga4.current.avgSessionDuration)),
-        kpi("Page views", formatInt(ga4.current.pageViews)),
-        kpi("Engaged sessions", formatInt(ga4.current.engagedSessions)),
-      ].join("")}</div>`
-    : "";
-
-  const highlights = events.highlights.length
-    ? `<h3>Tracked actions</h3><table><thead><tr><th>Action</th><th class="num">Count</th></tr></thead><tbody>${events.highlights
-        .map((item) => `<tr><td>${escapeHtml(item.label)}</td><td class="num">${escapeHtml(formatInt(item.count))}</td></tr>`)
-        .join("")}</tbody></table>`
-    : "";
-
-  return {
-    title: "Engagement and contact actions",
-    body: `${cards}<div class="cards3">${contactCards}</div>${paragraphs(section?.paragraphs ?? [])}${highlights}`,
-  };
-}
-
-function leadsPage(snapshot: TReportSnapshotDto): TPageSpec {
-  const leadsSection = sectionByKey(snapshot.narrative.sections, "leads");
-  const contentSection = sectionByKey(snapshot.narrative.sections, "content");
-  const { leads, activities } = snapshot;
-
-  const origins = Object.entries(leads.byOrigin ?? {})
-    .filter(([, count]) => count > 0)
-    .map(([origin, count]) => `<tr><td>${escapeHtml(origin)}</td><td class="num">${escapeHtml(formatInt(count))}</td></tr>`)
-    .join("");
-
-  const activityRows = [
-    ["Blog posts", activities.current.blogs, activities.previous.blogs],
-    ["Backlinks", activities.current.backlinks, activities.previous.backlinks],
-    ["Technical tasks", activities.current.technical_work, activities.previous.technical_work],
-  ]
-    .map(
-      ([label, current, previous]) =>
-        `<tr><td>${escapeHtml(String(label))}</td><td class="num">${escapeHtml(formatInt(Number(current)))}</td><td class="num">${escapeHtml(formatInt(Number(previous)))}</td></tr>`,
-    )
-    .join("");
-
-  const blogs = activities.blogs.length
-    ? `<h3>Published blog posts</h3><table><thead><tr><th>Title</th><th class="num">Date</th></tr></thead><tbody>${activities.blogs
-        .map((blog) => `<tr><td>${escapeHtml(blog.title)}</td><td class="num">${escapeHtml(blog.occurredOn)}</td></tr>`)
-        .join("")}</tbody></table>`
-    : "";
-
-  return {
-    title: "Leads and content",
-    body: `<div class="kpis">${[
-      kpi("Leads", formatInt(leads.total), relativeChange(leads.total, leads.previousTotal)),
-      kpi("Blog posts", formatInt(activities.current.blogs), relativeChange(activities.current.blogs, activities.previous.blogs)),
-      kpi("Backlinks", formatInt(activities.current.backlinks), relativeChange(activities.current.backlinks, activities.previous.backlinks)),
-      kpi("Technical tasks", formatInt(activities.current.technical_work)),
-    ].join("")}</div>
-${paragraphs(leadsSection?.paragraphs ?? [])}
-${origins ? `<h3>Leads by source</h3><table><tbody>${origins}</tbody></table>` : ""}
-<h3>Work logged</h3>
-<table><thead><tr><th>Type</th><th class="num">This period</th><th class="num">Previous period</th></tr></thead><tbody>${activityRows}</tbody></table>
-${paragraphs(contentSection?.paragraphs ?? [])}
-${blogs}`,
-  };
-}
-
-function notesPage(snapshot: TReportSnapshotDto): TPageSpec {
-  const { notes } = snapshot;
-  const highlights = notes.highlights.length
-    ? `<h3>Highlights</h3><ul>${notes.highlights.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`
-    : "";
-  const translation = notes.translationStatus
-    ? `<h3>Website translation</h3><div class="callout">${escapeHtml(notes.translationStatus)}</div>`
-    : "";
-  const closing = notes.closingNote ? `<h3>Next steps</h3><p>${escapeHtml(notes.closingNote)}</p>` : "";
-  const content = highlights + translation + closing;
-  return {
-    title: "Notes and next steps",
-    body: content || `<p class="note">No additional notes for this period.</p>`,
-  };
-}
-
-function closingPage(assets: TReportAssets): string {
-  const phones = REPORT_BRAND.phones.map((phone) => `<div>${escapeHtml(phone)}</div>`).join("");
-  const addresses = REPORT_BRAND.addresses.map((address) => `<div>${escapeHtml(address)}</div>`).join("");
+function closingPage(view: TReportView, assets: TReportAssets): string {
+  const phones = view.contact.phones.map((phone) => `<div>${escapeHtml(phone)}</div>`).join("");
+  const addresses = view.contact.addresses.map((address) => `<div>${escapeHtml(address)}</div>`).join("");
   return `<section class="page closing-page" style="background-image:url(${assets.contactBgDataUri});background-size:cover;background-position:center"><div class="closing">
 <div class="lc-logo">${assets.lcLogoSvg}</div>
-<h2>CONTACT US</h2>
+<h2>${escapeHtml(REPORT_COPY.cover.contactUs)}</h2>
 <div class="grid">
   <div>${phones}</div>
   <div>${addresses}</div>
-  <div>${escapeHtml(REPORT_BRAND.email)}</div>
-  <div>${escapeHtml(REPORT_BRAND.website)}</div>
+  <div>${escapeHtml(view.contact.email)}</div>
+  <div>${escapeHtml(view.contact.website)}</div>
 </div>
-<p class="legal">Figures come from Google Search Console and Google Analytics as cached by Crawllex. Minor differences from the source dashboards can occur due to data sampling and the ranking of top rows.</p>
+<p class="legal">${escapeHtml(view.legal)}</p>
 </div></section>`;
 }
 
-/** Full print document for one report. Pages are numbered in order. */
-export function renderReportHtml(
-  snapshot: TReportSnapshotDto,
-  assets: TReportAssets = EMPTY_REPORT_ASSETS,
-): string {
-  const title = `${snapshot.project.name} — ${formatMonthTitle(snapshot.period.from)}`;
+/** Full print document for one report snapshot. */
+export function renderReportHtml(snapshot: TReportSnapshotDto, assets: TReportAssets = EMPTY_REPORT_ASSETS): string {
+  const view = buildReportView(snapshot);
   const footer = snapshot.project.name;
-
-  const specs: TPageSpec[] = [
-    { title: "Executive summary", body: summaryBody(snapshot) },
-    ...searchPages(snapshot),
-    ...trafficPages(snapshot),
-    engagementPage(snapshot),
-    leadsPage(snapshot),
-    notesPage(snapshot),
-  ];
-
   const pages = [
-    coverPage(snapshot, assets),
-    ...specs.map((spec, index) =>
-      page(String(index + 1).padStart(2, "0"), spec.title, spec.body, footer, index + 1, assets.chevronsSvg),
-    ),
-    closingPage(assets),
+    coverPage(view, assets),
+    ...view.sections.map((section, index) => sectionPage(section, index + 1, footer, assets)),
+    closingPage(view, assets),
   ];
-
   return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>${escapeHtml(title)}</title>
+<title>${escapeHtml(view.title)}</title>
 <style>${buildCss(assets)}</style>
 </head>
 <body>

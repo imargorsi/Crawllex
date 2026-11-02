@@ -5,26 +5,25 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
+import { ReportDetailView } from "@/components/reports/report-view/report-detail-view";
 import { Heading } from "@/components/heading";
 import { Paragraph } from "@/components/paragraph";
-import { EmptyState } from "@/components/ui/empty-state";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { AlertDialogCancel } from "@/components/ui/alert-dialog";
+import { buttonVariants } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Spinner } from "@/components/ui/spinner";
 import { useProjectAccess } from "@/context/project-access-context";
 import { useSelectedProject } from "@/context/selected-project-context";
 import { useAuthUserQuery } from "@/features/auth/auth.api";
-import {
-  fetchReportPdf,
-  useDeleteReportMutation,
-  useReportHtmlQuery,
-  useReportQuery,
-} from "@/features/reports/reports.api";
+import { fetchReportPdf, useDeleteReportMutation, useReportQuery } from "@/features/reports/reports.api";
 import { ApiError } from "@/lib/frontend/api/errors";
 import { downloadBrowserBlob } from "@/lib/frontend/download-file";
-import { Icons } from "@/lib/frontend/icons/app-icons";
 import { notify } from "@/lib/frontend/feedback/notify";
+import { Icons } from "@/lib/frontend/icons/app-icons";
 import { hasPermission, mergePermissions } from "@/lib/rbac/access";
+import { formatCompactPeriodLabel, formatMonthTitle } from "@/lib/reports/period";
+import { buildReportView } from "@/lib/reports/view-model";
 import { cn } from "@/lib/utils";
 
 type TReportDetailSectionProps = {
@@ -47,10 +46,10 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
   const canDelete = hasPermission(permissions, "reports.delete");
   const reportQuery = useReportQuery(canView ? projectId : null, reportId);
   const deleteMutation = useDeleteReportMutation(projectId);
-
-  const [pdfBusy, setPdfBusy] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const htmlQuery = useReportHtmlQuery(canView ? projectId : null, reportId, Boolean(reportQuery.data));
+
+  const view = useMemo(() => (reportQuery.data ? buildReportView(reportQuery.data.snapshot) : null), [reportQuery.data]);
 
   if (!projectId) {
     return (
@@ -84,14 +83,14 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
 
   async function downloadPdf() {
     if (!projectId || !report) return;
-    setPdfBusy(true);
+    setIsDownloading(true);
     try {
       const blob = await fetchReportPdf(projectId, reportId);
       downloadBrowserBlob(`${report.title.replace(/[^\w]+/g, "-").toLowerCase()}.pdf`, blob);
     } catch {
       notify.error(t("pdfError"));
     } finally {
-      setPdfBusy(false);
+      setIsDownloading(false);
     }
   }
 
@@ -108,52 +107,53 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
 
   return (
     <div className="w-full min-w-0">
-      <div className="space-y-5 px-4 py-6 sm:px-6">
-        <Link href="/reports" className="text-sm text-text-secondary hover:text-text-primary">
-          ← {t("backToList")}
+      <div className="space-y-6 px-4 py-6 sm:px-6">
+        <Link href="/reports" className="inline-flex items-center gap-1.5 text-sm text-text-muted hover:text-text-primary">
+          <Icons.arrowLeft className="size-4" aria-hidden />
+          {t("backToList")}
         </Link>
 
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div className="type-stack-md min-w-0">
-            <Heading id="report-title" pageTitle>
-              {report?.title ?? ""}
-            </Heading>
-            {report ? (
-              <Paragraph className="text-text-secondary">
-                {report.snapshot.period.label}
-              </Paragraph>
-            ) : null}
-          </div>
-          <div className="flex shrink-0 flex-wrap gap-3">
-            <Button type="button" onClick={() => void downloadPdf()} disabled={pdfBusy || !report}>
-              {pdfBusy ? t("preparingPdf") : t("downloadPdf")}
-            </Button>
-            {canDelete ? (
-              <button
-                type="button"
-                className={cn(buttonVariants({ variant: "destructive", size: "md" }))}
-                onClick={() => setDeleteOpen(true)}
-              >
-                {t("deleteAction")}
-              </button>
-            ) : null}
-          </div>
-        </div>
+        {report && view ? (
+          <>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div className="type-stack-md min-w-0">
+                <Heading id="report-title" pageTitle>
+                  {formatMonthTitle(report.periodFrom)}
+                </Heading>
+                <Paragraph className="text-text-muted">
+                  {view.cover.clientName} · {formatCompactPeriodLabel(report.periodFrom, report.periodTo)}
+                </Paragraph>
+              </div>
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => void downloadPdf()}
+                  disabled={isDownloading}
+                  className={cn(buttonVariants({ variant: "primary", size: "md" }), "rounded-full")}
+                >
+                  {isDownloading ? <Spinner className="size-4" /> : <Icons.download className="size-4" aria-hidden />}
+                  {t("downloadPdf")}
+                </button>
+                {canDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => setDeleteOpen(true)}
+                    className="inline-flex h-9 items-center gap-2 rounded-full border border-status-rejected/40 bg-transparent px-4 text-sm font-semibold text-status-rejected transition-colors hover:bg-status-rejected/12"
+                  >
+                    <Icons.delete className="size-4" aria-hidden />
+                    {t("deleteAction")}
+                  </button>
+                ) : null}
+              </div>
+            </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-bg-hover">
-          {htmlQuery.isError ? (
-            <p className="p-6 text-sm text-destructive">{t("previewError")}</p>
-          ) : htmlQuery.data ? (
-            <iframe
-              title={report?.title ?? t("title")}
-              srcDoc={htmlQuery.data}
-              sandbox=""
-              className="h-[80vh] w-full bg-white"
-            />
-          ) : (
-            <p className="p-6 text-sm text-text-secondary">{t("previewLoading")}</p>
-          )}
-        </div>
+            <ReportDetailView view={view} />
+          </>
+        ) : (
+          <div className="flex justify-center py-16">
+            <Spinner className="size-6" />
+          </div>
+        )}
       </div>
 
       <ConfirmDialog
