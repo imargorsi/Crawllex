@@ -97,7 +97,7 @@ describe("report service", () => {
     expect(await listReports(projectId)).toHaveLength(0);
   });
 
-  it("gives project_user report view and create, but not delete", async () => {
+  it("gives project_user view-only report access", async () => {
     const { projectId } = await seedProject();
     const role = await Role.findOne({ slug: PROJECT_USER_ROLE });
     const member = await User.create({
@@ -117,7 +117,7 @@ describe("report service", () => {
     const access = await getProjectAccessForUser(authContextFor(member), projectId);
     expect(access).not.toBeNull();
     expect(hasPermission(access!.permissions, "reports.view")).toBe(true);
-    expect(hasPermission(access!.permissions, "reports.create")).toBe(true);
+    expect(hasPermission(access!.permissions, "reports.create")).toBe(false);
     expect(hasPermission(access!.permissions, "reports.delete")).toBe(false);
   });
 });
