@@ -16,7 +16,36 @@ export type TReportTone = "brand" | "cyan" | "emerald" | "amber" | "neutral";
 export type TChangeView = { direction: TChange["direction"]; text: string };
 
 /** `empty` is true when the value is zero: the UI mutes it and hides the trend. */
-export type TKpiView = { label: string; value: string; change: TChangeView | null; tone: TReportTone; empty: boolean };
+/** Every icon a KPI tile or highlight card can show. The UI maps each key to an app icon. */
+export type TReportIcon =
+  | "clicks"
+  | "impressions"
+  | "ctr"
+  | "position"
+  | "sessions"
+  | "users"
+  | "newUsers"
+  | "organic"
+  | "engagementRate"
+  | "time"
+  | "pageViews"
+  | "engaged"
+  | "leads"
+  | "calls"
+  | "emails"
+  | "whatsapp"
+  | "blogs"
+  | "backlinks"
+  | "technical";
+
+export type TKpiView = {
+  icon: TReportIcon;
+  label: string;
+  value: string;
+  change: TChangeView | null;
+  tone: TReportTone;
+  empty: boolean;
+};
 
 export type TTableView = { headers: string[]; rows: string[][]; emptyText: string };
 
@@ -25,13 +54,10 @@ export type TSeriesView = {
   series: { name: string; color: string; values: Array<number | null> }[];
 };
 
-/** Which icon a highlight card shows. The UI maps each name to an app icon. */
-export type TCardIcon = "leads" | "calls" | "emails" | "whatsapp" | "blogs" | "backlinks" | "technical";
-
 export type TCardView = {
   /** When set, the card opens this table in a modal (arrow shown). */
   table?: TTableView;
-  icon: TCardIcon;
+  icon: TReportIcon;
   label: string;
   value: string;
   body: string;
@@ -83,8 +109,8 @@ function change(current: number, previous: number | null | undefined): TChangeVi
   return { direction: result.direction, text: `${arrow} ${Math.abs(result.ratio * 100).toFixed(1)}% vs previous` };
 }
 
-function kpi(label: string, value: string, tone: TReportTone, delta?: TChangeView | null): TKpiView {
-  return { label, value, change: delta ?? null, tone, empty: value === "0" };
+function kpi(icon: TReportIcon, label: string, value: string, tone: TReportTone, delta?: TChangeView | null): TKpiView {
+  return { icon, label, value, change: delta ?? null, tone, empty: value === "0" };
 }
 
 function ranked(rows: TReportRankedRowDto[], emptyText: string, headers: string[], columns: (row: TReportRankedRowDto) => string[]): TTableView {
@@ -135,10 +161,10 @@ function searchSection(snapshot: TReportSnapshotDto, text: TReportText): TSectio
     blocks.push({
       type: "kpis",
       items: [
-        kpi(REPORT_COPY.kpi.clicks, formatInt(gsc.current.clicks), "brand", change(gsc.current.clicks, gsc.previous.clicks)),
-        kpi(REPORT_COPY.kpi.impressions, formatInt(gsc.current.impressions), "cyan", change(gsc.current.impressions, gsc.previous.impressions)),
-        kpi(REPORT_COPY.kpi.ctr, formatPercent(gsc.current.ctr), "emerald"),
-        kpi(REPORT_COPY.kpi.avgPosition, formatPosition(gsc.current.position), "amber"),
+        kpi("clicks", REPORT_COPY.kpi.clicks, formatInt(gsc.current.clicks), "brand", change(gsc.current.clicks, gsc.previous.clicks)),
+        kpi("impressions", REPORT_COPY.kpi.impressions, formatInt(gsc.current.impressions), "cyan", change(gsc.current.impressions, gsc.previous.impressions)),
+        kpi("ctr", REPORT_COPY.kpi.ctr, formatPercent(gsc.current.ctr), "emerald"),
+        kpi("position", REPORT_COPY.kpi.avgPosition, formatPosition(gsc.current.position), "amber"),
       ],
     });
   }
@@ -198,10 +224,10 @@ function trafficSection(snapshot: TReportSnapshotDto, text: TReportText): TSecti
     blocks.push({
       type: "kpis",
       items: [
-        kpi(REPORT_COPY.kpi.sessions, formatInt(ga4.current.sessions), "brand", change(ga4.current.sessions, ga4.previous.sessions)),
-        kpi(REPORT_COPY.kpi.users, formatInt(ga4.current.totalUsers), "cyan", change(ga4.current.totalUsers, ga4.previous.totalUsers)),
-        kpi(REPORT_COPY.kpi.newUsers, formatInt(ga4.current.newUsers), "emerald", change(ga4.current.newUsers, ga4.previous.newUsers)),
-        kpi(REPORT_COPY.kpi.organicSessions, formatInt(ga4.current.organicSessions), "amber", change(ga4.current.organicSessions, ga4.previous.organicSessions)),
+        kpi("sessions", REPORT_COPY.kpi.sessions, formatInt(ga4.current.sessions), "brand", change(ga4.current.sessions, ga4.previous.sessions)),
+        kpi("users", REPORT_COPY.kpi.users, formatInt(ga4.current.totalUsers), "cyan", change(ga4.current.totalUsers, ga4.previous.totalUsers)),
+        kpi("newUsers", REPORT_COPY.kpi.newUsers, formatInt(ga4.current.newUsers), "emerald", change(ga4.current.newUsers, ga4.previous.newUsers)),
+        kpi("organic", REPORT_COPY.kpi.organicSessions, formatInt(ga4.current.organicSessions), "amber", change(ga4.current.organicSessions, ga4.previous.organicSessions)),
       ],
     });
   }
@@ -278,10 +304,10 @@ function engagementSection(snapshot: TReportSnapshotDto, text: TReportText): TSe
     blocks.push({
       type: "kpis",
       items: [
-        kpi(REPORT_COPY.kpi.engagementRate, formatPercent(ga4.current.engagementRate), "brand"),
-        kpi(REPORT_COPY.kpi.avgTimeOnSite, formatDuration(ga4.current.avgSessionDuration), "cyan"),
-        kpi(REPORT_COPY.kpi.pageViews, formatInt(ga4.current.pageViews), "emerald"),
-        kpi(REPORT_COPY.kpi.engagedSessions, formatInt(ga4.current.engagedSessions), "amber"),
+        kpi("engagementRate", REPORT_COPY.kpi.engagementRate, formatPercent(ga4.current.engagementRate), "brand"),
+        kpi("time", REPORT_COPY.kpi.avgTimeOnSite, formatDuration(ga4.current.avgSessionDuration), "cyan"),
+        kpi("pageViews", REPORT_COPY.kpi.pageViews, formatInt(ga4.current.pageViews), "emerald"),
+        kpi("engaged", REPORT_COPY.kpi.engagedSessions, formatInt(ga4.current.engagedSessions), "amber"),
       ],
     });
   }

@@ -10,7 +10,7 @@ import type { TAppIconComponent } from "@/components/ui/app-icon";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
 import { PARAGRAPH_BREAK } from "@/lib/reports/report-text";
-import type { TChangeView, TKpiView, TReportTone, TSeriesView, TTableView } from "@/lib/reports/view-model";
+import type { TChangeView, TKpiView, TReportIcon, TReportTone, TSeriesView, TTableView } from "@/lib/reports/view-model";
 
 /** Tone → theme token. The shared view carries tones, not colours, so the UI stays on theme tokens. */
 export const TONE_VAR: Record<TReportTone, string> = {
@@ -36,33 +36,31 @@ export function ChangeText({ change, className }: { change: TChangeView; classNa
 /** Series colours: brand, cyan, emerald, amber. Distinct per series, same tokens as the KPI tones. */
 const CHART_COLORS = [TONE_VAR.brand, TONE_VAR.cyan, TONE_VAR.emerald, TONE_VAR.amber] as const;
 
-/** Icon per KPI label, so the same metric looks the same wherever it appears. */
-const KPI_ICON: Record<string, TAppIconComponent> = {
-  "Search clicks": Icons.cursorPointer,
-  Clicks: Icons.cursorPointer,
-  Impressions: Icons.view,
-  CTR: Icons.chartLine,
-  "Click-through rate": Icons.chartLine,
-  "Avg position": Icons.chartBar,
-  Sessions: Icons.analytics,
-  Users: Icons.userGroup,
-  "New users": Icons.userAdd,
-  "Organic sessions": Icons.chartLine,
-  Leads: Icons.userGroup,
-  "Blog posts": Icons.file,
-  Backlinks: Icons.megaphone,
-  "Technical tasks": Icons.access,
-  "Engagement rate": Icons.chartLine,
-  "Avg time on site": Icons.clock,
-  "Page views": Icons.view,
-  "Engaged sessions": Icons.userGroup,
-  Calls: Icons.call,
-  "Email clicks": Icons.mail,
-  "WhatsApp clicks": Icons.megaphone,
+/** App icon per report icon key. KPI tiles and highlight cards both read from here. */
+export const REPORT_ICON: Record<TReportIcon, TAppIconComponent> = {
+  clicks: Icons.cursorPointer,
+  impressions: Icons.view,
+  ctr: Icons.chartLine,
+  position: Icons.chartBar,
+  sessions: Icons.analytics,
+  users: Icons.userGroup,
+  newUsers: Icons.userAdd,
+  organic: Icons.chartLine,
+  engagementRate: Icons.chartLine,
+  time: Icons.clock,
+  pageViews: Icons.view,
+  engaged: Icons.userGroup,
+  leads: Icons.userGroup,
+  calls: Icons.call,
+  emails: Icons.mail,
+  whatsapp: Icons.message,
+  blogs: Icons.file,
+  backlinks: Icons.megaphone,
+  technical: Icons.wrench,
 };
 
 function ReportKpi({ item }: { item: TKpiView }) {
-  const Icon = KPI_ICON[item.label] ?? Icons.chartLine;
+  const Icon = REPORT_ICON[item.icon];
   const tone = item.empty ? "neutral" : item.tone;
   return (
     <div className={cn("flex min-w-0 items-start gap-3 rounded-2xl border p-4", item.empty ? "border-text-primary/10" : "border-text-primary/20")}>

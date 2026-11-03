@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import {
   ChangeText,
   Emphasis,
+  REPORT_ICON,
   ReportAreaChart,
   ReportCallout,
   ReportDonut,
@@ -18,21 +19,11 @@ import type { TAppIconComponent } from "@/components/ui/app-icon";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { toolbarFilterChipClass, toolbarFilterShellClass } from "@/lib/frontend/layout/dashboard-chrome";
 import { cn } from "@/lib/utils";
-import type { TBlockView, TCardIcon, TCardView, TNamedTable, TReportView, TSectionView, TTableView } from "@/lib/reports/view-model";
+import type { TBlockView, TCardView, TNamedTable, TReportView, TSectionView, TTableView } from "@/lib/reports/view-model";
 
 type TDrilldown = { title: string; description: string; table: TTableView };
 
 type TOpenTable = (table: TTableView, title: string) => void;
-
-const CARD_ICON: Record<TCardIcon, TAppIconComponent> = {
-  leads: Icons.userGroup,
-  calls: Icons.call,
-  emails: Icons.mail,
-  whatsapp: Icons.message,
-  blogs: Icons.file,
-  backlinks: Icons.megaphone,
-  technical: Icons.wrench,
-};
 
 const TABLE_ICON: Record<"query" | "country" | "landing" | "page" | "backlink" | "technical" | "default", TAppIconComponent> = {
   query: Icons.cursorPointer,
@@ -154,7 +145,7 @@ function SubHeading({ title }: { title: string }) {
 
 /** Highlight card: icon, label, big number and the plain-language line. Cards with a table open it in a modal. */
 function HighlightCard({ card, onOpen }: { card: TCardView; onOpen: TOpenTable }) {
-  const Icon = CARD_ICON[card.icon];
+  const Icon = REPORT_ICON[card.icon];
   const tone = card.empty ? "neutral" : card.tone;
   const body = (
     <>
