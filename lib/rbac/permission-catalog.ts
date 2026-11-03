@@ -8,13 +8,13 @@
  *   (system defaults: project_owner + project_user → view + export only; super_admin → full)
  * - Integrations (Settings → Google GSC/GA4 + WordPress lead sources): view, disconnect, refresh, update
  * - Members: view, invite, remove
+ * - Reports (Module 11, monthly client reports): view, create, delete
+ *   (system defaults: project_owner → all; project_user → view only)
  *
  * Platform `admin.*` keys are for `super_admin` evaluation only — never on project Role documents.
  *
  * Not in catalog (always allowed for authenticated users):
  * - Profile / edit-profile / change password (Module 12)
- *
- * Out of scope for this product: packaged Client Reports (handled separately — not a module here).
  */
 
 export const PERMISSION_ACTIONS = ["view", "create", "update", "delete"] as const;
@@ -41,6 +41,13 @@ export const LEAD_DEFAULT_ROLE_ACTIONS = ["view", "export"] as const;
 
 export const VIEW_ONLY_ACTIONS = ["view"] as const;
 
+export const REPORT_PERMISSION_ACTIONS = ["view", "create", "delete"] as const;
+export type ReportPermissionAction = (typeof REPORT_PERMISSION_ACTIONS)[number];
+
+export function reportPermission(action: ReportPermissionAction): string {
+  return `reports.${action}`;
+}
+
 /** Project-scoped modules in the role matrix. */
 export const PROJECT_MODULE_SLUGS = [
   "dashboard",
@@ -50,6 +57,7 @@ export const PROJECT_MODULE_SLUGS = [
   "leads",
   "integrations",
   "members",
+  "reports",
 ] as const;
 
 export type ProjectModuleSlug = (typeof PROJECT_MODULE_SLUGS)[number];
@@ -70,6 +78,7 @@ export const PROJECT_PERMISSION_MODULES: readonly PermissionModuleDefinition[] =
   { slug: "leads", label: "Leads", actions: LEAD_PERMISSION_ACTIONS },
   { slug: "integrations", label: "Integrations", actions: INTEGRATION_PERMISSION_ACTIONS },
   { slug: "members", label: "Members", actions: MEMBER_PERMISSION_ACTIONS },
+  { slug: "reports", label: "Reports", actions: REPORT_PERMISSION_ACTIONS },
 ];
 
 export const ADMIN_MODULE_SLUGS = ["users", "roles"] as const;

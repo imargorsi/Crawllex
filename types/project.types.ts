@@ -4,6 +4,7 @@ import type { TIntegrationStatus } from "@/lib/integrations/constants";
 export type TProjectOwnerSummary = {
   id: string;
   name: string;
+  email: string;
   profileImage: string | null;
 };
 

@@ -115,6 +115,12 @@ export async function getProjectAccessForUser(auth: AuthContext, projectId: stri
   };
 }
 
+/** True when the caller has `permission` on the project. Never throws; unknown project or no membership gives false. */
+export async function hasProjectPermission(auth: AuthContext, projectId: string, permission: string): Promise<boolean> {
+  const access = await getProjectAccessForUser(auth, projectId);
+  return access ? hasPermission(access.permissions, permission) : false;
+}
+
 export async function requireProjectPermission(
   auth: AuthContext,
   projectId: string,

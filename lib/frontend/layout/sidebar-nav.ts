@@ -6,6 +6,7 @@ export type SidebarNavLabelKey =
   | "projects"
   | "analytics"
   | "seoActivities"
+  | "reports"
   | "leads"
   | "users"
   | "rolesPermissions"
@@ -95,6 +96,14 @@ export const SIDEBAR_NAV_DEFINITIONS: readonly SidebarNavDefinition[] = [
     labelKey: "seoActivities",
     icon: Icons.rocket,
     viewPermission: "seo_activities.view",
+    permissionScope: "project",
+    group: "reporting",
+  },
+  {
+    path: "/reports",
+    labelKey: "reports",
+    icon: Icons.file,
+    viewPermission: "reports.view",
     permissionScope: "project",
     group: "reporting",
   },

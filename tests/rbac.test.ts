@@ -20,6 +20,7 @@ describe("RBAC permission catalog", () => {
       "leads",
       "integrations",
       "members",
+      "reports",
     ]);
   });
 
@@ -64,6 +65,7 @@ describe("RBAC permission catalog", () => {
       "Leads",
       "Integrations",
       "Members",
+      "Reports",
     ]);
   });
 });

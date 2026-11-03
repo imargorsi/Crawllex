@@ -13,6 +13,7 @@ export {
   projectDeletedMailContent,
   projectInviteMailContent,
   projectRejectedMailContent,
+  reportReadyMailContent,
   userActivatedMailContent,
   userDeactivatedMailContent,
 } from "@/lib/mail/templates";
@@ -48,30 +49,52 @@ function getTransporter(): Transporter | null {
   return transporter;
 }
 
+export type MailAttachment = {
+  filename: string;
+  content: Buffer;
+  contentType: string;
+};
+
 export type MailPayload = {
   to: string;
   subject: string;
   text: string;
   html?: string;
+  attachments?: MailAttachment[];
 };
 
-export async function sendMail(payload: MailPayload): Promise<void> {
+/**
+ * Sends one message. Resolves `true` when SMTP accepted it, `false` when no SMTP transport is
+ * configured (the message is only logged). Throws when SMTP rejects the message.
+ */
+export async function sendMail(payload: MailPayload): Promise<boolean> {
   const from = `"${env.mailFromName()}" <${env.mailFrom()}>`;
   const transport = getTransporter();
+  const { attachments, ...message } = payload;
 
   if (!transport) {
-    console.info("[mail]", { from, ...payload });
-    return;
+    console.info("[mail] SMTP not configured, message not sent:", {
+      from,
+      ...message,
+      attachments: attachments?.map((attachment) => attachment.filename),
+    });
+    return false;
   }
 
   try {
     await transport.sendMail({
       from,
-      to: payload.to,
-      subject: payload.subject,
-      text: payload.text,
-      html: payload.html ?? payload.text.replace(/\n/g, "<br>"),
+      to: message.to,
+      subject: message.subject,
+      text: message.text,
+      html: message.html ?? message.text.replace(/\n/g, "<br>"),
+      attachments: attachments?.map((attachment) => ({
+        filename: attachment.filename,
+        content: attachment.content,
+        contentType: attachment.contentType,
+      })),
     });
+    return true;
   } catch (error) {
     console.error("[mail] SMTP send failed:", error);
     throw error;

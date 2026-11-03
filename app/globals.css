@@ -969,3 +969,52 @@ code {
     bottom: 1.25rem !important;
   }
 }
+
+
+
+
+
+
+/* Report cover: slow pan and zoom on the neon image, plus a faint light sweep. Motion-safe only. */
+@keyframes report-cover-pan {
+  0% {
+    transform: scale(1.06) translate3d(-1.5%, 0.5%, 0);
+  }
+  50% {
+    transform: scale(1.12) translate3d(1.5%, -1%, 0);
+  }
+  100% {
+    transform: scale(1.06) translate3d(-1.5%, 0.5%, 0);
+  }
+}
+
+@keyframes report-cover-sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+/* Report tabs: the active section eases in slowly when a tab is chosen. */
+@keyframes report-tab-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.report-tab-enter {
+  animation: report-tab-enter 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-tab-enter {
+    animation: none;
+  }
+}

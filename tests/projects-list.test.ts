@@ -170,6 +170,7 @@ describe("GET /projects — listProjects", () => {
       owner: {
         id: user._id.toString(),
         name: "Lister",
+        email: "lister@example.com",
         profileImage: null,
       },
       integrations: {

@@ -10,6 +10,7 @@ const SEGMENT_KEYS: Record<string, string> = {
   analytics: "modules.analytics.title",
   "seo-activities": "modules.seoActivities.title",
   leads: "modules.leads.title",
+  reports: "modules.reports.title",
   settings: "settings.title",
   "edit-profile": "profile.edit.breadcrumbTitle",
   new: "breadcrumb.new",
