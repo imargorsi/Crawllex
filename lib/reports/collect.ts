@@ -3,10 +3,12 @@ import { Types } from "mongoose";
 import { summarizeEvents } from "@/lib/analytics/event-summary";
 import { getAnalyticsDimensions, getAnalyticsOverview } from "@/lib/integrations/read-analytics";
 import { AnalyticsDailyMetric, Lead, Project, SeoActivity } from "@/models";
-import { REPORT_MAX_BLOG_ROWS, REPORT_TOP_ROWS } from "@/lib/reports/constants";
+import { REPORT_MAX_ACTIVITY_ROWS, REPORT_TOP_ROWS } from "@/lib/reports/constants";
+import type { TSeoActivityType } from "@/types/seo-activity.types";
 import { resolveReportPeriod } from "@/lib/reports/period";
 import type { TAnalyticsDimensionRowDto, TAnalyticsOverviewDto } from "@/types/analytics.types";
 import type {
+  TReportActivityItemDto,
   TReportAnalyticsTotalsDto,
   TReportPeriodDto,
   TReportRankedRowDto,
@@ -15,7 +17,7 @@ import type {
   TReportSnapshotDto,
 } from "@/types/reports.types";
 
-type TCollectedBase = Omit<TReportSnapshotDto, "version" | "generatedAt" | "narrative" | "notes">;
+type TCollectedBase = Omit<TReportSnapshotDto, "version" | "generatedAt" | "notes">;
 
 /** Event kinds that describe visitor actions. Page views and session starts are left out. */
 const BUSINESS_EVENT_KINDS = new Set(["lead", "download", "click", "other"]);
@@ -71,6 +73,33 @@ function series(overview: TAnalyticsOverviewDto): TReportSeriesPointDto[] {
     impressions: point.impressions,
     sessions: point.sessions,
   }));
+}
+
+type TActivityRow = {
+  title?: string | null;
+  url: string;
+  occurredOn: string;
+  anchorText?: string | null;
+  details?: string | null;
+};
+
+function toActivityItem(row: TActivityRow): TReportActivityItemDto {
+  return {
+    title: row.title ?? row.url,
+    url: row.url,
+    occurredOn: row.occurredOn,
+    anchorText: row.anchorText ?? null,
+    details: row.details ?? null,
+  };
+}
+
+/** Newest activities of one type inside the period, capped at the activity row limit. */
+function recentActivities(projectId: string, activityType: TSeoActivityType, from: string, to: string) {
+  return SeoActivity.find({ projectId, activityType, occurredOn: { $gte: from, $lte: to } })
+    .sort({ occurredOn: -1 })
+    .limit(REPORT_MAX_ACTIVITY_ROWS)
+    .select("title url occurredOn anchorText details")
+    .lean<TActivityRow[]>();
 }
 
 async function countLeads(projectId: string, from: string, to: string) {
@@ -152,6 +181,9 @@ export async function collectReportData(
     activitiesNow,
     activitiesBefore,
     blogRows,
+    backlinkRows,
+    technicalRows,
+    leadRows,
   ] = await Promise.all([
     AnalyticsDailyMetric.exists({ projectId, source: "gsc", date: { $gte: from, $lte: to } }),
     AnalyticsDailyMetric.exists({ projectId, source: "ga4", date: { $gte: from, $lte: to } }),
@@ -167,14 +199,13 @@ export async function collectReportData(
     countLeads(projectId, period.previousFrom, period.previousTo),
     countActivities(projectId, from, to),
     countActivities(projectId, period.previousFrom, period.previousTo),
-    SeoActivity.find({
-      projectId,
-      activityType: "blogs",
-      occurredOn: { $gte: from, $lte: to },
-    })
-      .sort({ occurredOn: -1 })
-      .limit(REPORT_MAX_BLOG_ROWS)
-      .select("title url occurredOn")
+    recentActivities(projectId, "blogs", from, to),
+    recentActivities(projectId, "backlinks", from, to),
+    recentActivities(projectId, "technical_work", from, to),
+    Lead.find({ projectId, leadDate: { $gte: from, $lte: to } })
+      .sort({ leadDate: -1 })
+      .limit(REPORT_MAX_ACTIVITY_ROWS)
+      .select("firstName lastName email leadDate origin")
       .lean(),
   ]);
 
@@ -226,15 +257,19 @@ export async function collectReportData(
       total: leadsNow.total,
       previousTotal: leadsBefore.total,
       byOrigin: leadsNow.byOrigin,
+      rows: leadRows.map((row) => ({
+        name: [row.firstName, row.lastName].filter(Boolean).join(" "),
+        email: row.email,
+        leadDate: row.leadDate,
+        origin: row.origin,
+      })),
     },
     activities: {
       current: activitiesNow,
       previous: activitiesBefore,
-      blogs: blogRows.map((row) => ({
-        title: row.title ?? row.url,
-        url: row.url,
-        occurredOn: row.occurredOn,
-      })),
+      blogs: blogRows.map(toActivityItem),
+      backlinks: backlinkRows.map(toActivityItem),
+      technical: technicalRows.map(toActivityItem),
     },
   };
 

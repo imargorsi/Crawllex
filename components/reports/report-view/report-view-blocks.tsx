@@ -5,11 +5,12 @@ import { Area, AreaChart, Cell, CartesianGrid, Pie, PieChart, XAxis, YAxis } fro
 
 import { AppTable, type TAppTableColumn } from "@/components/table/app-table";
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import { elevatedCardMutedClass, elevatedCardTitleClass } from "@/lib/frontend/layout/dashboard-chrome";
 import type { TAppIconComponent } from "@/components/ui/app-icon";
-import { elevatedCardMutedClass, elevatedCardSurfaceClass, elevatedCardTitleClass } from "@/lib/frontend/layout/dashboard-chrome";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
-import type { TKpiView, TReportTone, TSeriesView, TTableView } from "@/lib/reports/view-model";
+import { PARAGRAPH_BREAK } from "@/lib/reports/report-text";
+import type { TChangeView, TKpiView, TReportTone, TSeriesView, TTableView } from "@/lib/reports/view-model";
 
 /** Tone → theme token. The shared view carries tones, not colours, so the UI stays on theme tokens. */
 export const TONE_VAR: Record<TReportTone, string> = {
@@ -21,11 +22,16 @@ export const TONE_VAR: Record<TReportTone, string> = {
 };
 
 const CHANGE_TEXT = {
-  up: "text-[var(--status-active)]",
-  down: "text-[var(--status-rejected)]",
+  up: "text-emerald-600 dark:text-emerald-400",
+  down: "text-rose-600 dark:text-rose-400",
   flat: "text-text-muted",
   none: "text-text-muted",
 } as const;
+
+/** Trend text ("▲ 9.0% vs previous"), coloured by direction. Used by KPI tiles and highlight cards. */
+export function ChangeText({ change, className }: { change: TChangeView; className?: string }) {
+  return <p className={cn(className, CHANGE_TEXT[change.direction])}>{change.text}</p>;
+}
 
 /** Series colours: brand, cyan, emerald, amber. Distinct per series, same tokens as the KPI tones. */
 const CHART_COLORS = [TONE_VAR.brand, TONE_VAR.cyan, TONE_VAR.emerald, TONE_VAR.amber] as const;
@@ -55,62 +61,45 @@ const KPI_ICON: Record<string, TAppIconComponent> = {
   "WhatsApp clicks": Icons.megaphone,
 };
 
-export function ReportPanel({
-  id,
-  title,
-  icon: Icon,
-  number,
-  children,
-  className,
-}: {
-  id?: string;
-  title: string;
-  icon?: TAppIconComponent;
-  number?: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <section
-      id={id}
-      className={cn(elevatedCardSurfaceClass, "flex min-w-0 scroll-mt-24 flex-col gap-5 rounded-3xl p-6 sm:p-7", className)}
-    >
-      <header className="flex items-center gap-3 border-b border-border/60 pb-4">
-        {Icon ? (
-          <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-brand/35 bg-brand/12 text-brand">
-            <Icon className="size-4" aria-hidden />
-          </span>
-        ) : null}
-        <h2 className={cn("min-w-0 flex-1 text-lg font-semibold tracking-tight", elevatedCardTitleClass)}>{title}</h2>
-        {number ? (
-          <span className="rounded-full border border-border/70 px-2.5 py-0.5 text-[11px] font-semibold tabular-nums text-text-muted">
-            {number}
-          </span>
-        ) : null}
-      </header>
-      {children}
-    </section>
-  );
-}
-
-export function ReportKpi({ item }: { item: TKpiView }) {
+function ReportKpi({ item }: { item: TKpiView }) {
   const Icon = KPI_ICON[item.label] ?? Icons.chartLine;
+  const tone = item.empty ? "neutral" : item.tone;
   return (
-    <div className="flex min-w-0 items-start gap-3 rounded-2xl border border-border/70 bg-bg-card/40 p-4">
+    <div className={cn("flex min-w-0 items-start gap-3 rounded-2xl border p-4", item.empty ? "border-text-primary/10" : "border-text-primary/20")}>
       <span
         className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border"
-        style={{ borderColor: TONE_VAR[item.tone], color: TONE_VAR[item.tone] }}
+        style={{ borderColor: TONE_VAR[tone], color: TONE_VAR[tone], opacity: item.empty ? 0.5 : 1 }}
       >
         <Icon className="size-4" aria-hidden />
       </span>
       <div className="min-w-0">
         <p className={cn("truncate text-xs font-medium", elevatedCardMutedClass)}>{item.label}</p>
-        <p className={cn("mt-1 text-3xl font-bold tabular-nums tracking-tight", elevatedCardTitleClass)}>{item.value}</p>
-        {item.change ? (
-          <p className={cn("mt-1 text-xs font-medium", CHANGE_TEXT[item.change.direction])}>{item.change.text}</p>
-        ) : null}
+        <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <p className={cn("text-3xl font-bold tabular-nums tracking-tight", item.empty ? "text-text-muted/50" : elevatedCardTitleClass)}>{item.value}</p>
+          {item.change && !item.empty ? (
+            <ChangeText change={item.change} className="text-sm font-bold" />
+          ) : null}
+        </div>
       </div>
     </div>
+  );
+}
+
+/** Splits a text into paragraphs and bolds the figures, so numbers stand out when skimming. */
+export function Emphasis({ text, className }: { text: string; className?: string }) {
+  const paragraphs = text.split(PARAGRAPH_BREAK).filter(Boolean);
+  return (
+    <>
+      {paragraphs.map((paragraph, index) => (
+        <p key={index} className={className}>
+          {paragraph.split(/(\d[\d,]*(?:\.\d+)?%?)/g).map((part, partIndex) => {
+            if (!/^\d/.test(part)) return <span key={partIndex}>{part}</span>;
+            const isYear = /^(19|20)\d{2}$/.test(part);
+            return isYear ? <span key={partIndex}>{part}</span> : <strong key={partIndex} className="font-semibold text-brand">{part}</strong>;
+          })}
+        </p>
+      ))}
+    </>
   );
 }
 
@@ -124,7 +113,7 @@ export function ReportKpiGrid({ items, columns = 4 }: { items: TKpiView[]; colum
   );
 }
 
-export function ReportAreaChart({ chart }: { chart: TSeriesView }) {
+export function ReportAreaChart({ chart, heightClass = "h-72", colorOffset = 0, fill = false }: { chart: TSeriesView; heightClass?: string; colorOffset?: number; fill?: boolean }) {
   const gradientId = useId().replace(/:/g, "");
   const keys = chart.series.map((_, index) => `series${index}`);
   const data = chart.dates.map((date, index) => {
@@ -135,10 +124,10 @@ export function ReportAreaChart({ chart }: { chart: TSeriesView }) {
     return row;
   });
   const config: ChartConfig = Object.fromEntries(
-    chart.series.map((series, index) => [keys[index], { label: series.name, color: CHART_COLORS[index % CHART_COLORS.length] }]),
+    chart.series.map((series, index) => [keys[index], { label: series.name, color: CHART_COLORS[(index + colorOffset) % CHART_COLORS.length] }]),
   );
   return (
-    <ChartContainer config={config} className="aspect-auto h-72 w-full" initialDimension={{ width: 640, height: 288 }}>
+    <ChartContainer config={config} className={cn("aspect-auto w-full", fill ? "absolute inset-0" : heightClass)} initialDimension={{ width: 640, height: 352 }}>
       <AreaChart data={data} margin={{ top: 16, right: 8, left: 0, bottom: 0 }}>
         <defs>
           {keys.map((key) => (
@@ -216,7 +205,9 @@ export function ReportTable({ table }: { table: TTableView }) {
     label: header,
     align: index === 0 ? "start" : "end",
     render: (item) => (
-      <span className={cn(index === 0 ? "text-text-primary" : "tabular-nums text-text-muted")}>{item.cells[index]}</span>
+      <span className={cn("whitespace-nowrap", index === 0 ? "block max-w-[32rem] truncate text-text-primary" : "tabular-nums text-text-muted")} title={item.cells[index]}>
+        {item.cells[index]}
+      </span>
     ),
   }));
   return (
@@ -230,39 +221,11 @@ export function ReportTable({ table }: { table: TTableView }) {
   );
 }
 
-export function ReportList({ items }: { items: string[] }) {
-  return (
-    <ul className="space-y-2.5">
-      {items.map((item) => (
-        <li key={item} className="flex gap-2.5 text-sm leading-relaxed text-text-secondary">
-          <Icons.checkCircle className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
-          <span>{item}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-export function ReportParagraphs({ items }: { items: string[] }) {
-  return (
-    <div className="space-y-2.5">
-      {items.map((text) => (
-        <p key={text} className="text-sm leading-relaxed text-text-secondary">
-          {text}
-        </p>
-      ))}
-    </div>
-  );
-}
-
 export function ReportNote({ text }: { text: string }) {
   return <p className="text-sm italic text-text-muted">{text}</p>;
 }
 
 export function ReportCallout({ text }: { text: string }) {
-  return <p className="rounded-2xl border border-brand/35 bg-brand/10 px-4 py-3 text-sm text-text-primary">{text}</p>;
+  return <p className="rounded-2xl border border-brand/50 px-4 py-3 text-sm text-text-primary">{text}</p>;
 }
 
-export function ReportSubheading({ children }: { children: React.ReactNode }) {
-  return <h3 className={cn("text-sm font-semibold", elevatedCardTitleClass)}>{children}</h3>;
-}

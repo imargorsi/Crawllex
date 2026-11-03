@@ -4,7 +4,7 @@ import { loadReportAssets } from "@/lib/reports/assets";
 import { loadClientLogoDataUri } from "@/lib/reports/client-logo";
 import { collectReportData } from "@/lib/reports/collect";
 import { renderReportPdf } from "@/lib/reports/pdf-client";
-import { buildNarrative } from "@/lib/reports/narrative";
+import { buildReportText, PARAGRAPH_BREAK } from "@/lib/reports/report-text";
 import { formatMonthTitle, isFullCalendarMonth } from "@/lib/reports/period";
 import { renderReportHtml } from "@/lib/reports/render-html";
 import { Project, Report } from "@/models";
@@ -20,13 +20,12 @@ type TReportLean = {
   _id: Types.ObjectId;
   projectId: Types.ObjectId;
   title: string;
+  summary?: string | null;
   periodFrom: string;
   periodTo: string;
   createdAt: Date;
   snapshot?: Partial<TReportSnapshotDto>;
 };
-
-const SUMMARY_LINES = 2;
 
 function listKpis(doc: TReportLean): TReportListKpisDto | null {
   const snapshot = doc.snapshot;
@@ -43,12 +42,6 @@ function listKpis(doc: TReportLean): TReportListKpisDto | null {
   };
 }
 
-function shortSummary(doc: TReportLean): string | null {
-  const lines = doc.snapshot?.narrative?.executiveSummary ?? [];
-  const text = lines.slice(0, SUMMARY_LINES).join(" ").trim();
-  return text || null;
-}
-
 function toListItem(doc: TReportLean): TReportListItemDto {
   return {
     id: String(doc._id),
@@ -57,7 +50,7 @@ function toListItem(doc: TReportLean): TReportListItemDto {
     periodFrom: doc.periodFrom,
     periodTo: doc.periodTo,
     createdAt: doc.createdAt.toISOString(),
-    summary: shortSummary(doc),
+    summary: doc.summary ?? null,
     kpis: listKpis(doc),
   };
 }
@@ -74,7 +67,7 @@ function reportTitle(projectName: string, from: string, to: string, label: strin
   return `${projectName} — ${title}`;
 }
 
-/** Collects data, writes the narrative and stores a snapshot. Returns the saved report. */
+/** Collects data, stores a snapshot and its list summary. Returns the saved report. */
 export async function createReport(
   projectId: string,
   userId: string,
@@ -88,15 +81,18 @@ export async function createReport(
 
   const { base, period } = await collectReportData(projectId, input.periodFrom, input.periodTo);
   const project = await Project.findById(projectId).select("logoImage").lean();
-  const logoDataUri = await loadClientLogoDataUri(project?.logoImage ?? null).catch(() => null);
+  const logoDataUri = await loadClientLogoDataUri(project?.logoImage ?? null).catch((error: unknown) => {
+    console.error(`[reports] Client logo load failed for project ${projectId}; report created without logo.`, error);
+    return null;
+  });
   const snapshot: TReportSnapshotDto = {
     version: 1,
     generatedAt: new Date().toISOString(),
     ...base,
     project: { ...base.project, logoDataUri },
-    narrative: buildNarrative(base, notes),
     notes,
   };
+  const summary = buildReportText(snapshot).summary.split(PARAGRAPH_BREAK)[0] ?? null;
 
   const doc = await Report.create({
     projectId,
@@ -105,6 +101,7 @@ export async function createReport(
     previousFrom: period.previousFrom,
     previousTo: period.previousTo,
     title: reportTitle(base.project.name, period.from, period.to, period.label),
+    summary,
     notes,
     snapshot,
     createdBy: userId,
@@ -117,7 +114,7 @@ export async function listReports(projectId: string): Promise<TReportListItemDto
   const docs = await Report.find({ projectId })
     .sort({ createdAt: -1 })
     .select(
-      "title periodFrom periodTo createdAt projectId snapshot.narrative.executiveSummary snapshot.gsc.current snapshot.ga4.current snapshot.leads snapshot.events.contacts",
+      "title summary periodFrom periodTo createdAt projectId snapshot.gsc.current snapshot.ga4.current snapshot.leads snapshot.events.contacts",
     )
     .lean<TReportLean[]>();
   return docs.map((doc) => toListItem(doc));
@@ -135,7 +132,7 @@ export async function deleteReport(projectId: string, reportId: string): Promise
   return result.deletedCount === 1;
 }
 
-export function reportHtml(report: TReportDetailDto): string {
+function reportHtml(report: TReportDetailDto): string {
   return renderReportHtml(report.snapshot, loadReportAssets());
 }
 

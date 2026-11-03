@@ -6,6 +6,17 @@ import { useTranslation } from "react-i18next";
 
 import { ReportDetailView } from "@/components/reports/report-view/report-detail-view";
 import { ReportHero } from "@/components/reports/report-view/report-hero";
+import { PageAmbientGlow } from "@/components/ui/page-ambient-glow";
+
+/** Brand gradient wash behind the whole report page. Boxes stay transparent so it shows through. */
+function PageBackdrop() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-x-0 top-0 h-[44rem] bg-[radial-gradient(70%_55%_at_50%_0%,color-mix(in_srgb,var(--brand)_22%,transparent),transparent_70%),linear-gradient(180deg,color-mix(in_srgb,var(--brand)_8%,transparent),transparent_60%)]"
+    />
+  );
+}
 import { DashboardModuleBreadcrumbSection } from "@/components/layout/dashboard-module-breadcrumb-section";
 import { AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
@@ -105,18 +116,21 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
   }
 
   return (
-    <div className="w-full min-w-0">
+    <div className="relative w-full min-w-0">
+      <PageBackdrop />
+      <PageAmbientGlow />
       {report ? (
         <DashboardModuleBreadcrumbSection
           items={[{ label: t("title"), href: "/reports" }, { label: formatMonthTitle(report.periodFrom) }]}
         />
       ) : null}
 
-      <div className="space-y-6 px-4 py-6 sm:px-6">
+      <div className="relative space-y-6 px-4 py-6 sm:px-6">
         {report && view ? (
           <>
             <ReportHero
               clientName={view.cover.clientName}
+              clientLogoDataUri={view.cover.clientLogoDataUri}
               monthTitle={formatMonthTitle(report.periodFrom)}
               periodLabel={formatCompactPeriodLabel(report.periodFrom, report.periodTo)}
               createdAt={report.createdAt}
@@ -126,7 +140,7 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
                     type="button"
                     onClick={() => void downloadPdf()}
                     disabled={isDownloading}
-                    className="inline-flex h-10 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/25 disabled:opacity-60"
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-brand/40 bg-brand px-4 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand/90 disabled:opacity-60"
                   >
                     {isDownloading ? <Spinner className="size-4" /> : <Icons.download className="size-4" aria-hidden />}
                     {t("downloadPdf")}
@@ -135,7 +149,7 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
                     <button
                       type="button"
                       onClick={() => setDeleteOpen(true)}
-                      className="inline-flex h-10 items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:border-[var(--status-rejected)] hover:bg-[var(--status-rejected)]/80"
+                      className="inline-flex h-10 items-center gap-2 rounded-full border border-text-primary/25 px-4 text-sm font-semibold text-text-primary transition-colors hover:border-[var(--status-rejected)] hover:text-[var(--status-rejected)]"
                     >
                       <Icons.delete className="size-4" aria-hidden />
                       {t("deleteAction")}

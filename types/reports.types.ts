@@ -43,10 +43,12 @@ export type TReportSeriesPointDto = {
   sessions: number | null;
 };
 
-export type TReportNarrativeSectionDto = {
-  key: "search" | "traffic" | "engagement" | "leads" | "content";
-  heading: string;
-  paragraphs: string[];
+export type TReportActivityItemDto = {
+  title: string;
+  url: string;
+  occurredOn: string;
+  anchorText?: string | null;
+  details?: string | null;
 };
 
 export type TReportSnapshotDto = {
@@ -75,6 +77,8 @@ export type TReportSnapshotDto = {
     highlights: Array<{ label: string; count: number }>;
   };
   leads: {
+    /** Lead rows for the lead modal. Added later; missing on older snapshots. */
+    rows?: Array<{ name: string; email: string; leadDate: string; origin: string }>;
     total: number;
     previousTotal: number;
     byOrigin: Record<string, number>;
@@ -82,12 +86,10 @@ export type TReportSnapshotDto = {
   activities: {
     current: Record<string, number>;
     previous: Record<string, number>;
-    blogs: Array<{ title: string; url: string; occurredOn: string }>;
-  };
-  narrative: {
-    executiveSummary: string[];
-    keyFindings: string[];
-    sections: TReportNarrativeSectionDto[];
+    blogs: Array<TReportActivityItemDto>;
+    /** Added later. Missing on snapshots created before the detail lists existed. */
+    backlinks?: Array<TReportActivityItemDto>;
+    technical?: Array<TReportActivityItemDto>;
   };
   notes: {
     highlights: string[];

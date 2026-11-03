@@ -12,6 +12,7 @@ async function readLimited(stream: ReadableStream): Promise<Buffer | null> {
     if (done) break;
     size += value.byteLength;
     if (size > MAX_LOGO_BYTES) {
+      console.warn(`[reports] Client logo exceeds ${MAX_LOGO_BYTES} bytes; not embedded.`);
       await reader.cancel();
       return null;
     }
@@ -26,10 +27,21 @@ async function readLimited(stream: ReadableStream): Promise<Buffer | null> {
  * logo must be embedded here.
  */
 export async function loadClientLogoDataUri(logoImage: string | null): Promise<string | null> {
-  if (!logoImage || !logoImage.startsWith("blob:")) return null;
+  if (!logoImage) return null;
+  if (!logoImage.startsWith("blob:")) {
+    console.warn(`[reports] Client logo has unexpected format (prefix "${logoImage.split(":")[0]}"); not embedded.`);
+    return null;
+  }
 
   const object = await getR2Object(logoImage.slice("blob:".length));
-  if (!object || !object.contentType.startsWith("image/")) return null;
+  if (!object) {
+    console.warn("[reports] Client logo R2 object not found; not embedded.");
+    return null;
+  }
+  if (!object.contentType.startsWith("image/")) {
+    console.warn(`[reports] Client logo content type "${object.contentType}" is not an image; not embedded.`);
+    return null;
+  }
 
   const bytes = await readLimited(object.stream);
   if (!bytes) return null;

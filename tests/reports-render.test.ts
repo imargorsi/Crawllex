@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { escapeHtml } from "@/lib/reports/escape";
 import { renderReportHtml } from "@/lib/reports/render-html";
-import { buildNarrative } from "@/lib/reports/narrative";
 import { resolveReportPeriod } from "@/lib/reports/period";
 import type { TReportSnapshotDto } from "@/types/reports.types";
 
@@ -45,7 +44,6 @@ function snapshot(name: string, highlight: string): TReportSnapshotDto {
     version: 1,
     generatedAt: "2026-11-02T00:00:00.000Z",
     ...base,
-    narrative: buildNarrative(base, notes),
     notes,
   };
 }
@@ -65,7 +63,7 @@ describe("renderReportHtml", () => {
     expect(html).toContain("Executive summary");
     expect(html).toContain("Search performance");
     expect(html).toContain("Website traffic");
-    expect(html).toContain("Leads and content");
+    expect(html).toContain("Engagement and leads");
     expect(html).toContain("CONTACT US");
   });
 

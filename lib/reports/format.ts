@@ -1,4 +1,4 @@
-/** Number and text formatting shared by the narrative and the HTML renderer. */
+/** Number and text formatting shared by the report text and the HTML renderer. */
 
 export function formatInt(value: number | null | undefined): string {
   if (value == null) return "–";
@@ -26,7 +26,7 @@ export function formatDuration(seconds: number | null | undefined): string {
   return `${minutes}m ${String(rest).padStart(2, "0")}s`;
 }
 
-export type TChangeDirection = "up" | "down" | "flat" | "none";
+type TChangeDirection = "up" | "down" | "flat" | "none";
 
 export type TChange = {
   direction: TChangeDirection;

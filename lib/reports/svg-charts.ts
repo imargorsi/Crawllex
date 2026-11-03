@@ -1,7 +1,7 @@
 import { REPORT_PALETTE } from "@/lib/reports/constants";
 import { escapeHtml } from "@/lib/reports/escape";
 
-export type TLineSeries = {
+type TLineSeries = {
   name: string;
   color: string;
   values: Array<number | null>;

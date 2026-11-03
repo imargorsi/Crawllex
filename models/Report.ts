@@ -1,7 +1,7 @@
 import mongoose, { Schema, type InferSchemaType, type Model, type Types } from "mongoose";
 
 /**
- * Monthly client report. The snapshot holds the collected data and the generated narrative, so a
+ * Monthly client report. The snapshot holds the collected data, so a
  * saved report renders the same way later even if the cache changes. The PDF is rendered on demand.
  */
 const reportSchema = new Schema(
@@ -11,10 +11,11 @@ const reportSchema = new Schema(
     periodTo: { type: String, required: true, trim: true },
     previousFrom: { type: String, required: true, trim: true },
     previousTo: { type: String, required: true, trim: true },
+    summary: { type: String, default: null },
     title: { type: String, required: true, trim: true },
     /** Manual inputs entered with the report (highlights, translation status, closing note). */
     notes: { type: Schema.Types.Mixed, default: () => ({}) },
-    /** Collected data and generated narrative (see `types/reports.types.ts`). */
+    /** Collected data (see `types/reports.types.ts`). */
     snapshot: { type: Schema.Types.Mixed, required: true },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
   },

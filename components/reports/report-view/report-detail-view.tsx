@@ -3,266 +3,444 @@
 import { useCallback, useState } from "react";
 
 import {
+  ChangeText,
+  Emphasis,
   ReportAreaChart,
   ReportCallout,
+  ReportDonut,
   ReportKpiGrid,
-  ReportList,
   ReportNote,
-  ReportPanel,
-  ReportParagraphs,
   ReportTable,
   TONE_VAR,
 } from "@/components/reports/report-view/report-view-blocks";
 import { Modal } from "@/components/ui/modal";
-import { Icons } from "@/lib/frontend/icons/app-icons";
 import type { TAppIconComponent } from "@/components/ui/app-icon";
-import type { TBlockView, TReportTone, TReportView, TSectionView, TTableView } from "@/lib/reports/view-model";
-
-type TBlockOf<T extends TBlockView["type"]> = Extract<TBlockView, { type: T }>;
+import { Icons } from "@/lib/frontend/icons/app-icons";
+import { toolbarFilterChipClass, toolbarFilterShellClass } from "@/lib/frontend/layout/dashboard-chrome";
+import { cn } from "@/lib/utils";
+import type { TBlockView, TCardIcon, TCardView, TNamedTable, TReportView, TSectionView, TTableView } from "@/lib/reports/view-model";
 
 type TDrilldown = { title: string; description: string; table: TTableView };
 
-function blocksOf<T extends TBlockView["type"]>(section: TSectionView | undefined, type: T): TBlockOf<T>[] {
-  return section ? section.blocks.filter((block): block is TBlockOf<T> => block.type === type) : [];
+type TOpenTable = (table: TTableView, title: string) => void;
+
+const CARD_ICON: Record<TCardIcon, TAppIconComponent> = {
+  leads: Icons.userGroup,
+  calls: Icons.call,
+  emails: Icons.mail,
+  whatsapp: Icons.message,
+  blogs: Icons.file,
+  backlinks: Icons.megaphone,
+  technical: Icons.wrench,
+};
+
+const TABLE_ICON: Record<"query" | "country" | "landing" | "page" | "backlink" | "technical" | "default", TAppIconComponent> = {
+  query: Icons.cursorPointer,
+  country: Icons.globe,
+  landing: Icons.megaphone,
+  page: Icons.file,
+  backlink: Icons.megaphone,
+  technical: Icons.wrench,
+  default: Icons.chartLine,
+};
+
+/** Table kind from its title, so the same table gets the same icon wherever it appears. */
+function tableKind(title: string): keyof typeof TABLE_ICON {
+  const lower = title.toLowerCase();
+  if (lower.includes("quer")) return "query";
+  if (lower.includes("countr")) return "country";
+  if (lower.includes("backlink")) return "backlink";
+  if (lower.includes("technical")) return "technical";
+  if (lower.includes("landing") || lower.includes("action") || lower.includes("event")) return "landing";
+  if (lower.includes("page") || lower.includes("blog")) return "page";
+  return "default";
 }
 
-function sectionById(view: TReportView, id: TSectionView["id"]): TSectionView | undefined {
-  return view.sections.find((section) => section.id === id);
-}
-
-/** Pill that opens a detail table in a modal. The table is the same data the PDF prints. */
-function DrilldownPill({
-  label,
-  count,
-  icon: Icon,
+/** Opens a detail table in a modal. `row` is full width (drilldown list), `chip` is compact (chart header). */
+function DrilldownButton({
+  title,
+  table,
   onOpen,
+  variant,
 }: {
-  label: string;
-  count: number;
-  icon: TAppIconComponent;
+  title: string;
+  table: TTableView;
   onOpen: () => void;
+  variant: "row" | "chip";
 }) {
+  const Icon = TABLE_ICON[tableKind(title)];
+  const count = `${table.rows.length} ${table.rows.length === 1 ? "row" : "rows"}`;
+  if (variant === "chip") {
+    return (
+      <button
+        type="button"
+        onClick={onOpen}
+        className="group inline-flex items-center gap-2.5 rounded-xl border border-text-primary/20 py-2 pe-3 ps-2 text-start transition-all duration-200 hover:border-brand/60 hover:shadow-[0_10px_24px_-16px_var(--brand)]"
+      >
+        <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-brand/50 text-brand">
+          <Icon className="size-4" aria-hidden />
+        </span>
+        <span className="flex flex-col">
+          <span className="text-sm font-semibold leading-tight text-text-primary">{title}</span>
+          <span className="text-xs leading-tight text-text-muted">{count}</span>
+        </span>
+        <Icons.arrowRight className="size-3.5 text-text-muted transition-colors group-hover:text-brand" aria-hidden />
+      </button>
+    );
+  }
   return (
     <button
       type="button"
       onClick={onOpen}
-      className="group flex w-full items-center gap-4 rounded-2xl border border-border/70 bg-bg-card/40 px-4 py-3.5 text-start transition-all duration-200 hover:border-brand/55 hover:bg-brand/8 hover:shadow-[0_12px_28px_-16px_var(--brand)]"
+      className="group flex w-full items-center gap-4 rounded-2xl border border-text-primary/20 px-5 py-4 text-start transition-all duration-200 hover:border-brand/60 hover:shadow-[0_14px_30px_-18px_var(--brand)]"
     >
-      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-brand/40 bg-brand/12 text-brand">
-        <Icon className="size-4" aria-hidden />
+      <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-brand/50 text-brand">
+        <Icon className="size-5" aria-hidden />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-sm font-semibold text-text-primary">{label}</span>
-        <span className="mt-0.5 block text-xs text-text-muted">
-          {count} {count === 1 ? "row" : "rows"} this month
-        </span>
+        <span className="block truncate text-base font-semibold text-text-primary">{title}</span>
+        <span className="mt-0.5 block text-sm text-text-muted">{count} this month</span>
       </span>
-      <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full border border-border/70 text-text-muted transition-all duration-200 group-hover:border-brand/55 group-hover:text-brand">
-        <Icons.arrowRight className="size-3.5" aria-hidden />
-      </span>
+      <Icons.arrowRight className="size-4 shrink-0 text-text-muted transition-colors group-hover:text-brand" aria-hidden />
     </button>
   );
 }
 
-/** Jump links to each section, so the page reads like a dashboard with a clear outline. */
-function SectionNav({ items }: { items: { id: string; label: string }[] }) {
+/** Section tabs, same pill style as the other module tabs. Right-aligned. One section shows at a time. */
+function SectionTabs({
+  items,
+  activeId,
+  onSelect,
+}: {
+  items: { id: string; label: string }[];
+  activeId: string;
+  onSelect: (id: string) => void;
+}) {
   return (
-    <nav aria-label="Report sections" className="sticky top-3 z-20 -mx-1 flex flex-wrap gap-2 rounded-2xl border border-border/60 bg-bg-card/70 p-1.5 backdrop-blur-xl">
-      {items.map((item) => (
-        <a
-          key={item.id}
-          href={`#${item.id}`}
-          className="rounded-xl px-3.5 py-1.5 text-xs font-semibold text-text-muted transition-colors hover:bg-bg-hover hover:text-text-primary"
-        >
-          {item.label}
-        </a>
-      ))}
-    </nav>
-  );
-}
-
-/** Small chip with a tone dot, for contact actions and lead sources. */
-function ReportStat({ label, value, tone }: { label: string; value: string; tone: TReportTone }) {
-  return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border border-border/70 bg-bg-card/40 px-4 py-3">
-      <span className="flex min-w-0 items-center gap-2 text-sm text-text-muted">
-        <span className="size-2 shrink-0 rounded-full" style={{ background: TONE_VAR[tone] }} aria-hidden />
-        <span className="truncate">{label}</span>
-      </span>
-      <span className="text-lg font-semibold tabular-nums text-text-primary">{value}</span>
+    <div id="report-section-tabs" className="flex justify-end scroll-mt-24">
+      <div role="tablist" aria-label="Report sections" className={toolbarFilterShellClass}>
+        {items.map((item) => {
+          const isActive = activeId === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => onSelect(item.id)}
+              className={cn(
+                toolbarFilterChipClass,
+                isActive ? "bg-brand text-text-on-brand shadow-xs" : "text-text-secondary hover:bg-bg-hover hover:text-text-primary",
+              )}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-function pickDrilldowns(section: TSectionView | undefined, count: number): TDrilldown[] {
-  return blocksOf(section, "table").slice(0, count).map((block) => ({
-    title: block.title,
-    description: "",
-    table: block.table,
-  }));
+/** Section sub-heading with a brand rule, used the same way in every section. */
+function SubHeading({ title }: { title: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="h-5 w-1 rounded-full bg-brand" aria-hidden />
+      <h3 className="text-xl font-semibold tracking-tight text-text-primary">{title}</h3>
+    </div>
+  );
+}
+
+/** Highlight card: icon, label, big number and the plain-language line. Cards with a table open it in a modal. */
+function HighlightCard({ card, onOpen }: { card: TCardView; onOpen: TOpenTable }) {
+  const Icon = CARD_ICON[card.icon];
+  const tone = card.empty ? "neutral" : card.tone;
+  const body = (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <span
+          className="inline-flex size-11 items-center justify-center rounded-xl border"
+          style={{ borderColor: TONE_VAR[tone], color: TONE_VAR[tone], opacity: card.empty ? 0.5 : 1 }}
+        >
+          <Icon className="size-5" aria-hidden />
+        </span>
+        {card.table ? (
+          <span className="inline-flex size-8 items-center justify-center rounded-full border border-text-primary/15 text-text-muted transition-colors group-hover:border-brand/60 group-hover:text-brand">
+            <Icons.arrowRight className="size-4" aria-hidden />
+          </span>
+        ) : null}
+      </div>
+      <div className="mt-auto space-y-1">
+        <p className="text-sm font-medium text-text-muted">{card.label}</p>
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <p className={cn("text-4xl font-bold tabular-nums tracking-tight", card.empty ? "text-text-muted/50" : "text-text-primary")}>{card.value}</p>
+          {card.change && !card.empty ? <ChangeText change={card.change} className="text-sm font-bold" /> : null}
+        </div>
+      </div>
+      <Emphasis
+        text={card.body || " "}
+        className={cn("min-h-[2.75rem] text-sm leading-relaxed", card.empty ? "text-text-muted" : "text-text-secondary")}
+      />
+    </>
+  );
+  const base = cn(
+    "group flex h-full w-full flex-col gap-4 rounded-2xl border p-5 text-start transition-all duration-200",
+    card.empty ? "border-text-primary/10" : "border-text-primary/20",
+  );
+  if (!card.table) return <article className={base}>{body}</article>;
+  const table = card.table;
+  return (
+    <button type="button" onClick={() => onOpen(table, card.label)} className={cn(base, "hover:border-brand/60 hover:shadow-[0_14px_30px_-18px_var(--brand)]")}>
+      {body}
+    </button>
+  );
+}
+
+/** Charts with their drilldown tables as chips in the header. One chart per series, so scales do not hide each other. */
+function ChartCard({
+  title,
+  charts,
+  tables,
+  onOpen,
+  fill = false,
+}: {
+  title: string | null;
+  charts: { title: string; chart: Parameters<typeof ReportAreaChart>[0]["chart"] }[];
+  tables: TNamedTable[];
+  onOpen: TOpenTable;
+  /** Stretch to the height of the row (used beside the channel pie). */
+  fill?: boolean;
+}) {
+  const single = charts.length === 1;
+  if (fill && single) {
+    return (
+      <section className="flex h-full flex-col rounded-2xl border border-text-primary/20 p-5 sm:p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          {title ? <h4 className="text-base font-semibold text-text-primary">{title}</h4> : <span />}
+          {tables.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {tables.map((named) => (
+                <DrilldownButton key={named.title} title={named.title} table={named.table} onOpen={() => onOpen(named.table, named.title)} variant="chip" />
+              ))}
+            </div>
+          ) : null}
+        </div>
+        <div className="relative mt-5 min-h-[22rem] flex-1">
+          <ReportAreaChart chart={charts[0].chart} fill />
+        </div>
+      </section>
+    );
+  }
+  return (
+    <section className="rounded-2xl border border-text-primary/20 p-5 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        {title ? <h4 className="text-base font-semibold text-text-primary">{title}</h4> : <span />}
+        {tables.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {tables.map((named) => (
+              <DrilldownButton key={named.title} title={named.title} table={named.table} onOpen={() => onOpen(named.table, named.title)} variant="chip" />
+            ))}
+          </div>
+        ) : null}
+      </div>
+      <div className={cn("mt-5 grid gap-6", single ? "" : "lg:grid-cols-2")}>
+        {charts.map((item) => (
+          <div key={item.title} className="min-w-0 space-y-3">
+            {single ? null : <p className="text-sm font-medium text-text-muted">{item.title}</p>}
+            <ReportAreaChart chart={item.chart} heightClass={single ? "h-[22rem]" : "h-64"} colorOffset={charts.indexOf(item)} />
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/** Channel pie with an optional short list (top countries) under it. Stretches to match the chart beside it. */
+function DonutCard({ block }: { block: Extract<TBlockView, { type: "donut" }> }) {
+  return (
+    <section className="flex h-full flex-col rounded-2xl border border-text-primary/20 p-5 sm:p-6">
+      <h4 className="mb-5 text-base font-semibold text-text-primary">{block.title}</h4>
+      <div className="flex flex-1 items-center justify-center">
+        <ReportDonut rows={block.rows} />
+      </div>
+      {block.list ? (
+        <div className="mt-6 space-y-3 border-t border-text-primary/15 pt-5">
+          <h5 className="text-xs font-semibold uppercase tracking-widest text-text-muted">{block.list.title}</h5>
+          {block.list.rows.length > 0 ? (
+            <ul className="divide-y divide-text-primary/10">
+              {block.list.rows.map((row, index) => (
+                <li key={row.label} className="flex items-center justify-between gap-3 py-2.5 text-sm">
+                  <span className="flex min-w-0 items-center gap-3">
+                    <span className="w-4 shrink-0 text-xs tabular-nums text-text-muted">{index + 1}</span>
+                    <span className="truncate text-text-primary">{row.label}</span>
+                  </span>
+                  <span className="shrink-0 font-semibold tabular-nums text-text-primary">{row.value.toLocaleString("en-US")}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-text-muted">{block.list.emptyText}</p>
+          )}
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function SectionBlock({ block, onOpen }: { block: TBlockView; onOpen: TOpenTable }) {
+  switch (block.type) {
+    case "heading":
+      return <SubHeading title={block.title} />;
+    case "prose":
+      return (
+        <div className="max-w-4xl space-y-3">
+          {block.title ? <h4 className="text-base font-semibold text-text-primary">{block.title}</h4> : null}
+          <div className="flex flex-col gap-4">
+            <Emphasis
+              text={block.body}
+              className={block.variant === "lead" ? "text-lg leading-relaxed text-text-primary" : "text-[15px] leading-relaxed text-text-secondary"}
+            />
+          </div>
+        </div>
+      );
+    case "cards":
+      return (
+        <div className="space-y-4">
+          <h4 className="text-xs font-semibold uppercase tracking-widest text-text-muted">{block.title}</h4>
+          <div className="flex flex-wrap gap-4">
+            {block.items.map((card) => (
+              <div key={card.label} className="min-w-0 basis-full sm:basis-[calc(50%_-_0.5rem)] xl:basis-[calc(25%_-_0.75rem)]">
+                <HighlightCard card={card} onOpen={onOpen} />
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    case "kpis":
+      return <ReportKpiGrid items={block.items} />;
+    case "line":
+      return <ChartCard title={block.title} charts={block.charts} tables={block.tables} onOpen={onOpen} />;
+    case "donut":
+      return <DonutCard block={block} />;
+    case "bullets":
+      return (
+        <section className="space-y-4">
+          <h4 className="text-base font-semibold text-text-primary">{block.title}</h4>
+          <ul className="space-y-3">
+            {block.items.map((item) => (
+              <li key={item} className="flex gap-3 text-[15px] leading-relaxed text-text-secondary">
+                <Icons.checkCircle className="mt-1 size-4 shrink-0 text-brand" aria-hidden />
+                <Emphasis text={item} className="min-w-0" />
+              </li>
+            ))}
+          </ul>
+        </section>
+      );
+    case "table":
+      return block.table.rows.length > 0 ? (
+        <DrilldownButton title={block.title} table={block.table} onOpen={() => onOpen(block.table, block.title)} variant="row" />
+      ) : null;
+    case "callout":
+      return <ReportCallout text={block.text} />;
+    case "note":
+      return <ReportNote text={block.text} />;
+  }
+}
+
+type TBlockGroup =
+  | { kind: "single"; block: TBlockView }
+  | { kind: "pair"; line: Extract<TBlockView, { type: "line" }>; donut: Extract<TBlockView, { type: "donut" }> }
+  | { kind: "tables"; blocks: Extract<TBlockView, { type: "table" }>[] };
+
+/** Puts a chart and its pie side by side, and lays consecutive tables out as a row of chips. */
+function groupBlocks(blocks: TBlockView[]): TBlockGroup[] {
+  const groups: TBlockGroup[] = [];
+  blocks.forEach((block, index) => {
+    const next = blocks[index + 1];
+    const previous = groups[groups.length - 1];
+    if (block.type === "line" && next?.type === "donut") {
+      groups.push({ kind: "pair", line: block, donut: next });
+      return;
+    }
+    if (block.type === "donut" && previous?.kind === "pair") return;
+    if (block.type === "table") {
+      if (previous?.kind === "tables") {
+        previous.blocks.push(block);
+      } else {
+        groups.push({ kind: "tables", blocks: [block] });
+      }
+      return;
+    }
+    groups.push({ kind: "single", block });
+  });
+  return groups;
+}
+
+function BlockGroup({ group, onOpen }: { group: TBlockGroup; onOpen: TOpenTable }) {
+  if (group.kind === "pair") {
+    return (
+      <div className="grid gap-6 lg:h-[40rem] lg:grid-cols-5">
+        <div className="flex min-w-0 flex-col lg:col-span-3">
+          <ChartCard title={group.line.title} charts={group.line.charts} tables={group.line.tables} onOpen={onOpen} fill />
+        </div>
+        <div className="flex min-w-0 flex-col lg:col-span-2">
+          <DonutCard block={group.donut} />
+        </div>
+      </div>
+    );
+  }
+  if (group.kind === "tables") {
+    return (
+      <div className={cn("grid gap-4", group.blocks.length > 1 ? "md:grid-cols-2 xl:grid-cols-3" : "")}>
+        {group.blocks.map((block, index) => (
+          <SectionBlock key={index} block={block} onOpen={onOpen} />
+        ))}
+      </div>
+    );
+  }
+  return <SectionBlock block={group.block} onOpen={onOpen} />;
 }
 
 export function ReportDetailView({ view }: { view: TReportView }) {
   const [drilldown, setDrilldown] = useState<TDrilldown | null>(null);
+  const [activeId, setActiveId] = useState<string>("summary");
   const close = useCallback(() => setDrilldown(null), []);
 
-  const summary = sectionById(view, "summary");
-  const search = sectionById(view, "search");
-  const searchPages = sectionById(view, "searchPages");
-  const traffic = sectionById(view, "traffic");
-  const audience = sectionById(view, "audience");
-  const engagement = sectionById(view, "engagement");
-  const leads = sectionById(view, "leads");
+  const tabs = view.sections.map((section) => ({ id: section.id, label: section.title }));
+  // Executive summary by default. Falls back to the first section if the id is unknown.
+  const current: TSectionView | undefined = view.sections.find((section) => section.id === activeId) ?? view.sections[0];
 
-  const [queries] = pickDrilldowns(search, 1);
-  const [pages] = pickDrilldowns(searchPages, 1);
-  const [countries, landing] = pickDrilldowns(audience, 2);
-  const [actions] = pickDrilldowns(engagement, 1);
-  const [work, blogs] = pickDrilldowns(leads, 2);
-  const sources = blocksOf(leads, "donut")[0];
-
-  const open = (item: TDrilldown | undefined, description: string) => {
-    if (!item) return;
-    setDrilldown({ ...item, description });
+  const selectTab = (id: string) => {
+    setActiveId(id);
+    document.getElementById("report-section-tabs")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
-  const navItems = [
-    summary && { id: "summary", label: summary.title },
-    search && { id: "search", label: search.title },
-    traffic && { id: "traffic", label: traffic.title },
-    engagement && { id: "engagement", label: engagement.title },
-    leads && { id: "leads", label: leads.title },
-  ].filter((item): item is { id: string; label: string } => Boolean(item));
+  const openTable: TOpenTable = (table, title) => {
+    setDrilldown({ title, description: current?.title ?? "", table });
+  };
 
   return (
     <div className="space-y-6">
-      <SectionNav items={navItems} />
+      <SectionTabs items={tabs} activeId={current?.id ?? ""} onSelect={selectTab} />
 
-      {summary ? (
-        <ReportPanel id="summary" title={summary.title} icon={Icons.analytics} number={summary.number}>
-          {blocksOf(summary, "kpis").map((block, index) => (
-            <ReportKpiGrid key={index} items={block.items} />
-          ))}
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-text-primary">{blocksOf(summary, "list")[0]?.title}</h3>
-              <ReportList items={blocksOf(summary, "list")[0]?.items ?? []} />
-            </div>
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-text-primary">{blocksOf(summary, "list")[1]?.title}</h3>
-              <ReportList items={blocksOf(summary, "list")[1]?.items ?? []} />
-            </div>
+      {current ? (
+        <div key={current.id} className="report-tab-enter space-y-10">
+          <div className="flex items-end gap-4 border-b border-text-primary/15 pb-4">
+            <span className="text-4xl font-bold tabular-nums text-text-muted/60">{current.number}</span>
+            <h2 className="text-3xl font-semibold tracking-tight text-text-primary">{current.title}</h2>
           </div>
-        </ReportPanel>
-      ) : null}
-
-      {search ? (
-        <ReportPanel id="search" title={search.title} icon={Icons.cursorPointer} number={search.number}>
-          {blocksOf(search, "kpis").map((block, index) => (
-            <ReportKpiGrid key={index} items={block.items} />
+          {groupBlocks(current.blocks).map((group, index) => (
+            <BlockGroup key={index} group={group} onOpen={openTable} />
           ))}
-          <div className="grid gap-6 lg:grid-cols-5">
-            <div className="space-y-5 lg:col-span-3">
-              {blocksOf(search, "paragraphs").map((block, index) => (
-                <ReportParagraphs key={index} items={block.items} />
-              ))}
-            </div>
-            <div className="space-y-3 lg:col-span-2">
-              {queries ? <DrilldownPill label={queries.title} count={queries.table.rows.length} icon={Icons.cursorPointer} onOpen={() => open(queries, search.title)} /> : null}
-              {pages ? <DrilldownPill label={pages.title} count={pages.table.rows.length} icon={Icons.file} onOpen={() => open(pages, search.title)} /> : null}
-            </div>
-          </div>
-          {blocksOf(search, "line").map((block, index) => (
-            <ReportAreaChart key={index} chart={block.chart} />
-          ))}
-          {blocksOf(search, "note").map((block, index) => (
-            <ReportNote key={index} text={block.text} />
-          ))}
-        </ReportPanel>
-      ) : null}
-
-      {traffic ? (
-        <ReportPanel id="traffic" title={traffic.title} icon={Icons.chartLine} number={traffic.number}>
-          {blocksOf(traffic, "kpis").map((block, index) => (
-            <ReportKpiGrid key={index} items={block.items} />
-          ))}
-          <div className="grid gap-6 lg:grid-cols-5">
-            <div className="space-y-5 lg:col-span-3">
-              {blocksOf(traffic, "paragraphs").map((block, index) => (
-                <ReportParagraphs key={index} items={block.items} />
-              ))}
-            </div>
-            <div className="space-y-3 lg:col-span-2">
-              {countries ? <DrilldownPill label={countries.title} count={countries.table.rows.length} icon={Icons.globe} onOpen={() => open(countries, traffic.title)} /> : null}
-              {landing ? <DrilldownPill label={landing.title} count={landing.table.rows.length} icon={Icons.megaphone} onOpen={() => open(landing, traffic.title)} /> : null}
-            </div>
-          </div>
-          {blocksOf(traffic, "line").map((block, index) => (
-            <ReportAreaChart key={index} chart={block.chart} />
-          ))}
-          {blocksOf(traffic, "note").map((block, index) => (
-            <ReportNote key={index} text={block.text} />
-          ))}
-        </ReportPanel>
-      ) : null}
-
-      {engagement || leads ? (
-        <div className="grid gap-6 xl:grid-cols-2">
-          {engagement ? (
-            <ReportPanel id="engagement" title={engagement.title} icon={Icons.userGroup} number={engagement.number}>
-              {blocksOf(engagement, "kpis").map((block, index) => (
-                <ReportKpiGrid key={index} items={block.items} columns={2} />
-              ))}
-              <div className="grid gap-3">
-                {blocksOf(engagement, "chips")[0]?.items.map((item) => (
-                  <ReportStat key={item.label} label={item.label} value={item.value} tone={item.tone} />
-                ))}
-              </div>
-              {blocksOf(engagement, "paragraphs").map((block, index) => (
-                <ReportParagraphs key={index} items={block.items} />
-              ))}
-              {actions ? <DrilldownPill label={actions.title} count={actions.table.rows.length} icon={Icons.view} onOpen={() => open(actions, engagement.title)} /> : null}
-            </ReportPanel>
-          ) : null}
-
-          {leads ? (
-            <ReportPanel id="leads" title={leads.title} icon={Icons.userGroup} number={leads.number}>
-              {blocksOf(leads, "kpis").map((block, index) => (
-                <ReportKpiGrid key={index} items={block.items} columns={2} />
-              ))}
-              {sources ? (
-                <div className="space-y-3">
-                  <h3 className="text-sm font-semibold text-text-primary">{sources.title}</h3>
-                  <div className="grid gap-3">
-                    {sources.rows.map((row, index) => (
-                      <ReportStat key={row.label} label={row.label} value={row.value.toLocaleString("en-US")} tone={(["brand", "cyan", "emerald", "amber"] as const)[index % 4]} />
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-              {blocksOf(leads, "paragraphs").map((block, index) => (
-                <ReportParagraphs key={index} items={block.items} />
-              ))}
-              <div className="grid gap-3">
-                {work ? <DrilldownPill label={work.title} count={work.table.rows.length} icon={Icons.chartLine} onOpen={() => open(work, leads.title)} /> : null}
-                {blogs ? <DrilldownPill label={blogs.title} count={blogs.table.rows.length} icon={Icons.file} onOpen={() => open(blogs, leads.title)} /> : null}
-              </div>
-            </ReportPanel>
-          ) : null}
         </div>
-      ) : null}
+      ) : (
+        <ReportCallout text="No report content." />
+      )}
 
-      {!summary && !search && !traffic && !leads ? <ReportCallout text="No report content." /> : null}
-
-      <Modal
-        open={Boolean(drilldown)}
-        onClose={close}
-        title={drilldown?.title ?? ""}
-        description={drilldown?.description}
-      >
+      <Modal open={Boolean(drilldown)} onClose={close} title={drilldown?.title ?? ""} description={drilldown?.description} className="max-w-5xl">
         {drilldown ? <ReportTable table={drilldown.table} /> : null}
       </Modal>
     </div>
   );
 }
-

@@ -3,7 +3,7 @@ import { EMPTY_REPORT_ASSETS, type TReportAssets } from "@/lib/reports/assets";
 import { escapeHtml } from "@/lib/reports/escape";
 import { REPORT_COPY } from "@/lib/reports/copy";
 import { barChartSvg, lineChartSvg } from "@/lib/reports/svg-charts";
-import { buildReportView, type TBlockView, type TKpiView, type TReportView, type TSectionView, type TTableView } from "@/lib/reports/view-model";
+import { buildReportView, type TBlockView, type TCardView, type TKpiView, type TReportView, type TSectionView, type TTableView } from "@/lib/reports/view-model";
 import type { TReportSnapshotDto } from "@/types/reports.types";
 
 /**
@@ -38,6 +38,7 @@ h2, h3, .kpi .value { font-family: "Red Hat Display", "Poppins", Arial, sans-ser
 .footer { position: absolute; left: 16mm; right: 16mm; bottom: 20mm; display: flex; justify-content: space-between; font-size: 8.5pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 3mm; }
 h3 { font-size: 13pt; margin: 6mm 0 2mm; color: var(--ink); }
 p { margin: 0 0 3mm; }
+p.prose { font-size: 10.5pt; line-height: 1.75; text-align: justify; }
 ul { margin: 0 0 3mm; padding-left: 5mm; }
 li { margin-bottom: 1.5mm; }
 .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-bottom: 5mm; }
@@ -57,6 +58,13 @@ td.url { word-break: break-all; color: var(--muted); font-size: 8.5pt; }
 .note { font-size: 9.5pt; color: var(--muted); font-style: italic; }
 .callout { border-left: 3px solid var(--accent); background: var(--surface); padding: 3mm 4mm; border-radius: 0 2mm 2mm 0; margin-bottom: 4mm; }
 .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-bottom: 5mm; }
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 3mm; margin-bottom: 5mm; }
+.card { background: var(--surface); border-radius: 3mm; padding: 3.5mm; border-top: 3px solid var(--accent); }
+.card .label { font-size: 8.5pt; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.card .value { font-size: 16pt; font-weight: 700; margin-top: 1mm; }
+.card .change { font-size: 9pt; margin-top: 1mm; }
+.card-body { font-size: 9pt; margin: 2mm 0 0; line-height: 1.5; }
+p.prose.lead { font-size: 12pt; line-height: 1.7; }
 .cover { background: linear-gradient(160deg, #fff 55%, #e6f4ff 100%); }
 .cover .lc-logo svg { width: 46mm; height: auto; display: block; }
 .cover .cover-art { position: absolute; left: 0; right: 0; top: 118mm; bottom: 0; mix-blend-mode: multiply; overflow: hidden; }
@@ -118,24 +126,31 @@ function tableHtml(table: TTableView): string {
   return `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
 }
 
+function cardHtml(card: TCardView): string {
+  const change = card.change ? `<div class="change ${card.change.direction === "up" ? "up" : card.change.direction === "down" ? "down" : "flat"}">${escapeHtml(card.change.text)}</div>` : "";
+  return `<div class="card" style="border-top-color:${TONE_COLOR[card.tone]}"><div class="label">${escapeHtml(card.label)}</div><div class="value">${escapeHtml(card.value)}</div>${change}<p class="card-body">${escapeHtml(card.body)}</p></div>`;
+}
+
 function blockHtml(block: TBlockView): string {
   switch (block.type) {
-    case "paragraphs":
-      return block.items.map((text) => `<p>${escapeHtml(text)}</p>`).join("");
-    case "list":
-      return `<h3>${escapeHtml(block.title)}</h3><ul>${block.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+    case "heading":
+      return `<h3>${escapeHtml(block.title)}</h3>`;
+    case "prose":
+      return `${block.title ? `<h3>${escapeHtml(block.title)}</h3>` : ""}<p class="${block.variant === "lead" ? "prose lead" : "prose"}">${escapeHtml(block.body)}</p>`;
+    case "cards":
+      return `<h3>${escapeHtml(block.title)}</h3><div class="cards">${block.items.map(cardHtml).join("")}</div>`;
     case "kpis":
       return `<div class="kpis">${block.items.map(kpiHtml).join("")}</div>`;
-    case "chips":
-      return `<div class="kpis">${block.items.map((item) => kpiHtml({ label: item.label, value: item.value, change: null, tone: item.tone })).join("")}</div>`;
     case "line":
-      return `<div class="chart">${lineChartSvg(block.chart.dates, block.chart.series)}</div>`;
+      return `${block.charts.map((item) => `<div class="chart">${lineChartSvg(item.chart.dates, item.chart.series)}</div>`).join("")}${block.tables.map((named) => `<h3>${escapeHtml(named.title)}</h3>${tableHtml(named.table)}`).join("")}`;
     case "donut":
       return `<h3>${escapeHtml(block.title)}</h3><div class="chart">${barChartSvg(block.rows)}</div>`;
     case "table":
       return `<h3>${escapeHtml(block.title)}</h3>${tableHtml(block.table)}`;
     case "callout":
       return `<h3>${escapeHtml(block.title)}</h3><div class="callout">${escapeHtml(block.text)}</div>`;
+    case "bullets":
+      return `<h3>${escapeHtml(block.title)}</h3><ul>${block.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
     case "note":
       return `<p class="note">${escapeHtml(block.text)}</p>`;
   }

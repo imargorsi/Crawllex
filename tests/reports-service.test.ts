@@ -79,7 +79,8 @@ describe("report service", () => {
     expect(report.snapshot.activities.current.blogs).toBe(1);
     expect(report.snapshot.activities.blogs[0]?.title).toBe("Concrete Curing Guide");
     expect(report.snapshot.notes.translationStatus).toBe("Review pending");
-    expect(report.snapshot.narrative.executiveSummary.join(" ")).toContain("Arabic landing page live");
+    expect(report.summary).toContain("During September 2026");
+    expect(report.snapshot.notes.highlights).toEqual(["Arabic landing page live"]);
 
     const list = await listReports(projectId);
     expect(list).toHaveLength(1);

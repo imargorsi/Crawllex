@@ -1,8 +1,9 @@
 import { REPORT_COPY } from "@/lib/reports/copy";
-import { REPORT_BRAND, REPORT_MAX_BLOG_ROWS, REPORT_PALETTE } from "@/lib/reports/constants";
+import { REPORT_BRAND, REPORT_MAX_ACTIVITY_ROWS, REPORT_MAX_TOP_COUNTRIES, REPORT_MAX_TOP_EVENTS, REPORT_PALETTE } from "@/lib/reports/constants";
 import { formatDuration, formatInt, formatPercent, formatPosition, relativeChange, type TChange } from "@/lib/reports/format";
 import { formatMonthTitle, formatPeriodLabel } from "@/lib/reports/period";
-import type { TReportNarrativeSectionDto, TReportRankedRowDto, TReportSnapshotDto } from "@/types/reports.types";
+import type { TReportActivityItemDto, TReportRankedRowDto, TReportSnapshotDto } from "@/types/reports.types";
+import { buildReportText, describeEvent, type TReportText } from "@/lib/reports/report-text";
 
 /**
  * One view of a report snapshot. The PDF renderer and the in-app report page both render this
@@ -14,7 +15,8 @@ export type TReportTone = "brand" | "cyan" | "emerald" | "amber" | "neutral";
 
 export type TChangeView = { direction: TChange["direction"]; text: string };
 
-export type TKpiView = { label: string; value: string; change: TChangeView | null; tone: TReportTone };
+/** `empty` is true when the value is zero: the UI mutes it and hides the trend. */
+export type TKpiView = { label: string; value: string; change: TChangeView | null; tone: TReportTone; empty: boolean };
 
 export type TTableView = { headers: string[]; rows: string[][]; emptyText: string };
 
@@ -23,19 +25,37 @@ export type TSeriesView = {
   series: { name: string; color: string; values: Array<number | null> }[];
 };
 
+/** Which icon a highlight card shows. The UI maps each name to an app icon. */
+export type TCardIcon = "leads" | "calls" | "emails" | "whatsapp" | "blogs" | "backlinks" | "technical";
+
+export type TCardView = {
+  /** When set, the card opens this table in a modal (arrow shown). */
+  table?: TTableView;
+  icon: TCardIcon;
+  label: string;
+  value: string;
+  body: string;
+  change: TChangeView | null;
+  tone: TReportTone;
+  empty: boolean;
+};
+
+export type TNamedTable = { title: string; table: TTableView };
+
 export type TBlockView =
-  | { type: "paragraphs"; items: string[] }
-  | { type: "list"; title: string; items: string[] }
+  | { type: "heading"; title: string }
+  | { type: "prose"; title: string | null; body: string; variant: "lead" | "body" }
+  | { type: "cards"; title: string; items: TCardView[] }
   | { type: "kpis"; items: TKpiView[] }
-  | { type: "chips"; items: { label: string; value: string; tone: TReportTone }[] }
-  | { type: "line"; title: string | null; chart: TSeriesView }
-  | { type: "donut"; title: string; rows: { label: string; value: number }[] }
+  | { type: "line"; title: string | null; charts: { title: string; chart: TSeriesView }[]; tables: TNamedTable[] }
+  | { type: "donut"; title: string; rows: { label: string; value: number }[]; list?: { title: string; rows: { label: string; value: number }[]; emptyText: string } }
+  | { type: "bullets"; title: string; items: string[] }
   | { type: "table"; title: string; table: TTableView }
   | { type: "callout"; title: string; text: string }
   | { type: "note"; text: string };
 
 export type TSectionView = {
-  id: "summary" | "search" | "searchPages" | "traffic" | "audience" | "engagement" | "leads";
+  id: "summary" | "search" | "traffic" | "engagement" | "work";
   number: string;
   title: string;
   blocks: TBlockView[];
@@ -64,25 +84,52 @@ function change(current: number, previous: number | null | undefined): TChangeVi
 }
 
 function kpi(label: string, value: string, tone: TReportTone, delta?: TChangeView | null): TKpiView {
-  return { label, value, change: delta ?? null, tone };
+  return { label, value, change: delta ?? null, tone, empty: value === "0" };
 }
 
 function ranked(rows: TReportRankedRowDto[], emptyText: string, headers: string[], columns: (row: TReportRankedRowDto) => string[]): TTableView {
   return { headers, rows: rows.map(columns), emptyText };
 }
 
-function narrative(snapshot: TReportSnapshotDto, key: TReportNarrativeSectionDto["key"]): string[] {
-  return snapshot.narrative.sections.find((section) => section.key === key)?.paragraphs ?? [];
-}
-
 function lineView(dates: string[], series: TSeriesView["series"]): TSeriesView {
   return { dates, series };
 }
 
-function searchSection(snapshot: TReportSnapshotDto): TSectionView {
+function summarySection(snapshot: TReportSnapshotDto, text: TReportText): TSectionView {
+  const copy = REPORT_COPY.sections.summary;
+  const { activities, leads, events } = snapshot;
+  const h = text.highlights;
+  const blocks: TBlockView[] = [
+    { type: "prose", title: null, body: text.summary, variant: "lead" },
+    { type: "heading", title: copy.highlightsHeading },
+    {
+      type: "cards",
+      title: copy.contactHeading,
+      items: [
+        { icon: "leads", label: REPORT_COPY.kpi.leads, value: formatInt(leads.total), body: h.leads, change: change(leads.total, leads.previousTotal), tone: "brand", empty: formatInt(leads.total) === "0", table: leadsTable(snapshot) },
+        { icon: "calls", label: REPORT_COPY.kpi.calls, value: formatInt(events.contacts.call), body: h.calls, change: null, tone: "brand", empty: formatInt(events.contacts.call) === "0" },
+        { icon: "emails", label: REPORT_COPY.kpi.emailClicks, value: formatInt(events.contacts.email), body: h.emails, change: null, tone: "cyan", empty: formatInt(events.contacts.email) === "0" },
+        { icon: "whatsapp", label: REPORT_COPY.kpi.whatsappClicks, value: formatInt(events.contacts.whatsapp), body: h.whatsapp, change: null, tone: "emerald", empty: formatInt(events.contacts.whatsapp) === "0" },
+      ],
+    },
+    {
+      type: "cards",
+      title: copy.contentHeading,
+      items: [
+        { icon: "blogs", label: REPORT_COPY.kpi.blogPosts, value: formatInt(activities.current.blogs), body: h.blogs, change: change(activities.current.blogs, activities.previous.blogs), tone: "cyan", empty: formatInt(activities.current.blogs) === "0" },
+        { icon: "backlinks", label: REPORT_COPY.kpi.backlinks, value: formatInt(activities.current.backlinks), body: h.backlinks, change: change(activities.current.backlinks, activities.previous.backlinks), tone: "emerald", empty: formatInt(activities.current.backlinks) === "0" },
+        { icon: "technical", label: REPORT_COPY.kpi.technicalTasks, value: formatInt(activities.current.technical_work), body: h.technical, change: change(activities.current.technical_work, activities.previous.technical_work), tone: "amber", empty: formatInt(activities.current.technical_work) === "0" },
+      ],
+    },
+  ];
+  if (text.notes) blocks.push({ type: "prose", title: copy.notesHeading, body: text.notes, variant: "body" });
+  return { id: "summary", number: copy.number, title: copy.title, blocks };
+}
+
+function searchSection(snapshot: TReportSnapshotDto, text: TReportText): TSectionView {
   const { gsc, sources } = snapshot;
   const copy = REPORT_COPY.sections.search;
-  const blocks: TBlockView[] = [];
+  const blocks: TBlockView[] = [{ type: "prose", title: null, body: text.search, variant: "lead" }];
 
   if (sources.gsc) {
     blocks.push({
@@ -95,63 +142,57 @@ function searchSection(snapshot: TReportSnapshotDto): TSectionView {
       ],
     });
   }
-  blocks.push({ type: "paragraphs", items: narrative(snapshot, "search") });
+  const tables: TNamedTable[] = [
+    {
+      title: copy.queriesHeading,
+      table: ranked(gsc.topQueries, copy.noQueries, [REPORT_COPY.table.query, REPORT_COPY.table.clicks, REPORT_COPY.table.impressions, REPORT_COPY.table.ctr, REPORT_COPY.table.position], (row) => [
+        row.value,
+        formatInt(row.clicks),
+        formatInt(row.impressions),
+        formatPercent(row.ctr),
+        formatPosition(row.position),
+      ]),
+    },
+    {
+      title: copy.pagesHeading,
+      table: ranked(gsc.topPages, copy.noPages, [REPORT_COPY.table.page, REPORT_COPY.table.clicks, REPORT_COPY.table.impressions, REPORT_COPY.table.ctr, REPORT_COPY.table.position], (row) => [
+        row.value,
+        formatInt(row.clicks),
+        formatInt(row.impressions),
+        formatPercent(row.ctr),
+        formatPosition(row.position),
+      ]),
+    },
+  ];
   if (sources.gsc && gsc.series.length > 1) {
+    const dates = gsc.series.map((point) => point.date);
     blocks.push({
       type: "line",
-      title: null,
-      chart: lineView(
-        gsc.series.map((point) => point.date),
-        [
-          { name: REPORT_COPY.kpi.clicks, color: REPORT_PALETTE.series[0], values: gsc.series.map((point) => point.clicks) },
-          { name: REPORT_COPY.kpi.impressions, color: REPORT_PALETTE.series[1], values: gsc.series.map((point) => point.impressions) },
-        ]
-      ),
+      title: copy.chartHeading,
+      charts: [
+        {
+          title: REPORT_COPY.kpi.clicks,
+          chart: lineView(dates, [{ name: REPORT_COPY.kpi.clicks, color: REPORT_PALETTE.series[0], values: gsc.series.map((point) => point.clicks) }]),
+        },
+        {
+          title: REPORT_COPY.kpi.impressions,
+          chart: lineView(dates, [{ name: REPORT_COPY.kpi.impressions, color: REPORT_PALETTE.series[1], values: gsc.series.map((point) => point.impressions) }]),
+        },
+      ],
+      tables,
     });
   } else {
     blocks.push({ type: "note", text: copy.noDailySearch });
+    tables.forEach((named) => blocks.push({ type: "table", title: named.title, table: named.table }));
   }
-  blocks.push({
-    type: "table",
-    title: copy.queriesHeading,
-    table: ranked(gsc.topQueries, copy.noQueries, [REPORT_COPY.table.query, REPORT_COPY.table.clicks, REPORT_COPY.table.impressions, REPORT_COPY.table.ctr, REPORT_COPY.table.position], (row) => [
-      row.value,
-      formatInt(row.clicks),
-      formatInt(row.impressions),
-      formatPercent(row.ctr),
-      formatPosition(row.position),
-    ]),
-  });
 
   return { id: "search", number: copy.number, title: copy.title, blocks };
 }
 
-function searchPagesSection(snapshot: TReportSnapshotDto): TSectionView {
-  const copy = REPORT_COPY.sections.searchPages;
-  return {
-    id: "searchPages",
-    number: copy.number,
-    title: copy.title,
-    blocks: [
-      {
-        type: "table",
-        title: copy.heading,
-        table: ranked(snapshot.gsc.topPages, copy.noPages, [REPORT_COPY.table.page, REPORT_COPY.table.clicks, REPORT_COPY.table.impressions, REPORT_COPY.table.ctr, REPORT_COPY.table.position], (row) => [
-          row.value,
-          formatInt(row.clicks),
-          formatInt(row.impressions),
-          formatPercent(row.ctr),
-          formatPosition(row.position),
-        ]),
-      },
-    ],
-  };
-}
-
-function trafficSection(snapshot: TReportSnapshotDto): TSectionView {
+function trafficSection(snapshot: TReportSnapshotDto, text: TReportText): TSectionView {
   const { ga4, sources } = snapshot;
   const copy = REPORT_COPY.sections.traffic;
-  const blocks: TBlockView[] = [];
+  const blocks: TBlockView[] = [{ type: "prose", title: null, body: text.traffic, variant: "lead" }];
 
   if (sources.ga4) {
     blocks.push({
@@ -164,57 +205,75 @@ function trafficSection(snapshot: TReportSnapshotDto): TSectionView {
       ],
     });
   }
-  blocks.push({ type: "paragraphs", items: narrative(snapshot, "traffic") });
+  const countries = ga4.countries.filter((row) => (row.sessions ?? 0) > 0).slice(0, REPORT_MAX_TOP_COUNTRIES);
+  const tables: TNamedTable[] = [
+    {
+      title: copy.landingHeading,
+      table: ranked(ga4.topPages, copy.noPages, [REPORT_COPY.table.page, REPORT_COPY.table.sessions], (row) => [row.value, formatInt(row.sessions)]),
+    },
+  ];
   if (sources.ga4 && ga4.series.length > 1) {
     blocks.push({
       type: "line",
-      title: null,
-      chart: lineView(
-        ga4.series.map((point) => point.date),
-        [{ name: REPORT_COPY.kpi.sessions, color: REPORT_PALETTE.series[0], values: ga4.series.map((point) => point.sessions) }]
-      ),
+      title: copy.chartHeading,
+      charts: [
+        {
+          title: REPORT_COPY.kpi.sessions,
+          chart: lineView(
+            ga4.series.map((point) => point.date),
+            [{ name: REPORT_COPY.kpi.sessions, color: REPORT_PALETTE.series[0], values: ga4.series.map((point) => point.sessions) }]
+          ),
+        },
+      ],
+      tables,
     });
   } else {
     blocks.push({ type: "note", text: copy.noDailyTraffic });
+    tables.forEach((named) => blocks.push({ type: "table", title: named.title, table: named.table }));
   }
   const channels = ga4.channels.filter((row) => (row.sessions ?? 0) > 0).slice(0, 6);
+  const countryRows = countries.map((row) => ({ label: row.value, value: row.sessions ?? 0 }));
   if (channels.length > 0) {
     blocks.push({
       type: "donut",
       title: copy.channelsHeading,
       rows: channels.map((row) => ({ label: row.value, value: row.sessions ?? 0 })),
+      list: { title: copy.countriesHeading, rows: countryRows, emptyText: copy.noCountries },
+    });
+  } else {
+    blocks.push({
+      type: "table",
+      title: copy.countriesHeading,
+      table: ranked(ga4.countries, copy.noCountries, [REPORT_COPY.table.country, REPORT_COPY.table.sessions], (row) => [row.value, formatInt(row.sessions)]),
     });
   }
 
   return { id: "traffic", number: copy.number, title: copy.title, blocks };
 }
 
-function audienceSection(snapshot: TReportSnapshotDto): TSectionView {
-  const copy = REPORT_COPY.sections.audience;
-  return {
-    id: "audience",
-    number: copy.number,
-    title: copy.title,
-    blocks: [
+function engagementSection(snapshot: TReportSnapshotDto, text: TReportText): TSectionView {
+  const { ga4, events, sources, leads } = snapshot;
+  const copy = REPORT_COPY.sections.engagement;
+  const blocks: TBlockView[] = [{ type: "prose", title: null, body: text.engagement, variant: "lead" }];
+
+  blocks.push({
+    type: "cards",
+    title: copy.leadsHeading,
+    items: [
       {
-        type: "table",
-        title: copy.countriesHeading,
-        table: ranked(snapshot.ga4.countries, copy.noCountries, [REPORT_COPY.table.country, REPORT_COPY.table.sessions], (row) => [row.value, formatInt(row.sessions)]),
-      },
-      {
-        type: "table",
-        title: copy.landingHeading,
-        table: ranked(snapshot.ga4.topPages, copy.noPages, [REPORT_COPY.table.page, REPORT_COPY.table.sessions], (row) => [row.value, formatInt(row.sessions)]),
+        icon: "leads",
+        label: REPORT_COPY.kpi.leads,
+        value: formatInt(leads.total),
+        body: "",
+        change: change(leads.total, leads.previousTotal),
+        tone: "brand",
+        empty: leads.total === 0,
+        table: leadsTable(snapshot),
       },
     ],
-  };
-}
+  });
 
-function engagementSection(snapshot: TReportSnapshotDto): TSectionView {
-  const { ga4, events, sources } = snapshot;
-  const copy = REPORT_COPY.sections.engagement;
-  const blocks: TBlockView[] = [];
-
+  blocks.push({ type: "heading", title: copy.engagementHeading });
   if (sources.ga4) {
     blocks.push({
       type: "kpis",
@@ -226,116 +285,88 @@ function engagementSection(snapshot: TReportSnapshotDto): TSectionView {
       ],
     });
   }
-  blocks.push({
-    type: "chips",
-    items: [
-      { label: REPORT_COPY.kpi.calls, value: formatInt(events.contacts.call), tone: "brand" },
-      { label: REPORT_COPY.kpi.emailClicks, value: formatInt(events.contacts.email), tone: "cyan" },
-      { label: REPORT_COPY.kpi.whatsappClicks, value: formatInt(events.contacts.whatsapp), tone: "emerald" },
-    ],
-  });
-  blocks.push({ type: "paragraphs", items: narrative(snapshot, "engagement") });
   if (events.highlights.length > 0) {
     blocks.push({
-      type: "table",
-      title: copy.actionsHeading,
-      table: {
-        headers: [REPORT_COPY.table.action, REPORT_COPY.table.count],
-        rows: events.highlights.map((item) => [item.label, formatInt(item.count)]),
-        emptyText: "",
-      },
+      type: "bullets",
+      title: copy.eventsHeading,
+      items: events.highlights.slice(0, REPORT_MAX_TOP_EVENTS).map((item) => describeEvent(item.label, item.count)),
     });
   }
 
   return { id: "engagement", number: copy.number, title: copy.title, blocks };
 }
 
-function leadsSection(snapshot: TReportSnapshotDto): TSectionView {
-  const { leads, activities } = snapshot;
-  const copy = REPORT_COPY.sections.leads;
-  const origins = Object.entries(leads.byOrigin)
-    .filter(([, count]) => count > 0)
-    .map(([origin, count]) => [REPORT_COPY.origins[origin as keyof typeof REPORT_COPY.origins] ?? origin, formatInt(count)]);
-  const blocks: TBlockView[] = [
-    {
-      type: "kpis",
-      items: [
-        kpi(REPORT_COPY.kpi.leads, formatInt(leads.total), "brand", change(leads.total, leads.previousTotal)),
-        kpi(REPORT_COPY.kpi.blogPosts, formatInt(activities.current.blogs), "cyan", change(activities.current.blogs, activities.previous.blogs)),
-        kpi(REPORT_COPY.kpi.backlinks, formatInt(activities.current.backlinks), "emerald", change(activities.current.backlinks, activities.previous.backlinks)),
-        kpi(REPORT_COPY.kpi.technicalTasks, formatInt(activities.current.technical_work), "amber"),
-      ],
-    },
-    { type: "paragraphs", items: narrative(snapshot, "leads") },
-  ];
-  if (origins.length > 0) {
-    blocks.push({
-      type: "donut",
-      title: copy.sourcesHeading,
-      rows: Object.entries(leads.byOrigin)
-        .filter(([, count]) => count > 0)
-        .map(([origin, count]) => ({ label: REPORT_COPY.origins[origin as keyof typeof REPORT_COPY.origins] ?? origin, value: count })),
-    });
-  }
-  blocks.push({
-    type: "table",
-    title: copy.workHeading,
-    table: {
-      headers: [REPORT_COPY.table.type, REPORT_COPY.table.thisPeriod, REPORT_COPY.table.previousPeriod],
-      rows: [
-        [REPORT_COPY.workTypes.blogs, formatInt(activities.current.blogs), formatInt(activities.previous.blogs)],
-        [REPORT_COPY.workTypes.backlinks, formatInt(activities.current.backlinks), formatInt(activities.previous.backlinks)],
-        [REPORT_COPY.workTypes.technicalWork, formatInt(activities.current.technical_work), formatInt(activities.previous.technical_work)],
-      ],
-      emptyText: "",
-    },
-  });
-  blocks.push({ type: "paragraphs", items: narrative(snapshot, "content") });
-  if (activities.blogs.length > 0) {
-    blocks.push({
-      type: "table",
-      title: copy.blogsHeading,
-      table: {
-        headers: [REPORT_COPY.table.title, REPORT_COPY.table.date],
-        rows: activities.blogs.slice(0, REPORT_MAX_BLOG_ROWS).map((blog) => [blog.title, blog.occurredOn]),
-        emptyText: "",
-      },
-    });
-  }
-
-  return { id: "leads", number: copy.number, title: copy.title, blocks };
+function leadsTable(snapshot: TReportSnapshotDto): TTableView {
+  return {
+    headers: [REPORT_COPY.table.name, REPORT_COPY.table.email, REPORT_COPY.table.date, REPORT_COPY.table.source],
+    rows: (snapshot.leads.rows ?? []).slice(0, REPORT_MAX_ACTIVITY_ROWS).map((row) => [
+      row.name || "—",
+      row.email,
+      row.leadDate,
+      REPORT_COPY.origins[row.origin as keyof typeof REPORT_COPY.origins] ?? row.origin,
+    ]),
+    emptyText: REPORT_COPY.table.noLeads,
+  };
 }
 
-function summarySection(snapshot: TReportSnapshotDto): TSectionView {
-  const { gsc, ga4, leads, activities, sources, narrative: story } = snapshot;
-  const copy = REPORT_COPY.sections.summary;
+function activityTable(rows: TReportActivityItemDto[] | undefined): TTableView {
   return {
-    id: "summary",
-    number: copy.number,
-    title: copy.title,
-    blocks: [
-      {
-        type: "kpis",
-        items: [
-          kpi(REPORT_COPY.kpi.searchClicks, formatInt(gsc.current.clicks), "brand", sources.gsc ? change(gsc.current.clicks, gsc.previous.clicks) : null),
-          kpi(REPORT_COPY.kpi.impressions, formatInt(gsc.current.impressions), "cyan", sources.gsc ? change(gsc.current.impressions, gsc.previous.impressions) : null),
-          kpi(REPORT_COPY.kpi.sessions, formatInt(ga4.current.sessions), "emerald", sources.ga4 ? change(ga4.current.sessions, ga4.previous.sessions) : null),
-          kpi(REPORT_COPY.kpi.users, formatInt(ga4.current.totalUsers), "amber", sources.ga4 ? change(ga4.current.totalUsers, ga4.previous.totalUsers) : null),
-          kpi(REPORT_COPY.kpi.leads, formatInt(leads.total), "brand", change(leads.total, leads.previousTotal)),
-          kpi(REPORT_COPY.kpi.blogPosts, formatInt(activities.current.blogs), "cyan", change(activities.current.blogs, activities.previous.blogs)),
-          kpi(REPORT_COPY.kpi.avgPosition, formatPosition(gsc.current.position), "emerald"),
-          kpi(REPORT_COPY.kpi.clickThroughRate, formatPercent(gsc.current.ctr), "amber"),
-        ],
-      },
-      { type: "list", title: copy.summaryHeading, items: story.executiveSummary },
-      { type: "list", title: copy.findingsHeading, items: story.keyFindings },
-    ],
+    headers: [REPORT_COPY.table.title, REPORT_COPY.table.url, REPORT_COPY.table.date, REPORT_COPY.table.notes],
+    rows: (rows ?? []).slice(0, REPORT_MAX_ACTIVITY_ROWS).map((row) => [row.title, row.url, row.occurredOn, row.anchorText || row.details || "—"]),
+    emptyText: "",
   };
+}
+
+function workSection(snapshot: TReportSnapshotDto, text: TReportText): TSectionView {
+  const { activities } = snapshot;
+  const copy = REPORT_COPY.sections.work;
+  const blocks: TBlockView[] = [
+    { type: "prose", title: null, body: text.work, variant: "lead" },
+    {
+      type: "cards",
+      title: copy.cardsHeading,
+      items: [
+        {
+          icon: "blogs",
+          label: REPORT_COPY.kpi.blogPosts,
+          value: formatInt(activities.current.blogs),
+          body: copy.blogsHint,
+          change: change(activities.current.blogs, activities.previous.blogs),
+          tone: "cyan",
+          empty: activities.current.blogs === 0,
+          table: activityTable(activities.blogs),
+        },
+        {
+          icon: "backlinks",
+          label: REPORT_COPY.kpi.backlinks,
+          value: formatInt(activities.current.backlinks),
+          body: copy.backlinksHint,
+          change: change(activities.current.backlinks, activities.previous.backlinks),
+          tone: "emerald",
+          empty: activities.current.backlinks === 0,
+          table: activityTable(activities.backlinks),
+        },
+        {
+          icon: "technical",
+          label: REPORT_COPY.kpi.technicalTasks,
+          value: formatInt(activities.current.technical_work),
+          body: copy.technicalHint,
+          change: change(activities.current.technical_work, activities.previous.technical_work),
+          tone: "amber",
+          empty: activities.current.technical_work === 0,
+          table: activityTable(activities.technical),
+        },
+      ],
+    },
+  ];
+
+  return { id: "work", number: copy.number, title: copy.title, blocks };
 }
 
 /** Builds the full report view from a stored snapshot. Pure: no I/O. */
 export function buildReportView(snapshot: TReportSnapshotDto): TReportView {
   const monthTitle = formatMonthTitle(snapshot.period.from);
+  const text = buildReportText(snapshot);
   return {
     title: `${snapshot.project.name} — ${monthTitle}`,
     cover: {
@@ -347,13 +378,11 @@ export function buildReportView(snapshot: TReportSnapshotDto): TReportView {
       websiteUrl: snapshot.project.websiteUrl,
     },
     sections: [
-      summarySection(snapshot),
-      searchSection(snapshot),
-      searchPagesSection(snapshot),
-      trafficSection(snapshot),
-      audienceSection(snapshot),
-      engagementSection(snapshot),
-      leadsSection(snapshot),
+      summarySection(snapshot, text),
+      searchSection(snapshot, text),
+      trafficSection(snapshot, text),
+      engagementSection(snapshot, text),
+      workSection(snapshot, text),
     ],
     contact: {
       phones: [...REPORT_BRAND.phones],

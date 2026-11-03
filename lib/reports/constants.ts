@@ -33,8 +33,12 @@ export const REPORT_PALETTE = {
 /** Rows per ranked table (queries, pages, channels, countries). */
 export const REPORT_TOP_ROWS = 10;
 
-/** Blog titles listed in the content section. */
-export const REPORT_MAX_BLOG_ROWS = 20;
+/** Rows listed per work type (backlinks, technical tasks) in the work modals. */
+export const REPORT_MAX_ACTIVITY_ROWS = 100;
+/** Top tracked events listed in the engagement section. */
+export const REPORT_MAX_TOP_EVENTS = 5;
+/** Top countries listed under the traffic-by-channel pie. */
+export const REPORT_MAX_TOP_COUNTRIES = 5;
 
 /** Highlight notes accepted per report. */
 export const REPORT_MAX_HIGHLIGHTS = 8;
@@ -44,7 +48,7 @@ export const REPORT_RENDER_TIMEOUT_MS = 60_000;
 /** Max HTML size sent to the renderer (bytes). */
 export const REPORT_MAX_HTML_BYTES = 5 * 1024 * 1024;
 
-/** Relative change below this share counts as flat in narrative wording. */
+/** Relative change below this share counts as flat in report wording. */
 export const REPORT_FLAT_CHANGE_RATIO = 0.03;
 
 /** Position change (in ranking places) below this counts as stable. */
