@@ -14,7 +14,7 @@ describe("rich text helpers", () => {
   });
 
   it("returns the first paragraph for list summaries", () => {
-    expect(richDocFirstParagraph(doc)).toBe("Wins");
+    expect(richDocFirstParagraph(doc)).toBe("Traffic grew.");
     expect(richDocFirstParagraph([{ type: "paragraph", runs: [{ text: "  Hello  " }] }])).toBe("Hello");
   });
 

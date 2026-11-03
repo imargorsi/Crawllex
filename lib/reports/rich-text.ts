@@ -60,7 +60,8 @@ export function richDocPlainText(doc: TRichDoc): string {
     .join(BLOCK_BREAK);
 }
 
-/** First paragraph of plain text, for list cards. Returns null when the document is empty. */
+/** First paragraph or bullet list (headings skipped), for list cards. Returns null when there is none. */
 export function richDocFirstParagraph(doc: TRichDoc): string | null {
-  return richDocPlainText(doc).split(BLOCK_BREAK)[0]?.trim() || null;
+  const body = doc.filter((block) => block.type !== "heading");
+  return richDocPlainText(body).split(BLOCK_BREAK)[0]?.trim() || null;
 }
