@@ -206,15 +206,14 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
       <label htmlFor={id} className={cn("type-label text-text-primary", required ? 'after:ms-0.5 after:text-destructive after:content-["*"]' : "")}>
         {label}
       </label>
-      {hint ? <p className="type-caption text-text-muted">{hint}</p> : null}
       <div
         className={cn(
+          "overflow-hidden rounded-xl transition focus-within:border-[var(--accent-border)] focus-within:ring-2 focus-within:ring-brand/25",
           formFieldControlClass,
-          "overflow-hidden rounded-xl bg-transparent transition focus-within:border-(--accent-border) focus-within:ring-2 focus-within:ring-brand/25",
-          error && "border-destructive",
+          error && "border-[color-mix(in_srgb,var(--destructive)_68%,transparent)]",
         )}
       >
-        <div role="toolbar" aria-label={`${label} formatting`} className="flex flex-wrap items-center gap-1 border-b border-border px-2 py-1.5">
+        <div role="toolbar" aria-label={`${label} formatting`} className="flex items-center gap-0.5 border-b border-border/50 px-1.5 py-1">
           {TOOLBAR.map((item) => (
             <button
               key={item.format}
@@ -222,14 +221,14 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
               aria-label={item.label}
               title={item.label}
               onMouseDown={(event) => runCommand(event, item.command)}
-              className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 type-label text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
+              className="inline-flex h-7 min-w-7 items-center justify-center rounded-md px-1.5 type-caption text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
             >
               {item.glyph}
             </button>
           ))}
         </div>
         <div className="relative">
-          {empty ? <p className="pointer-events-none absolute start-4 top-3 text-[15px] text-text-placeholder">{placeholder}</p> : null}
+          {empty ? <p className="type-body pointer-events-none absolute start-3 top-2.5 text-text-placeholder">{placeholder}</p> : null}
           <div
             id={id}
             ref={rootRef}
@@ -242,15 +241,16 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
             onInput={handleInput}
             onPaste={handlePaste}
             className={cn(
-              "min-h-40 px-4 py-3 text-[15px] leading-relaxed text-text-primary outline-none",
-              "[&_h2]:mb-2 [&_h2]:mt-3 [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:tracking-tight",
-              "[&_h3]:mb-1 [&_h3]:mt-3 [&_h3]:text-base [&_h3]:font-semibold",
+              "type-body min-h-40 px-3 py-2.5 text-text-primary outline-none",
+              "[&_h2]:mb-2 [&_h2]:mt-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:tracking-tight",
+              "[&_h3]:mb-1 [&_h3]:mt-3 [&_h3]:font-semibold",
               "[&_p]:mb-2 [&_ul]:mb-2 [&_ul]:list-disc [&_ul]:ps-5 [&_li]:mb-1 [&_li]:marker:text-brand",
             )}
           />
         </div>
       </div>
-      {error ? <p className="type-caption text-destructive">{error}</p> : null}
+      {hint ? <p className="type-caption text-text-muted">{hint}</p> : null}
+      {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
     </div>
   );
 }
