@@ -114,12 +114,12 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
       }}
     >
       <section className={cn(elevatedCardSurfaceClass, "rounded-2xl p-6 sm:p-8")}>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8">
           <ProjectCreateStepper labels={stepLabels} current={currentStep} />
 
           {currentStep === REPORT_STEP ? (
-            <div className="flex flex-col gap-6">
-              <p className="type-body text-text-muted">{t("stepReportLead")}</p>
+            <div className="flex flex-col gap-8">
+              <p className="type-body text-text-secondary">{t("stepReportLead")}</p>
               <div className="max-w-sm">
                 <Input
                   id="report-month"
@@ -130,7 +130,7 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
                   required
                   onChange={(event) => setMonth(event.target.value)}
                 />
-                <p className="type-caption mt-2 text-text-muted">{t("periodHint")}</p>
+                <p className="type-caption mt-3 text-text-secondary">{t("periodHint")}</p>
               </div>
               <RichTextEditor
                 id="report-next-steps"
@@ -148,9 +148,9 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
           ) : null}
 
           {isContentStep ? (
-            <div className="flex flex-col gap-6">
-              <p className="type-body text-text-muted">{t("stepContentLead")}</p>
-              <div className="grid gap-6 lg:grid-cols-2">
+            <div className="flex flex-col gap-8">
+              <p className="type-body text-text-secondary">{t("stepContentLead")}</p>
+              <div className="grid gap-x-6 gap-y-10 lg:grid-cols-2">
                 {REPORT_WRITTEN_KEYS.map((key) => (
                   <div key={key} className={cn(key === "executiveSummary" && "lg:col-span-2")}>
                     <RichTextEditor

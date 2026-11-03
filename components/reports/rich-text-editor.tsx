@@ -202,7 +202,7 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
   }
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2.5">
       <label htmlFor={id} className={cn("type-label text-text-primary", required ? 'after:ms-0.5 after:text-destructive after:content-["*"]' : "")}>
         {label}
       </label>
@@ -221,14 +221,14 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
               aria-label={item.label}
               title={item.label}
               onMouseDown={(event) => runCommand(event, item.command)}
-              className="inline-flex h-7 min-w-7 items-center justify-center rounded-md px-1.5 type-caption text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
+              className="inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 type-label text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
             >
               {item.glyph}
             </button>
           ))}
         </div>
         <div className="relative">
-          {empty ? <p className="type-body pointer-events-none absolute start-3 top-2.5 text-text-placeholder">{placeholder}</p> : null}
+          {empty ? <p className="type-body pointer-events-none absolute start-3 top-3 text-text-muted">{placeholder}</p> : null}
           <div
             id={id}
             ref={rootRef}
@@ -249,7 +249,7 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
           />
         </div>
       </div>
-      {hint ? <p className="type-caption text-text-muted">{hint}</p> : null}
+      {hint ? <p className="type-caption text-text-secondary">{hint}</p> : null}
       {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
     </div>
   );
