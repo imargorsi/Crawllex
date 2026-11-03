@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isRichDocEmpty, richDocFirstParagraph, richDocPlainText, type TRichDoc } from "@/lib/reports/rich-text";
+import { isRichDocEmpty, isSafeHref, richDocFirstParagraph, richDocPlainText, type TRichDoc } from "@/lib/reports/rich-text";
 
 const doc: TRichDoc = [
   { type: "heading", level: 2, runs: [{ text: "Wins" }] },
@@ -23,5 +23,20 @@ describe("rich text helpers", () => {
     expect(isRichDocEmpty([{ type: "paragraph", runs: [{ text: " " }] }])).toBe(true);
     expect(isRichDocEmpty([{ type: "bullets", items: [[{ text: "" }]] }])).toBe(true);
     expect(isRichDocEmpty(doc)).toBe(false);
+  });
+});
+
+describe("isSafeHref", () => {
+  it("allows web and mail links", () => {
+    expect(isSafeHref("https://example.com/page?x=1")).toBe(true);
+    expect(isSafeHref("http://example.com")).toBe(true);
+    expect(isSafeHref("mailto:team@example.com")).toBe(true);
+  });
+
+  it("rejects script, data and relative links", () => {
+    expect(isSafeHref("javascript:alert(1)")).toBe(false);
+    expect(isSafeHref("data:text/html,<script>alert(1)</script>")).toBe(false);
+    expect(isSafeHref("/relative/path")).toBe(false);
+    expect(isSafeHref("")).toBe(false);
   });
 });

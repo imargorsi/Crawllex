@@ -106,7 +106,14 @@ function RichRuns({ runs }: { runs: TRichInline[] }) {
   return (
     <>
       {runs.map((run, index) => {
-        const content = run.bold ? <strong className="font-semibold text-text-primary">{run.text}</strong> : run.text;
+        let content: React.ReactNode = run.bold ? <strong className="font-semibold text-text-primary">{run.text}</strong> : run.text;
+        if (run.href) {
+          content = (
+            <a href={run.href} target="_blank" rel="noopener noreferrer" className="text-brand underline underline-offset-4 hover:opacity-80">
+              {content}
+            </a>
+          );
+        }
         return run.italic ? <em key={index}>{content}</em> : <span key={index}>{content}</span>;
       })}
     </>

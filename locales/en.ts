@@ -909,6 +909,18 @@ export interface Translation {
       periodHint: string;
       invalidPeriod: string;
       nextStepsRequired: string;
+      toolbarBold: string;
+      toolbarItalic: string;
+      toolbarHeading: string;
+      toolbarSubheading: string;
+      toolbarParagraph: string;
+      toolbarList: string;
+      linkButton: string;
+      linkUrl: string;
+      linkApply: string;
+      linkRemove: string;
+      linkSelectText: string;
+      linkInvalid: string;
       stepReport: string;
       stepReportLead: string;
       stepContent: string;
@@ -2608,6 +2620,18 @@ const translation: Translation = {
       periodHint: "Covers the first to the last day of the month.",
       invalidPeriod: "Choose a valid month.",
       nextStepsRequired: "Next steps are required.",
+      toolbarBold: "Bold",
+      toolbarItalic: "Italic",
+      toolbarHeading: "Heading",
+      toolbarSubheading: "Subheading",
+      toolbarParagraph: "Paragraph",
+      toolbarList: "Bullet list",
+      linkButton: "Link",
+      linkUrl: "Link address",
+      linkApply: "Apply",
+      linkRemove: "Remove link",
+      linkSelectText: "Select the text you want to link first.",
+      linkInvalid: "Enter a valid address, for example https://example.com.",
       stepReport: "Report",
       stepReportLead: "Pick the month this report covers and write the next steps for the client. Next steps are required and saved with the report.",
       stepContent: "Content",

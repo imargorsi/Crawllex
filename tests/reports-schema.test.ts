@@ -41,6 +41,13 @@ describe("createReportSchema", () => {
     expect(() => createReportSchema.parse({ ...base, written: { work: bad } })).toThrow();
   });
 
+  it("accepts safe links and rejects unsafe ones", () => {
+    const linked: TRichDoc = [{ type: "paragraph", runs: [{ text: "Read more", href: "https://example.com" }] }];
+    expect(createReportSchema.parse({ ...base, written: { work: linked } }).written.work).toEqual(linked);
+    const unsafe = [{ type: "paragraph", runs: [{ text: "x", href: "javascript:alert(1)" }] }] as TRichDoc;
+    expect(() => createReportSchema.parse({ ...base, written: { work: unsafe } })).toThrow();
+  });
+
   it("rejects text longer than the document limit", () => {
     const long = paragraph("x".repeat(30_001));
     expect(() => createReportSchema.parse({ ...base, written: { search: long } })).toThrow("Text Is Too Long.");

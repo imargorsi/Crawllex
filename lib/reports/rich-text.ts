@@ -4,7 +4,8 @@
  * renderer draws them with escaped text. Only headings, paragraphs, bullet lists, bold and italic exist.
  */
 
-export type TRichInline = { text: string; bold?: boolean; italic?: boolean };
+/** A run of text. `href` is set on links only; it is always passed through `isSafeHref` first. */
+export type TRichInline = { text: string; bold?: boolean; italic?: boolean; href?: string };
 
 export type TRichBlock =
   | { type: "heading"; level: 2 | 3; runs: TRichInline[] }
@@ -17,6 +18,18 @@ export type TRichDoc = TRichBlock[];
 export const REPORT_WRITTEN_KEYS = ["executiveSummary", "search", "traffic", "leads", "work"] as const;
 
 export type TReportWrittenKey = (typeof REPORT_WRITTEN_KEYS)[number];
+
+const SAFE_PROTOCOLS = ["https:", "http:", "mailto:"];
+
+/** Only web and mail links are allowed. Anything else (javascript:, data:, relative paths) is rejected. */
+export function isSafeHref(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return SAFE_PROTOCOLS.includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
 
 /** Block text separator used by plain-text exports of a document. */
 const BLOCK_BREAK = "\n\n";

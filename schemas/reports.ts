@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { ANALYTICS_MAX_RANGE_DAYS } from "@/lib/integrations/constants";
 import { inclusiveDaySpan } from "@/lib/integrations/date.utils";
-import { isRichDocEmpty, type TRichDoc } from "@/lib/reports/rich-text";
+import { isRichDocEmpty, isSafeHref, type TRichDoc } from "@/lib/reports/rich-text";
 
 const isoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date Must Be YYYY-MM-DD.");
 
@@ -14,6 +14,11 @@ const richInlineSchema = z.object({
   text: z.string().max(5_000, "Text Is Too Long."),
   bold: z.boolean().optional(),
   italic: z.boolean().optional(),
+  href: z
+    .string()
+    .max(2_000, "Link Is Too Long.")
+    .refine(isSafeHref, "Links Must Start With https://, http:// or mailto:.")
+    .optional(),
 });
 
 const richRunsSchema = z.array(richInlineSchema).max(500);

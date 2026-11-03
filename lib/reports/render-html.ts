@@ -137,7 +137,8 @@ function runsHtml(runs: TRichInline[]): string {
     .map((run) => {
       const text = escapeHtml(run.text);
       const bold = run.bold ? `<strong>${text}</strong>` : text;
-      return run.italic ? `<em>${bold}</em>` : bold;
+      const linked = run.href ? `<a href="${escapeHtml(run.href)}">${bold}</a>` : bold;
+      return run.italic ? `<em>${linked}</em>` : linked;
     })
     .join("");
 }
