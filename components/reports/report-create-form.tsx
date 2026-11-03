@@ -79,7 +79,6 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
   /** Checks the report step. Returns the first problem, or null when the step is complete. */
   function validateReportStep(): string | null {
     if (!monthValueToPeriod(month)) return t("invalidPeriod");
-    if (!hasNextSteps) return t("nextStepsRequired");
     return null;
   }
 
@@ -101,9 +100,13 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
   async function submit() {
     const problem = validateReportStep();
     const period = monthValueToPeriod(month);
-    if (problem || !period || !nextSteps) {
+    if (problem || !period) {
       setCurrentStep(REPORT_STEP);
       setStepError(problem);
+      return;
+    }
+    if (!hasNextSteps || !nextSteps) {
+      setStepError(t("nextStepsRequired"));
       return;
     }
     setStepError(null);
@@ -170,19 +173,6 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
                   />
                 </div>
               </div>
-              <RichTextEditor
-                id="report-next-steps"
-                label={t("written.nextSteps")}
-                icon={Icons.rocket}
-                hint={t("sectionNextStepsHint")}
-                placeholder={t("writtenPlaceholder")}
-                defaultValue={nextSteps}
-                required
-                onChange={(doc) => {
-                  setNextSteps(doc);
-                  if (!isRichDocEmpty(doc)) setStepError(null);
-                }}
-              />
             </div>
           ) : null}
 
@@ -204,10 +194,24 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
                   </div>
                 ))}
               </div>
+              <RichTextEditor
+                id="report-next-steps"
+                label={t("written.nextSteps")}
+                icon={Icons.rocket}
+                hint={t("sectionNextStepsHint")}
+                placeholder={t("writtenPlaceholder")}
+                defaultValue={nextSteps}
+                required
+                onChange={(doc) => {
+                  setNextSteps(doc);
+                  if (!isRichDocEmpty(doc)) setStepError(null);
+                }}
+                error={stepError && !hasNextSteps ? stepError : undefined}
+              />
             </div>
           ) : null}
 
-          {stepError ? (
+          {stepError && !(isContentStep && !hasNextSteps) ? (
             <p className="text-sm text-destructive" role="alert">
               {stepError}
             </p>
