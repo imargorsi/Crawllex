@@ -53,6 +53,12 @@ describe("createReportSchema", () => {
     expect(() => createReportSchema.parse({ ...base, written: { search: long } })).toThrow("Text Is Too Long.");
   });
 
+  it("keeps unique recipient ids and rejects malformed ones", () => {
+    const id = "6ae9efd9e4010f5debf64183";
+    expect(createReportSchema.parse({ ...base, recipientUserIds: [id, id] }).recipientUserIds).toEqual([id]);
+    expect(() => createReportSchema.parse({ ...base, recipientUserIds: ["not-an-id"] })).toThrow();
+  });
+
   it("rejects a start date after the end date", () => {
     expect(() => createReportSchema.parse({ ...base, periodFrom: "2026-09-30", periodTo: "2026-09-01" })).toThrow();
   });

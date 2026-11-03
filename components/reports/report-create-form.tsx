@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { ProjectCreateStepper } from "@/components/forms/project-create-stepper";
+import { ProjectInviteUserSelect } from "@/components/forms/project-invite-user-select";
 import { ReportFieldLabel } from "@/components/reports/report-field-label";
 import { RichTextEditor } from "@/components/reports/rich-text-editor";
 import { Input } from "@/components/input";
@@ -13,6 +14,8 @@ import { Icons } from "@/lib/frontend/icons/app-icons";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useCreateReportMutation, type TCreateReportPayload } from "@/features/reports/reports.api";
+import { useProjectQuery } from "@/features/projects/projects.api";
+import type { TUserLookupItem } from "@/types/project-invite.types";
 import { ApiError } from "@/lib/frontend/api/errors";
 import { notify } from "@/lib/frontend/feedback/notify";
 import { elevatedCardSurfaceClass } from "@/lib/frontend/layout/dashboard-chrome";
@@ -54,6 +57,13 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
   const [currentStep, setCurrentStep] = useState(REPORT_STEP);
   const [month, setMonth] = useState(defaultMonthValue());
   const [nextSteps, setNextSteps] = useState<TRichDoc | null>(null);
+  // Recipients start with the project owner. Once the user edits the list, their list is kept as is.
+  const [editedRecipients, setEditedRecipients] = useState<TUserLookupItem[] | null>(null);
+  const { data: project } = useProjectQuery(projectId);
+  const ownerRecipients: TUserLookupItem[] = project?.owner
+    ? [{ id: project.owner.id, name: project.owner.name, email: project.owner.email, profileImage: project.owner.profileImage }]
+    : [];
+  const recipients = editedRecipients ?? ownerRecipients;
   const [written, setWritten] = useState<TWrittenState>(EMPTY_WRITTEN);
   const [stepError, setStepError] = useState<string | null>(null);
   const createMutation = useCreateReportMutation(projectId);
@@ -99,6 +109,7 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
     setStepError(null);
     const payload: TCreateReportPayload = {
       ...period,
+      recipientUserIds: recipients.map((user) => user.id),
       written: Object.fromEntries(
         REPORT_WRITTEN_KEYS.map((key) => [key, written[key] && !isRichDocEmpty(written[key]) ? written[key] : null]),
       ) as TCreateReportPayload["written"],
@@ -132,18 +143,29 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
           {currentStep === REPORT_STEP ? (
             <div className="flex flex-col gap-8">
               <p className="text-base text-text-secondary">{t("stepReportLead")}</p>
-              <div className="flex max-w-sm flex-col gap-3">
-                <ReportFieldLabel htmlFor="report-month" label={t("periodMonth")} icon={Icons.calendar} required />
-                <Input
-                  id="report-month"
-                  type="select"
-                  aria-label={t("periodMonth")}
-                  value={month}
-                  options={monthOptions}
-                  required
-                  onChange={(event) => setMonth(event.target.value)}
-                />
-                <p className="text-sm text-text-secondary">{t("periodHint")}</p>
+              <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+                <div className="flex flex-col gap-3 lg:w-72 lg:shrink-0">
+                  <ReportFieldLabel htmlFor="report-month" label={t("periodMonth")} icon={Icons.calendar} required />
+                  <Input
+                    id="report-month"
+                    type="select"
+                    aria-label={t("periodMonth")}
+                    value={month}
+                    options={monthOptions}
+                    required
+                    onChange={(event) => setMonth(event.target.value)}
+                  />
+                  <p className="text-sm text-text-secondary">{t("periodHint")}</p>
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-3">
+                  <ReportFieldLabel htmlFor="report-recipients-search" label={t("sendToLabel")} icon={Icons.mail} />
+                  <ProjectInviteUserSelect
+                    selectedUsers={recipients}
+                    onSelect={(user) => setEditedRecipients([...recipients, user])}
+                    onRemove={(userId) => setEditedRecipients(recipients.filter((user) => user.id !== userId))}
+                    helpText={t("sendToHint")}
+                  />
+                </div>
               </div>
               <RichTextEditor
                 id="report-next-steps"

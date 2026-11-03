@@ -63,6 +63,12 @@ export const createReportSchema = z
       })
       .default({ executiveSummary: null, search: null, traffic: null, leads: null, work: null }),
     nextSteps: requiredRichDoc,
+    /** Crawllex users who receive the PDF and dashboard link. Sending is not configured yet. */
+    recipientUserIds: z
+      .array(z.string().regex(/^[a-f\d]{24}$/i, "Recipient Is Invalid."))
+      .max(20, "Add 20 Recipients Or Fewer.")
+      .transform((ids) => [...new Set(ids)])
+      .default([]),
   })
   .superRefine((value, ctx) => {
     if (value.periodFrom > value.periodTo) {

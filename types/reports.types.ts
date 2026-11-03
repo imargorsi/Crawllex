@@ -47,6 +47,8 @@ export type TReportSeriesPointDto = {
 export type TReportNotesDto = {
   written?: Partial<Record<TReportWrittenKey, TRichDoc | null>>;
   nextSteps?: TRichDoc | null;
+  /** Crawllex users chosen to receive the report. Missing on reports created before this field. */
+  recipientUserIds?: string[];
 };
 
 export type TReportActivityItemDto = {

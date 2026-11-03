@@ -909,6 +909,8 @@ export interface Translation {
       periodHint: string;
       invalidPeriod: string;
       nextStepsRequired: string;
+      sendToLabel: string;
+      sendToHint: string;
       toolbarBold: string;
       toolbarItalic: string;
       toolbarHeading: string;
@@ -2620,6 +2622,8 @@ const translation: Translation = {
       periodHint: "Covers the first to the last day of the month.",
       invalidPeriod: "Choose a valid month.",
       nextStepsRequired: "Next steps are required.",
+      sendToLabel: "Send PDF and dashboard link to",
+      sendToHint: "Added after creation by email. The project owner is added by default.",
       toolbarBold: "Bold",
       toolbarItalic: "Italic",
       toolbarHeading: "Heading",

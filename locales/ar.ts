@@ -915,6 +915,8 @@ const translation: Translation = {
       periodHint: "يغطي من أول يوم إلى آخر يوم في الشهر.",
       invalidPeriod: "اختر شهراً صالحاً.",
       nextStepsRequired: "الخطوات القادمة مطلوبة.",
+      sendToLabel: "أرسل ملف PDF ورابط لوحة التحكم إلى",
+      sendToHint: "تُرسل بالبريد بعد الإنشاء. يُضاف مالك المشروع تلقائياً.",
       toolbarBold: "عريض",
       toolbarItalic: "مائل",
       toolbarHeading: "عنوان",

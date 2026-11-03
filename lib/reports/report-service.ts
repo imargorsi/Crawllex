@@ -7,7 +7,8 @@ import { renderReportPdf } from "@/lib/reports/pdf-client";
 import { reportListSummary } from "@/lib/reports/report-text";
 import { formatMonthTitle, isFullCalendarMonth } from "@/lib/reports/period";
 import { renderReportHtml } from "@/lib/reports/render-html";
-import { Project, Report } from "@/models";
+import { HttpError } from "@/lib/api/http-errors";
+import { Project, Report, User } from "@/models";
 import type { CreateReportInput } from "@/schemas/reports";
 import type {
   TReportDetailDto,
@@ -74,7 +75,17 @@ export async function createReport(
   userId: string,
   input: CreateReportInput,
 ): Promise<TReportDetailDto> {
-  const notes: TReportNotesDto = { written: input.written, nextSteps: input.nextSteps };
+  if (input.recipientUserIds.length > 0) {
+    const knownUsers = await User.countDocuments({ _id: { $in: input.recipientUserIds } });
+    if (knownUsers !== input.recipientUserIds.length) {
+      throw new HttpError(400, "Recipient Not Found.");
+    }
+  }
+  const notes: TReportNotesDto = {
+    written: input.written,
+    nextSteps: input.nextSteps,
+    recipientUserIds: input.recipientUserIds,
+  };
 
   const { base, period } = await collectReportData(projectId, input.periodFrom, input.periodTo);
   const project = await Project.findById(projectId).select("logoImage").lean();

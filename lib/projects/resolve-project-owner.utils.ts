@@ -33,13 +33,14 @@ export async function resolveOwnerMap(
   const ownerUserIds = [...new Set([...firstOwnerByProject.values()].map((id) => id.toString()))];
   if (ownerUserIds.length === 0) return new Map();
 
-  const owners = await User.find({ _id: { $in: ownerUserIds } }).select("_id name profileImage");
+  const owners = await User.find({ _id: { $in: ownerUserIds } }).select("_id name email profileImage");
   const ownerById = new Map(
     owners.map((owner) => [
       owner._id.toString(),
       {
         id: owner._id.toString(),
         name: owner.name,
+        email: owner.email,
         profileImage: serializeStoredImageUrl(owner.profileImage),
       },
     ]),
