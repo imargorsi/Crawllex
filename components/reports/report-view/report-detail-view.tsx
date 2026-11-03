@@ -432,7 +432,7 @@ export function ReportDetailView({ view }: { view: TReportView }) {
         <ReportCallout text="No report content." />
       )}
 
-      <Modal open={Boolean(drilldown)} onClose={close} title={drilldown?.title ?? ""} description={drilldown?.description} className="max-w-5xl">
+      <Modal open={Boolean(drilldown)} onClose={close} title={drilldown?.title ?? ""} description={drilldown?.description} className="w-[min(100%-1.5rem,64rem)]">
         {drilldown ? <ReportTable table={drilldown.table} /> : null}
       </Modal>
     </div>
