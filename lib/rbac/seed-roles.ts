@@ -83,7 +83,7 @@ export async function seedSystemRoles(): Promise<void> {
     {
       $addToSet: {
         permissions: {
-          $each: [integrationPermission("view"), ...leadDefaults, reportPermission("view")],
+          $each: [integrationPermission("view"), ...leadDefaults, reportPermission("view"), reportPermission("create")],
         },
       },
     },
