@@ -10,7 +10,7 @@ import type { TAppIconComponent } from "@/components/ui/app-icon";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
 import { PARAGRAPH_BREAK } from "@/lib/reports/report-text";
-import type { TRichDoc, TRichInline } from "@/lib/reports/rich-text";
+import { isSafeHref, type TRichDoc, type TRichInline } from "@/lib/reports/rich-text";
 import type { TChangeView, TKpiView, TReportIcon, TReportTone, TSeriesView, TTableView } from "@/lib/reports/view-model";
 
 /** Tone → theme token. The shared view carries tones, not colours, so the UI stays on theme tokens. */
@@ -107,7 +107,7 @@ function RichRuns({ runs }: { runs: TRichInline[] }) {
     <>
       {runs.map((run, index) => {
         let content: React.ReactNode = run.bold ? <strong className="font-semibold text-text-primary">{run.text}</strong> : run.text;
-        if (run.href) {
+        if (run.href && isSafeHref(run.href)) {
           content = (
             <a href={run.href} target="_blank" rel="noopener noreferrer" className="text-brand underline underline-offset-4 hover:opacity-80">
               {content}

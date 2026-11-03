@@ -3,7 +3,7 @@ import { EMPTY_REPORT_ASSETS, type TReportAssets } from "@/lib/reports/assets";
 import { escapeHtml } from "@/lib/reports/escape";
 import { REPORT_COPY } from "@/lib/reports/copy";
 import { barChartSvg, lineChartSvg } from "@/lib/reports/svg-charts";
-import type { TRichDoc, TRichInline } from "@/lib/reports/rich-text";
+import { isSafeHref, type TRichDoc, type TRichInline } from "@/lib/reports/rich-text";
 import { buildReportView, type TBlockView, type TCardView, type TKpiView, type TReportView, type TSectionView, type TTableView } from "@/lib/reports/view-model";
 import type { TReportSnapshotDto } from "@/types/reports.types";
 
@@ -137,7 +137,7 @@ function runsHtml(runs: TRichInline[]): string {
     .map((run) => {
       const text = escapeHtml(run.text);
       const bold = run.bold ? `<strong>${text}</strong>` : text;
-      const linked = run.href ? `<a href="${escapeHtml(run.href)}">${bold}</a>` : bold;
+      const linked = run.href && isSafeHref(run.href) ? `<a href="${escapeHtml(run.href)}">${bold}</a>` : bold;
       return run.italic ? `<em>${linked}</em>` : linked;
     })
     .join("");
