@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
@@ -11,7 +11,9 @@ import { ReportFieldLabel } from "@/components/reports/report-field-label";
 import { RichTextEditor } from "@/components/reports/rich-text-editor";
 import { Input } from "@/components/input";
 import { Icons } from "@/lib/frontend/icons/app-icons";
-import { Button } from "@/components/ui/button";
+import { AlertDialogCancel } from "@/components/ui/alert-dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useCreateReportMutation, type TCreateReportPayload } from "@/features/reports/reports.api";
 import { useProjectQuery } from "@/features/projects/projects.api";
@@ -69,6 +71,19 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
   const createMutation = useCreateReportMutation(projectId);
   const isSubmitting = createMutation.isPending;
   const hasNextSteps = Boolean(nextSteps && !isRichDocEmpty(nextSteps));
+  const writtenCount = REPORT_WRITTEN_KEYS.filter((key) => written[key] && !isRichDocEmpty(written[key])).length;
+  // Anything typed counts as unsaved work: the user is asked before leaving the page.
+  const isDirty = hasNextSteps || writtenCount > 0;
+  const [leaveOpen, setLeaveOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isDirty) return;
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [isDirty]);
 
   const stepLabels = [t("stepReport"), t("stepContent")];
 
@@ -179,7 +194,12 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
 
           {isContentStep ? (
             <div className="flex flex-col gap-8">
-              <p className="text-base text-text-secondary">{t("stepContentLead")}</p>
+              <div className="flex flex-col gap-2">
+                <p className="text-base text-text-secondary">{t("stepContentLead")}</p>
+                <p className="text-sm font-medium text-text-primary">
+                  {t("writtenProgress", { count: writtenCount, total: REPORT_WRITTEN_KEYS.length })}
+                </p>
+              </div>
               <div className="grid gap-x-6 gap-y-10 lg:grid-cols-2">
                 {REPORT_WRITTEN_KEYS.map((key) => (
                   <div key={key} className={cn(key === "executiveSummary" && "lg:col-span-2")}>
@@ -242,12 +262,36 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
         </div>
         {!isContentStep ? (
           <div className="mt-3">
-            <Link href="/reports" className="inline-flex type-body-strong text-text-secondary transition-colors hover:text-text-primary hover:underline">
+            <Link
+              href="/reports"
+              onClick={(event) => {
+                if (!isDirty) return;
+                event.preventDefault();
+                setLeaveOpen(true);
+              }}
+              className="inline-flex type-body-strong text-text-secondary transition-colors hover:text-text-primary hover:underline"
+            >
               {t("backToList")}
             </Link>
           </div>
         ) : null}
       </div>
+
+      <ConfirmDialog
+        open={leaveOpen}
+        onOpenChange={setLeaveOpen}
+        tone="destructive"
+        title={t("leaveTitle")}
+        description={t("leaveBody")}
+        action={
+          <>
+            <AlertDialogCancel>{t("leaveStay")}</AlertDialogCancel>
+            <button type="button" className={buttonVariants({ variant: "destructive", size: "md" })} onClick={() => router.push("/reports")}>
+              {t("leaveConfirm")}
+            </button>
+          </>
+        }
+      />
     </form>
   );
 }

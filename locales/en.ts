@@ -927,6 +927,11 @@ export interface Translation {
       stepReportLead: string;
       stepContent: string;
       stepContentLead: string;
+      writtenProgress: string;
+      leaveTitle: string;
+      leaveBody: string;
+      leaveStay: string;
+      leaveConfirm: string;
       previousStep: string;
       nextStep: string;
       sectionNextStepsHint: string;
@@ -2617,13 +2622,13 @@ const translation: Translation = {
       loadError: "Reports could not be loaded.",
       newReport: "New Report",
       createTitle: "New Monthly Report",
-      createBody: "Pick a month, then write any section you want to replace. Next steps are required.",
+      createBody: "Choose the month and who receives the report, then add the written content.",
       periodMonth: "Report Month",
       periodHint: "Covers the first to the last day of the month.",
       invalidPeriod: "Choose a valid month.",
       nextStepsRequired: "Next steps are required.",
       sendToLabel: "Send PDF and dashboard link to",
-      sendToHint: "Added after creation by email. The project owner is added by default.",
+      sendToHint: "Saved with the report. Email sending is not set up yet. The project owner is added by default.",
       toolbarBold: "Bold",
       toolbarItalic: "Italic",
       toolbarHeading: "Heading",
@@ -2639,7 +2644,12 @@ const translation: Translation = {
       stepReport: "Report",
       stepReportLead: "Pick the month this report covers and who receives it after creation.",
       stepContent: "Content",
-      stepContentLead: "Optional sections replace their generated text. Next steps are required and saved with the report.",
+      stepContentLead: "Optional sections replace their generated text. Next steps are required.",
+      writtenProgress: "{{count}} of {{total}} sections written.",
+      leaveTitle: "Leave This Report?",
+      leaveBody: "What you wrote will be lost.",
+      leaveStay: "Keep Editing",
+      leaveConfirm: "Leave",
       previousStep: "Previous Step",
       nextStep: "Next Step",
       sectionNextStepsHint: "Saved with the report.",
