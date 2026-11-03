@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type MouseEvent, type ReactNode } from "react";
 
+import { formFieldControlClass } from "@/lib/frontend/layout/dashboard-chrome";
 import { cn } from "@/lib/utils";
 import type { TRichBlock, TRichDoc, TRichInline } from "@/lib/reports/rich-text";
 
@@ -14,6 +15,7 @@ type TRichTextEditorProps = {
   defaultValue: TRichDoc | null;
   onChange: (doc: TRichDoc) => void;
   error?: string;
+  required?: boolean;
 };
 
 type TFormat = "bold" | "italic" | "h2" | "h3" | "p" | "list";
@@ -169,7 +171,7 @@ function blockNode(block: TRichBlock): Node {
 }
 
 /** Rich text editor: bold, italic, headings, paragraphs and bullet lists. Pasted text is plain. */
-export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onChange, error }: TRichTextEditorProps) {
+export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onChange, error, required }: TRichTextEditorProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [empty, setEmpty] = useState(!defaultValue?.length);
 
@@ -200,20 +202,19 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-end justify-between gap-3">
-        <label htmlFor={id} className="text-sm font-semibold text-text-primary">
-          {label}
-        </label>
-        {hint ? <p className="text-xs text-text-muted">{hint}</p> : null}
-      </div>
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={id} className={cn("type-label text-text-primary", required ? 'after:ms-0.5 after:text-destructive after:content-["*"]' : "")}>
+        {label}
+      </label>
+      {hint ? <p className="type-caption text-text-muted">{hint}</p> : null}
       <div
         className={cn(
-          "overflow-hidden rounded-2xl border bg-transparent transition-colors focus-within:border-brand/60",
-          error ? "border-rose-500/70" : "border-text-primary/20",
+          formFieldControlClass,
+          "overflow-hidden rounded-xl bg-transparent transition focus-within:border-(--accent-border) focus-within:ring-2 focus-within:ring-brand/25",
+          error && "border-destructive",
         )}
       >
-        <div role="toolbar" aria-label={`${label} formatting`} className="flex flex-wrap items-center gap-1 border-b border-text-primary/15 px-2 py-1.5">
+        <div role="toolbar" aria-label={`${label} formatting`} className="flex flex-wrap items-center gap-1 border-b border-border px-2 py-1.5">
           {TOOLBAR.map((item) => (
             <button
               key={item.format}
@@ -221,22 +222,21 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
               aria-label={item.label}
               title={item.label}
               onMouseDown={(event) => runCommand(event, item.command)}
-              className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold text-text-secondary transition-colors hover:bg-text-primary/[0.06] hover:text-text-primary"
+              className="inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 type-label text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
             >
               {item.glyph}
             </button>
           ))}
         </div>
         <div className="relative">
-          {empty ? (
-            <p className="pointer-events-none absolute start-4 top-3 text-[15px] text-text-placeholder">{placeholder}</p>
-          ) : null}
+          {empty ? <p className="pointer-events-none absolute start-4 top-3 text-[15px] text-text-placeholder">{placeholder}</p> : null}
           <div
             id={id}
             ref={rootRef}
             role="textbox"
             aria-multiline="true"
             aria-label={label}
+            aria-invalid={Boolean(error)}
             contentEditable
             suppressContentEditableWarning
             onInput={handleInput}
@@ -250,7 +250,7 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
           />
         </div>
       </div>
-      {error ? <p className="text-xs text-rose-600 dark:text-rose-400">{error}</p> : null}
+      {error ? <p className="type-caption text-destructive">{error}</p> : null}
     </div>
   );
 }

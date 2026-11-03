@@ -909,11 +909,15 @@ export interface Translation {
       periodHint: string;
       invalidPeriod: string;
       nextStepsRequired: string;
-      requiredLabel: string;
-      sectionPeriod: string;
-      sectionWritten: string;
-      sectionWrittenHint: string;
-      sectionNextSteps: string;
+      stepPeriod: string;
+      stepPeriodLead: string;
+      stepWritten: string;
+      stepWrittenLead: string;
+      stepNextSteps: string;
+      stepNextStepsLead: string;
+      previousStep: string;
+      nextStep: string;
+      reviewWritten: string;
       sectionNextStepsHint: string;
       writtenPlaceholder: string;
       written: {
@@ -2607,11 +2611,15 @@ const translation: Translation = {
       periodHint: "Covers the first to the last day of the month.",
       invalidPeriod: "Choose a valid month.",
       nextStepsRequired: "Next steps are required.",
-      requiredLabel: "Required",
-      sectionPeriod: "Period",
-      sectionWritten: "Written text",
-      sectionWrittenHint: "Optional. Write a section to replace its generated text. Leave it empty to keep the generated text.",
-      sectionNextSteps: "Next steps",
+      stepPeriod: "Period",
+      stepPeriodLead: "Pick the month this report covers. The figures come from the cached Search Console and Google Analytics data for that month.",
+      stepWritten: "Written text",
+      stepWrittenLead: "Optional. Write a section to replace its generated text. Leave a section empty to keep the generated text.",
+      stepNextSteps: "Next steps",
+      stepNextStepsLead: "Required. Write the next steps for the client. They are saved with the report.",
+      previousStep: "Previous Step",
+      nextStep: "Next Step",
+      reviewWritten: "{{count}} of {{total}} sections written. The others use the generated text.",
       sectionNextStepsHint: "Saved with the report.",
       writtenPlaceholder: "Write here. Use the toolbar for headings, bullet points and bold or italic.",
       written: {
