@@ -33,8 +33,8 @@ export function ReportsCreateSection() {
   if (!canCreate) return null;
 
   return (
-    <div className="w-full min-w-0 px-4 py-6 sm:px-6">
-      <div className="mx-auto w-full max-w-5xl space-y-8">
+    <div className="w-full min-w-0">
+      <div className="flex flex-col gap-5 px-4 py-6 sm:px-6">
         <div className="type-stack-md">
           <Heading id="reports-create-title" pageTitle>
             {t("createTitle")}

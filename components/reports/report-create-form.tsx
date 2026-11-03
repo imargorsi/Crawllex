@@ -101,7 +101,7 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
 
   return (
     <form
-      className="space-y-5"
+      className="flex flex-col gap-5"
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
@@ -110,11 +110,11 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
       }}
     >
       <section className={cn(elevatedCardSurfaceClass, "rounded-2xl p-6 sm:p-8")}>
-        <div className="space-y-6">
+        <div className="flex flex-col gap-6">
           <ProjectCreateStepper labels={stepLabels} current={currentStep} />
 
           {currentStep === PERIOD_STEP ? (
-            <div className="space-y-6">
+            <div className="flex flex-col gap-6">
               <p className="type-body text-text-muted">{t("stepPeriodLead")}</p>
               <div className="max-w-sm">
                 <Input
@@ -132,24 +132,27 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
           ) : null}
 
           {currentStep === WRITTEN_STEP ? (
-            <div className="space-y-6">
+            <div className="flex flex-col gap-6">
               <p className="type-body text-text-muted">{t("stepWrittenLead")}</p>
-              {REPORT_WRITTEN_KEYS.map((key) => (
-                <RichTextEditor
-                  key={key}
-                  id={`report-written-${key}`}
-                  label={t(`written.${key}`)}
-                  hint={t(`writtenHint.${key}`)}
-                  placeholder={t("writtenPlaceholder")}
-                  defaultValue={null}
-                  onChange={(doc) => setSection(key, doc)}
-                />
-              ))}
+              <div className="grid gap-6 lg:grid-cols-2">
+                {REPORT_WRITTEN_KEYS.map((key) => (
+                  <div key={key} className={cn(key === "executiveSummary" && "lg:col-span-2")}>
+                    <RichTextEditor
+                      id={`report-written-${key}`}
+                      label={t(`written.${key}`)}
+                      hint={t(`writtenHint.${key}`)}
+                      placeholder={t("writtenPlaceholder")}
+                      defaultValue={null}
+                      onChange={(doc) => setSection(key, doc)}
+                    />
+                  </div>
+                ))}
+              </div>
             </div>
           ) : null}
 
           {currentStep === NEXT_STEPS_STEP ? (
-            <div className="space-y-6">
+            <div className="flex flex-col gap-6">
               <p className="type-body text-text-muted">{t("stepNextStepsLead")}</p>
               <RichTextEditor
                 id="report-next-steps"
