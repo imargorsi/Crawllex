@@ -153,7 +153,7 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
                     id="report-month"
                     type="select"
                     aria-label={t("periodMonth")}
-                    controlClassName="h-12"
+                    controlClassName="h-12 border-2 border-border/60 dark:border-text-primary/25"
                     value={month}
                     options={monthOptions}
                     required
@@ -168,6 +168,7 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
                     onSelect={(user) => setEditedRecipients([...recipients, user])}
                     onRemove={(userId) => setEditedRecipients(recipients.filter((user) => user.id !== userId))}
                     hideSearchLabel
+                    searchClassName="border-2 border-border/60 dark:border-text-primary/25"
                     chipsBelow
                     helpText={t("sendToHint")}
                   />

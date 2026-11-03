@@ -7,7 +7,6 @@ import { ReportFieldLabel } from "@/components/reports/report-field-label";
 import { Input } from "@/components/input";
 import { Button } from "@/components/ui/button";
 import type { TAppIconComponent } from "@/components/ui/app-icon";
-import { formFieldControlClass } from "@/lib/frontend/layout/dashboard-chrome";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { isSafeHref, type TRichBlock, type TRichDoc, type TRichInline } from "@/lib/reports/rich-text";
 import { cn } from "@/lib/utils";
@@ -304,7 +303,7 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
       <div
         className={cn(
           "overflow-hidden rounded-xl transition focus-within:border-[var(--accent-border)] focus-within:ring-2 focus-within:ring-brand/25",
-          formFieldControlClass,
+          "border-2 border-border/60 bg-transparent dark:border-text-primary/25",
           error && "border-[color-mix(in_srgb,var(--destructive)_68%,transparent)]",
         )}
       >

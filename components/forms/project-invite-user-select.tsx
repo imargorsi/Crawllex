@@ -23,6 +23,8 @@ type ProjectInviteUserSelectProps = {
   helpText?: string;
   /** Hide the built-in search label when the caller draws its own label. */
   hideSearchLabel?: boolean;
+  /** Extra classes for the search field (outline, size). */
+  searchClassName?: string;
   /** Render the selected users below the search field instead of above it. */
   chipsBelow?: boolean;
 };
@@ -36,6 +38,7 @@ export function ProjectInviteUserSelect({
   disabled = false,
   helpText,
   hideSearchLabel = false,
+  searchClassName,
   chipsBelow = false,
 }: ProjectInviteUserSelectProps) {
   const { t } = useTranslation("translation", { keyPrefix: "modules.projects.createForm" });
@@ -108,6 +111,7 @@ export function ProjectInviteUserSelect({
                   "h-12 w-full rounded-xl border border-border bg-bg-input pe-11 ps-11 type-body text-text-primary outline-none transition-colors placeholder:text-text-placeholder",
                   "focus-visible:border-(--accent-border) focus-visible:ring-2 focus-visible:ring-(--accent-border)/40",
                   "disabled:cursor-not-allowed disabled:opacity-60",
+                  searchClassName,
                 )}
               />
               {lookupQuery.isFetching ? (
