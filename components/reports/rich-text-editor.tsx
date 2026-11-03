@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type MouseEvent, type ReactNode } from "react";
 
 import { formFieldControlClass } from "@/lib/frontend/layout/dashboard-chrome";
+import type { TAppIconComponent } from "@/components/ui/app-icon";
+import { ReportFieldLabel } from "@/components/reports/report-field-label";
 import { cn } from "@/lib/utils";
 import type { TRichBlock, TRichDoc, TRichInline } from "@/lib/reports/rich-text";
 
@@ -16,6 +18,7 @@ type TRichTextEditorProps = {
   onChange: (doc: TRichDoc) => void;
   error?: string;
   required?: boolean;
+  icon?: TAppIconComponent;
 };
 
 type TFormat = "bold" | "italic" | "h2" | "h3" | "p" | "list";
@@ -171,7 +174,7 @@ function blockNode(block: TRichBlock): Node {
 }
 
 /** Rich text editor: bold, italic, headings, paragraphs and bullet lists. Pasted text is plain. */
-export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onChange, error, required }: TRichTextEditorProps) {
+export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onChange, error, required, icon: Icon }: TRichTextEditorProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [empty, setEmpty] = useState(!defaultValue?.length);
 
@@ -203,9 +206,7 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
 
   return (
     <div className="flex flex-col gap-2.5">
-      <label htmlFor={id} className={cn("type-label text-text-primary", required ? 'after:ms-0.5 after:text-destructive after:content-["*"]' : "")}>
-        {label}
-      </label>
+      <ReportFieldLabel htmlFor={id} label={label} icon={Icon} required={required} />
       <div
         className={cn(
           "overflow-hidden rounded-xl transition focus-within:border-[var(--accent-border)] focus-within:ring-2 focus-within:ring-brand/25",
@@ -221,14 +222,14 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
               aria-label={item.label}
               title={item.label}
               onMouseDown={(event) => runCommand(event, item.command)}
-              className="inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 type-label text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
+              className="inline-flex h-9 min-w-9 items-center justify-center rounded-md px-2 text-sm font-semibold text-text-secondary transition-colors hover:bg-bg-hover hover:text-text-primary"
             >
               {item.glyph}
             </button>
           ))}
         </div>
         <div className="relative">
-          {empty ? <p className="type-body pointer-events-none absolute start-3 top-3 text-text-muted">{placeholder}</p> : null}
+          {empty ? <p className="pointer-events-none absolute start-4 top-3.5 text-base text-text-muted">{placeholder}</p> : null}
           <div
             id={id}
             ref={rootRef}
@@ -241,7 +242,7 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
             onInput={handleInput}
             onPaste={handlePaste}
             className={cn(
-              "type-body min-h-40 px-3 py-2.5 text-text-primary outline-none",
+              "min-h-44 px-4 py-3.5 text-base leading-relaxed text-text-primary outline-none",
               "[&_h2]:mb-2 [&_h2]:mt-3 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:tracking-tight",
               "[&_h3]:mb-1 [&_h3]:mt-3 [&_h3]:font-semibold",
               "[&_p]:mb-2 [&_ul]:mb-2 [&_ul]:list-disc [&_ul]:ps-5 [&_li]:mb-1 [&_li]:marker:text-brand",
@@ -249,7 +250,7 @@ export function RichTextEditor({ id, label, hint, placeholder, defaultValue, onC
           />
         </div>
       </div>
-      {hint ? <p className="type-caption text-text-secondary">{hint}</p> : null}
+      {hint ? <p className="text-sm text-text-secondary">{hint}</p> : null}
       {error ? <p className="text-sm text-destructive" role="alert">{error}</p> : null}
     </div>
   );

@@ -6,8 +6,10 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { ProjectCreateStepper } from "@/components/forms/project-create-stepper";
+import { ReportFieldLabel } from "@/components/reports/report-field-label";
 import { RichTextEditor } from "@/components/reports/rich-text-editor";
 import { Input } from "@/components/input";
+import { Icons } from "@/lib/frontend/icons/app-icons";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useCreateReportMutation, type TCreateReportPayload } from "@/features/reports/reports.api";
@@ -16,11 +18,21 @@ import { notify } from "@/lib/frontend/feedback/notify";
 import { elevatedCardSurfaceClass } from "@/lib/frontend/layout/dashboard-chrome";
 import { buildMonthOptions, defaultMonthValue, monthValueToPeriod } from "@/lib/frontend/reports/period-options";
 import { isRichDocEmpty, REPORT_WRITTEN_KEYS, type TReportWrittenKey, type TRichDoc } from "@/lib/reports/rich-text";
+import type { TAppIconComponent } from "@/components/ui/app-icon";
 import { cn } from "@/lib/utils";
 
 type TWrittenState = Record<TReportWrittenKey, TRichDoc | null>;
 
 const EMPTY_WRITTEN: TWrittenState = { executiveSummary: null, search: null, traffic: null, leads: null, work: null };
+
+/** One icon per written section, so each editor is easy to find. */
+const WRITTEN_ICON: Record<TReportWrittenKey, TAppIconComponent> = {
+  executiveSummary: Icons.file,
+  search: Icons.cursorPointer,
+  traffic: Icons.globe,
+  leads: Icons.userGroup,
+  work: Icons.wrench,
+} as const;
 
 const monthFormatter = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric", timeZone: "UTC" });
 
@@ -119,22 +131,24 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
 
           {currentStep === REPORT_STEP ? (
             <div className="flex flex-col gap-8">
-              <p className="type-body text-text-secondary">{t("stepReportLead")}</p>
+              <p className="text-base text-text-secondary">{t("stepReportLead")}</p>
               <div className="flex max-w-sm flex-col gap-3">
+                <ReportFieldLabel htmlFor="report-month" label={t("periodMonth")} icon={Icons.calendar} required />
                 <Input
                   id="report-month"
                   type="select"
-                  label={t("periodMonth")}
+                  aria-label={t("periodMonth")}
                   value={month}
                   options={monthOptions}
                   required
                   onChange={(event) => setMonth(event.target.value)}
                 />
-                <p className="type-caption text-text-secondary">{t("periodHint")}</p>
+                <p className="text-sm text-text-secondary">{t("periodHint")}</p>
               </div>
               <RichTextEditor
                 id="report-next-steps"
                 label={t("written.nextSteps")}
+                icon={Icons.rocket}
                 hint={t("sectionNextStepsHint")}
                 placeholder={t("writtenPlaceholder")}
                 defaultValue={nextSteps}
@@ -149,13 +163,14 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
 
           {isContentStep ? (
             <div className="flex flex-col gap-8">
-              <p className="type-body text-text-secondary">{t("stepContentLead")}</p>
+              <p className="text-base text-text-secondary">{t("stepContentLead")}</p>
               <div className="grid gap-x-6 gap-y-10 lg:grid-cols-2">
                 {REPORT_WRITTEN_KEYS.map((key) => (
                   <div key={key} className={cn(key === "executiveSummary" && "lg:col-span-2")}>
                     <RichTextEditor
                       id={`report-written-${key}`}
                       label={t(`written.${key}`)}
+                      icon={WRITTEN_ICON[key]}
                       hint={t(`writtenHint.${key}`)}
                       placeholder={t("writtenPlaceholder")}
                       defaultValue={written[key]}
