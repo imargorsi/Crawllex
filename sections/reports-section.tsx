@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { ReportCard } from "@/components/reports/report-card";
-import { ReportCreateSheet } from "@/components/reports/report-create-sheet";
 import { ReportsTable } from "@/components/reports/reports-table";
 import { CardGridSkeleton } from "@/components/skeletons/card-grid-skeleton";
 import { Heading } from "@/components/heading";
@@ -58,7 +57,6 @@ export function ReportsSection() {
   const { queryParams, setQueryParams, deleteQueryParams } = useQueryParams();
   const viewMode = parseProjectListViewMode(queryParams.view);
 
-  const [createOpen, setCreateOpen] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<TReportListItemDto | null>(null);
 
@@ -132,7 +130,7 @@ export function ReportsSection() {
               <ProjectListViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
             ) : null}
             {canCreate && (hasReports || reportsQuery.isPending) ? (
-              <CreateActionButton onClick={() => setCreateOpen(true)}>{t("newReport")}</CreateActionButton>
+              <CreateActionButton onClick={() => router.push("/reports/new")}>{t("newReport")}</CreateActionButton>
             ) : null}
           </div>
         </div>
@@ -145,7 +143,7 @@ export function ReportsSection() {
           <div className="flex flex-col items-center gap-4">
             <EmptyState icon={Icons.file} title={t("emptyTitle")} description={t("emptyBody")} />
             {canCreate ? (
-              <CreateActionButton onClick={() => setCreateOpen(true)}>{t("newReport")}</CreateActionButton>
+              <CreateActionButton onClick={() => router.push("/reports/new")}>{t("newReport")}</CreateActionButton>
             ) : null}
           </div>
         ) : viewMode === "table" ? (
@@ -197,12 +195,6 @@ export function ReportsSection() {
         }
       />
 
-      <ReportCreateSheet
-        projectId={projectId}
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-        onCreated={(report) => router.push(`/reports/${report.id}`)}
-      />
     </div>
   );
 }
