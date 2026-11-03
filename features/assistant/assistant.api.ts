@@ -7,6 +7,8 @@ import { baseQuery } from "@/lib/frontend/api/base";
 import type {
   TAssistantHistoryDto,
   TAssistantQueryResult,
+  TAssistantThreadDto,
+  TAssistantThreadsDto,
 } from "@/types/assistant.types";
 
 const assistantApi = {
@@ -16,10 +18,14 @@ const assistantApi = {
 export const assistantKeys = {
   all: [assistantApi.reducerPath] as const,
   history: (projectId: string) => [...assistantKeys.all, "history", projectId] as const,
+  threads: (projectId: string) => [...assistantKeys.all, "threads", projectId] as const,
+  thread: (projectId: string, threadId: string) =>
+    [...assistantKeys.all, "thread", projectId, threadId] as const,
 };
 
 export type TAssistantQueryPayload = {
   query: string;
+  threadId?: string;
 };
 
 export function useAssistantHistoryQuery(
@@ -36,6 +42,37 @@ export function useAssistantHistoryQuery(
       return envelope.data;
     },
     enabled: Boolean(projectId) && (options?.enabled ?? true) && Boolean(token),
+  });
+}
+
+export function useAssistantThreadsQuery(projectId: string | null | undefined) {
+  const token = useAccessToken();
+  return useQuery({
+    queryKey: assistantKeys.threads(projectId ?? ""),
+    queryFn: async () => {
+      const envelope = await baseQuery.get<TAssistantThreadsDto>(
+        `projects/${projectId}/assistant/threads`,
+      );
+      return envelope.data;
+    },
+    enabled: Boolean(projectId) && Boolean(token),
+  });
+}
+
+export function useAssistantThreadQuery(
+  projectId: string | null | undefined,
+  threadId: string | null | undefined,
+) {
+  const token = useAccessToken();
+  return useQuery({
+    queryKey: assistantKeys.thread(projectId ?? "", threadId ?? ""),
+    queryFn: async () => {
+      const envelope = await baseQuery.get<TAssistantThreadDto>(
+        `projects/${projectId}/assistant/threads/${threadId}`,
+      );
+      return envelope.data;
+    },
+    enabled: Boolean(projectId) && Boolean(threadId) && Boolean(token),
   });
 }
 
@@ -56,6 +93,10 @@ export function useAssistantQueryMutation(projectId: string | null | undefined) 
       queryClient.setQueryData(assistantKeys.history(projectId), {
         items: data.history,
       } satisfies TAssistantHistoryDto);
+      void queryClient.invalidateQueries({ queryKey: assistantKeys.threads(projectId) });
+      void queryClient.invalidateQueries({
+        queryKey: assistantKeys.thread(projectId, data.threadId),
+      });
     },
   });
 }

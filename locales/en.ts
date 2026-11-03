@@ -261,6 +261,22 @@ export interface Translation {
     selectProjectBody: string;
     loadError: string;
     dateFilterAriaLabel: string;
+    chat: {
+      conversations: string;
+      newChat: string;
+      noConversations: string;
+      emptyTitle: string;
+      emptyBody: string;
+      placeholder: string;
+      send: string;
+      sending: string;
+      you: string;
+      assistant: string;
+      thinking: string;
+      sendError: string;
+      loadError: string;
+      messageCount: string;
+    };
     export: {
       excel: string;
       success: string;
@@ -1879,6 +1895,22 @@ const translation: Translation = {
     selectProjectBody: "Choose a project from the sidebar to open its control center.",
     loadError: "Could not load dashboard data. Try again.",
     dateFilterAriaLabel: "Dashboard Date Range",
+    chat: {
+      conversations: "Conversations",
+      newChat: "New chat",
+      noConversations: "No conversations yet. Start a new chat.",
+      emptyTitle: "Ask Crawllex",
+      emptyBody: "Ask about leads, analytics, or SEO activities for this project, or how to use Crawllex.",
+      placeholder: "Type a question…",
+      send: "Send",
+      sending: "Sending…",
+      you: "You",
+      assistant: "Crawllex",
+      thinking: "Thinking…",
+      sendError: "Could not send that message. Try again.",
+      loadError: "Could not load this conversation.",
+      messageCount: "{{count}} messages",
+    },
     export: {
       excel: "Export Excel",
       success: "Excel report downloaded.",

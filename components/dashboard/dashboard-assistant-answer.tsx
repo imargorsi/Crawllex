@@ -59,7 +59,7 @@ function AssistantBlock({ block }: { block: TAssistantBlock }) {
   );
 }
 
-function AssistantMessage({ message }: { message: string }) {
+export function AssistantMessage({ message }: { message: string }) {
   const blocks = parseAssistantMessage(message);
   const groups: Array<{ key: string; node: React.ReactNode }> = [];
   let bullets: TAssistantBlock[] = [];
