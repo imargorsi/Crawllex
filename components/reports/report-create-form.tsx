@@ -143,26 +143,29 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
           {currentStep === REPORT_STEP ? (
             <div className="flex flex-col gap-8">
               <p className="text-base text-text-secondary">{t("stepReportLead")}</p>
-              <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-                <div className="flex flex-col gap-3 lg:w-72 lg:shrink-0">
+              <div className="grid gap-x-6 gap-y-8 lg:grid-cols-2 lg:items-start">
+                <div className="flex min-w-0 flex-col gap-3">
                   <ReportFieldLabel htmlFor="report-month" label={t("periodMonth")} icon={Icons.calendar} required />
                   <Input
                     id="report-month"
                     type="select"
                     aria-label={t("periodMonth")}
+                    controlClassName="h-12"
                     value={month}
                     options={monthOptions}
                     required
                     onChange={(event) => setMonth(event.target.value)}
                   />
-                  <p className="text-sm text-text-secondary">{t("periodHint")}</p>
+                  <p className="type-caption text-text-muted">{t("periodHint")}</p>
                 </div>
-                <div className="flex min-w-0 flex-1 flex-col gap-3">
+                <div className="flex min-w-0 flex-col gap-3">
                   <ReportFieldLabel htmlFor="report-recipients-search" label={t("sendToLabel")} icon={Icons.mail} />
                   <ProjectInviteUserSelect
                     selectedUsers={recipients}
                     onSelect={(user) => setEditedRecipients([...recipients, user])}
                     onRemove={(userId) => setEditedRecipients(recipients.filter((user) => user.id !== userId))}
+                    hideSearchLabel
+                    chipsBelow
                     helpText={t("sendToHint")}
                   />
                 </div>
