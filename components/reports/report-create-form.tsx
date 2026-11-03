@@ -120,7 +120,7 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
           {currentStep === REPORT_STEP ? (
             <div className="flex flex-col gap-8">
               <p className="type-body text-text-secondary">{t("stepReportLead")}</p>
-              <div className="max-w-sm">
+              <div className="flex max-w-sm flex-col gap-3">
                 <Input
                   id="report-month"
                   type="select"
@@ -130,7 +130,7 @@ export function ReportCreateForm({ projectId }: { projectId: string }) {
                   required
                   onChange={(event) => setMonth(event.target.value)}
                 />
-                <p className="type-caption mt-3 text-text-secondary">{t("periodHint")}</p>
+                <p className="type-caption text-text-secondary">{t("periodHint")}</p>
               </div>
               <RichTextEditor
                 id="report-next-steps"
