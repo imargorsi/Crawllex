@@ -10,6 +10,7 @@ import type { TAppIconComponent } from "@/components/ui/app-icon";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
 import { PARAGRAPH_BREAK } from "@/lib/reports/report-text";
+import type { TRichDoc, TRichInline } from "@/lib/reports/rich-text";
 import type { TChangeView, TKpiView, TReportIcon, TReportTone, TSeriesView, TTableView } from "@/lib/reports/view-model";
 
 /** Tone → theme token. The shared view carries tones, not colours, so the UI stays on theme tokens. */
@@ -98,6 +99,54 @@ export function Emphasis({ text, className }: { text: string; className?: string
         </p>
       ))}
     </>
+  );
+}
+
+function RichRuns({ runs }: { runs: TRichInline[] }) {
+  return (
+    <>
+      {runs.map((run, index) => {
+        const content = run.bold ? <strong className="font-semibold text-text-primary">{run.text}</strong> : run.text;
+        return run.italic ? <em key={index}>{content}</em> : <span key={index}>{content}</span>;
+      })}
+    </>
+  );
+}
+
+/** Hand-written report text: headings, paragraphs, bullet lists, bold and italic. Plain React text, no HTML. */
+export function RichDoc({ doc }: { doc: TRichDoc }) {
+  return (
+    <div className="max-w-4xl space-y-4">
+      {doc.map((block, index) => {
+        if (block.type === "heading") {
+          return block.level === 2 ? (
+            <h3 key={index} className="pt-2 text-xl font-semibold tracking-tight text-text-primary">
+              <RichRuns runs={block.runs} />
+            </h3>
+          ) : (
+            <h4 key={index} className="text-base font-semibold text-text-primary">
+              <RichRuns runs={block.runs} />
+            </h4>
+          );
+        }
+        if (block.type === "paragraph") {
+          return (
+            <p key={index} className="text-lg leading-relaxed text-text-primary">
+              <RichRuns runs={block.runs} />
+            </p>
+          );
+        }
+        return (
+          <ul key={index} className="list-disc space-y-2 ps-5 text-[15px] leading-relaxed text-text-secondary marker:text-brand">
+            {block.items.map((item, itemIndex) => (
+              <li key={itemIndex}>
+                <RichRuns runs={item} />
+              </li>
+            ))}
+          </ul>
+        );
+      })}
+    </div>
   );
 }
 

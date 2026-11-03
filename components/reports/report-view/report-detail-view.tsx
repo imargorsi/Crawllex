@@ -7,6 +7,7 @@ import {
   Emphasis,
   REPORT_ICON,
   ReportAreaChart,
+  RichDoc,
   ReportCallout,
   ReportDonut,
   ReportKpiGrid,
@@ -283,6 +284,8 @@ function SectionBlock({ block, onOpen }: { block: TBlockView; onOpen: TOpenTable
   switch (block.type) {
     case "heading":
       return <SubHeading title={block.title} />;
+    case "rich":
+      return <RichDoc doc={block.doc} />;
     case "prose":
       return (
         <div className="max-w-4xl space-y-3">

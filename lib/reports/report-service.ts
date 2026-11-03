@@ -4,7 +4,7 @@ import { loadReportAssets } from "@/lib/reports/assets";
 import { loadClientLogoDataUri } from "@/lib/reports/client-logo";
 import { collectReportData } from "@/lib/reports/collect";
 import { renderReportPdf } from "@/lib/reports/pdf-client";
-import { buildReportText, PARAGRAPH_BREAK } from "@/lib/reports/report-text";
+import { reportListSummary } from "@/lib/reports/report-text";
 import { formatMonthTitle, isFullCalendarMonth } from "@/lib/reports/period";
 import { renderReportHtml } from "@/lib/reports/render-html";
 import { Project, Report } from "@/models";
@@ -13,6 +13,7 @@ import type {
   TReportDetailDto,
   TReportListItemDto,
   TReportListKpisDto,
+  TReportNotesDto,
   TReportSnapshotDto,
 } from "@/types/reports.types";
 
@@ -73,11 +74,7 @@ export async function createReport(
   userId: string,
   input: CreateReportInput,
 ): Promise<TReportDetailDto> {
-  const notes = {
-    highlights: input.highlights,
-    translationStatus: input.translationStatus,
-    closingNote: input.closingNote,
-  };
+  const notes: TReportNotesDto = { written: input.written, nextSteps: input.nextSteps };
 
   const { base, period } = await collectReportData(projectId, input.periodFrom, input.periodTo);
   const project = await Project.findById(projectId).select("logoImage").lean();
@@ -92,7 +89,7 @@ export async function createReport(
     project: { ...base.project, logoDataUri },
     notes,
   };
-  const summary = buildReportText(snapshot).summary.split(PARAGRAPH_BREAK)[0] ?? null;
+  const summary = reportListSummary(snapshot);
 
   const doc = await Report.create({
     projectId,

@@ -40,8 +40,6 @@ export const REPORT_MAX_TOP_EVENTS = 5;
 /** Top countries listed under the traffic-by-channel pie. */
 export const REPORT_MAX_TOP_COUNTRIES = 5;
 
-/** Highlight notes accepted per report. */
-export const REPORT_MAX_HIGHLIGHTS = 8;
 
 export const REPORT_RENDER_TIMEOUT_MS = 60_000;
 

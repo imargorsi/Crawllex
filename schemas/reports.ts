@@ -2,28 +2,62 @@ import { z } from "zod";
 
 import { ANALYTICS_MAX_RANGE_DAYS } from "@/lib/integrations/constants";
 import { inclusiveDaySpan } from "@/lib/integrations/date.utils";
-import { REPORT_MAX_HIGHLIGHTS } from "@/lib/reports/constants";
+import { isRichDocEmpty, type TRichDoc } from "@/lib/reports/rich-text";
 
 const isoDateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date Must Be YYYY-MM-DD.");
 
-const optionalText = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max, `Must Be ${max} Characters Or Fewer.`)
-    .nullish()
-    .transform((value) => (value ? value : null));
+/** Limits for hand-written report text. */
+const RICH_MAX_BLOCKS = 200;
+const RICH_MAX_CHARS = 30_000;
+
+const richInlineSchema = z.object({
+  text: z.string().max(5_000, "Text Is Too Long."),
+  bold: z.boolean().optional(),
+  italic: z.boolean().optional(),
+});
+
+const richRunsSchema = z.array(richInlineSchema).max(500);
+
+const richBlockSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("heading"), level: z.union([z.literal(2), z.literal(3)]), runs: richRunsSchema }),
+  z.object({ type: z.literal("paragraph"), runs: richRunsSchema }),
+  z.object({ type: z.literal("bullets"), items: z.array(richRunsSchema).max(200) }),
+]);
+
+const richDocSchema: z.ZodType<TRichDoc> = z
+  .array(richBlockSchema)
+  .max(RICH_MAX_BLOCKS, "Text Has Too Many Blocks.")
+  .refine((doc) => documentChars(doc) <= RICH_MAX_CHARS, "Text Is Too Long.");
+
+function documentChars(doc: TRichDoc): number {
+  return doc.reduce((total, block) => {
+    const runs = block.type === "bullets" ? block.items.flat() : block.runs;
+    return total + runs.reduce((sum, run) => sum + run.text.length, 0);
+  }, 0);
+}
+
+/** Optional section text: empty input becomes null, so the generated text is used. */
+const optionalRichDoc = richDocSchema
+  .nullish()
+  .transform((doc) => (doc && !isRichDocEmpty(doc) ? doc : null));
+
+/** Next Steps must be written. */
+const requiredRichDoc = richDocSchema.refine((doc) => !isRichDocEmpty(doc), "Next Steps Are Required.");
 
 export const createReportSchema = z
   .object({
     periodFrom: isoDateSchema,
     periodTo: isoDateSchema,
-    highlights: z
-      .array(z.string().trim().min(1, "Highlight Cannot Be Empty.").max(300, "Highlight Is Too Long."))
-      .max(REPORT_MAX_HIGHLIGHTS, `Add ${REPORT_MAX_HIGHLIGHTS} Highlights Or Fewer.`)
-      .default([]),
-    translationStatus: optionalText(500),
-    closingNote: optionalText(1000),
+    written: z
+      .object({
+        executiveSummary: optionalRichDoc,
+        search: optionalRichDoc,
+        traffic: optionalRichDoc,
+        leads: optionalRichDoc,
+        work: optionalRichDoc,
+      })
+      .default({ executiveSummary: null, search: null, traffic: null, leads: null, work: null }),
+    nextSteps: requiredRichDoc,
   })
   .superRefine((value, ctx) => {
     if (value.periodFrom > value.periodTo) {

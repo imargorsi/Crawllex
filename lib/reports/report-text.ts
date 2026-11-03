@@ -1,6 +1,7 @@
-import { REPORT_MAX_HIGHLIGHTS, REPORT_FLAT_CHANGE_RATIO, REPORT_STABLE_POSITION_DELTA } from "@/lib/reports/constants";
+import { REPORT_FLAT_CHANGE_RATIO, REPORT_STABLE_POSITION_DELTA } from "@/lib/reports/constants";
 import { countPhrase, formatInt, formatPercent, formatPosition, formatDuration, relativeChange } from "@/lib/reports/format";
 import { formatMonthTitle } from "@/lib/reports/period";
+import { richDocFirstParagraph } from "@/lib/reports/rich-text";
 import type { TReportSnapshotDto } from "@/types/reports.types";
 
 /**
@@ -20,7 +21,6 @@ export type TReportText = {
     backlinks: string;
     technical: string;
   };
-  notes: string | null;
   search: string;
   traffic: string;
   engagement: string;
@@ -75,7 +75,7 @@ function positionPhrase(current: number | null | undefined, previous: number | n
 
 export function buildReportText(snapshot: TReportSnapshotDto): TReportText {
   const month = formatMonthTitle(snapshot.period.from);
-  const { gsc, ga4, leads, activities, events, sources, notes } = snapshot;
+  const { gsc, ga4, leads, activities, events, sources } = snapshot;
   const contacts = events.contacts;
   const topQuery = gsc.topQueries.find((row) => (row.clicks ?? 0) > 0);
   const topChannel = ga4.channels.find((row) => (row.sessions ?? 0) > 0);
@@ -157,15 +157,19 @@ export function buildReportText(snapshot: TReportSnapshotDto): TReportText {
     "Open a card to see each item, newest first.",
   ].join(" ");
 
-  const noteLines = notes.highlights.slice(0, REPORT_MAX_HIGHLIGHTS);
-
   return {
     summary: summaryParts.join(PARAGRAPH_BREAK),
     highlights,
-    notes: noteLines.length > 0 ? noteLines.join(" ") : null,
     search,
     traffic,
     engagement,
     work,
   };
+}
+
+/** Summary shown on report list cards: the written executive summary when there is one, else the generated one. */
+export function reportListSummary(snapshot: TReportSnapshotDto): string | null {
+  const written = snapshot.notes?.written?.executiveSummary;
+  if (written) return richDocFirstParagraph(written);
+  return buildReportText(snapshot).summary.split(PARAGRAPH_BREAK)[0] ?? null;
 }

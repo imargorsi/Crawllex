@@ -1,3 +1,4 @@
+import type { TReportWrittenKey, TRichDoc } from "@/lib/reports/rich-text";
 /** Monthly client report DTOs. Shared by the API, the HTML renderer and the UI. */
 
 export type TReportPeriodDto = {
@@ -41,6 +42,11 @@ export type TReportSeriesPointDto = {
   clicks: number | null;
   impressions: number | null;
   sessions: number | null;
+};
+
+export type TReportNotesDto = {
+  written?: Partial<Record<TReportWrittenKey, TRichDoc | null>>;
+  nextSteps?: TRichDoc | null;
 };
 
 export type TReportActivityItemDto = {
@@ -91,11 +97,8 @@ export type TReportSnapshotDto = {
     backlinks?: Array<TReportActivityItemDto>;
     technical?: Array<TReportActivityItemDto>;
   };
-  notes: {
-    highlights: string[];
-    translationStatus: string | null;
-    closingNote: string | null;
-  };
+  /** Hand-written text and next steps. Reports created before the editor have no `written`. */
+  notes: TReportNotesDto;
 };
 
 export type TReportListItemDto = {

@@ -13,7 +13,7 @@ const reportSchema = new Schema(
     previousTo: { type: String, required: true, trim: true },
     summary: { type: String, default: null },
     title: { type: String, required: true, trim: true },
-    /** Manual inputs entered with the report (highlights, translation status, closing note). */
+    /** Hand-written text and next steps (see `lib/reports/rich-text.ts`). */
     notes: { type: Schema.Types.Mixed, default: () => ({}) },
     /** Collected data (see `types/reports.types.ts`). */
     snapshot: { type: Schema.Types.Mixed, required: true },

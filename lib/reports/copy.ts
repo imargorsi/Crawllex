@@ -10,7 +10,7 @@ export const REPORT_COPY = {
     contactUs: "CONTACT US",
   },
   sections: {
-    summary: { number: "01", title: "Executive summary", highlightsHeading: "Key highlights", contentHeading: "Content", contactHeading: "Leads and contacts", notesHeading: "Team notes" },
+    summary: { number: "01", title: "Executive summary", highlightsHeading: "Key highlights", contentHeading: "Content", contactHeading: "Leads and contacts" },
     search: { number: "02", title: "Search performance", chartHeading: "Daily clicks and impressions", queriesHeading: "Top search queries", pagesHeading: "Top search pages", noQueries: "No search queries for this period.", noPages: "No search pages for this period.", noDailySearch: "No daily search data for this period." },
     traffic: { number: "03", title: "Website traffic", chartHeading: "Daily sessions", channelsHeading: "Traffic by channel", countriesHeading: "Top countries", landingHeading: "Top landing pages", noDailyTraffic: "No daily traffic data for this period.", noCountries: "No country data for this period.", noPages: "No page data for this period." },
     engagement: { number: "04", title: "Engagement and leads", leadsHeading: "Leads", engagementHeading: "Engagement", eventsHeading: "Top events overall" },

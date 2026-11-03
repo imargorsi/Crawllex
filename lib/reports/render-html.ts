@@ -3,6 +3,7 @@ import { EMPTY_REPORT_ASSETS, type TReportAssets } from "@/lib/reports/assets";
 import { escapeHtml } from "@/lib/reports/escape";
 import { REPORT_COPY } from "@/lib/reports/copy";
 import { barChartSvg, lineChartSvg } from "@/lib/reports/svg-charts";
+import type { TRichDoc, TRichInline } from "@/lib/reports/rich-text";
 import { buildReportView, type TBlockView, type TCardView, type TKpiView, type TReportView, type TSectionView, type TTableView } from "@/lib/reports/view-model";
 import type { TReportSnapshotDto } from "@/types/reports.types";
 
@@ -131,8 +132,30 @@ function cardHtml(card: TCardView): string {
   return `<div class="card" style="border-top-color:${TONE_COLOR[card.tone]}"><div class="label">${escapeHtml(card.label)}</div><div class="value">${escapeHtml(card.value)}</div>${change}<p class="card-body">${escapeHtml(card.body)}</p></div>`;
 }
 
+function runsHtml(runs: TRichInline[]): string {
+  return runs
+    .map((run) => {
+      const text = escapeHtml(run.text);
+      const bold = run.bold ? `<strong>${text}</strong>` : text;
+      return run.italic ? `<em>${bold}</em>` : bold;
+    })
+    .join("");
+}
+
+function richDocHtml(doc: TRichDoc): string {
+  return doc
+    .map((block) => {
+      if (block.type === "heading") return `<h3>${runsHtml(block.runs)}</h3>`;
+      if (block.type === "paragraph") return `<p class="prose lead">${runsHtml(block.runs)}</p>`;
+      return `<ul>${block.items.map((item) => `<li>${runsHtml(item)}</li>`).join("")}</ul>`;
+    })
+    .join("");
+}
+
 function blockHtml(block: TBlockView): string {
   switch (block.type) {
+    case "rich":
+      return richDocHtml(block.doc);
     case "heading":
       return `<h3>${escapeHtml(block.title)}</h3>`;
     case "prose":

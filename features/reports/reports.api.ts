@@ -6,6 +6,7 @@ import { useAccessToken } from "@/hooks/use-access-token.hook";
 import { ApiError } from "@/lib/frontend/api/errors";
 import { baseQuery } from "@/lib/frontend/api/base";
 import { getAccessToken } from "@/lib/frontend/auth/session";
+import type { CreateReportInput } from "@/schemas/reports";
 import type { TReportDetailDto, TReportListItemDto } from "@/types/reports.types";
 
 export const reportsKeys = {
@@ -15,13 +16,7 @@ export const reportsKeys = {
     [...reportsKeys.all, "detail", projectId, reportId] as const,
 };
 
-export type TCreateReportPayload = {
-  periodFrom: string;
-  periodTo: string;
-  highlights: string[];
-  translationStatus: string | null;
-  closingNote: string | null;
-};
+export type TCreateReportPayload = CreateReportInput;
 
 export function useReportsQuery(projectId: string | null | undefined) {
   const token = useAccessToken();

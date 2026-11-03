@@ -4,6 +4,7 @@ import { formatDuration, formatInt, formatPercent, formatPosition, relativeChang
 import { formatMonthTitle, formatPeriodLabel } from "@/lib/reports/period";
 import type { TReportActivityItemDto, TReportRankedRowDto, TReportSnapshotDto } from "@/types/reports.types";
 import { buildReportText, describeEvent, type TReportText } from "@/lib/reports/report-text";
+import type { TRichDoc } from "@/lib/reports/rich-text";
 
 /**
  * One view of a report snapshot. The PDF renderer and the in-app report page both render this
@@ -71,6 +72,7 @@ export type TNamedTable = { title: string; table: TTableView };
 export type TBlockView =
   | { type: "heading"; title: string }
   | { type: "prose"; title: string | null; body: string; variant: "lead" | "body" }
+  | { type: "rich"; doc: TRichDoc }
   | { type: "cards"; title: string; items: TCardView[] }
   | { type: "kpis"; items: TKpiView[] }
   | { type: "line"; title: string | null; charts: { title: string; chart: TSeriesView }[]; tables: TNamedTable[] }
@@ -117,6 +119,11 @@ function ranked(rows: TReportRankedRowDto[], emptyText: string, headers: string[
   return { headers, rows: rows.map(columns), emptyText };
 }
 
+/** Section overview: the team's written text when provided, else the generated paragraph. */
+function overviewBlock(written: TRichDoc | null | undefined, generated: string): TBlockView {
+  return written ? { type: "rich", doc: written } : { type: "prose", title: null, body: generated, variant: "lead" };
+}
+
 function lineView(dates: string[], series: TSeriesView["series"]): TSeriesView {
   return { dates, series };
 }
@@ -126,7 +133,7 @@ function summarySection(snapshot: TReportSnapshotDto, text: TReportText): TSecti
   const { activities, leads, events } = snapshot;
   const h = text.highlights;
   const blocks: TBlockView[] = [
-    { type: "prose", title: null, body: text.summary, variant: "lead" },
+    overviewBlock(snapshot.notes?.written?.executiveSummary, text.summary),
     { type: "heading", title: copy.highlightsHeading },
     {
       type: "cards",
@@ -148,14 +155,13 @@ function summarySection(snapshot: TReportSnapshotDto, text: TReportText): TSecti
       ],
     },
   ];
-  if (text.notes) blocks.push({ type: "prose", title: copy.notesHeading, body: text.notes, variant: "body" });
   return { id: "summary", number: copy.number, title: copy.title, blocks };
 }
 
 function searchSection(snapshot: TReportSnapshotDto, text: TReportText): TSectionView {
   const { gsc, sources } = snapshot;
   const copy = REPORT_COPY.sections.search;
-  const blocks: TBlockView[] = [{ type: "prose", title: null, body: text.search, variant: "lead" }];
+  const blocks: TBlockView[] = [overviewBlock(snapshot.notes?.written?.search, text.search)];
 
   if (sources.gsc) {
     blocks.push({
@@ -218,7 +224,7 @@ function searchSection(snapshot: TReportSnapshotDto, text: TReportText): TSectio
 function trafficSection(snapshot: TReportSnapshotDto, text: TReportText): TSectionView {
   const { ga4, sources } = snapshot;
   const copy = REPORT_COPY.sections.traffic;
-  const blocks: TBlockView[] = [{ type: "prose", title: null, body: text.traffic, variant: "lead" }];
+  const blocks: TBlockView[] = [overviewBlock(snapshot.notes?.written?.traffic, text.traffic)];
 
   if (sources.ga4) {
     blocks.push({
@@ -280,7 +286,7 @@ function trafficSection(snapshot: TReportSnapshotDto, text: TReportText): TSecti
 function engagementSection(snapshot: TReportSnapshotDto, text: TReportText): TSectionView {
   const { ga4, events, sources, leads } = snapshot;
   const copy = REPORT_COPY.sections.engagement;
-  const blocks: TBlockView[] = [{ type: "prose", title: null, body: text.engagement, variant: "lead" }];
+  const blocks: TBlockView[] = [overviewBlock(snapshot.notes?.written?.leads, text.engagement)];
 
   blocks.push({
     type: "cards",
@@ -347,7 +353,7 @@ function workSection(snapshot: TReportSnapshotDto, text: TReportText): TSectionV
   const { activities } = snapshot;
   const copy = REPORT_COPY.sections.work;
   const blocks: TBlockView[] = [
-    { type: "prose", title: null, body: text.work, variant: "lead" },
+    overviewBlock(snapshot.notes?.written?.work, text.work),
     {
       type: "cards",
       title: copy.cardsHeading,

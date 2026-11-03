@@ -908,10 +908,29 @@ export interface Translation {
       periodMonth: string;
       periodHint: string;
       invalidPeriod: string;
-      highlightsLabel: string;
-      highlightsHint: string;
-      translationStatusLabel: string;
-      closingNoteLabel: string;
+      nextStepsRequired: string;
+      requiredLabel: string;
+      sectionPeriod: string;
+      sectionWritten: string;
+      sectionWrittenHint: string;
+      sectionNextSteps: string;
+      sectionNextStepsHint: string;
+      writtenPlaceholder: string;
+      written: {
+        executiveSummary: string;
+        search: string;
+        traffic: string;
+        leads: string;
+        work: string;
+        nextSteps: string;
+      };
+      writtenHint: {
+        executiveSummary: string;
+        search: string;
+        traffic: string;
+        leads: string;
+        work: string;
+      };
       createSubmit: string;
       created: string;
       emptyTitle: string;
@@ -2583,14 +2602,33 @@ const translation: Translation = {
       loadError: "Reports could not be loaded.",
       newReport: "New Report",
       createTitle: "New Monthly Report",
-      createBody: "Pick a month. The report uses cached Search Console and Google Analytics data for that month.",
+      createBody: "Pick a month, then write any section you want to replace. Next steps are required.",
       periodMonth: "Report Month",
       periodHint: "Covers the first to the last day of the month.",
       invalidPeriod: "Choose a valid month.",
-      highlightsLabel: "Highlights",
-      highlightsHint: "One highlight per line. Shown in the notes section.",
-      translationStatusLabel: "Website Translation Status",
-      closingNoteLabel: "Next Steps",
+      nextStepsRequired: "Next steps are required.",
+      requiredLabel: "Required",
+      sectionPeriod: "Period",
+      sectionWritten: "Written text",
+      sectionWrittenHint: "Optional. Write a section to replace its generated text. Leave it empty to keep the generated text.",
+      sectionNextSteps: "Next steps",
+      sectionNextStepsHint: "Saved with the report.",
+      writtenPlaceholder: "Write here. Use the toolbar for headings, bullet points and bold or italic.",
+      written: {
+        executiveSummary: "Executive summary",
+        search: "Search performance",
+        traffic: "Website traffic",
+        leads: "Engagement and leads",
+        work: "Work logged",
+        nextSteps: "Next steps",
+      },
+      writtenHint: {
+        executiveSummary: "Replaces the generated introduction.",
+        search: "Replaces the generated search overview.",
+        traffic: "Replaces the generated traffic overview.",
+        leads: "Replaces the generated engagement and leads overview.",
+        work: "Replaces the generated work logged overview.",
+      },
       createSubmit: "Create Report",
       created: "Report created.",
       emptyTitle: "No Reports Yet",

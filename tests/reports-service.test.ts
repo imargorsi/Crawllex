@@ -64,8 +64,8 @@ describe("report service", () => {
     const input = createReportSchema.parse({
       periodFrom: "2026-09-01",
       periodTo: "2026-09-30",
-      highlights: ["Arabic landing page live"],
-      translationStatus: "Review pending",
+      written: { work: [{ type: "paragraph", runs: [{ text: "Arabic landing page live." }] }] },
+      nextSteps: [{ type: "paragraph", runs: [{ text: "Review translation." }] }],
     });
     const report = await createReport(projectId, String(owner._id), input);
 
@@ -78,9 +78,9 @@ describe("report service", () => {
     expect(report.snapshot.leads.byOrigin).toEqual({ wordpress: 1 });
     expect(report.snapshot.activities.current.blogs).toBe(1);
     expect(report.snapshot.activities.blogs[0]?.title).toBe("Concrete Curing Guide");
-    expect(report.snapshot.notes.translationStatus).toBe("Review pending");
+    expect(report.snapshot.notes.nextSteps).toEqual([{ type: "paragraph", runs: [{ text: "Review translation." }] }]);
     expect(report.summary).toContain("During September 2026");
-    expect(report.snapshot.notes.highlights).toEqual(["Arabic landing page live"]);
+    expect(report.snapshot.notes.written?.work).toEqual([{ type: "paragraph", runs: [{ text: "Arabic landing page live." }] }]);
 
     const list = await listReports(projectId);
     expect(list).toHaveLength(1);

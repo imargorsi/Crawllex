@@ -39,7 +39,10 @@ function snapshot(name: string, highlight: string): TReportSnapshotDto {
       blogs: [],
     },
   };
-  const notes = { highlights: [highlight], translationStatus: null, closingNote: null };
+  const notes = {
+    written: { work: [{ type: "paragraph" as const, runs: [{ text: highlight }] }] },
+    nextSteps: [{ type: "paragraph" as const, runs: [{ text: "Next steps are stored, not rendered." }] }],
+  };
   return {
     version: 1,
     generatedAt: "2026-11-02T00:00:00.000Z",
@@ -49,7 +52,7 @@ function snapshot(name: string, highlight: string): TReportSnapshotDto {
 }
 
 describe("renderReportHtml", () => {
-  it("escapes project name and notes so they cannot inject markup", () => {
+  it("escapes project name and written text so they cannot inject markup", () => {
     const html = renderReportHtml(snapshot('<img src=x onerror="alert(1)">', "<script>alert(2)</script>"));
     expect(html).not.toContain("<script>alert(2)</script>");
     expect(html).not.toContain('<img src=x onerror="alert(1)">');
