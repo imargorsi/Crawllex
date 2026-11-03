@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 
 import { ReportDetailView } from "@/components/reports/report-view/report-detail-view";
@@ -43,7 +43,14 @@ type TReportDetailSectionProps = {
 export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
   const { t } = useTranslation("translation", { keyPrefix: "modules.reports" });
   const router = useRouter();
-  const { selectedProject } = useSelectedProject();
+  const { selectedProject, projects, setSelectedProjectId } = useSelectedProject();
+  const linkedProjectId = useSearchParams().get("project");
+
+  // Emailed links carry the project id: select it so the report loads for the reader.
+  useEffect(() => {
+    if (!linkedProjectId || linkedProjectId === selectedProject?.id) return;
+    if (projects.some((project) => project.id === linkedProjectId)) setSelectedProjectId(linkedProjectId);
+  }, [linkedProjectId, projects, selectedProject?.id, setSelectedProjectId]);
   const projectId = selectedProject?.id ?? null;
   const { data: authUser } = useAuthUserQuery();
   const { projectPermissions } = useProjectAccess();

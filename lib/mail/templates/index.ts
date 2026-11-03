@@ -5,6 +5,7 @@ export { projectInviteMailContent } from "@/lib/mail/templates/project-invite";
 export { projectCreatedMailContent } from "@/lib/mail/templates/project-created";
 export { projectApprovedMailContent } from "@/lib/mail/templates/project-approved";
 export { projectRejectedMailContent } from "@/lib/mail/templates/project-rejected";
+export { reportReadyMailContent } from "@/lib/mail/templates/report-ready";
 export { projectActivatedMailContent } from "@/lib/mail/templates/project-activated";
 export { projectDeactivatedMailContent } from "@/lib/mail/templates/project-deactivated";
 export { projectDeletedMailContent } from "@/lib/mail/templates/project-deleted";

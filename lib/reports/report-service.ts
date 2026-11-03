@@ -4,6 +4,7 @@ import { loadReportAssets } from "@/lib/reports/assets";
 import { loadClientLogoDataUri } from "@/lib/reports/client-logo";
 import { collectReportData } from "@/lib/reports/collect";
 import { renderReportPdf } from "@/lib/reports/pdf-client";
+import { deliverReportEmails } from "@/lib/reports/report-delivery";
 import { reportListSummary } from "@/lib/reports/report-text";
 import { formatMonthTitle, isFullCalendarMonth } from "@/lib/reports/period";
 import { renderReportHtml } from "@/lib/reports/render-html";
@@ -115,7 +116,12 @@ export async function createReport(
     createdBy: userId,
   });
 
-  return toDetail(doc.toObject() as unknown as TReportLean);
+  const report = toDetail(doc.toObject() as unknown as TReportLean);
+  // Email runs in the background: the creator gets the saved report now, delivery status is stored per recipient.
+  void deliverReportEmails({ report, renderPdf: reportPdf }).catch((error: unknown) => {
+    console.error(`[reports] Email delivery crashed for report ${report.id}.`, error);
+  });
+  return report;
 }
 
 export async function listReports(projectId: string): Promise<TReportListItemDto[]> {

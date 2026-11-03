@@ -1,32 +1,14 @@
+import { hashPassword } from "@/lib/auth/password";
 import { describe, expect, it } from "vitest";
 
-import { hashPassword } from "@/lib/auth/password";
-import { createProject } from "@/lib/projects/create-project";
 import { getProjectAccessForUser } from "@/lib/projects/get-project-access";
 import { hasPermission } from "@/lib/rbac/access";
-import { seedSystemRoles } from "@/lib/rbac/seed-roles";
 import { PROJECT_USER_ROLE } from "@/lib/rbac/roles";
 import { createReport, deleteReport, getReport, listReports } from "@/lib/reports/report-service";
 import { AnalyticsDailyMetric, Lead, Project, ProjectMember, Role, SeoActivity, User } from "@/models";
 import { createReportSchema } from "@/schemas/reports";
-import { authContextFor, projectInput } from "@/tests/helpers/project-test-utils";
-
-async function seedProject() {
-  await seedSystemRoles();
-  const owner = await User.create({
-    name: "Report Owner",
-    email: "report-owner@example.com",
-    password: await hashPassword("password"),
-    emailVerifiedAt: new Date(),
-    roles: [],
-  });
-  const { project } = await createProject(
-    authContextFor(owner),
-    projectInput({ businessName: "Silver Foundation", websiteUrl: "https://silver.example.com" }),
-  );
-  await Project.findByIdAndUpdate(project._id, { status: "active" });
-  return { owner, projectId: project._id.toString() };
-}
+import { authContextFor } from "@/tests/helpers/project-test-utils";
+import { seedProject } from "@/tests/helpers/report-test-utils";
 
 describe("report service", () => {
   it("collects cached data, stores a snapshot, and lists, reads and deletes it", async () => {
