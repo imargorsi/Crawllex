@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { sendMail } from "@/lib/mail/client";
 import { reportReadyMailContent } from "@/lib/mail/templates";
 import { deliverReportEmails, reportDashboardUrl } from "@/lib/reports/report-delivery";
-import { createReport, getReport } from "@/lib/reports/report-service";
+import { createReport, listReports } from "@/lib/reports/report-service";
 import { Report, User } from "@/models";
 import { createReportSchema } from "@/schemas/reports";
 import { seedProject } from "@/tests/helpers/report-test-utils";
@@ -39,6 +39,7 @@ async function createTestReport(projectId: string, userId: string, recipientUser
   });
   const report = await createReport(projectId, userId, input);
   report.snapshot.notes = { ...report.snapshot.notes, recipientUserIds };
+  await Report.updateOne({ _id: report.id }, { $set: { "snapshot.notes.recipientUserIds": recipientUserIds } });
   return report;
 }
 
@@ -117,5 +118,38 @@ describe("report delivery", () => {
 
     await expect(deliverReportEmails({ report, renderPdf })).resolves.toBeUndefined();
     expect((await deliveriesOf(report.id)).map((d) => d.status)).toEqual(["not_sent"]);
+  });
+
+  it("never emails the same recipient twice for one report", async () => {
+    const { owner, projectId } = await seedTestProject();
+    const report = await createTestReport(projectId, String(owner._id), [String(owner._id)]);
+
+    await deliverReportEmails({ report, renderPdf });
+    await deliverReportEmails({ report, renderPdf });
+
+    expect(sendMailMock).toHaveBeenCalledTimes(1);
+    expect((await deliveriesOf(report.id)).map((d) => d.status)).toEqual(["sent"]);
+  });
+
+  it("returns delivery details to report creators only", async () => {
+    const { owner, projectId } = await seedTestProject();
+    const report = await createTestReport(projectId, String(owner._id), [String(owner._id)]);
+    await deliverReportEmails({ report, renderPdf });
+
+    const withDetails = await listReports(projectId, { includeDeliveries: true });
+    expect(withDetails[0]?.recipientCount).toBe(1);
+    expect(withDetails[0]?.deliveries?.[0]).toMatchObject({ name: "Report Owner", email: "report-owner@example.com", status: "sent" });
+
+    const withoutDetails = await listReports(projectId, { includeDeliveries: false });
+    expect(withoutDetails[0]).not.toHaveProperty("deliveries");
+    expect(withoutDetails[0]).not.toHaveProperty("recipientCount");
+  });
+
+  it("reports recipients that are still pending as recipientCount without deliveries", async () => {
+    const { owner, projectId } = await seedTestProject();
+    await createTestReport(projectId, String(owner._id), [String(owner._id)]);
+
+    const list = await listReports(projectId, { includeDeliveries: true });
+    expect(list[0]).toMatchObject({ recipientCount: 1, deliveries: [] });
   });
 });

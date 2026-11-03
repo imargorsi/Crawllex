@@ -3,13 +3,12 @@ import { sendMail } from "@/lib/mail/client";
 import { reportReadyMailContent } from "@/lib/mail/templates";
 import { isActiveUserStatus } from "@/lib/users/constants";
 import { Report, User } from "@/models";
-import type { TReportDetailDto } from "@/types/reports.types";
+import type { TReportDeliveryStatus, TReportDetailDto } from "@/types/reports.types";
 
-/** Outcome for one recipient. `not_sent` means SMTP is not configured, so nothing left the server. */
-export type TReportDeliveryStatus = "sent" | "not_sent" | "failed" | "skipped";
-
+/** One stored delivery attempt. Stored in `notes.deliveries` of the report document. */
 export type TReportDelivery = {
   userId: string;
+  name: string;
   email: string | null;
   status: TReportDeliveryStatus;
   error: string | null;
@@ -31,8 +30,9 @@ function errorMessage(error: unknown): string {
 
 /**
  * Emails the report PDF (attached) and the dashboard link to each recipient in `notes.recipientUserIds`.
- * Runs after the report is saved. Every recipient gets one entry in `notes.deliveries`, so a failed
- * send can be seen later. Never throws: a failure is recorded, not raised to the creator.
+ * Runs after the report is saved. Every attempt is stored in `notes.deliveries`, so a failed send can
+ * be seen later. A recipient already marked `sent` is skipped, so the same report is never emailed twice
+ * to the same person. Never throws: a failure is recorded, not raised to the creator.
  */
 export async function deliverReportEmails(input: {
   report: TReportDetailDto;
@@ -42,7 +42,12 @@ export async function deliverReportEmails(input: {
   const recipientIds = report.snapshot.notes?.recipientUserIds ?? [];
   if (recipientIds.length === 0) return;
 
-  const users = await User.find({ _id: { $in: recipientIds } }).select("name email status");
+  const stored = await Report.findById(report.id).select("notes.deliveries").lean<{ notes?: { deliveries?: TReportDelivery[] } }>();
+  const alreadySent = new Set((stored?.notes?.deliveries ?? []).filter((d) => d.status === "sent").map((d) => d.userId));
+  const pending = recipientIds.filter((userId) => !alreadySent.has(userId));
+  if (pending.length === 0) return;
+
+  const users = await User.find({ _id: { $in: pending } }).select("name email status");
   const usersById = new Map(users.map((user) => [user._id.toString(), user]));
 
   let pdf: Buffer | null = null;
@@ -59,16 +64,16 @@ export async function deliverReportEmails(input: {
   const mail = reportReadyMailContent({ clientName, periodLabel: report.snapshot.period.label, dashboardUrl });
   const deliveries: TReportDelivery[] = [];
 
-  for (const userId of recipientIds) {
+  for (const userId of pending) {
     const user = usersById.get(userId);
     const at = new Date();
 
     if (!user || !isActiveUserStatus(user.status) || !user.email) {
-      deliveries.push({ userId, email: user?.email ?? null, status: "skipped", error: "Recipient not active or has no email.", at });
+      deliveries.push({ userId, name: user?.name ?? "", email: user?.email ?? null, status: "skipped", error: "Recipient not active or has no email.", at });
       continue;
     }
     if (!pdf) {
-      deliveries.push({ userId, email: user.email, status: "failed", error: pdfError ?? "PDF not rendered.", at });
+      deliveries.push({ userId, name: user.name, email: user.email, status: "failed", error: pdfError ?? "PDF not rendered.", at });
       continue;
     }
 
@@ -80,10 +85,10 @@ export async function deliverReportEmails(input: {
         html: mail.html,
         attachments: [{ filename: pdfFilename(report.title), content: pdf, contentType: "application/pdf" }],
       });
-      deliveries.push({ userId, email: user.email, status: sent ? "sent" : "not_sent", error: null, at });
+      deliveries.push({ userId, name: user.name, email: user.email, status: sent ? "sent" : "not_sent", error: null, at });
     } catch (error) {
       console.error(`[reports] Email failed for report ${report.id} to ${user.email}.`, error);
-      deliveries.push({ userId, email: user.email, status: "failed", error: errorMessage(error), at });
+      deliveries.push({ userId, name: user.name, email: user.email, status: "failed", error: errorMessage(error), at });
     }
   }
 

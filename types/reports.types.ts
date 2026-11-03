@@ -44,6 +44,18 @@ export type TReportSeriesPointDto = {
   sessions: number | null;
 };
 
+/** Delivery state of one recipient of a report. Visible to users who can create reports. */
+export type TReportDeliveryStatus = "sent" | "not_sent" | "failed" | "skipped";
+
+export type TReportDeliveryDto = {
+  userId: string;
+  name: string;
+  email: string | null;
+  status: TReportDeliveryStatus;
+  error: string | null;
+  at: string;
+};
+
 export type TReportNotesDto = {
   written?: Partial<Record<TReportWrittenKey, TRichDoc | null>>;
   nextSteps?: TRichDoc | null;
@@ -114,6 +126,10 @@ export type TReportListItemDto = {
   summary: string | null;
   /** Headline numbers for list cards. Null for reports saved before this field existed. */
   kpis: TReportListKpisDto | null;
+  /** Recipients chosen for the report. Present only for users who can create reports. */
+  recipientCount?: number;
+  /** Latest delivery per recipient. Present only for users who can create reports. */
+  deliveries?: TReportDeliveryDto[];
 };
 
 export type TReportListKpisDto = {

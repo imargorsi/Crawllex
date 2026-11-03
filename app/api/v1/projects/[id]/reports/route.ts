@@ -4,7 +4,7 @@ import { withApiHandler } from "@/lib/api/handler";
 import { ApiResponse } from "@/lib/api/response";
 import { runApiGuards } from "@/lib/auth/run-api-guards";
 import { connectDb } from "@/lib/db/mongoose";
-import { requireProjectPermission } from "@/lib/projects/get-project-access";
+import { hasProjectPermission, requireProjectPermission } from "@/lib/projects/get-project-access";
 import { createReport, listReports } from "@/lib/reports/report-service";
 import { createReportSchema } from "@/schemas/reports";
 
@@ -31,7 +31,8 @@ export const GET = withApiHandler(async (request, context) => {
   const permissionError = await requireProjectPermission(auth, projectId, "reports.view");
   if (permissionError) return permissionError;
 
-  const reports = await listReports(projectId);
+  const includeDeliveries = await hasProjectPermission(auth, projectId, "reports.create");
+  const reports = await listReports(projectId, { includeDeliveries });
   return ApiResponse.success(reports);
 });
 

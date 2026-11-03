@@ -64,19 +64,19 @@ describe("report service", () => {
     expect(report.summary).toContain("During September 2026");
     expect(report.snapshot.notes.written?.work).toEqual([{ type: "paragraph", runs: [{ text: "Arabic landing page live." }] }]);
 
-    const list = await listReports(projectId);
+    const list = await listReports(projectId, { includeDeliveries: false });
     expect(list).toHaveLength(1);
     expect(list[0]).not.toHaveProperty("snapshot");
 
-    const detail = await getReport(projectId, report.id);
+    const detail = await getReport(projectId, report.id, { includeDeliveries: false });
     expect(detail?.snapshot.project.name).toBe("Silver Foundation");
 
-    expect(await getReport(projectId, "000000000000000000000000")).toBeNull();
-    expect(await getReport(projectId, "not-an-id")).toBeNull();
+    expect(await getReport(projectId, "000000000000000000000000", { includeDeliveries: false })).toBeNull();
+    expect(await getReport(projectId, "not-an-id", { includeDeliveries: false })).toBeNull();
 
     expect(await deleteReport(projectId, report.id)).toBe(true);
     expect(await deleteReport(projectId, report.id)).toBe(false);
-    expect(await listReports(projectId)).toHaveLength(0);
+    expect(await listReports(projectId, { includeDeliveries: false })).toHaveLength(0);
   });
 
   it("gives project_user view-only report access", async () => {

@@ -31,7 +31,7 @@ export const GET = withApiHandler(async (request, context) => {
   const permissionError = await requireProjectPermission(auth, params.id, "reports.view");
   if (permissionError) return permissionError;
 
-  const report = await getReport(params.id, params.reportId);
+  const report = await getReport(params.id, params.reportId, { includeDeliveries: false });
   if (!report) {
     return ApiResponse.error("Report Not Found.", {}, 404);
   }

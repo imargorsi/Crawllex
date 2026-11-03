@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
+import { ReportDeliveryStatus } from "@/components/reports/report-delivery-status";
 import { AppTable, type TAppTableColumn } from "@/components/table/app-table";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { formatInt } from "@/lib/reports/format";
@@ -84,6 +85,7 @@ export function ReportsTable({
       align: "end",
       render: (report) => (
         <div className="flex items-center justify-end gap-1.5" data-row-click-ignore>
+          <ReportDeliveryStatus report={report} />
           <Link href={`/reports/${report.id}`} aria-label={t("open")} title={t("open")} className={ICON_BUTTON}>
             <Icons.view className="size-4" aria-hidden />
           </Link>

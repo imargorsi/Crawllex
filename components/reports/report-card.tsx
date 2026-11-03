@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
+import { ReportDeliveryStatus } from "@/components/reports/report-delivery-status";
 import { ReportStatChip } from "@/components/reports/report-stat-chip";
 import type { TAppIconComponent } from "@/components/ui/app-icon";
 import { Spinner } from "@/components/ui/spinner";
@@ -113,6 +114,7 @@ export function ReportCard({
         </div>
 
         <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
+          <ReportDeliveryStatus report={report} variant="cover" />
           <CoverActionButton
             label={t("downloadPdf")}
             icon={Icons.download}

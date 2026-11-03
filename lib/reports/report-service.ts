@@ -4,7 +4,7 @@ import { loadReportAssets } from "@/lib/reports/assets";
 import { loadClientLogoDataUri } from "@/lib/reports/client-logo";
 import { collectReportData } from "@/lib/reports/collect";
 import { renderReportPdf } from "@/lib/reports/pdf-client";
-import { deliverReportEmails } from "@/lib/reports/report-delivery";
+import { deliverReportEmails, type TReportDelivery } from "@/lib/reports/report-delivery";
 import { reportListSummary } from "@/lib/reports/report-text";
 import { formatMonthTitle, isFullCalendarMonth } from "@/lib/reports/period";
 import { renderReportHtml } from "@/lib/reports/render-html";
@@ -12,6 +12,7 @@ import { HttpError } from "@/lib/api/http-errors";
 import { Project, Report, User } from "@/models";
 import type { CreateReportInput } from "@/schemas/reports";
 import type {
+  TReportDeliveryDto,
   TReportDetailDto,
   TReportListItemDto,
   TReportListKpisDto,
@@ -28,7 +29,25 @@ type TReportLean = {
   periodTo: string;
   createdAt: Date;
   snapshot?: Partial<TReportSnapshotDto>;
+  notes?: { deliveries?: TReportDelivery[] };
 };
+
+/** Options for reads. Delivery details are for users who can create reports. */
+type TReadOptions = { includeDeliveries: boolean };
+
+/** Latest attempt per recipient, in the order each recipient was first attempted. */
+function latestDeliveries(attempts: TReportDelivery[]): TReportDeliveryDto[] {
+  const latest = new Map<string, TReportDelivery>();
+  for (const attempt of attempts) latest.set(attempt.userId, attempt);
+  return [...latest.values()].map((attempt) => ({
+    userId: attempt.userId,
+    name: attempt.name,
+    email: attempt.email,
+    status: attempt.status,
+    error: attempt.error,
+    at: new Date(attempt.at).toISOString(),
+  }));
+}
 
 function listKpis(doc: TReportLean): TReportListKpisDto | null {
   const snapshot = doc.snapshot;
@@ -45,7 +64,7 @@ function listKpis(doc: TReportLean): TReportListKpisDto | null {
   };
 }
 
-function toListItem(doc: TReportLean): TReportListItemDto {
+function toListItem(doc: TReportLean, options: TReadOptions): TReportListItemDto {
   return {
     id: String(doc._id),
     projectId: String(doc.projectId),
@@ -55,14 +74,20 @@ function toListItem(doc: TReportLean): TReportListItemDto {
     createdAt: doc.createdAt.toISOString(),
     summary: doc.summary ?? null,
     kpis: listKpis(doc),
+    ...(options.includeDeliveries
+      ? {
+          recipientCount: doc.snapshot?.notes?.recipientUserIds?.length ?? 0,
+          deliveries: latestDeliveries(doc.notes?.deliveries ?? []),
+        }
+      : {}),
   };
 }
 
-function toDetail(doc: TReportLean): TReportDetailDto {
+function toDetail(doc: TReportLean, options: TReadOptions): TReportDetailDto {
   if (!doc.snapshot) {
     throw new Error("Report snapshot is missing.");
   }
-  return { ...toListItem(doc), snapshot: doc.snapshot as TReportSnapshotDto };
+  return { ...toListItem(doc, options), snapshot: doc.snapshot as TReportSnapshotDto };
 }
 
 function reportTitle(projectName: string, from: string, to: string, label: string): string {
@@ -116,7 +141,7 @@ export async function createReport(
     createdBy: userId,
   });
 
-  const report = toDetail(doc.toObject() as unknown as TReportLean);
+  const report = toDetail(doc.toObject() as unknown as TReportLean, { includeDeliveries: true });
   // Email runs in the background: the creator gets the saved report now, delivery status is stored per recipient.
   void deliverReportEmails({ report, renderPdf: reportPdf }).catch((error: unknown) => {
     console.error(`[reports] Email delivery crashed for report ${report.id}.`, error);
@@ -124,20 +149,20 @@ export async function createReport(
   return report;
 }
 
-export async function listReports(projectId: string): Promise<TReportListItemDto[]> {
+export async function listReports(projectId: string, options: TReadOptions): Promise<TReportListItemDto[]> {
   const docs = await Report.find({ projectId })
     .sort({ createdAt: -1 })
     .select(
-      "title summary periodFrom periodTo createdAt projectId snapshot.gsc.current snapshot.ga4.current snapshot.leads snapshot.events.contacts",
+      "title summary periodFrom periodTo createdAt projectId notes.deliveries snapshot.notes.recipientUserIds snapshot.gsc.current snapshot.ga4.current snapshot.leads snapshot.events.contacts",
     )
     .lean<TReportLean[]>();
-  return docs.map((doc) => toListItem(doc));
+  return docs.map((doc) => toListItem(doc, options));
 }
 
-export async function getReport(projectId: string, reportId: string): Promise<TReportDetailDto | null> {
+export async function getReport(projectId: string, reportId: string, options: TReadOptions): Promise<TReportDetailDto | null> {
   if (!Types.ObjectId.isValid(reportId)) return null;
   const doc = await Report.findOne({ _id: reportId, projectId }).lean<TReportLean | null>();
-  return doc ? toDetail(doc) : null;
+  return doc ? toDetail(doc, options) : null;
 }
 
 export async function deleteReport(projectId: string, reportId: string): Promise<boolean> {

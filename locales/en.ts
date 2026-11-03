@@ -924,6 +924,20 @@ export interface Translation {
       linkSelectText: string;
       linkInvalid: string;
       stepReport: string;
+      deliverySent: string;
+      deliverySending: string;
+      deliveryPartial: string;
+      deliveryNotSent: string;
+      deliveryNoRecipients: string;
+      deliveryTitle: string;
+      deliveryColRecipient: string;
+      deliveryColStatus: string;
+      deliveryColTime: string;
+      deliveryColError: string;
+      deliveryStatusSent: string;
+      deliveryStatusNotSent: string;
+      deliveryStatusFailed: string;
+      deliveryStatusSkipped: string;
       stepReportLead: string;
       stepContent: string;
       stepContentLead: string;
@@ -2642,6 +2656,20 @@ const translation: Translation = {
       linkSelectText: "Select the text you want to link first.",
       linkInvalid: "Enter a valid address, for example https://example.com.",
       stepReport: "Report",
+      deliverySent: "Sent",
+      deliverySending: "Sending",
+      deliveryPartial: "{{sent}} Sent · {{failed}} Failed",
+      deliveryNotSent: "Not Sent",
+      deliveryNoRecipients: "No Recipients",
+      deliveryTitle: "Email Delivery",
+      deliveryColRecipient: "Recipient",
+      deliveryColStatus: "Status",
+      deliveryColTime: "Time",
+      deliveryColError: "Error",
+      deliveryStatusSent: "Sent",
+      deliveryStatusNotSent: "Not Sent",
+      deliveryStatusFailed: "Failed",
+      deliveryStatusSkipped: "Skipped",
       stepReportLead: "Pick the month this report covers and who receives it after creation.",
       stepContent: "Content",
       stepContentLead: "Optional sections replace their generated text. Next steps are required.",
