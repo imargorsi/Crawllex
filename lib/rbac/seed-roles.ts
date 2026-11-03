@@ -68,7 +68,8 @@ export async function seedSystemRoles(): Promise<void> {
     integrationPermission(action),
   );
   const leadDefaults = LEAD_DEFAULT_ROLE_ACTIONS.map((action) => leadPermission(action));
-  const ownerReports = REPORT_PERMISSION_ACTIONS.map((action) => reportPermission(action));
+  // Creating reports is not a default: admins grant reports.create to the roles that need it.
+  const ownerReports = REPORT_PERMISSION_ACTIONS.filter((action) => action !== "create").map((action) => reportPermission(action));
 
   await Role.updateOne(
     { slug: PROJECT_OWNER_ROLE },
