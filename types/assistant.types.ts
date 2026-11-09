@@ -73,7 +73,32 @@ export type TAssistantHistoryItem = {
   createdAt: string;
 };
 
+export type TAssistantThreadSummary = {
+  threadId: string;
+  title: string;
+  updatedAt: string;
+  messageCount: number;
+};
+
+export type TAssistantThreadMessage = {
+  id: string;
+  query: string;
+  answer: string;
+  intent: string;
+  createdAt: string;
+};
+
+export type TAssistantThreadsDto = {
+  items: TAssistantThreadSummary[];
+};
+
+export type TAssistantThreadDto = {
+  threadId: string;
+  messages: TAssistantThreadMessage[];
+};
+
 export type TAssistantQueryResult = {
+  threadId: string;
   message: string;
   intent: TAssistantIntent;
   /** Which path answered: LLM tools (`ai`) or the rule-based parser (`nlp`). */

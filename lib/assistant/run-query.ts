@@ -1,5 +1,7 @@
-import { generateChatCompletion, openRouterApiKey } from "@/lib/assistant/ai/openrouter-client";
+import { generateChatCompletion, llmConfig } from "@/lib/assistant/ai/llm-client";
 import { executeAssistantTool } from "@/lib/assistant/ai/tools";
+import { randomUUID } from "node:crypto";
+
 import { tryAnswerWithAi } from "@/lib/assistant/ai/run-ai-query";
 import type { AuthContext } from "@/lib/auth/guards";
 import { permissionForAssistantParse } from "@/lib/assistant/detect-intent";
@@ -24,7 +26,7 @@ function denyModule(
 }
 
 export function isAssistantAiEnabled(): boolean {
-  return process.env.ASSISTANT_AI_ENABLED === "true" && Boolean(openRouterApiKey());
+  return process.env.ASSISTANT_AI_ENABLED === "true" && llmConfig() !== null;
 }
 
 async function tryAiAnswer(
@@ -50,16 +52,19 @@ export async function runAssistantQuery(
   input: AssistantQueryInput,
 ): Promise<TAssistantQueryResult> {
   const userId = auth.user._id.toString();
+  const threadId = input.threadId ?? randomUUID();
 
   const aiMessage = await tryAiAnswer(auth, projectId, input.query);
   if (aiMessage != null) {
     const history = await appendAssistantHistory({
       projectId,
       userId,
+      threadId,
       query: input.query,
+      answer: aiMessage,
       intent: "ai_answer",
     });
-    return { message: aiMessage, intent: "ai_answer", source: "ai", history };
+    return { threadId, message: aiMessage, intent: "ai_answer", source: "ai", history };
   }
 
   const parsed = parseAssistantQuery(input.query);
@@ -98,11 +103,14 @@ export async function runAssistantQuery(
   const history = await appendAssistantHistory({
     projectId,
     userId,
+    threadId,
     query: input.query,
+    answer: message,
     intent,
   });
 
   return {
+    threadId,
     message,
     intent,
     source: "nlp",

@@ -5,7 +5,7 @@ import { Icons } from "@/lib/frontend/icons/app-icons";
 import { useEffect, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 
-import { DashboardAssistantPanel } from "@/components/dashboard/dashboard-assistant-panel";
+import { DashboardOrielShortcut } from "@/components/dashboard/dashboard-oriel-shortcut";
 import { DashboardSeoPulse } from "@/components/dashboard/dashboard-seo-pulse";
 import { DashboardSeoTrendGrid } from "@/components/dashboard/dashboard-seo-trend-grid";
 import { Heading } from "@/components/heading";
@@ -214,12 +214,11 @@ export function DashboardHomeSection() {
             )}
           >
             <div className="min-h-0 min-w-0 w-full xl:h-full">
-              <DashboardAssistantPanel
+              <DashboardOrielShortcut
                 projectId={projectId}
                 canViewLeads={canViewLeads}
                 canViewAnalytics={canViewAnalytics}
                 canViewSeo={canViewSeo}
-                compact
                 className="w-full xl:h-full"
               />
             </div>

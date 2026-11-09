@@ -1,7 +1,7 @@
-export const OPENROUTER_TIMEOUT_MS = 25_000;
-export const OPENROUTER_RATE_LIMIT_RETRY_MS = 2_000;
-const DEFAULT_MODEL = "dots-studio/dots-3-note-preview:free";
-const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+// Local model on logibox (Qwen3-8B via llama-server behind Caddy basic auth), reached over Tailscale.
+// Tailscale encrypts the link; basic auth is still required by the gateway.
+export const LLM_TIMEOUT_MS = 180_000;
+const DEFAULT_MODEL = "qwen3-8b";
 
 export type TAssistantAiFailure =
   | "disabled"
@@ -50,29 +50,26 @@ export type TAssistantMessage = {
   tool_calls?: TToolCall[];
 };
 
-export function openRouterModelId(): string {
-  return process.env.OPENROUTER_MODEL?.trim() || DEFAULT_MODEL;
-}
+export type TLlmConfig = { baseUrl: string; user: string; password: string; model: string };
 
-export function openRouterApiKey(): string | null {
-  return process.env.OPENROUTER_API_KEY?.trim() || null;
+/** Null when any required variable is missing. Env: LLM_BASE_URL, LLM_USER, LLM_PASSWORD, LLM_MODEL (optional). */
+export function llmConfig(): TLlmConfig | null {
+  const baseUrl = process.env.LLM_BASE_URL?.trim().replace(/\/+$/, "");
+  const user = process.env.LLM_USER?.trim();
+  const password = process.env.LLM_PASSWORD?.trim();
+  if (!baseUrl || !user || !password) return null;
+  return { baseUrl, user, password, model: process.env.LLM_MODEL?.trim() || DEFAULT_MODEL };
 }
 
 /**
- * One OpenAI-compatible chat completion on OpenRouter. Returns the assistant message verbatim.
- * Never logs the key or the response body.
+ * One OpenAI-compatible chat completion on the local model. Returns the assistant message verbatim.
+ * Never logs the password or the response body.
  */
 export async function generateChatCompletion(request: TChatRequest): Promise<TAssistantMessage> {
-  const apiKey = openRouterApiKey();
-  if (!apiKey) throw new AssistantAiError("disabled");
+  const config = llmConfig();
+  if (!config) throw new AssistantAiError("disabled");
 
-  let response = await postCompletion(request, apiKey);
-  if (response.status === 429) {
-    // Free-tier upstream rate limit. One short retry, then let the caller fall back.
-    await new Promise((resolve) => setTimeout(resolve, OPENROUTER_RATE_LIMIT_RETRY_MS));
-    response = await postCompletion(request, apiKey);
-  }
-
+  const response = await postCompletion(request, config);
   if (!response.ok) throw new AssistantAiError("http", response.status);
 
   const data: unknown = await response.json().catch(() => null);
@@ -81,33 +78,36 @@ export async function generateChatCompletion(request: TChatRequest): Promise<TAs
   return message;
 }
 
-async function postCompletion(request: TChatRequest, apiKey: string): Promise<Response> {
+async function postCompletion(request: TChatRequest, config: TLlmConfig): Promise<Response> {
   const body = {
-    model: openRouterModelId(),
+    model: config.model,
     temperature: 0,
     max_tokens: 1024,
+    // Reasoning is also off on the server; this keeps answers short and fast.
+    chat_template_kwargs: { enable_thinking: false },
     messages: request.messages,
     tools: request.tools.map((tool) => ({
       type: "function",
       function: {
         name: tool.name,
         description: tool.description,
-        parameters: tool.parameters,
+        parameters: lowercaseSchemaTypes(tool.parameters),
       },
     })),
   };
 
+  const credentials = Buffer.from(`${config.user}:${config.password}`).toString("base64");
+
   try {
-    return await fetch(ENDPOINT, {
+    return await fetch(`${config.baseUrl}/v1/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-        "X-Title": "Crawllex",
+        Authorization: `Basic ${credentials}`,
       },
       body: JSON.stringify(body),
       redirect: "error",
-      signal: AbortSignal.timeout(OPENROUTER_TIMEOUT_MS),
+      signal: AbortSignal.timeout(LLM_TIMEOUT_MS),
     });
   } catch (error) {
     if (error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError")) {
@@ -115,6 +115,23 @@ async function postCompletion(request: TChatRequest, apiKey: string): Promise<Re
     }
     throw new AssistantAiError("http");
   }
+}
+
+/**
+ * llama-server's template parser needs JSON Schema types in lowercase. The tool declarations use
+ * Gemini-style uppercase ("OBJECT", "STRING", "INTEGER"), which it rejects with HTTP 400.
+ */
+export function lowercaseSchemaTypes<T>(schema: T): T {
+  if (Array.isArray(schema)) return schema.map((item) => lowercaseSchemaTypes(item)) as T;
+  if (typeof schema !== "object" || schema == null) return schema;
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(schema)) {
+    out[key] =
+      key === "type" && typeof value === "string"
+        ? value.toLowerCase()
+        : lowercaseSchemaTypes(value);
+  }
+  return out as T;
 }
 
 function extractMessage(data: unknown): TAssistantMessage | null {

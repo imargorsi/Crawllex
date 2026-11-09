@@ -27,6 +27,7 @@ export interface Translation {
     seoActivities: string;
     leads: string;
     reports: string;
+    oriel: string;
     settings: string;
   };
   breadcrumb: {
@@ -255,6 +256,38 @@ export interface Translation {
       linkChangePassword: string;
     };
   };
+  oriel: {
+    conversations: string;
+    newChat: string;
+    noConversations: string;
+    emptyTitle: string;
+    emptyBody: string;
+    placeholder: string;
+    send: string;
+    sending: string;
+    you: string;
+    assistant: string;
+    thinking: string;
+    sendError: string;
+    messageCount_one: string;
+    messageCount_other: string;
+    title: string;
+    subtitle: string;
+    deleteChat: string;
+    deleteAll: string;
+    deleteChatTitle: string;
+    deleteChatBody: string;
+    deleteAllTitle: string;
+    deleteAllBody: string;
+    cancel: string;
+    confirmDelete: string;
+    deleteError: string;
+    deleteAllError: string;
+    newChatTitle: string;
+    openButton: string;
+    recentChats: string;
+
+  };
   home: {
     title: string;
     subtitle: string;
@@ -325,26 +358,9 @@ export interface Translation {
       };
     };
     assistant: {
-      title: string;
       greeting: string;
       greetingFallback: string;
-      description: string;
-      descriptionShort: string;
-      placeholder: string;
-      inputLabel: string;
-      submit: string;
-      asking: string;
       suggestionsLabel: string;
-      popularTitle: string;
-      historyLabel: string;
-      historyLoading: string;
-      answerLabel: string;
-      sourceAi: string;
-      sourceNlp: string;
-      emptyAnswer: string;
-      queryError: string;
-      tipTitle: string;
-      tipBody: string;
       suggestions: {
         leadsThisMonth: string;
         leadsLastMonth: string;
@@ -1743,6 +1759,7 @@ const translation: Translation = {
     analytics: "Analytics",
     seoActivities: "SEO Activities",
     reports: "Reports",
+    oriel: "Oriel",
     leads: "Leads",
     settings: "Settings",
   },
@@ -1977,6 +1994,38 @@ const translation: Translation = {
       linkChangePassword: "Change password",
     },
   },
+  oriel: {
+    conversations: "Conversations",
+    newChat: "New chat",
+    noConversations: "No conversations yet. Start a new chat.",
+    emptyTitle: "Ask Crawllex",
+    emptyBody: "Ask about leads, analytics, or SEO activities for this project, or how to use Crawllex.",
+    placeholder: "Type a question…",
+    send: "Send",
+    sending: "Sending…",
+    you: "You",
+    assistant: "Crawllex",
+    thinking: "Thinking…",
+    sendError: "Could not send that message. Try again.",
+    messageCount_one: "{{count}} message",
+    messageCount_other: "{{count}} messages",
+    title: "Oriel",
+    subtitle: "Ask about your projects, reports and how Crawllex works.",
+    deleteChat: "Delete conversation",
+    deleteAll: "Delete all",
+    deleteChatTitle: "Delete this conversation?",
+    deleteChatBody: "This conversation will be permanently deleted. This cannot be undone.",
+    deleteAllTitle: "Delete all conversations?",
+    deleteAllBody: "All your conversations in this project will be permanently deleted. This cannot be undone.",
+    cancel: "Cancel",
+    confirmDelete: "Delete",
+    deleteError: "Could not delete the conversation. Try again.",
+    deleteAllError: "Could not delete the conversations. Try again.",
+    newChatTitle: "New conversation",
+    openButton: "Open Oriel",
+    recentChats: "Recent Chats",
+
+  },
   home: {
     title: "Dashboard",
     subtitle: "Project pulse, search trends, and quick answers for the selected date range.",
@@ -2048,28 +2097,9 @@ const translation: Translation = {
       },
     },
     assistant: {
-      title: "Dashboard Assistant",
       greeting: "Hi {{name}}",
       greetingFallback: "Hi There",
-      description:
-        "I'm your Dashboard Assistant. Ask about leads, analytics, or SEO activities for this project. Answers use cached project data only.",
-      descriptionShort:
-        "I'm your Dashboard Assistant. Ask about leads, analytics, or SEO activities for this project.",
-      placeholder: "Ask about leads, analytics, or SEO activities…",
-      inputLabel: "Assistant Query",
-      submit: "Ask",
-      asking: "Asking…",
       suggestionsLabel: "Try Asking",
-      popularTitle: "Popular Questions",
-      historyLabel: "Recent Queries",
-      historyLoading: "Loading recent queries…",
-      answerLabel: "Answer",
-      sourceAi: "Crawllex Insight",
-      sourceNlp: "Crawllex Quick Lookup",
-      emptyAnswer: "Pick a suggestion or type a question to see a quick project summary.",
-      queryError: "Could not run that query. Try again.",
-      tipTitle: "Pro Tip",
-      tipBody: "Ask about leads, analytics, pages, queries, or SEO activities for this project.",
       suggestions: {
         leadsThisMonth: "Leads This Month",
         leadsLastMonth: "Leads Last Month",

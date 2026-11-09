@@ -748,24 +748,9 @@ code {
   animation-delay: var(--seo-spark-delay, 0s);
 }
 
-@keyframes assistant-ai-well-float {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(0, -3px, 0);
-  }
-}
-
-.assistant-ai-well {
-  animation: assistant-ai-well-float 2.8s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .seo-sparkline-wave,
-  .seo-sparkline-area-live,
-  .assistant-ai-well {
+  .seo-sparkline-area-live {
     animation: none;
   }
 }
