@@ -9,7 +9,8 @@ import {
   type TAssistantToolResult,
 } from "@/lib/assistant/ai/tools";
 
-export const ASSISTANT_AI_MAX_TURNS = 5;
+// One tool round plus the final answer. Qwen3-8B on CPU is slow per turn; more rounds cost minutes.
+export const ASSISTANT_AI_MAX_TURNS = 2;
 const BREAKER_THRESHOLD = 3;
 const BREAKER_OPEN_MS = 5 * 60 * 1000;
 
@@ -42,7 +43,7 @@ export function buildSystemInstruction(now: Date = new Date()): string {
 export type TAiAnswer = { message: string; toolCalls: string[] };
 
 type TAiDeps = {
-  generate: (request: TChatRequest) => Promise<TAssistantMessage>;
+  generate: (request: TChatRequest, onToken?: (text: string) => void) => Promise<TAssistantMessage>;
   execute: (name: string, args: unknown) => Promise<TAssistantToolResult>;
 };
 
@@ -59,6 +60,7 @@ export async function answerWithAi(
   query: string,
   deps: TAiDeps,
   now: Date = new Date(),
+  onToken?: (text: string) => void,
 ): Promise<TAiAnswer> {
   const messages: TChatMessage[] = [
     { role: "system", content: buildSystemInstruction(now) },
@@ -69,7 +71,7 @@ export async function answerWithAi(
 
   for (let turn = 0; turn < ASSISTANT_AI_MAX_TURNS; turn += 1) {
     const request: TChatRequest = { messages: [...messages], tools };
-    const reply = await deps.generate(request);
+    const reply = await deps.generate(request, onToken);
 
     if (!reply.tool_calls || reply.tool_calls.length === 0) {
       const message = reply.content?.trim() ?? "";
@@ -130,10 +132,11 @@ export async function tryAnswerWithAi(
   query: string,
   deps: TAiDeps,
   now = Date.now(),
+  onToken?: (text: string) => void,
 ): Promise<TAiAnswer | null> {
   if (aiBreakerOpen(now)) return null;
   try {
-    const answer = await answerWithAi(query, deps);
+    const answer = await answerWithAi(query, deps, new Date(now), onToken);
     recordAiSuccess();
     return answer;
   } catch (error) {

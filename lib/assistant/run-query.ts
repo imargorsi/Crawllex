@@ -1,3 +1,4 @@
+import { answerCacheKey, getCachedAnswer, setCachedAnswer } from "@/lib/assistant/ai/answer-cache";
 import { generateChatCompletion, llmConfig } from "@/lib/assistant/ai/llm-client";
 import { executeAssistantTool } from "@/lib/assistant/ai/tools";
 import { randomUUID } from "node:crypto";
@@ -29,45 +30,70 @@ export function isAssistantAiEnabled(): boolean {
   return process.env.ASSISTANT_AI_ENABLED === "true" && llmConfig() !== null;
 }
 
+/**
+ * AI answer for questions the rule parser could not read. Cached per user and question for five minutes.
+ * `onToken` receives the text as it is generated (a cached answer arrives as one piece).
+ */
 async function tryAiAnswer(
   auth: AuthContext,
   projectId: string,
   query: string,
+  onToken?: (text: string) => void,
 ): Promise<string | null> {
   if (!isAssistantAiEnabled()) return null;
   const access = await getProjectAccessForUser(auth, projectId);
   if (!access) return null;
   const permissions = access.permissions;
 
-  const answer = await tryAnswerWithAi(query, {
-    generate: generateChatCompletion,
-    execute: (name, args) => executeAssistantTool(name, args, projectId, permissions),
-  });
+  const key = answerCacheKey(projectId, auth.user._id.toString(), query);
+  const cached = getCachedAnswer(key);
+  if (cached != null) {
+    onToken?.(cached);
+    return cached;
+  }
+
+  const answer = await tryAnswerWithAi(
+    query,
+    {
+      generate: generateChatCompletion,
+      execute: (name, args) => executeAssistantTool(name, args, projectId, permissions),
+    },
+    Date.now(),
+    onToken,
+  );
+  if (answer?.message) setCachedAnswer(key, answer.message);
   return answer?.message ?? null;
 }
 
+/**
+ * Answers one question. Rule parser first: a recognized question is answered at once, without the model.
+ * The model runs only when the parser does not understand the question. `onToken` streams AI text.
+ */
 export async function runAssistantQuery(
   auth: AuthContext,
   projectId: string,
   input: AssistantQueryInput,
+  onToken?: (text: string) => void,
 ): Promise<TAssistantQueryResult> {
   const userId = auth.user._id.toString();
   const threadId = input.threadId ?? randomUUID();
+  const parsed = parseAssistantQuery(input.query);
 
-  const aiMessage = await tryAiAnswer(auth, projectId, input.query);
-  if (aiMessage != null) {
-    const history = await appendAssistantHistory({
-      projectId,
-      userId,
-      threadId,
-      query: input.query,
-      answer: aiMessage,
-      intent: "ai_answer",
-    });
-    return { threadId, message: aiMessage, intent: "ai_answer", source: "ai", history };
+  if (parsed.kind === "unknown") {
+    const aiMessage = await tryAiAnswer(auth, projectId, input.query, onToken);
+    if (aiMessage != null) {
+      const history = await appendAssistantHistory({
+        projectId,
+        userId,
+        threadId,
+        query: input.query,
+        answer: aiMessage,
+        intent: "ai_answer",
+      });
+      return { threadId, message: aiMessage, intent: "ai_answer", source: "ai", history };
+    }
   }
 
-  const parsed = parseAssistantQuery(input.query);
   const intent = parsed.kind;
 
   let message: string;

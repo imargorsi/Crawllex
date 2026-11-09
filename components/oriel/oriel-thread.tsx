@@ -10,6 +10,8 @@ import { Icons } from "@/lib/frontend/icons/app-icons";
 type TOrielThreadProps = {
   messages: TAssistantThreadMessage[];
   pendingQuery: string | null;
+  /** Answer text streamed so far; the thinking label shows until the first token. */
+  pendingText?: string | null;
   isLoading: boolean;
   isBusy: boolean;
   suggestions: TOrielSuggestion[];
@@ -18,7 +20,16 @@ type TOrielThreadProps = {
 };
 
 /** Scrollable message area. Shows starter questions while the conversation is empty. */
-export function OrielThread({ messages, pendingQuery, isLoading, isBusy, suggestions, labels, onPick }: TOrielThreadProps) {
+export function OrielThread({
+  messages,
+  pendingQuery,
+  pendingText,
+  isLoading,
+  isBusy,
+  suggestions,
+  labels,
+  onPick,
+}: TOrielThreadProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const isEmpty = messages.length === 0 && !pendingQuery && !isLoading;
 
@@ -57,7 +68,7 @@ export function OrielThread({ messages, pendingQuery, isLoading, isBusy, suggest
       {pendingQuery ? (
         <div className="flex flex-col gap-4">
           <OrielUserMessage label={labels.you} text={pendingQuery} />
-          <OrielAssistantMessage label={labels.assistant} text={labels.thinking} />
+          <OrielAssistantMessage label={labels.assistant} text={pendingText || labels.thinking} />
         </div>
       ) : null}
     </div>

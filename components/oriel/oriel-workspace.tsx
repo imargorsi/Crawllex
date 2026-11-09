@@ -56,6 +56,8 @@ export function OrielWorkspace({
   // The workspace only renders on the client, so reading sessionStorage here is safe.
   const [activeThreadId, setActiveThreadId] = useState<string | null>(() => peekOrielHandoff().threadId ?? null);
   const [pendingQuery, setPendingQuery] = useState<string | null>(null);
+  // Text of the answer while it streams in (AI path). Empty until the first token.
+  const [streamingText, setStreamingText] = useState<string | null>(null);
   const [deleteRequest, setDeleteRequest] = useState<TDeleteRequest>(null);
 
   const threadsQuery = useAssistantThreadsQuery(projectId);
@@ -108,7 +110,11 @@ export function OrielWorkspace({
     if (isBusy) return;
     setPendingQuery(query);
     try {
-      const result = await queryMutation.mutateAsync({ query, threadId: activeThreadId ?? undefined });
+      const result = await queryMutation.mutateAsync({
+        query,
+        threadId: activeThreadId ?? undefined,
+        onToken: (text) => setStreamingText((previous) => (previous ?? "") + text),
+      });
       // Show the reply at once; the thread query refetches in the background.
       queryClient.setQueryData<TAssistantThreadDto>(assistantKeys.thread(projectId, result.threadId), (previous) => ({
         threadId: result.threadId,
@@ -122,6 +128,7 @@ export function OrielWorkspace({
       notify.error(ApiError.messageFrom(error, t("sendError")));
     } finally {
       setPendingQuery(null);
+      setStreamingText(null);
     }
   }
 
@@ -177,6 +184,7 @@ export function OrielWorkspace({
           <OrielThread
             messages={messages}
             pendingQuery={pendingQuery}
+            pendingText={streamingText}
             isLoading={Boolean(activeThreadId) && threadQuery.isLoading}
             isBusy={isBusy}
             suggestions={suggestions}

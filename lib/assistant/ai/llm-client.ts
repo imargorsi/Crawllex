@@ -65,12 +65,16 @@ export function llmConfig(): TLlmConfig | null {
  * One OpenAI-compatible chat completion on the local model. Returns the assistant message verbatim.
  * Never logs the password or the response body.
  */
-export async function generateChatCompletion(request: TChatRequest): Promise<TAssistantMessage> {
+export async function generateChatCompletion(
+  request: TChatRequest,
+  onToken?: (text: string) => void,
+): Promise<TAssistantMessage> {
   const config = llmConfig();
   if (!config) throw new AssistantAiError("disabled");
 
-  const response = await postCompletion(request, config);
+  const response = await postCompletion(request, config, onToken !== undefined);
   if (!response.ok) throw new AssistantAiError("http", response.status);
+  if (onToken) return readStreamedMessage(response, onToken);
 
   const data: unknown = await response.json().catch(() => null);
   const message = extractMessage(data);
@@ -78,11 +82,13 @@ export async function generateChatCompletion(request: TChatRequest): Promise<TAs
   return message;
 }
 
-async function postCompletion(request: TChatRequest, config: TLlmConfig): Promise<Response> {
+async function postCompletion(request: TChatRequest, config: TLlmConfig, stream: boolean): Promise<Response> {
   const body = {
     model: config.model,
     temperature: 0,
-    max_tokens: 1024,
+    // Short answers are faster on the local model (about 6 tokens/s). 300 covers the three-section format.
+    max_tokens: 300,
+    stream,
     // Reasoning is also off on the server; this keeps answers short and fast.
     chat_template_kwargs: { enable_thinking: false },
     messages: request.messages,
@@ -114,6 +120,80 @@ async function postCompletion(request: TChatRequest, config: TLlmConfig): Promis
       throw new AssistantAiError("timeout");
     }
     throw new AssistantAiError("http");
+  }
+}
+
+/**
+ * Reads an OpenAI-style SSE stream. Text deltas go to `onToken` as they arrive; tool-call deltas are
+ * joined by index. Returns the same message shape as the non-streaming call.
+ */
+async function readStreamedMessage(
+  response: Response,
+  onToken: (text: string) => void,
+): Promise<TAssistantMessage> {
+  if (!response.body) throw new AssistantAiError("invalid_response");
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let content = "";
+  const calls = new Map<number, { id: string; name: string; args: string }>();
+
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let newline = buffer.indexOf("\n");
+      while (newline >= 0) {
+        const line = buffer.slice(0, newline).trim();
+        buffer = buffer.slice(newline + 1);
+        newline = buffer.indexOf("\n");
+        if (!line.startsWith("data:")) continue;
+        const payload = line.slice(5).trim();
+        if (!payload || payload === "[DONE]") continue;
+        const delta = parseDelta(payload);
+        if (!delta) continue;
+        if (typeof delta.content === "string" && delta.content) {
+          content += delta.content;
+          onToken(delta.content);
+        }
+        for (const call of delta.tool_calls ?? []) {
+          const current = calls.get(call.index ?? 0) ?? { id: "", name: "", args: "" };
+          if (call.id) current.id = call.id;
+          if (call.function?.name) current.name += call.function.name;
+          if (call.function?.arguments) current.args += call.function.arguments;
+          calls.set(call.index ?? 0, current);
+        }
+      }
+    }
+  } catch {
+    throw new AssistantAiError("http");
+  }
+
+  const toolCalls: TToolCall[] = [...calls.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([index, call]) => ({
+      id: call.id || `call_${index}`,
+      type: "function" as const,
+      function: { name: call.name, arguments: call.args },
+    }))
+    .filter((call) => call.function.name);
+
+  if (!content.trim() && toolCalls.length === 0) throw new AssistantAiError("invalid_response");
+  return { content: content || null, tool_calls: toolCalls.length > 0 ? toolCalls : undefined };
+}
+
+type TStreamDelta = {
+  content?: string;
+  tool_calls?: Array<{ index?: number; id?: string; function?: { name?: string; arguments?: string } }>;
+};
+
+function parseDelta(payload: string): TStreamDelta | null {
+  try {
+    const json = JSON.parse(payload) as { choices?: Array<{ delta?: TStreamDelta }> };
+    return json.choices?.[0]?.delta ?? null;
+  } catch {
+    return null;
   }
 }
 

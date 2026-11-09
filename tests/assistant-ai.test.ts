@@ -27,6 +27,7 @@ vi.mock("@/lib/seo-activities/list-seo-activities", () => ({
 }));
 
 import { getAnalyticsDimensions } from "@/lib/integrations/read-analytics";
+import { ASSISTANT_AI_MAX_TURNS } from "@/lib/assistant/ai/run-ai-query";
 import { countLeadsInRange } from "@/lib/leads/list-leads";
 import {
   AssistantAiError,
@@ -228,7 +229,7 @@ describe("answerWithAi", () => {
     const execute = vi.fn(async () => ({ ok: true as const, data: {} }));
 
     await expect(answerWithAi("loop", { generate, execute })).rejects.toMatchObject({ reason: "tool_limit" });
-    expect(generate).toHaveBeenCalledTimes(5);
+    expect(generate).toHaveBeenCalledTimes(ASSISTANT_AI_MAX_TURNS);
   });
 
   it("puts today's date in the system instruction", async () => {
@@ -381,5 +382,68 @@ describe("llm client", () => {
     vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(body), { status: 200 })));
     const reply = await generateChatCompletion(request);
     expect(reply.tool_calls?.[0].function.name).toBe("get_leads_count");
+  });
+});
+
+describe("llm client streaming", () => {
+  const request = { messages: [{ role: "user" as const, content: "q" }], tools: [] };
+  const setLlm = () => {
+    vi.stubEnv("LLM_BASE_URL", "http://100.90.184.0:8092");
+    vi.stubEnv("LLM_USER", "owner");
+    vi.stubEnv("LLM_PASSWORD", "test-pass");
+    vi.stubEnv("LLM_MODEL", "qwen3-8b");
+  };
+  const sseReply = (lines: string[]) =>
+    new Response(lines.map((line) => `data: ${line}\n\n`).join(""), {
+      status: 200,
+      headers: { "Content-Type": "text/event-stream" },
+    });
+
+  it("streams text deltas to onToken in order and returns the joined text", async () => {
+    setLlm();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        sseReply([
+          JSON.stringify({ choices: [{ delta: { content: "Lea" } }] }),
+          JSON.stringify({ choices: [{ delta: { content: "ds: 4" } }] }),
+          "[DONE]",
+        ]),
+      ),
+    );
+    const seen: string[] = [];
+    const reply = await generateChatCompletion(request, (text) => seen.push(text));
+    expect(seen).toEqual(["Lea", "ds: 4"]);
+    expect(reply.content).toBe("Leads: 4");
+  });
+
+  it("joins streamed tool-call fragments by index", async () => {
+    setLlm();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        sseReply([
+          JSON.stringify({ choices: [{ delta: { tool_calls: [{ index: 0, id: "c1", function: { name: "get_leads_count", arguments: "{\"from\":" } }] } }] }),
+          JSON.stringify({ choices: [{ delta: { tool_calls: [{ index: 0, function: { arguments: "\"2026-10-01\"}" } }] } }] }),
+          "[DONE]",
+        ]),
+      ),
+    );
+    const reply = await generateChatCompletion(request, () => undefined);
+    expect(reply.tool_calls).toEqual([
+      { id: "c1", type: "function", function: { name: "get_leads_count", arguments: "{\"from\":\"2026-10-01\"}" } },
+    ]);
+  });
+
+  it("asks for a stream and keeps reasoning off when streaming", async () => {
+    setLlm();
+    const fetchMock = vi.fn(async () => sseReply(["[DONE]"]));
+    vi.stubGlobal("fetch", fetchMock);
+    await expect(generateChatCompletion(request, () => undefined)).rejects.toMatchObject({ reason: "invalid_response" });
+    const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    const body = JSON.parse(String(init.body));
+    expect(body.stream).toBe(true);
+    expect(body.max_tokens).toBe(300);
+    expect(body.chat_template_kwargs).toEqual({ enable_thinking: false });
   });
 });
