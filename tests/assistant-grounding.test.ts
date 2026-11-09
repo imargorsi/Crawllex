@@ -24,4 +24,9 @@ describe("grounding check for follow-up replies", () => {
   it("rejects replies that print format labels", () => {
     expect(isGroundedReply("Metric: clicks - 557.", DATA, [])).toBe(false);
   });
+
+  it("accepts dates that come from the data", () => {
+    const withPeriod = { ...DATA, from: "2026-10-10", to: "2026-11-08" };
+    expect(isGroundedReply("Period: 2026-10-10 to 2026-11-08.", withPeriod, [])).toBe(true);
+  });
 });

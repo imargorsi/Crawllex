@@ -67,16 +67,24 @@ export const POST = withApiHandler(async (request, context) => {
 
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
+      // The client may have left; writes to a closed stream are ignored.
+      let open = true;
+      const send = (event: string, data: unknown) => {
+        if (!open) return;
+        try {
+          controller.enqueue(sse(event, data));
+        } catch {
+          open = false;
+        }
+      };
       try {
-        const result = await runAssistantQuery(auth, projectId, input, (text) => {
-          controller.enqueue(sse("token", { text }));
-        });
-        controller.enqueue(sse("done", result));
+        const result = await runAssistantQuery(auth, projectId, input, (text) => send("token", { text }));
+        send("done", result);
       } catch {
         // Details are logged by the query layer. The client gets a fixed message.
-        controller.enqueue(sse("error", { message: "The assistant could not answer right now. Try again." }));
+        send("error", { message: "The assistant could not answer right now. Try again." });
       } finally {
-        controller.close();
+        if (open) controller.close();
       }
     },
   });

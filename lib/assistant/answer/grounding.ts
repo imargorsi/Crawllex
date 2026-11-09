@@ -12,6 +12,9 @@ function numericValues(value: unknown, out: Set<number> = new Set()): Set<number
   if (typeof value === "number" && Number.isFinite(value)) {
     out.add(round(value));
     out.add(round(value * 100));
+  } else if (typeof value === "string") {
+    // Dates and labels in the data (e.g. "2026-10-10") carry numbers too.
+    for (const n of numbersIn(value)) out.add(n);
   } else if (Array.isArray(value)) {
     for (const item of value) numericValues(item, out);
   } else if (value && typeof value === "object") {
