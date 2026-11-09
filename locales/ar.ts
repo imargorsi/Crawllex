@@ -262,8 +262,8 @@ const translation: Translation = {
     conversations: "المحادثات",
     newChat: "محادثة جديدة",
     noConversations: "لا توجد محادثات بعد. ابدأ محادثة جديدة.",
-    emptyTitle: "اسأل كرولكس",
-    emptyBody: "اسأل عن العملاء المحتملين أو التحليلات أو أنشطة SEO لهذا المشروع، أو عن كيفية استخدام كرولكس.",
+    emptyTitle: "اسأل أوريل",
+    emptyBody: "اسأل عن العملاء المحتملين أو البحث أو الزيارات أو أعمال SEO في هذا المشروع.",
     placeholder: "اكتب سؤالا…",
     send: "إرسال",
     sending: "جارٍ الإرسال…",
@@ -289,6 +289,9 @@ const translation: Translation = {
     openButton: "فتح أوريل",
     recentChats: "المحادثات الأخيرة",
 
+    today: "اليوم",
+    earlier: "أقدم",
+    emptyHint: "الإجابات من بيانات مشروعك. لا تُخمَّن الأرقام أبدًا.",
   },
   home: {
     title: "لوحة التحكم",
