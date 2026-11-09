@@ -4,7 +4,7 @@ import { loadReportAssets } from "@/lib/reports/assets";
 import { loadClientLogoDataUri } from "@/lib/reports/client-logo";
 import { collectReportData } from "@/lib/reports/collect";
 import { renderReportPdf } from "@/lib/reports/pdf-client";
-import { deliverReportEmails, type TReportDelivery } from "@/lib/reports/report-delivery";
+import { deliverReportEmails, reportDashboardUrl, type TReportDelivery } from "@/lib/reports/report-delivery";
 import { reportListSummary } from "@/lib/reports/report-text";
 import { formatMonthTitle, isFullCalendarMonth } from "@/lib/reports/period";
 import { renderReportHtml } from "@/lib/reports/render-html";
@@ -141,12 +141,19 @@ export async function createReport(
     createdBy: userId,
   });
 
-  const report = toDetail(doc.toObject() as unknown as TReportLean, { includeDeliveries: true });
-  // Email runs in the background: the creator gets the saved report now, delivery status is stored per recipient.
-  void deliverReportEmails({ report, renderPdf: reportPdf }).catch((error: unknown) => {
-    console.error(`[reports] Email delivery crashed for report ${report.id}.`, error);
-  });
-  return report;
+  // Not sent here. The team reviews the HTML preview first, then sends with sendReport().
+  return toDetail(doc.toObject() as unknown as TReportLean, { includeDeliveries: true });
+}
+
+/**
+ * Emails the PDF and dashboard link to the recipients that have not received this report yet.
+ * Called from the Send action after review. Safe to call again: sent recipients are skipped.
+ */
+export async function sendReport(projectId: string, reportId: string): Promise<TReportDetailDto | null> {
+  const report = await getReport(projectId, reportId, { includeDeliveries: true });
+  if (!report) return null;
+  await deliverReportEmails({ report, renderPdf: reportPdf });
+  return getReport(projectId, reportId, { includeDeliveries: true });
 }
 
 export async function listReports(projectId: string, options: TReadOptions): Promise<TReportListItemDto[]> {
@@ -171,10 +178,13 @@ export async function deleteReport(projectId: string, reportId: string): Promise
   return result.deletedCount === 1;
 }
 
-function reportHtml(report: TReportDetailDto): string {
-  return renderReportHtml(report.snapshot, loadReportAssets());
+/** Print HTML for one report. The browser preview and the PDF both use this document. */
+export function reportHtmlDocument(report: TReportDetailDto): string {
+  return renderReportHtml(report.snapshot, loadReportAssets(), {
+    dashboardUrl: reportDashboardUrl(report.projectId, report.id),
+  });
 }
 
 export function reportPdf(report: TReportDetailDto): Promise<Buffer> {
-  return renderReportPdf(reportHtml(report));
+  return renderReportPdf(reportHtmlDocument(report));
 }

@@ -91,7 +91,7 @@ export function Emphasis({ text, className }: { text: string; className?: string
     <>
       {paragraphs.map((paragraph, index) => (
         <p key={index} className={className}>
-          {paragraph.split(/(\d[\d,]*(?:\.\d+)?%?)/g).map((part, partIndex) => {
+          {paragraph.split(/(\d+(?:,\d{3})*(?:\.\d+)?%?)/g).map((part, partIndex) => {
             if (!/^\d/.test(part)) return <span key={partIndex}>{part}</span>;
             const isYear = /^(19|20)\d{2}$/.test(part);
             return isYear ? <span key={partIndex}>{part}</span> : <strong key={partIndex} className="font-semibold text-brand">{part}</strong>;

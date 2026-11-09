@@ -5,7 +5,7 @@ import { getProjectAccessForUser } from "@/lib/projects/get-project-access";
 import { hasPermission } from "@/lib/rbac/access";
 import { PROJECT_USER_ROLE } from "@/lib/rbac/roles";
 import { createReport, deleteReport, getReport, listReports } from "@/lib/reports/report-service";
-import { AnalyticsDailyMetric, Lead, Project, ProjectMember, Role, SeoActivity, User } from "@/models";
+import { AnalyticsDailyMetric, Lead, ProjectMember, Role, SeoActivity, User } from "@/models";
 import { createReportSchema } from "@/schemas/reports";
 import { authContextFor } from "@/tests/helpers/project-test-utils";
 import { seedProject } from "@/tests/helpers/report-test-utils";

@@ -154,7 +154,7 @@ export function buildReportText(snapshot: TReportSnapshotDto): TReportText {
 
   const work = [
     `In ${month} the team logged ${countPhrase(activities.current.blogs, "blog post", "blog posts")}, ${countPhrase(activities.current.backlinks, "backlink", "backlinks")} and ${countPhrase(activities.current.technical_work, "technical task", "technical tasks")}.`,
-    "Open a card to see each item, newest first.",
+    "Each item is listed in your dashboard, newest first.",
   ].join(" ");
 
   return {

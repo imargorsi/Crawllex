@@ -26,7 +26,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { useProjectAccess } from "@/context/project-access-context";
 import { useSelectedProject } from "@/context/selected-project-context";
 import { useAuthUserQuery } from "@/features/auth/auth.api";
-import { fetchReportPdf, useDeleteReportMutation, useReportQuery } from "@/features/reports/reports.api";
+import { fetchReportHtml, fetchReportPdf, useDeleteReportMutation, useReportQuery, useSendReportMutation } from "@/features/reports/reports.api";
 import { ApiError } from "@/lib/frontend/api/errors";
 import { downloadBrowserBlob } from "@/lib/frontend/download-file";
 import { notify } from "@/lib/frontend/feedback/notify";
@@ -61,8 +61,10 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
 
   const canView = hasPermission(permissions, "reports.view");
   const canDelete = hasPermission(permissions, "reports.delete");
+  const canSend = hasPermission(permissions, "reports.create");
   const reportQuery = useReportQuery(canView ? projectId : null, reportId);
   const deleteMutation = useDeleteReportMutation(projectId);
+  const sendMutation = useSendReportMutation(projectId);
   const [isDownloading, setIsDownloading] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -97,6 +99,36 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
   }
 
   const report = reportQuery.data;
+
+  const recipientIds = report?.snapshot.notes?.recipientUserIds ?? [];
+  const sentIds = new Set((report?.deliveries ?? []).filter((d) => d.status === "sent").map((d) => d.userId));
+  const hasUnsent = recipientIds.some((userId) => !sentIds.has(userId));
+
+  /** Opens the same HTML as the PDF in a new tab, so the report can be checked before it is sent. */
+  async function openPreview() {
+    if (!projectId) return;
+    // Open the tab first so the browser does not block it after the request.
+    const tab = window.open("", "_blank");
+    try {
+      const blob = await fetchReportHtml(projectId, reportId);
+      const url = URL.createObjectURL(new Blob([blob], { type: "text/html" }));
+      if (tab) tab.location.href = url;
+      else window.open(url, "_blank");
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch {
+      tab?.close();
+      notify.error(t("previewError"));
+    }
+  }
+
+  async function sendReport() {
+    try {
+      await sendMutation.mutateAsync(reportId);
+      notify.success(t("sentNotice"));
+    } catch {
+      notify.error(t("sendError"));
+    }
+  }
 
   async function downloadPdf() {
     if (!projectId || !report) return;
@@ -143,6 +175,25 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
               createdAt={report.createdAt}
               actions={
                 <>
+                  <button
+                    type="button"
+                    onClick={() => void openPreview()}
+                    className="inline-flex h-10 items-center gap-2 rounded-full border border-text-primary/25 px-4 text-sm font-semibold text-text-primary transition-colors hover:border-brand hover:text-brand"
+                  >
+                    <Icons.view className="size-4" aria-hidden />
+                    {t("previewHtml")}
+                  </button>
+                  {canSend && hasUnsent ? (
+                    <button
+                      type="button"
+                      onClick={() => void sendReport()}
+                      disabled={sendMutation.isPending}
+                      className="inline-flex h-10 items-center gap-2 rounded-full border border-brand/40 bg-brand px-4 text-sm font-semibold text-text-on-brand transition-colors hover:bg-brand/90 disabled:opacity-60"
+                    >
+                      {sendMutation.isPending ? <Spinner className="size-4" /> : <Icons.mail className="size-4" aria-hidden />}
+                      {sendMutation.isPending ? t("sendingReport") : t("sendReport")}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => void downloadPdf()}
