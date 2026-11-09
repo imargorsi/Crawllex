@@ -3,9 +3,9 @@
 import { useEffect, useRef } from "react";
 
 import { OrielAssistantMessage, OrielUserMessage } from "@/components/oriel/oriel-message";
+import { OrielMark } from "@/components/oriel/oriel-mark";
 import { OrielSuggestions, type TOrielSuggestion } from "@/components/oriel/oriel-suggestions";
 import type { TAssistantThreadMessage } from "@/types/assistant.types";
-import { Icons } from "@/lib/frontend/icons/app-icons";
 
 type TOrielThreadProps = {
   messages: TAssistantThreadMessage[];
@@ -15,11 +15,11 @@ type TOrielThreadProps = {
   isLoading: boolean;
   isBusy: boolean;
   suggestions: TOrielSuggestion[];
-  labels: { you: string; assistant: string; thinking: string; emptyTitle: string; emptyBody: string };
+  labels: { you: string; assistant: string; thinking: string; emptyTitle: string; emptyBody: string; emptyHint: string };
   onPick: (query: string) => void;
 };
 
-/** Scrollable message area. Shows starter questions while the conversation is empty. */
+/** Message column (centered, readable width). Empty state is a hero with the Oriel mark and starter questions. */
 export function OrielThread({
   messages,
   pendingQuery,
@@ -37,40 +37,46 @@ export function OrielThread({
   useEffect(() => {
     const el = scrollRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [messages.length, pendingQuery, isBusy]);
+  }, [messages.length, pendingQuery, pendingText, isBusy]);
 
   if (isEmpty) {
     return (
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-5 px-6 py-10 text-center">
-        <span className="bg-brand/10 text-brand flex size-12 items-center justify-center rounded-xl">
-          <Icons.sparkles className="size-6" aria-hidden />
-        </span>
-        <div className="flex flex-col gap-1.5">
-          <h2 className="type-title text-text-primary">{labels.emptyTitle}</h2>
-          <p className="type-body text-text-secondary max-w-md">{labels.emptyBody}</p>
+      <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-6 overflow-hidden px-6 py-10 text-center">
+        <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/2 size-80 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" style={{ background: "var(--glow-brand)", opacity: 0.35 }} />
+        <div className="relative">
+          <OrielMark size="lg" />
         </div>
-        <OrielSuggestions suggestions={suggestions} disabled={isBusy} onPick={onPick} />
+        <div className="relative flex max-w-md flex-col gap-2">
+          <h2 className="type-title text-text-primary">{labels.emptyTitle}</h2>
+          <p className="type-body text-text-secondary">{labels.emptyBody}</p>
+          <p className="type-caption text-text-muted">{labels.emptyHint}</p>
+        </div>
+        <div className="relative">
+          <OrielSuggestions suggestions={suggestions} disabled={isBusy} onPick={onPick} />
+        </div>
       </div>
     );
   }
 
   return (
-    <div ref={scrollRef} className="themed-scrollbar flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-5 py-5" aria-live="polite">
-      {isLoading && messages.length === 0 ? <p className="type-caption text-text-muted">…</p> : null}
+    <div ref={scrollRef} className="themed-scrollbar flex min-h-0 flex-1 justify-center overflow-y-auto px-6 py-6" aria-live="polite">
+      <div className="flex w-full max-w-3xl flex-col gap-7">
+        {isLoading && messages.length === 0 ? <p className="type-caption text-text-muted">…</p> : null}
 
-      {messages.map((message) => (
-        <div key={message.id} className="flex flex-col gap-4">
-          <OrielUserMessage label={labels.you} text={message.query} />
-          {message.answer ? <OrielAssistantMessage label={labels.assistant} text={message.answer} /> : null}
-        </div>
-      ))}
+        {messages.map((message) => (
+          <div key={message.id} className="flex flex-col gap-5">
+            <OrielUserMessage label={labels.you} text={message.query} />
+            {message.answer ? <OrielAssistantMessage label={labels.assistant} text={message.answer} /> : null}
+          </div>
+        ))}
 
-      {pendingQuery ? (
-        <div className="flex flex-col gap-4">
-          <OrielUserMessage label={labels.you} text={pendingQuery} />
-          <OrielAssistantMessage label={labels.assistant} text={pendingText || labels.thinking} />
-        </div>
-      ) : null}
+        {pendingQuery ? (
+          <div className="flex flex-col gap-5">
+            <OrielUserMessage label={labels.you} text={pendingQuery} />
+            <OrielAssistantMessage label={labels.assistant} text={pendingText || labels.thinking} />
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

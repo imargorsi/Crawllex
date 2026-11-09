@@ -1,10 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { OrielConversationList } from "@/components/oriel/oriel-conversation-list";
+import { OrielMark } from "@/components/oriel/oriel-mark";
 import { Icons } from "@/lib/frontend/icons/app-icons";
-import type { TAssistantThreadSummary } from "@/types/assistant.types";
 import { glassPanelSurfaceClass } from "@/lib/frontend/layout/dashboard-chrome";
+import { cn } from "@/lib/utils";
+import type { TAssistantThreadSummary } from "@/types/assistant.types";
 
 type TOrielSidebarProps = {
   threads: TAssistantThreadSummary[];
@@ -16,6 +17,8 @@ type TOrielSidebarProps = {
     newChat: string;
     deleteAll: string;
     empty: string;
+    today: string;
+    earlier: string;
     deleteLabel: (title: string) => string;
     messageCount: (count: number) => string;
   };
@@ -26,8 +29,8 @@ type TOrielSidebarProps = {
 };
 
 /**
- * Left column: new chat, recent conversations, delete all.
- * Three stacked sections with their own borders so each one reads separately.
+ * Left column: brand header with a New chat action, the conversation list, and Delete all.
+ * Glass surface, no hard dividers between the list and the footer.
  */
 export function OrielSidebar({
   threads,
@@ -41,39 +44,52 @@ export function OrielSidebar({
   onDeleteAll,
 }: TOrielSidebarProps) {
   return (
-    <aside className={`${glassPanelSurfaceClass} flex min-h-0 w-full flex-col overflow-hidden rounded-2xl xl:w-72 xl:shrink-0`}>
-      <header className="border-text-primary/15 flex items-center justify-between gap-2 border-b px-4 py-3">
-        <h2 className="type-body-strong text-text-primary">{labels.title}</h2>
-        <Button type="button" variant="outlined" size="sm" onClick={onNewChat} disabled={disabled}>
+    <aside className={cn(glassPanelSurfaceClass, "flex min-h-0 w-full flex-col overflow-hidden rounded-2xl xl:w-72 xl:shrink-0")}>
+      <header className="flex flex-col gap-3 p-4 pb-3">
+        <div className="flex items-center gap-2.5">
+          <OrielMark size="sm" />
+          <h2 className="type-body-strong text-text-primary">{labels.title}</h2>
+        </div>
+        <button
+          type="button"
+          onClick={onNewChat}
+          disabled={disabled}
+          className="group flex h-10 w-full items-center justify-center gap-2 rounded-xl text-sm font-semibold text-white shadow-sm transition-transform hover:-translate-y-px active:translate-y-0 disabled:opacity-50"
+          style={{ background: "var(--gradient-primary)", boxShadow: "0 8px 24px -10px var(--glow-brand)" }}
+        >
           <Icons.add className="size-4" aria-hidden />
           {labels.newChat}
-        </Button>
+        </button>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-2 p-2">
+      <div className="flex min-h-0 flex-1 flex-col px-2">
         <OrielConversationList
           threads={threads}
           activeThreadId={activeThreadId}
           isLoading={isLoading}
-          labels={{ empty: labels.empty, deleteLabel: labels.deleteLabel, messageCount: labels.messageCount }}
+          labels={{
+            empty: labels.empty,
+            today: labels.today,
+            earlier: labels.earlier,
+            deleteLabel: labels.deleteLabel,
+            messageCount: labels.messageCount,
+          }}
           disabled={disabled}
           onSelect={onSelect}
           onDelete={onDelete}
         />
       </div>
 
-      <footer className="border-text-primary/15 border-t p-2">
-        <Button
+      <footer className="p-3 pt-2">
+        <button
           type="button"
-          variant="ghost"
-          size="sm"
-          className="w-full justify-center text-destructive hover:text-destructive"
           onClick={onDeleteAll}
           disabled={disabled || threads.length === 0}
+          className="type-caption flex w-full items-center justify-center gap-1.5 rounded-lg py-2 font-medium text-text-muted transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
         >
-          <Icons.delete className="size-4" aria-hidden />
+          <Icons.delete className="size-3.5" aria-hidden />
           {labels.deleteAll}
-        </Button>
+        </button>
       </footer>
     </aside>
   );

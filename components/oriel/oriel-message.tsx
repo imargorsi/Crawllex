@@ -1,34 +1,52 @@
 "use client";
 
 import { AssistantMessage } from "@/components/oriel/oriel-answer";
+import { OrielMark } from "@/components/oriel/oriel-mark";
 import { glassPanelSurfaceClass } from "@/lib/frontend/layout/dashboard-chrome";
+import { cn } from "@/lib/utils";
 
-/** Shared frame for one chat message: sender label, then the bubble. */
-function MessageFrame({ label, align, children }: { label: string; align: "start" | "end"; children: React.ReactNode }) {
+/** Sender label above a message, aligned to the side of the sender. */
+function SenderLabel({ label, align }: { label: string; align: "start" | "end" }) {
   return (
-    <div className={align === "end" ? "flex flex-col items-end gap-1.5" : "flex flex-col items-start gap-1.5"}>
-      <span className="type-caption font-semibold tracking-wide text-text-muted uppercase">{label}</span>
-      {children}
-    </div>
+    <span
+      className={cn(
+        "type-caption font-semibold tracking-wide text-text-muted uppercase",
+        align === "end" ? "text-end" : "text-start",
+      )}
+    >
+      {label}
+    </span>
   );
 }
 
 export function OrielUserMessage({ label, text }: { label: string; text: string }) {
   return (
-    <MessageFrame label={label} align="end">
-      <div className="bg-brand/10 border-brand/30 type-body text-text-primary max-w-[85%] rounded-xl border px-4 py-2.5 whitespace-pre-wrap">
+    <div className="flex flex-col items-end gap-1.5">
+      <SenderLabel label={label} align="end" />
+      <div
+        className="type-body max-w-[80%] rounded-2xl rounded-tr-md px-4 py-2.5 whitespace-pre-wrap text-text-primary"
+        style={{
+          background:
+            "linear-gradient(135deg, color-mix(in srgb, var(--brand) 22%, transparent), color-mix(in srgb, var(--brand) 12%, transparent))",
+          boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--brand) 30%, transparent)",
+        }}
+      >
         {text}
       </div>
-    </MessageFrame>
+    </div>
   );
 }
 
 export function OrielAssistantMessage({ label, text }: { label: string; text: string }) {
   return (
-    <MessageFrame label={label} align="start">
-      <div className={`${glassPanelSurfaceClass} w-full max-w-[92%] rounded-xl px-4 py-3`}>
-        <AssistantMessage message={text} />
+    <div className="flex items-start gap-3">
+      <OrielMark size="sm" className="mt-5" />
+      <div className="flex min-w-0 max-w-[88%] flex-col gap-1.5">
+        <SenderLabel label={label} align="start" />
+        <div className={cn(glassPanelSurfaceClass, "rounded-2xl rounded-tl-md px-5 py-4")}>
+          <AssistantMessage message={text} />
+        </div>
       </div>
-    </MessageFrame>
+    </div>
   );
 }

@@ -11,7 +11,7 @@ function InlineText({ text }: { text: string }) {
     <>
       {parseAssistantInline(text).map((segment, index) =>
         segment.bold ? (
-          <strong key={index} className="font-semibold text-text-primary">
+          <strong key={index} className="font-semibold text-brand">
             {segment.text}
           </strong>
         ) : (
@@ -25,15 +25,15 @@ function InlineText({ text }: { text: string }) {
 function AssistantBlock({ block }: { block: TAssistantBlock }) {
   if (block.type === "heading") {
     return (
-      <h3 className="pt-1 type-caption font-semibold tracking-wide text-brand">
+      <h3 className="mt-4 mb-1 first:mt-0 type-caption font-semibold tracking-wide text-brand uppercase">
         <InlineText text={block.text} />
       </h3>
     );
   }
   if (block.type === "bullet") {
     return (
-      <li className="flex gap-2 type-body text-text-primary">
-        <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-brand" />
+      <li className="flex gap-2.5 type-body text-text-primary">
+        <span aria-hidden className="mt-2.5 size-1.5 shrink-0 rounded-full" style={{ background: "var(--gradient-primary)" }} />
         <span className="min-w-0 flex-1">
           <InlineText text={block.text} />
         </span>

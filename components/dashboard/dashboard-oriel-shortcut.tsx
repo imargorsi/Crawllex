@@ -6,10 +6,10 @@ import { useTranslation } from "react-i18next";
 
 import { Heading } from "@/components/heading";
 import { Paragraph } from "@/components/paragraph";
-import { Button } from "@/components/ui/button";
 import { useAssistantThreadsQuery } from "@/features/assistant/assistant.api";
 import { useAuthUserQuery } from "@/features/auth/auth.api";
 import { buildAssistantSuggestions, filterAssistantSuggestions } from "@/lib/frontend/assistant/suggestions";
+import { OrielMark } from "@/components/oriel/oriel-mark";
 import { setOrielHandoff } from "@/lib/frontend/oriel/handoff";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { glassPanelSurfaceClass, typeStackMdClass } from "@/lib/frontend/layout/dashboard-chrome";
@@ -24,6 +24,14 @@ type TDashboardOrielShortcutProps = {
 };
 
 const RECENT_CHAT_LIMIT = 5;
+
+function formatChatTime(iso: string): string {
+  const date = new Date(iso);
+  const sameDay = date.toDateString() === new Date().toDateString();
+  return sameDay
+    ? date.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })
+    : date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
 const SUGGESTION_LIMIT = 4;
 
 function firstNameOf(name: string | undefined): string {
@@ -88,46 +96,70 @@ export function DashboardOrielShortcut({
   return (
     <section
       aria-labelledby="dashboard-oriel-title"
-      className={cn(glassPanelSurfaceClass, "flex w-full min-w-0 flex-col gap-5 rounded-2xl p-5 sm:p-6", className)}
+      className={cn(glassPanelSurfaceClass, "relative flex w-full min-w-0 flex-col gap-5 overflow-hidden rounded-2xl p-5 sm:p-6", className)}
     >
-      <header className="flex items-start justify-between gap-3">
-        <div className={cn(typeStackMdClass, "min-w-0")}>
-          <Heading id="dashboard-oriel-title" SmallTitle className="leading-tight">
-            {greeting}
-          </Heading>
-          <Paragraph moreSmaller className="leading-snug text-text-secondary">
-            {tOriel("subtitle")}
-          </Paragraph>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -top-24 -end-24 size-64 rounded-full blur-3xl"
+        style={{ background: "var(--glow-brand)", opacity: 0.45 }}
+      />
+
+      <header className="relative flex items-start justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3.5">
+          <OrielMark size="md" />
+          <div className={cn(typeStackMdClass, "min-w-0")}>
+            <Heading id="dashboard-oriel-title" SmallTitle className="leading-tight">
+              {greeting}
+            </Heading>
+            <Paragraph moreSmaller className="leading-snug text-text-secondary">
+              {tOriel("subtitle")}
+            </Paragraph>
+          </div>
         </div>
-        <Button type="button" variant="outlined" size="sm" onClick={() => openOriel()} className="shrink-0">
+        <button
+          type="button"
+          onClick={() => openOriel()}
+          className="type-caption shrink-0 rounded-full px-3.5 py-1.5 font-semibold text-white transition-transform hover:-translate-y-px"
+          style={{ background: "var(--gradient-primary)", boxShadow: "0 8px 20px -10px var(--glow-brand)" }}
+        >
           {tOriel("openButton")}
-          <Icons.arrowRight className="size-3.5 rtl:rotate-180" aria-hidden />
-        </Button>
+        </button>
       </header>
 
-      <form onSubmit={onSubmit} className="border-text-primary/15 flex items-center gap-2 rounded-xl border p-1.5 ps-3">
+      <form
+        onSubmit={onSubmit}
+        className="relative flex items-center gap-2 rounded-2xl border border-text-primary/15 bg-text-primary/[0.03] p-1.5 ps-4 transition-shadow focus-within:border-brand/60 focus-within:shadow-[0_0_24px_-8px_var(--glow-brand)]"
+      >
+        <Icons.sparkles className="size-4 shrink-0 text-brand" aria-hidden />
         <input
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           placeholder={tOriel("placeholder")}
           aria-label={tOriel("placeholder")}
           maxLength={500}
-          className="type-body text-text-primary placeholder:text-text-placeholder h-9 min-w-0 flex-1 bg-transparent outline-none"
+          className="type-body text-text-primary placeholder:text-text-placeholder h-10 min-w-0 flex-1 bg-transparent outline-none"
         />
-        <Button type="submit" variant="primary" size="icon-sm" disabled={!draft.trim()} aria-label={tOriel("send")}>
+        <button
+          type="submit"
+          disabled={!draft.trim()}
+          aria-label={tOriel("send")}
+          className="flex size-9 shrink-0 items-center justify-center rounded-xl text-white transition-all disabled:opacity-40"
+          style={{ background: "var(--gradient-primary)" }}
+        >
           <Icons.arrowRight className="size-4 rtl:rotate-180" aria-hidden />
-        </Button>
+        </button>
       </form>
 
       {suggestions.length > 0 ? (
-        <ul className="flex flex-wrap gap-2" aria-label={t("suggestionsLabel")}>
+        <ul className="relative flex flex-wrap gap-2" aria-label={t("suggestionsLabel")}>
           {suggestions.map((item) => (
             <li key={item.id}>
               <button
                 type="button"
                 onClick={() => openOriel({ query: item.query })}
-                className="border-text-primary/15 type-caption text-text-secondary hover:border-text-primary/35 hover:text-text-primary rounded-full border px-3 py-1.5 transition-colors"
+                className="type-caption inline-flex items-center gap-1.5 rounded-full border border-text-primary/12 bg-text-primary/[0.03] px-3 py-1.5 text-text-secondary transition-colors hover:border-brand/50 hover:text-text-primary"
               >
+                <Icons.sparkles className="size-3 text-brand" aria-hidden />
                 {item.label}
               </button>
             </li>
@@ -135,22 +167,25 @@ export function DashboardOrielShortcut({
         </ul>
       ) : null}
 
-      <div className="flex flex-col gap-2.5">
-        <p className="type-caption text-text-muted font-semibold tracking-wide uppercase">{tOriel("recentChats")}</p>
+      <div className="relative flex flex-col gap-2.5">
+        <p className="type-caption font-semibold tracking-wide text-text-muted uppercase">{tOriel("recentChats")}</p>
         {threadsQuery.isLoading ? null : recentChats.length === 0 ? (
           <p className="type-caption text-text-muted">{tOriel("noConversations")}</p>
         ) : (
-          <ul className="flex flex-col gap-1.5" aria-label={tOriel("recentChats")}>
+          <ul className="flex flex-col gap-2" aria-label={tOriel("recentChats")}>
             {recentChats.map((chat) => (
               <li key={chat.threadId}>
                 <button
                   type="button"
                   onClick={() => openOriel({ threadId: chat.threadId })}
-                  className="border-text-primary/10 hover:border-text-primary/30 hover:bg-text-primary/[0.04] flex w-full min-w-0 items-center gap-3 rounded-lg border px-3 py-2 text-start transition-colors"
+                  className="group flex w-full min-w-0 items-center gap-3 rounded-xl border border-text-primary/10 bg-text-primary/[0.02] px-3.5 py-2.5 text-start transition-all hover:border-brand/40 hover:bg-text-primary/[0.05]"
                 >
-                  <Icons.message className="text-text-muted size-4 shrink-0" aria-hidden />
-                  <span className="type-caption text-text-primary min-w-0 flex-1 truncate">{chat.title}</span>
-                  <Icons.arrowRight className="text-text-muted size-3.5 shrink-0 rtl:rotate-180" aria-hidden />
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand/12 text-brand">
+                    <Icons.message className="size-3.5" aria-hidden />
+                  </span>
+                  <span className="type-body min-w-0 flex-1 truncate text-text-primary">{chat.title}</span>
+                  <span className="type-caption shrink-0 text-text-muted">{formatChatTime(chat.updatedAt)}</span>
+                  <Icons.arrowRight className="size-3.5 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5 rtl:rotate-180" aria-hidden />
                 </button>
               </li>
             ))}

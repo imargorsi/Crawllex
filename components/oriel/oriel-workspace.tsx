@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { OrielComposer } from "@/components/oriel/oriel-composer";
+import { OrielMark } from "@/components/oriel/oriel-mark";
 import { OrielSidebar } from "@/components/oriel/oriel-sidebar";
 import { OrielThread } from "@/components/oriel/oriel-thread";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -163,6 +164,8 @@ export function OrielWorkspace({
             newChat: t("newChat"),
             deleteAll: t("deleteAll"),
             empty: t("noConversations"),
+            today: t("today"),
+            earlier: t("earlier"),
             deleteLabel: (title) => `${t("deleteChat")}: ${title}`,
             messageCount: (count) => t("messageCount", { count }),
           }}
@@ -175,11 +178,23 @@ export function OrielWorkspace({
           onDeleteAll={() => setDeleteRequest({ kind: "all" })}
         />
 
-        <section className={`${glassPanelSurfaceClass} flex min-h-[60vh] min-w-0 flex-col overflow-hidden rounded-2xl xl:min-h-0`}>
-          <header className="border-text-primary/15 flex items-center justify-between gap-3 border-b px-5 py-3">
-            <h3 className="type-body-strong text-text-primary truncate">{activeThread?.title ?? t("newChatTitle")}</h3>
-            {pendingQuery ? <Icons.loading className="text-text-muted size-4 shrink-0 animate-spin" aria-hidden /> : null}
+        <section className={cn(glassPanelSurfaceClass, "relative flex min-h-[60vh] min-w-0 flex-col overflow-hidden rounded-2xl xl:min-h-0")}>
+          <header className="flex items-center justify-between gap-3 px-6 pt-5 pb-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <OrielMark size="md" />
+              <div className="flex min-w-0 flex-col">
+                <h3 className="type-body-strong truncate text-text-primary">{activeThread?.title ?? t("newChatTitle")}</h3>
+                <span className="type-caption flex items-center gap-1.5 text-text-muted">
+                  <span
+                    aria-hidden
+                    className={cn("size-1.5 rounded-full", pendingQuery ? "animate-pulse bg-brand" : "bg-success")}
+                  />
+                  {pendingQuery ? t("thinking") : t("subtitle")}
+                </span>
+              </div>
+            </div>
           </header>
+          <div aria-hidden className="mx-6 h-px" style={{ background: "linear-gradient(90deg, transparent, var(--brand), transparent)", opacity: 0.35 }} />
 
           <OrielThread
             messages={messages}
@@ -194,11 +209,12 @@ export function OrielWorkspace({
               thinking: t("thinking"),
               emptyTitle: t("emptyTitle"),
               emptyBody: t("emptyBody"),
+              emptyHint: t("emptyHint"),
             }}
             onPick={send}
           />
 
-          <footer className="border-text-primary/15 border-t p-3">
+          <footer className="px-5 pt-3 pb-4">
             <OrielComposer
               isBusy={isBusy}
               placeholder={t("placeholder")}

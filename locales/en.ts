@@ -287,6 +287,9 @@ export interface Translation {
     openButton: string;
     recentChats: string;
 
+    today: string;
+    earlier: string;
+    emptyHint: string;
   };
   home: {
     title: string;
@@ -1998,8 +2001,8 @@ const translation: Translation = {
     conversations: "Conversations",
     newChat: "New chat",
     noConversations: "No conversations yet. Start a new chat.",
-    emptyTitle: "Ask Crawllex",
-    emptyBody: "Ask about leads, analytics, or SEO activities for this project, or how to use Crawllex.",
+    emptyTitle: "Ask Oriel",
+    emptyBody: "Ask about leads, search, traffic or SEO work for this project, or how Crawllex works.",
     placeholder: "Type a question…",
     send: "Send",
     sending: "Sending…",
@@ -2025,6 +2028,9 @@ const translation: Translation = {
     openButton: "Open Oriel",
     recentChats: "Recent Chats",
 
+    today: "Today",
+    earlier: "Earlier",
+    emptyHint: "Answers use your project's own data. Figures are never guessed.",
   },
   home: {
     title: "Dashboard",
