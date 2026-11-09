@@ -27,7 +27,6 @@ vi.mock("@/lib/seo-activities/list-seo-activities", () => ({
 }));
 
 import { getAnalyticsDimensions } from "@/lib/integrations/read-analytics";
-import { ASSISTANT_AI_MAX_TURNS } from "@/lib/assistant/ai/run-ai-query";
 import { countLeadsInRange } from "@/lib/leads/list-leads";
 import {
   AssistantAiError,
@@ -167,90 +166,68 @@ function toolReply(name: string, args: Record<string, unknown>, id = "call_1"): 
 }
 
 describe("answerWithAi", () => {
-  it("returns plain text when no tool is needed", async () => {
-    const answer = await answerWithAi("hi", {
-      generate: vi.fn(async () => textReply("Hello.")),
-      execute: vi.fn(),
-    });
-    expect(answer).toEqual({ message: "Hello.", toolCalls: [] });
+  const NOW = new Date("2026-10-20T10:00:00Z");
+
+  it("reads the 30 days ending yesterday, then makes one model call with no tools", async () => {
+    const execute = vi.fn(async (name: string, args: unknown) => ({ ok: true as const, data: { name, args } }));
+    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("Summary."));
+
+    const answer = await answerWithAi("how are we doing", { generate, execute }, NOW);
+
+    expect(answer.message).toBe("Summary.");
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect(generate.mock.calls[0]?.[0]?.tools).toEqual([]);
+    expect(execute).toHaveBeenCalledTimes(3);
+    for (const call of execute.mock.calls) {
+      expect(call[1]).toEqual({ from: "2026-09-20", to: "2026-10-19" });
+    }
   });
 
-  it("runs a tool and feeds the result back before answering", async () => {
-    const generate = vi
-      .fn()
-      .mockResolvedValueOnce(toolReply("get_leads_count", { from: "2026-10-01", to: "2026-10-10" }))
-      .mockResolvedValueOnce(textReply("You had 7 leads."));
-    const execute = vi.fn(async () => ({ ok: true as const, data: { leads: 7 } }));
+  it("puts the fetched data and the question in the user message", async () => {
+    const execute = vi.fn(async (_name: string, _args: unknown) => ({ ok: true as const, data: { leads: 7 } }));
+    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("ok"));
 
-    const answer = await answerWithAi("leads?", { generate, execute });
+    await answerWithAi("leads?", { generate, execute }, NOW);
 
-    expect(execute).toHaveBeenCalledWith("get_leads_count", { from: "2026-10-01", to: "2026-10-10" });
-    expect(answer).toEqual({ message: "You had 7 leads.", toolCalls: ["get_leads_count"] });
-
-    const second = generate.mock.calls[1][0];
-    const toolMessage = second.messages[second.messages.length - 1];
-    expect(toolMessage).toMatchObject({ role: "tool", tool_call_id: "call_1" });
-    expect(JSON.parse(toolMessage.content)).toEqual({ data: { leads: 7 } });
+    const user = generate.mock.calls[0]?.[0]?.messages[1];
+    expect(user?.content).toContain("Question: leads?");
+    expect(user?.content).toContain('"leads":7');
   });
 
-  it("passes tool errors back to the model instead of throwing", async () => {
-    const generate = vi
-      .fn()
-      .mockResolvedValueOnce(toolReply("get_analytics_overview", { from: "2026-10-01", to: "2026-10-10" }))
-      .mockResolvedValueOnce(textReply("Analytics are not available for this range."));
-    const execute = vi.fn(async () => ({ ok: false as const, error: "Not Permitted For This Project." }));
-
-    const answer = await answerWithAi("traffic?", { generate, execute });
-    expect(answer.message).toBe("Analytics are not available for this range.");
-    const second = generate.mock.calls[1][0];
-    expect(JSON.parse(second.messages[second.messages.length - 1].content)).toEqual({
-      error: "Not Permitted For This Project.",
-    });
-  });
-
-  it("reports invalid tool arguments to the model without calling the tool", async () => {
-    const badCall: TAssistantMessage = {
-      content: null,
-      tool_calls: [{ id: "c", type: "function", function: { name: "get_leads_count", arguments: "{not json" } }],
-    };
-    const generate = vi.fn().mockResolvedValueOnce(badCall).mockResolvedValueOnce(textReply("ok"));
-    const execute = vi.fn();
-
-    await answerWithAi("x", { generate, execute });
-    expect(execute).not.toHaveBeenCalled();
-    const second = generate.mock.calls[1][0];
-    expect(JSON.parse(second.messages[second.messages.length - 1].content)).toEqual({
-      error: "Invalid Tool Arguments.",
-    });
-  });
-
-  it("stops after the turn cap instead of looping forever", async () => {
-    const generate = vi.fn(async () => toolReply("get_leads_count", { from: "2026-10-01", to: "2026-10-10" }));
-    const execute = vi.fn(async () => ({ ok: true as const, data: {} }));
-
-    await expect(answerWithAi("loop", { generate, execute })).rejects.toMatchObject({ reason: "tool_limit" });
-    expect(generate).toHaveBeenCalledTimes(ASSISTANT_AI_MAX_TURNS);
-  });
-
-  it("puts today's date in the system instruction", async () => {
-    const generate = vi.fn<(request: TChatRequest) => Promise<TAssistantMessage>>(
-      async () => textReply("ok"),
+  it("passes a tool error into the data as an error, not a throw", async () => {
+    const execute = vi.fn(async (name: string, _args: unknown) =>
+      name === "get_leads_count" ? { ok: false as const, error: "Module Not Available." } : { ok: true as const, data: {} },
     );
-    await answerWithAi("q", { generate, execute: vi.fn() }, new Date("2026-10-20T10:00:00Z"));
-    const system = generate.mock.calls[0]?.[0].messages[0];
+    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("ok"));
+
+    await answerWithAi("q", { generate, execute }, NOW);
+
+    expect(generate.mock.calls[0]?.[0]?.messages[1]?.content).toContain('"error":"Module Not Available."');
+  });
+
+  it("puts today's date and the data range in the system instruction", async () => {
+    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("ok"));
+    await answerWithAi("q", { generate, execute: vi.fn(async () => ({ ok: true as const, data: {} })) }, NOW);
+    const system = generate.mock.calls[0]?.[0]?.messages[0];
     expect(system).toMatchObject({ role: "system" });
-    expect((system as { content: string }).content).toContain("Today is 2026-10-20 (UTC).");
+    expect(system?.content).toContain("Today is 2026-10-20");
+    expect(system?.content).toContain("covers 2026-09-20 to 2026-10-19");
+    expect(system?.content).toContain("Period: 2026-09-20 to 2026-10-19.");
   });
 
   it("rejects an empty model reply", async () => {
+    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply(""));
     await expect(
-      answerWithAi("x", { generate: vi.fn(async () => textReply("   ")), execute: vi.fn() }),
-    ).rejects.toBeInstanceOf(AssistantAiError);
+      answerWithAi("q", { generate, execute: vi.fn(async () => ({ ok: true as const, data: {} })) }, NOW),
+    ).rejects.toMatchObject({ reason: "invalid_response" });
   });
 });
 
 describe("tryAnswerWithAi fallback", () => {
-  const deps = (generate: () => Promise<TAssistantMessage>) => ({ generate, execute: vi.fn() });
+  const deps = (generate: () => Promise<TAssistantMessage>) => ({
+    generate,
+    execute: vi.fn(async () => ({ ok: true as const, data: {} })),
+  });
 
   it("returns null on provider failure so NLP can answer", async () => {
     const result = await tryAnswerWithAi(
