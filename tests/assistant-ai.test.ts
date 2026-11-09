@@ -215,7 +215,7 @@ describe("answerWithAi", () => {
     const request = generate.mock.calls[0]?.[0];
     expect(request?.tools).toEqual([]);
     expect(request?.maxTokens).toBe(FOLLOW_UP_MAX_TOKENS);
-    expect(request?.messages[0]?.content).toContain("Answer the follow-up");
+    expect(request?.messages[0]?.content).toContain("Answer the user's latest message directly");
     expect(request?.messages[0]?.content).toContain("Today is 2026-10-20");
     expect(request?.messages[1]).toEqual({ role: "user", content: "earlier question" });
     expect(request?.messages[2]).toEqual({ role: "assistant", content: "earlier answer" });
@@ -445,5 +445,22 @@ describe("llm client streaming", () => {
     expect(body.stream).toBe(true);
     expect(body.max_tokens).toBe(300);
     expect(body.chat_template_kwargs).toEqual({ enable_thinking: false });
+  });
+});
+
+describe("answerWithAi follow-up grounding", () => {
+  const NOW = new Date("2026-10-20T10:00:00Z");
+  const data = async (_name: string, _args: unknown) => ({ ok: true as const, data: { gsc: { impressions: 3 } } });
+
+  it("replaces an ungrounded follow-up with a short note and the brief", async () => {
+    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) =>
+      textReply("Impressions fell from 9000 to 0."),
+    );
+    const answer = await answerWithAi("why?", { generate, execute: data }, NOW, undefined, [
+      { query: "q", answer: "earlier" },
+    ]);
+    expect(answer.mode).toBe("brief");
+    expect(answer.message.startsWith("The project data does not explain this.")).toBe(true);
+    expect(answer.message).not.toContain("9000");
   });
 });

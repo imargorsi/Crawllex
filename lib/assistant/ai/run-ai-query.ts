@@ -5,6 +5,7 @@ import {
 } from "@/lib/assistant/ai/llm-client";
 import type { TAssistantToolResult } from "@/lib/assistant/ai/tools";
 import { buildAnswerBrief } from "@/lib/assistant/answer/brief";
+import { isGroundedReply } from "@/lib/assistant/answer/grounding";
 
 const BREAKER_THRESHOLD = 3;
 const BREAKER_OPEN_MS = 5 * 60 * 1000;
@@ -53,6 +54,16 @@ export type TThreadTurn = { query: string; answer: string };
 /** Characters per streamed chunk for the code-built brief, so it appears progressively like a reply. */
 const BRIEF_CHUNK_CHARS = 48;
 
+/** Sent before the brief when a follow-up cannot be answered from the data. */
+const NOT_IN_DATA_LEAD = "The project data does not explain this. Here is the current picture for the period:";
+
+/** Sends text to the chat in chunks, so it appears progressively like a reply. */
+function emitChunks(text: string, onToken?: (chunk: string) => void): void {
+  for (let index = 0; index < text.length; index += BRIEF_CHUNK_CHARS) {
+    onToken?.(text.slice(index, index + BRIEF_CHUNK_CHARS));
+  }
+}
+
 /** Questions in other scripts (e.g. Arabic) go to the model, which replies in the same language. */
 function usesNonLatinScript(text: string): boolean {
   return /[^\u0000-\u024F\s\d\p{P}]/u.test(text);
@@ -62,11 +73,13 @@ function usesNonLatinScript(text: string): boolean {
 export const FOLLOW_UP_MAX_TOKENS = 220;
 
 const FOLLOW_UP_SYSTEM = [
-  "You are the Crawllex assistant for one client project (SEO, leads, website analytics).",
-  "Answer the follow-up using only the figures in the project data and the earlier answers. Never invent numbers.",
-  "Explain what the figures show. Do not give generic advice and do not describe features.",
-  "If the data cannot answer it, say so in one sentence.",
-  "At most 3 bullets, each '- Metric: value, meaning'. Bold key numbers with **double asterisks**. Keep the whole reply under 120 words.",
+  "You are Crawllex's assistant for one client project (SEO, leads, website analytics).",
+  "Answer the user's latest message directly. The first sentence answers it.",
+  "Use only the figures in the project data. Never invent numbers.",
+  "Mention only the figures that answer the question. Do not repeat the whole data set.",
+  "If the message is unclear, ask one short clarifying question.",
+  "If it is rude, a joke, or not about this project, reply in one friendly sentence and name what you can answer: leads, search performance, website traffic, engagement, SEO work.",
+  "Otherwise: at most 3 bullets, each '- Metric: value, meaning'. Bold key numbers with **double asterisks**. Under 120 words.",
   "No tables, links, code or HTML. Reply in the same language as the question.",
 ].join(" ");
 
@@ -97,9 +110,7 @@ export async function answerWithAi(
   // First question of a conversation: the structured brief is built in code. No model call, exact figures.
   if (history.length === 0 && !usesNonLatinScript(query)) {
     const message = buildAnswerBrief(data, range);
-    for (let index = 0; index < message.length; index += BRIEF_CHUNK_CHARS) {
-      onToken?.(message.slice(index, index + BRIEF_CHUNK_CHARS));
-    }
+    emitChunks(message, onToken);
     return { message, toolCalls: [...PREFETCH_TOOLS], mode: "brief" };
   }
 
@@ -115,9 +126,17 @@ export async function answerWithAi(
       content: `Question: ${query}\n\nProject data, ${range.from} to ${range.to}:\n${JSON.stringify(data)}`,
     },
   ];
-  const reply = await deps.generate({ messages, tools: [], maxTokens: FOLLOW_UP_MAX_TOKENS }, onToken);
+  // The reply is checked before anything is shown, so it is not streamed token by token.
+  const reply = await deps.generate({ messages, tools: [], maxTokens: FOLLOW_UP_MAX_TOKENS });
   const message = reply.content?.trim() ?? "";
   if (!message) throw new AssistantAiError("invalid_response");
+
+  if (!isGroundedReply(message, data, history.map((turn) => turn.answer))) {
+    const fallback = `${NOT_IN_DATA_LEAD}\n\n${buildAnswerBrief(data, range)}`;
+    emitChunks(fallback, onToken);
+    return { message: fallback, toolCalls: [...PREFETCH_TOOLS], mode: "brief" };
+  }
+  emitChunks(message, onToken);
   return { message, toolCalls: [...PREFETCH_TOOLS], mode: "model" };
 }
 

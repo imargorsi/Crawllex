@@ -20,6 +20,12 @@ import type { TAssistantQueryResult } from "@/types/assistant.types";
 /** Earlier exchanges sent with a follow-up question. */
 const CONVERSATION_TURNS = 4;
 
+/**
+ * Questions that ask for an explanation or advice. The rule parser can match a keyword in them
+ * ("impressions") and answer a different question, so these always go to the model.
+ */
+const EXPLANATORY = /\b(why|how come|explain|reason|because|what should|next steps?|what can i do|recommend|suggest|improve|help me)\b/i;
+
 function denyModule(
   permission: "leads.view" | "analytics.view" | "seo_activities.view" | null,
 ): "leads" | "analytics" | "seo_activities" {
@@ -94,7 +100,7 @@ export async function runAssistantQuery(
   const threadId = input.threadId ?? randomUUID();
   const parsed = parseAssistantQuery(input.query);
 
-  if (parsed.kind === "unknown") {
+  if (parsed.kind === "unknown" || EXPLANATORY.test(input.query)) {
     const history = await recentTurns(projectId, userId, input.threadId);
     const aiMessage = await tryAiAnswer(auth, projectId, input.query, history, onToken);
     if (aiMessage != null) {
