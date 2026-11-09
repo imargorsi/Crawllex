@@ -153,3 +153,19 @@ describe("report delivery", () => {
     expect(list[0]).toMatchObject({ recipientCount: 1, deliveries: [] });
   });
 });
+
+describe("report send is manual", () => {
+  beforeEach(() => {
+    sendMailMock.mockReset();
+    sendMailMock.mockResolvedValue(true);
+  });
+
+  it("creating a report with recipients does not email anyone", async () => {
+    const { owner, projectId } = await seedTestProject();
+    const recipient = await User.create({ name: "Client Reader", email: "reader@example.com", status: "active" });
+    const report = await createTestReport(projectId, String(owner._id), [String(recipient._id)]);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(sendMailMock).not.toHaveBeenCalled();
+    expect(await deliveriesOf(report.id)).toEqual([]);
+  });
+});

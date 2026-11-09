@@ -925,7 +925,6 @@ export interface Translation {
       linkInvalid: string;
       stepReport: string;
       deliverySent: string;
-      deliverySending: string;
       deliveryPartial: string;
       deliveryNotSent: string;
       deliveryNoRecipients: string;
@@ -984,6 +983,11 @@ export interface Translation {
       downloadPdf: string;
       preparingPdf: string;
       pdfError: string;
+      previewHtml: string;
+      sendReport: string;
+      sendingReport: string;
+      sentNotice: string;
+      sendError: string;
       deleteAction: string;
       deleteTitle: string;
       deleteBody: string;
@@ -2657,7 +2661,6 @@ const translation: Translation = {
       linkInvalid: "Enter a valid address, for example https://example.com.",
       stepReport: "Report",
       deliverySent: "Sent",
-      deliverySending: "Sending",
       deliveryPartial: "{{sent}} Sent · {{failed}} Failed",
       deliveryNotSent: "Not Sent",
       deliveryNoRecipients: "No Recipients",
@@ -2716,6 +2719,11 @@ const translation: Translation = {
       downloadPdf: "Download PDF",
       preparingPdf: "Preparing PDF…",
       pdfError: "The PDF could not be created. Try again.",
+      previewHtml: "Preview HTML",
+      sendReport: "Send Report",
+      sendingReport: "Sending…",
+      sentNotice: "Report sent to recipients.",
+      sendError: "The report could not be sent. Try again.",
       deleteAction: "Delete",
       deleteTitle: "Delete This Report?",
       deleteBody: "The saved report and its snapshot will be removed. This cannot be undone.",

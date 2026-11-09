@@ -39,19 +39,18 @@ export function ReportDeliveryStatus({ report, variant = "inline" }: { report: T
   const count = (status: TReportDeliveryStatus) => deliveries.filter((item) => item.status === status).length;
   const sent = count("sent");
   const failed = count("failed");
-  const pending = Math.max(0, (report.recipientCount ?? deliveries.length) - deliveries.length);
+  const recipients = report.recipientCount ?? deliveries.length;
 
+  // Send is manual: before the first send there are no deliveries, so the chip shows "Not Sent".
   const label =
-    (report.recipientCount ?? deliveries.length) === 0
+    recipients === 0
       ? t("deliveryNoRecipients")
-      : pending > 0
-        ? t("deliverySending")
-        : failed > 0
+      : sent === recipients
+        ? t("deliverySent")
+        : sent > 0 || failed > 0
           ? t("deliveryPartial", { sent, failed })
-          : sent > 0
-            ? t("deliverySent")
-            : t("deliveryNotSent");
-  const dot = pending > 0 ? DOT.not_sent : failed > 0 ? DOT.failed : sent > 0 ? DOT.sent : DOT.not_sent;
+          : t("deliveryNotSent");
+  const dot = sent === recipients && recipients > 0 ? DOT.sent : failed > 0 ? DOT.failed : DOT.not_sent;
 
   const table = {
     headers: [t("deliveryColRecipient"), t("deliveryColStatus"), t("deliveryColTime"), t("deliveryColError")],

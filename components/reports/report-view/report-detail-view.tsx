@@ -396,9 +396,16 @@ function BlockGroup({ group, onOpen }: { group: TBlockGroup; onOpen: TOpenTable 
   return <SectionBlock block={group.block} onOpen={onOpen} />;
 }
 
+/** `?section=search` (from the PDF's "View the full breakdown" links) opens that tab. Client-only: runs after the report loads. */
+function initialSectionId(view: TReportView): string {
+  if (typeof window === "undefined") return "summary";
+  const requested = new URLSearchParams(window.location.search).get("section");
+  return view.sections.some((section) => section.id === requested) ? (requested as string) : "summary";
+}
+
 export function ReportDetailView({ view }: { view: TReportView }) {
   const [drilldown, setDrilldown] = useState<TDrilldown | null>(null);
-  const [activeId, setActiveId] = useState<string>("summary");
+  const [activeId, setActiveId] = useState<string>(() => initialSectionId(view));
   const close = useCallback(() => setDrilldown(null), []);
 
   const tabs = view.sections.map((section) => ({ id: section.id, label: section.title }));

@@ -23,6 +23,14 @@ export const REPORT_COPY = {
       cardsHeading: "Work logged this period",
     },
   },
+  charts: {
+    clicks: { title: "Daily clicks", subtitle: "Visits from Google search results, per day." },
+    impressions: { title: "Daily impressions", subtitle: "How often your pages appeared in Google results, per day." },
+    sessions: { title: "Daily sessions", subtitle: "Visits to the website, per day (Google Analytics)." },
+    channels: { subtitle: "Where visitors came from, with each channel's share of sessions." },
+    countries: { title: "Top countries", subtitle: "Countries with the most sessions this period." },
+    stats: { total: "Total", average: "Daily average", bestDay: "Best day", peak: "Best day" },
+  },
   kpi: {
     impressions: "Impressions",
     clicks: "Clicks",

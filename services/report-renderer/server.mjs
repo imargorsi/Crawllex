@@ -97,6 +97,8 @@ async function renderPdf(html) {
       }
     });
     await page.setContent(html, { waitUntil: "load", timeout: RENDER_TIMEOUT_MS });
+    // The report script splits sections into A4 pages and sets window.reportReady when done.
+    await page.waitForFunction("window.reportReady === true", { timeout: RENDER_TIMEOUT_MS });
     return await page.pdf({
       format: "A4",
       printBackground: true,

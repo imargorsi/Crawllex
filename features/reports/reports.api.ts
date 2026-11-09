@@ -79,9 +79,9 @@ export function useDeleteReportMutation(projectId: string | null | undefined) {
  * Binary and HTML endpoints bypass the JSON envelope, so they are fetched with the Bearer token
  * directly. Errors are read from the JSON error body when present.
  */
-async function fetchReportResponse(projectId: string, reportId: string) {
+async function fetchReportResponse(projectId: string, reportId: string, format: "pdf" | "html") {
   const token = getAccessToken();
-  const response = await fetch(`/api/v1/projects/${projectId}/reports/${reportId}/pdf`, {
+  const response = await fetch(`/api/v1/projects/${projectId}/reports/${reportId}/${format}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (!response.ok) {
@@ -92,7 +92,29 @@ async function fetchReportResponse(projectId: string, reportId: string) {
 }
 
 export async function fetchReportPdf(projectId: string, reportId: string): Promise<Blob> {
-  const response = await fetchReportResponse(projectId, reportId);
+  const response = await fetchReportResponse(projectId, reportId, "pdf");
   return response.blob();
+}
+
+/** Same document as the PDF, for the browser preview. */
+export async function fetchReportHtml(projectId: string, reportId: string): Promise<Blob> {
+  const response = await fetchReportResponse(projectId, reportId, "html");
+  return response.blob();
+}
+
+/** Emails the report to its recipients. Run only after the preview has been checked. */
+export function useSendReportMutation(projectId: string | null | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (reportId: string) => {
+      const envelope = await baseQuery.post<TReportDetailDto>(`projects/${projectId}/reports/${reportId}/send`, {});
+      return envelope.data;
+    },
+    onSuccess: (report) => {
+      if (!projectId || !report) return;
+      void queryClient.invalidateQueries({ queryKey: reportsKeys.list(projectId) });
+      queryClient.setQueryData(reportsKeys.detail(projectId, report.id), report);
+    },
+  });
 }
 

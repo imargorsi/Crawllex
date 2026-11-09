@@ -6,12 +6,15 @@ import path from "node:path";
  * URIs so the preview and the PDF renderer need no network and no font install.
  */
 export type TReportAssets = {
-  lcLogoSvg: string;
-  dotsSvg: string;
-  chevronsSvg: string;
-  coverArtSvg: string;
+  /** PNG data URIs with transparent background. SVG artwork from the template rendered black in the PDF. */
+  lcLogoUri: string;
+  dotsUri: string;
+  chevronsUri: string;
+  coverArtUri: string;
   contactBgDataUri: string;
   fontFaceCss: string;
+  /** Browser script that splits sections into A4 pages (assets/paginate.js). */
+  paginateJs: string;
 };
 
 const ASSET_DIR = path.join(process.cwd(), "lib", "reports", "assets");
@@ -25,6 +28,10 @@ const FONT_FACES: ReadonlyArray<{ file: string; family: string; weight: number }
 
 let cached: TReportAssets | null = null;
 
+function pngDataUri(file: string): string {
+  return `data:image/png;base64,${readFileSync(path.join(ASSET_DIR, file)).toString("base64")}`;
+}
+
 export function loadReportAssets(): TReportAssets {
   if (cached) return cached;
 
@@ -34,15 +41,16 @@ export function loadReportAssets(): TReportAssets {
   }).join("\n");
 
   cached = {
-    lcLogoSvg: readFileSync(path.join(ASSET_DIR, "lc-logo.svg"), "utf8"),
-    dotsSvg: readFileSync(path.join(ASSET_DIR, "dots.svg"), "utf8"),
-    chevronsSvg: readFileSync(path.join(ASSET_DIR, "chevrons.svg"), "utf8"),
-    coverArtSvg: readFileSync(path.join(ASSET_DIR, "cover-art.svg"), "utf8"),
+    lcLogoUri: pngDataUri("lc-logo.png"),
+    dotsUri: pngDataUri("dots.png"),
+    chevronsUri: pngDataUri("chevrons.png"),
+    coverArtUri: pngDataUri("cover-art.png"),
     contactBgDataUri: `data:image/jpeg;base64,${readFileSync(path.join(ASSET_DIR, "contact-bg.jpg")).toString("base64")}`,
     fontFaceCss,
+    paginateJs: readFileSync(path.join(ASSET_DIR, "paginate.js"), "utf8"),
   };
   return cached;
 }
 
 /** No artwork: used by tests and when files are missing. Text fallbacks render instead. */
-export const EMPTY_REPORT_ASSETS: TReportAssets = { lcLogoSvg: "", dotsSvg: "", chevronsSvg: "", coverArtSvg: "", contactBgDataUri: "", fontFaceCss: "" };
+export const EMPTY_REPORT_ASSETS: TReportAssets = { lcLogoUri: "", dotsUri: "", chevronsUri: "", coverArtUri: "", contactBgDataUri: "", fontFaceCss: "", paginateJs: "" };
