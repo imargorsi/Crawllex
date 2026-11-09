@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import path from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
@@ -9,7 +10,9 @@ import { leakedTerm } from "@/lib/oriel/output-guard";
 import { retrieve, tokenize } from "@/lib/oriel/retrieve";
 import { allowOrielRequest, resetOrielRateLimitForTests } from "@/lib/oriel/rate-limit";
 
+// doc/ is gitignored: the real corpus exists only on the workstation that maintains it.
 const CORPUS_DIR = path.join(process.cwd(), "doc", "oriel", "corpus");
+const HAS_CORPUS = existsSync(CORPUS_DIR);
 
 const SAMPLE: TCorpusChunk[] = [
   { id: "a#1", source: "06.md", heading: "7.5 Project Members", text: "Owner searches registered verified users and sends an invite. The user accepts or declines in the app." },
@@ -25,7 +28,7 @@ describe("oriel corpus", () => {
     expect(chunks[1]!.text).toBe("detail text");
   });
 
-  it("loads the real functional corpus without the manifest", () => {
+  it.skipIf(!HAS_CORPUS)("loads the real functional corpus without the manifest", () => {
     const chunks = loadCorpus(CORPUS_DIR);
     expect(chunks.length).toBeGreaterThanOrEqual(15);
     expect(chunks.some((c) => c.source === "MANIFEST.md")).toBe(false);
