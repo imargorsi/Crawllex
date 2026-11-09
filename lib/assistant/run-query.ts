@@ -2,8 +2,7 @@ import { answerCacheKey, getCachedAnswer, setCachedAnswer } from "@/lib/assistan
 import { generateChatCompletion, llmConfig } from "@/lib/assistant/ai/llm-client";
 import { executeAssistantTool } from "@/lib/assistant/ai/tools";
 import { randomUUID } from "node:crypto";
-
-import { tryAnswerWithAi } from "@/lib/assistant/ai/run-ai-query";
+import { tryAnswerWithAi, type TThreadTurn } from "@/lib/assistant/ai/run-ai-query";
 import type { AuthContext } from "@/lib/auth/guards";
 import { permissionForAssistantParse } from "@/lib/assistant/detect-intent";
 import {
@@ -11,12 +10,15 @@ import {
   handleAssistantIntent,
   unknownAssistantAnswer,
 } from "@/lib/assistant/handle-intent";
-import { appendAssistantHistory } from "@/lib/assistant/history";
+import { appendAssistantHistory, getAssistantThreadMessages } from "@/lib/assistant/history";
 import { parseAssistantQuery } from "@/lib/assistant/nlp/parse-query";
 import { getProjectAccessForUser } from "@/lib/projects/get-project-access";
 import { hasPermission } from "@/lib/rbac/access";
 import type { AssistantQueryInput } from "@/schemas/assistant";
 import type { TAssistantQueryResult } from "@/types/assistant.types";
+
+/** Earlier exchanges sent with a follow-up question. */
+const CONVERSATION_TURNS = 4;
 
 function denyModule(
   permission: "leads.view" | "analytics.view" | "seo_activities.view" | null,
@@ -34,10 +36,21 @@ export function isAssistantAiEnabled(): boolean {
  * AI answer for questions the rule parser could not read. Cached per user and question for five minutes.
  * `onToken` receives the text as it is generated (a cached answer arrives as one piece).
  */
+/** The last few exchanges of a conversation, oldest first. Only the signed-in user's own thread. */
+async function recentTurns(projectId: string, userId: string, threadId: string | undefined): Promise<TThreadTurn[]> {
+  if (!threadId) return [];
+  const messages = await getAssistantThreadMessages(projectId, userId, threadId);
+  return messages
+    .filter((message) => message.answer)
+    .slice(-CONVERSATION_TURNS)
+    .map((message) => ({ query: message.query, answer: message.answer }));
+}
+
 async function tryAiAnswer(
   auth: AuthContext,
   projectId: string,
   query: string,
+  history: TThreadTurn[],
   onToken?: (text: string) => void,
 ): Promise<string | null> {
   if (!isAssistantAiEnabled()) return null;
@@ -45,8 +58,9 @@ async function tryAiAnswer(
   if (!access) return null;
   const permissions = access.permissions;
 
+  // Answers depend on the conversation, so the cache is used only for first questions.
   const key = answerCacheKey(projectId, auth.user._id.toString(), query);
-  const cached = getCachedAnswer(key);
+  const cached = history.length === 0 ? getCachedAnswer(key) : null;
   if (cached != null) {
     onToken?.(cached);
     return cached;
@@ -60,8 +74,9 @@ async function tryAiAnswer(
     },
     Date.now(),
     onToken,
+    history,
   );
-  if (answer?.message) setCachedAnswer(key, answer.message);
+  if (answer?.message && history.length === 0) setCachedAnswer(key, answer.message);
   return answer?.message ?? null;
 }
 
@@ -80,7 +95,8 @@ export async function runAssistantQuery(
   const parsed = parseAssistantQuery(input.query);
 
   if (parsed.kind === "unknown") {
-    const aiMessage = await tryAiAnswer(auth, projectId, input.query, onToken);
+    const history = await recentTurns(projectId, userId, input.threadId);
+    const aiMessage = await tryAiAnswer(auth, projectId, input.query, history, onToken);
     if (aiMessage != null) {
       const history = await appendAssistantHistory({
         projectId,

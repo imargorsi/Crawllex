@@ -1,7 +1,7 @@
-// Local model on logibox (Qwen3-4B via llama-server behind Caddy basic auth), reached over Tailscale.
+// Local model on logibox (Qwen3-1.7B via llama-server behind Caddy basic auth), reached over Tailscale.
 // Tailscale encrypts the link; basic auth is still required by the gateway.
 export const LLM_TIMEOUT_MS = 180_000;
-const DEFAULT_MODEL = "qwen3-4b";
+const DEFAULT_MODEL = "qwen3-1.7b";
 
 export type TAssistantAiFailure =
   | "disabled"
@@ -43,6 +43,8 @@ export type TToolDeclaration = {
 export type TChatRequest = {
   messages: TChatMessage[];
   tools: TToolDeclaration[];
+  /** Reply length cap in tokens. Default 300. */
+  maxTokens?: number;
 };
 
 export type TAssistantMessage = {
@@ -87,7 +89,7 @@ async function postCompletion(request: TChatRequest, config: TLlmConfig, stream:
     model: config.model,
     temperature: 0,
     // Short answers are faster on the local model (about 6 tokens/s). 300 covers the three-section format.
-    max_tokens: 300,
+    max_tokens: request.maxTokens ?? 300,
     stream,
     // Reasoning is also off on the server; this keeps answers short and fast.
     chat_template_kwargs: { enable_thinking: false },

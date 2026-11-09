@@ -35,6 +35,7 @@ import {
   type TChatRequest,
 } from "@/lib/assistant/ai/llm-client";
 import {
+  FOLLOW_UP_MAX_TOKENS,
   answerWithAi,
   aiBreakerOpen,
   recordAiFailure,
@@ -167,63 +168,79 @@ function toolReply(name: string, args: Record<string, unknown>, id = "call_1"): 
 
 describe("answerWithAi", () => {
   const NOW = new Date("2026-10-20T10:00:00Z");
+  const FOLLOW_UP = [{ query: "earlier question", answer: "earlier answer" }];
+  const okData = async (_name: string, _args: unknown) => ({
+    ok: true as const,
+    data: { leads: 7, gsc: { clicks: 120, impressions: 900, ctr: 0.13, averagePosition: 8.2 }, ga4: { sessions: 300, totalUsers: 210 } },
+  });
+  const noModel = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("unused"));
 
-  it("reads the 30 days ending yesterday, then makes one model call with no tools", async () => {
-    const execute = vi.fn(async (name: string, args: unknown) => ({ ok: true as const, data: { name, args } }));
-    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("Summary."));
+  it("answers a first question with the code-built brief, with no model call", async () => {
+    const generate = vi.fn(noModel);
+    const chunks: string[] = [];
+    const answer = await answerWithAi("how are we doing", { generate, execute: okData }, NOW, (text) => chunks.push(text));
 
-    const answer = await answerWithAi("how are we doing", { generate, execute }, NOW);
+    expect(answer.mode).toBe("brief");
+    expect(generate).not.toHaveBeenCalled();
+    expect(answer.message).toContain("## Search performance");
+    expect(answer.message).toContain("- Clicks: **120** from Google search results");
+    expect(answer.message.endsWith("Period: 2026-09-20 to 2026-10-19.")).toBe(true);
+    expect(chunks.join("")).toBe(answer.message);
+  });
 
-    expect(answer.message).toBe("Summary.");
-    expect(generate).toHaveBeenCalledTimes(1);
-    expect(generate.mock.calls[0]?.[0]?.tools).toEqual([]);
+  it("reads the 30 days ending yesterday for every tool", async () => {
+    const execute = vi.fn(okData);
+    await answerWithAi("q", { generate: vi.fn(noModel), execute }, NOW);
     expect(execute).toHaveBeenCalledTimes(3);
     for (const call of execute.mock.calls) {
       expect(call[1]).toEqual({ from: "2026-09-20", to: "2026-10-19" });
     }
   });
 
-  it("puts the fetched data and the question in the user message", async () => {
-    const execute = vi.fn(async (_name: string, _args: unknown) => ({ ok: true as const, data: { leads: 7 } }));
-    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("ok"));
-
-    await answerWithAi("leads?", { generate, execute }, NOW);
-
-    const user = generate.mock.calls[0]?.[0]?.messages[1];
-    expect(user?.content).toContain("Question: leads?");
-    expect(user?.content).toContain('"leads":7');
-  });
-
-  it("passes a tool error into the data as an error, not a throw", async () => {
+  it("leaves out a section whose tool returned an error instead of showing zeros", async () => {
     const execute = vi.fn(async (name: string, _args: unknown) =>
       name === "get_leads_count" ? { ok: false as const, error: "Module Not Available." } : { ok: true as const, data: {} },
     );
-    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("ok"));
-
-    await answerWithAi("q", { generate, execute }, NOW);
-
-    expect(generate.mock.calls[0]?.[0]?.messages[1]?.content).toContain('"error":"Module Not Available."');
+    const answer = await answerWithAi("q", { generate: vi.fn(noModel), execute }, NOW);
+    expect(answer.message).not.toContain("Leads");
+    expect(answer.message).not.toContain("Module Not Available");
   });
 
-  it("puts today's date and the data range in the system instruction", async () => {
-    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("ok"));
-    await answerWithAi("q", { generate, execute: vi.fn(async () => ({ ok: true as const, data: {} })) }, NOW);
-    const system = generate.mock.calls[0]?.[0]?.messages[0];
-    expect(system).toMatchObject({ role: "system" });
-    expect(system?.content).toContain("Today is 2026-10-20");
-    expect(system?.content).toContain("covers 2026-09-20 to 2026-10-19");
-    expect(system?.content).toContain("Period: 2026-09-20 to 2026-10-19.");
+  it("answers a follow-up with one model call that sees the earlier turns and the data", async () => {
+    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("Clicks rose."));
+    const answer = await answerWithAi("why?", { generate, execute: okData }, NOW, undefined, FOLLOW_UP);
+
+    expect(answer).toMatchObject({ message: "Clicks rose.", mode: "model" });
+    expect(generate).toHaveBeenCalledTimes(1);
+    const request = generate.mock.calls[0]?.[0];
+    expect(request?.tools).toEqual([]);
+    expect(request?.maxTokens).toBe(FOLLOW_UP_MAX_TOKENS);
+    expect(request?.messages[0]?.content).toContain("Answer the follow-up");
+    expect(request?.messages[0]?.content).toContain("Today is 2026-10-20");
+    expect(request?.messages[1]).toEqual({ role: "user", content: "earlier question" });
+    expect(request?.messages[2]).toEqual({ role: "assistant", content: "earlier answer" });
+    expect(request?.messages[3]?.content).toContain("Question: why?");
+    expect(request?.messages[3]?.content).toContain('"leads":7');
   });
 
-  it("rejects an empty model reply", async () => {
+  it("sends questions in another script to the model, which replies in that language", async () => {
+    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("ok"));
+    const answer = await answerWithAi("كيف الأداء؟", { generate, execute: okData }, NOW);
+    expect(answer.mode).toBe("model");
+    expect(generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects an empty model reply on a follow-up", async () => {
     const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply(""));
-    await expect(
-      answerWithAi("q", { generate, execute: vi.fn(async () => ({ ok: true as const, data: {} })) }, NOW),
-    ).rejects.toMatchObject({ reason: "invalid_response" });
+    await expect(answerWithAi("q", { generate, execute: okData }, NOW, undefined, FOLLOW_UP)).rejects.toMatchObject({
+      reason: "invalid_response",
+    });
   });
 });
 
 describe("tryAnswerWithAi fallback", () => {
+  // Follow-up turn: the model path runs (first questions are answered by the code-built brief).
+  const FOLLOW_UP = [{ query: "earlier question", answer: "earlier answer" }];
   const deps = (generate: () => Promise<TAssistantMessage>) => ({
     generate,
     execute: vi.fn(async () => ({ ok: true as const, data: {} })),
@@ -235,6 +252,9 @@ describe("tryAnswerWithAi fallback", () => {
       deps(async () => {
         throw new AssistantAiError("http", 429);
       }),
+      Date.now(),
+      undefined,
+      FOLLOW_UP,
     );
     expect(result).toBeNull();
   });
@@ -245,12 +265,12 @@ describe("tryAnswerWithAi fallback", () => {
     });
     const now = 1_000_000;
     for (let i = 0; i < 3; i += 1) {
-      await tryAnswerWithAi("q", deps(generate), now);
+      await tryAnswerWithAi("q", deps(generate), now, undefined, FOLLOW_UP);
     }
     expect(aiBreakerOpen(now)).toBe(true);
 
     generate.mockClear();
-    expect(await tryAnswerWithAi("q", deps(generate), now + 1000)).toBeNull();
+    expect(await tryAnswerWithAi("q", deps(generate), now + 1000, undefined, FOLLOW_UP)).toBeNull();
     expect(generate).not.toHaveBeenCalled();
   });
 
@@ -270,6 +290,9 @@ describe("tryAnswerWithAi fallback", () => {
       deps(async () => {
         throw new AssistantAiError("http", 429);
       }),
+      Date.now(),
+      undefined,
+      FOLLOW_UP,
     );
     const logged = spy.mock.calls.map((call) => String(call[0])).join(" ");
     expect(logged).toContain("http (HTTP 429)");
