@@ -748,24 +748,9 @@ code {
   animation-delay: var(--seo-spark-delay, 0s);
 }
 
-@keyframes assistant-ai-well-float {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0);
-  }
-  50% {
-    transform: translate3d(0, -3px, 0);
-  }
-}
-
-.assistant-ai-well {
-  animation: assistant-ai-well-float 2.8s ease-in-out infinite;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .seo-sparkline-wave,
-  .seo-sparkline-area-live,
-  .assistant-ai-well {
+  .seo-sparkline-area-live {
     animation: none;
   }
 }
@@ -967,5 +952,54 @@ code {
   .app-glass-toaster .toast-region--bottom-center {
     top: auto !important;
     bottom: 1.25rem !important;
+  }
+}
+
+
+
+
+
+
+/* Report cover: slow pan and zoom on the neon image, plus a faint light sweep. Motion-safe only. */
+@keyframes report-cover-pan {
+  0% {
+    transform: scale(1.06) translate3d(-1.5%, 0.5%, 0);
+  }
+  50% {
+    transform: scale(1.12) translate3d(1.5%, -1%, 0);
+  }
+  100% {
+    transform: scale(1.06) translate3d(-1.5%, 0.5%, 0);
+  }
+}
+
+@keyframes report-cover-sweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(220%);
+  }
+}
+
+/* Report tabs: the active section eases in slowly when a tab is chosen. */
+@keyframes report-tab-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.report-tab-enter {
+  animation: report-tab-enter 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .report-tab-enter {
+    animation: none;
   }
 }

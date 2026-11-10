@@ -6,7 +6,9 @@ export type SidebarNavLabelKey =
   | "projects"
   | "analytics"
   | "seoActivities"
+  | "reports"
   | "leads"
+  | "oriel"
   | "users"
   | "rolesPermissions"
   | "settings";
@@ -46,6 +48,14 @@ export const SIDEBAR_NAV_DEFINITIONS: readonly SidebarNavDefinition[] = [
     path: "/dashboard",
     labelKey: "dashboard",
     icon: Icons.dashboard,
+    viewPermission: "dashboard.view",
+    permissionScope: "project",
+    group: "general",
+  },
+  {
+    path: "/oriel",
+    labelKey: "oriel",
+    icon: Icons.sparkles,
     viewPermission: "dashboard.view",
     permissionScope: "project",
     group: "general",
@@ -95,6 +105,14 @@ export const SIDEBAR_NAV_DEFINITIONS: readonly SidebarNavDefinition[] = [
     labelKey: "seoActivities",
     icon: Icons.rocket,
     viewPermission: "seo_activities.view",
+    permissionScope: "project",
+    group: "reporting",
+  },
+  {
+    path: "/reports",
+    labelKey: "reports",
+    icon: Icons.file,
+    viewPermission: "reports.view",
     permissionScope: "project",
     group: "reporting",
   },

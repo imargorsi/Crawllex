@@ -180,7 +180,7 @@ describe("Dashboard assistant query", () => {
     expect(result.history).toHaveLength(1);
   });
 
-  it("keeps history private per user and caps at five", async () => {
+  it("keeps history private per user and lists the latest five", async () => {
     await seedSystemRoles();
 
     const owner = await User.create({
@@ -234,11 +234,12 @@ describe("Dashboard assistant query", () => {
     const otherHistory = await listAssistantHistory(projectId, other._id.toString());
     expect(otherHistory).toHaveLength(0);
 
+    // Storage keeps up to ASSISTANT_RETENTION_LIMIT (500) per user and project; the list shows five.
     const stored = await AssistantQueryHistory.countDocuments({
       projectId,
       userId: owner._id,
     });
-    expect(stored).toBe(5);
+    expect(stored).toBe(6);
   });
 
   it("returns unknown safely for unsupported questions", async () => {

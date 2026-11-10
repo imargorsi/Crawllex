@@ -4,6 +4,8 @@ import {
   isKnownPermission,
   LEAD_DEFAULT_ROLE_ACTIONS,
   leadPermission,
+  REPORT_PERMISSION_ACTIONS,
+  reportPermission,
 } from "@/lib/rbac/permission-catalog";
 import { PROJECT_OWNER_ROLE, PROJECT_USER_ROLE, SYSTEM_ROLE_SEEDS } from "@/lib/rbac/roles";
 import { purgeHiddenAdminRoles } from "@/lib/rbac/purge-hidden-admin-roles";
@@ -66,16 +68,24 @@ export async function seedSystemRoles(): Promise<void> {
     integrationPermission(action),
   );
   const leadDefaults = LEAD_DEFAULT_ROLE_ACTIONS.map((action) => leadPermission(action));
+  // Creating reports is not a default: admins grant reports.create to the roles that need it.
+  const ownerReports = REPORT_PERMISSION_ACTIONS.filter((action) => action !== "create").map((action) => reportPermission(action));
 
   await Role.updateOne(
     { slug: PROJECT_OWNER_ROLE },
-    { $addToSet: { permissions: { $each: [...ownerIntegrations, ...leadDefaults] } } },
+    {
+      $addToSet: {
+        permissions: { $each: [...ownerIntegrations, ...leadDefaults, ...ownerReports] },
+      },
+    },
   );
   await Role.updateOne(
     { slug: PROJECT_USER_ROLE },
     {
       $addToSet: {
-        permissions: { $each: [integrationPermission("view"), ...leadDefaults] },
+        permissions: {
+          $each: [integrationPermission("view"), ...leadDefaults, reportPermission("view")],
+        },
       },
     },
   );

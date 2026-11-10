@@ -26,6 +26,8 @@ export interface Translation {
     analytics: string;
     seoActivities: string;
     leads: string;
+    reports: string;
+    oriel: string;
     settings: string;
   };
   breadcrumb: {
@@ -254,6 +256,41 @@ export interface Translation {
       linkChangePassword: string;
     };
   };
+  oriel: {
+    conversations: string;
+    newChat: string;
+    noConversations: string;
+    emptyTitle: string;
+    emptyBody: string;
+    placeholder: string;
+    send: string;
+    sending: string;
+    you: string;
+    assistant: string;
+    thinking: string;
+    sendError: string;
+    messageCount_one: string;
+    messageCount_other: string;
+    title: string;
+    subtitle: string;
+    deleteChat: string;
+    deleteAll: string;
+    deleteChatTitle: string;
+    deleteChatBody: string;
+    deleteAllTitle: string;
+    deleteAllBody: string;
+    cancel: string;
+    confirmDelete: string;
+    deleteError: string;
+    deleteAllError: string;
+    newChatTitle: string;
+    openButton: string;
+    recentChats: string;
+
+    today: string;
+    earlier: string;
+    emptyHint: string;
+  };
   home: {
     title: string;
     subtitle: string;
@@ -324,26 +361,9 @@ export interface Translation {
       };
     };
     assistant: {
-      title: string;
       greeting: string;
       greetingFallback: string;
-      description: string;
-      descriptionShort: string;
-      placeholder: string;
-      inputLabel: string;
-      submit: string;
-      asking: string;
       suggestionsLabel: string;
-      popularTitle: string;
-      historyLabel: string;
-      historyLoading: string;
-      answerLabel: string;
-      sourceAi: string;
-      sourceNlp: string;
-      emptyAnswer: string;
-      queryError: string;
-      tipTitle: string;
-      tipBody: string;
       suggestions: {
         leadsThisMonth: string;
         leadsLastMonth: string;
@@ -892,6 +912,109 @@ export interface Translation {
         colCreatedAt: string;
         colUpdatedAt: string;
       };
+    };
+    reports: {
+      title: string;
+      subtitle: string;
+      selectProjectTitle: string;
+      selectProjectBody: string;
+      noAccessTitle: string;
+      noAccessBody: string;
+      loadError: string;
+      newReport: string;
+      createTitle: string;
+      createBody: string;
+      periodMonth: string;
+      periodHint: string;
+      invalidPeriod: string;
+      nextStepsRequired: string;
+      sendToLabel: string;
+      sendToHint: string;
+      toolbarBold: string;
+      toolbarItalic: string;
+      toolbarHeading: string;
+      toolbarSubheading: string;
+      toolbarParagraph: string;
+      toolbarList: string;
+      linkButton: string;
+      linkUrl: string;
+      linkApply: string;
+      linkRemove: string;
+      linkSelectText: string;
+      linkInvalid: string;
+      stepReport: string;
+      deliverySent: string;
+      deliveryPartial: string;
+      deliveryNotSent: string;
+      deliveryNoRecipients: string;
+      deliveryTitle: string;
+      deliveryColRecipient: string;
+      deliveryColStatus: string;
+      deliveryColTime: string;
+      deliveryColError: string;
+      deliveryStatusSent: string;
+      deliveryStatusNotSent: string;
+      deliveryStatusFailed: string;
+      deliveryStatusSkipped: string;
+      stepReportLead: string;
+      stepContent: string;
+      stepContentLead: string;
+      writtenProgress: string;
+      leaveTitle: string;
+      leaveBody: string;
+      leaveStay: string;
+      leaveConfirm: string;
+      previousStep: string;
+      nextStep: string;
+      sectionNextStepsHint: string;
+      writtenPlaceholder: string;
+      written: {
+        executiveSummary: string;
+        search: string;
+        traffic: string;
+        leads: string;
+        work: string;
+        nextSteps: string;
+      };
+      writtenHint: {
+        executiveSummary: string;
+        search: string;
+        traffic: string;
+        leads: string;
+        work: string;
+      };
+      createSubmit: string;
+      created: string;
+      emptyTitle: string;
+      emptyBody: string;
+      colTitle: string;
+      colSummary: string;
+      colPerformance: string;
+      summary: string;
+      kpiClicks: string;
+      kpiSessions: string;
+      kpiLeads: string;
+      kpiCalls: string;
+      colCreated: string;
+      createdOn: string;
+      open: string;
+      backToList: string;
+      downloadPdf: string;
+      preparingPdf: string;
+      pdfError: string;
+      previewHtml: string;
+      sendReport: string;
+      sendingReport: string;
+      sentNotice: string;
+      sendError: string;
+      deleteAction: string;
+      deleteTitle: string;
+      deleteBody: string;
+      deleted: string;
+      previewLoading: string;
+      previewError: string;
+      notFoundTitle: string;
+      notFoundBody: string;
     };
     analytics: {
       title: string;
@@ -1638,6 +1761,8 @@ const translation: Translation = {
     projects: "Projects",
     analytics: "Analytics",
     seoActivities: "SEO Activities",
+    reports: "Reports",
+    oriel: "Oriel",
     leads: "Leads",
     settings: "Settings",
   },
@@ -1872,6 +1997,41 @@ const translation: Translation = {
       linkChangePassword: "Change password",
     },
   },
+  oriel: {
+    conversations: "Conversations",
+    newChat: "New chat",
+    noConversations: "No conversations yet. Start a new chat.",
+    emptyTitle: "Ask Oriel",
+    emptyBody: "Ask about leads, search, traffic or SEO work for this project, or how Crawllex works.",
+    placeholder: "Type a question…",
+    send: "Send",
+    sending: "Sending…",
+    you: "You",
+    assistant: "Crawllex",
+    thinking: "Thinking…",
+    sendError: "Could not send that message. Try again.",
+    messageCount_one: "{{count}} message",
+    messageCount_other: "{{count}} messages",
+    title: "Oriel",
+    subtitle: "Ask about your projects, reports and how Crawllex works.",
+    deleteChat: "Delete conversation",
+    deleteAll: "Delete all",
+    deleteChatTitle: "Delete this conversation?",
+    deleteChatBody: "This conversation will be permanently deleted. This cannot be undone.",
+    deleteAllTitle: "Delete all conversations?",
+    deleteAllBody: "All your conversations in this project will be permanently deleted. This cannot be undone.",
+    cancel: "Cancel",
+    confirmDelete: "Delete",
+    deleteError: "Could not delete the conversation. Try again.",
+    deleteAllError: "Could not delete the conversations. Try again.",
+    newChatTitle: "New conversation",
+    openButton: "Open Oriel",
+    recentChats: "Recent Chats",
+
+    today: "Today",
+    earlier: "Earlier",
+    emptyHint: "Answers use your project's own data. Figures are never guessed.",
+  },
   home: {
     title: "Dashboard",
     subtitle: "Project pulse, search trends, and quick answers for the selected date range.",
@@ -1943,28 +2103,9 @@ const translation: Translation = {
       },
     },
     assistant: {
-      title: "Dashboard Assistant",
       greeting: "Hi {{name}}",
       greetingFallback: "Hi There",
-      description:
-        "I'm your Dashboard Assistant. Ask about leads, analytics, or SEO activities for this project. Answers use cached project data only.",
-      descriptionShort:
-        "I'm your Dashboard Assistant. Ask about leads, analytics, or SEO activities for this project.",
-      placeholder: "Ask about leads, analytics, or SEO activities…",
-      inputLabel: "Assistant Query",
-      submit: "Ask",
-      asking: "Asking…",
       suggestionsLabel: "Try Asking",
-      popularTitle: "Popular Questions",
-      historyLabel: "Recent Queries",
-      historyLoading: "Loading recent queries…",
-      answerLabel: "Answer",
-      sourceAi: "Crawllex Insight",
-      sourceNlp: "Crawllex Quick Lookup",
-      emptyAnswer: "Pick a suggestion or type a question to see a quick project summary.",
-      queryError: "Could not run that query. Try again.",
-      tipTitle: "Pro Tip",
-      tipBody: "Ask about leads, analytics, pages, queries, or SEO activities for this project.",
       suggestions: {
         leadsThisMonth: "Leads This Month",
         leadsLastMonth: "Leads Last Month",
@@ -2524,6 +2665,109 @@ const translation: Translation = {
         colCreatedAt: "Created",
         colUpdatedAt: "Updated",
       },
+    },
+    reports: {
+      title: "Reports",
+      subtitle: "Monthly client reports for search, traffic and leads.",
+      selectProjectTitle: "Select A Project",
+      selectProjectBody: "Choose a project to view its reports.",
+      noAccessTitle: "No Access",
+      noAccessBody: "You do not have permission to view reports for this project.",
+      loadError: "Reports could not be loaded.",
+      newReport: "New Report",
+      createTitle: "New Monthly Report",
+      createBody: "Choose the month and who receives the report, then add the written content.",
+      periodMonth: "Report Month",
+      periodHint: "Covers the first to the last day of the month.",
+      invalidPeriod: "Choose a valid month.",
+      nextStepsRequired: "Next steps are required.",
+      sendToLabel: "Send PDF and dashboard link to",
+      sendToHint: "Saved with the report. Email sending is not set up yet. The project owner is added by default.",
+      toolbarBold: "Bold",
+      toolbarItalic: "Italic",
+      toolbarHeading: "Heading",
+      toolbarSubheading: "Subheading",
+      toolbarParagraph: "Paragraph",
+      toolbarList: "Bullet list",
+      linkButton: "Link",
+      linkUrl: "Link address",
+      linkApply: "Apply",
+      linkRemove: "Remove link",
+      linkSelectText: "Select the text you want to link first.",
+      linkInvalid: "Enter a valid address, for example https://example.com.",
+      stepReport: "Report",
+      deliverySent: "Sent",
+      deliveryPartial: "{{sent}} Sent · {{failed}} Failed",
+      deliveryNotSent: "Not Sent",
+      deliveryNoRecipients: "No Recipients",
+      deliveryTitle: "Email Delivery",
+      deliveryColRecipient: "Recipient",
+      deliveryColStatus: "Status",
+      deliveryColTime: "Time",
+      deliveryColError: "Error",
+      deliveryStatusSent: "Sent",
+      deliveryStatusNotSent: "Not Sent",
+      deliveryStatusFailed: "Failed",
+      deliveryStatusSkipped: "Skipped",
+      stepReportLead: "Pick the month this report covers and who receives it after creation.",
+      stepContent: "Content",
+      stepContentLead: "Optional sections replace their generated text. Next steps are required.",
+      writtenProgress: "{{count}} of {{total}} sections written.",
+      leaveTitle: "Leave This Report?",
+      leaveBody: "What you wrote will be lost.",
+      leaveStay: "Keep Editing",
+      leaveConfirm: "Leave",
+      previousStep: "Previous Step",
+      nextStep: "Next Step",
+      sectionNextStepsHint: "Saved with the report.",
+      writtenPlaceholder: "Write here. Use the toolbar for headings, bullet points and bold or italic.",
+      written: {
+        executiveSummary: "Executive summary",
+        search: "Search performance",
+        traffic: "Website traffic",
+        leads: "Engagement and leads",
+        work: "Work logged",
+        nextSteps: "Next steps",
+      },
+      writtenHint: {
+        executiveSummary: "Replaces the generated introduction.",
+        search: "Replaces the generated search overview.",
+        traffic: "Replaces the generated traffic overview.",
+        leads: "Replaces the generated engagement and leads overview.",
+        work: "Replaces the generated work logged overview.",
+      },
+      createSubmit: "Create Report",
+      created: "Report created.",
+      emptyTitle: "No Reports Yet",
+      emptyBody: "Create the first monthly report for this project.",
+      colTitle: "Report",
+      colSummary: "Summary",
+      colPerformance: "Performance",
+      summary: "Summary",
+      kpiClicks: "Clicks",
+      kpiSessions: "Sessions",
+      kpiLeads: "Leads",
+      kpiCalls: "Calls",
+      colCreated: "Created",
+      createdOn: "Created on",
+      open: "Open",
+      backToList: "Back To Reports",
+      downloadPdf: "Download PDF",
+      preparingPdf: "Preparing PDF…",
+      pdfError: "The PDF could not be created. Try again.",
+      previewHtml: "Preview HTML",
+      sendReport: "Send Report",
+      sendingReport: "Sending…",
+      sentNotice: "Report sent to recipients.",
+      sendError: "The report could not be sent. Try again.",
+      deleteAction: "Delete",
+      deleteTitle: "Delete This Report?",
+      deleteBody: "The saved report and its snapshot will be removed. This cannot be undone.",
+      deleted: "Report deleted.",
+      previewLoading: "Loading report…",
+      previewError: "The report preview could not be loaded.",
+      notFoundTitle: "Report Not Found",
+      notFoundBody: "This report does not exist or was deleted.",
     },
     analytics: {
       title: "Analytics",

@@ -66,6 +66,8 @@ import {
   ViewIcon,
   ViewOffSlashIcon,
   Wrench01Icon,
+  CursorPointer01Icon,
+  Download04Icon,
 } from "@hugeicons/core-free-icons";
 
 import { createAppIcon, type TAppIconComponent } from "@/components/ui/app-icon";
@@ -97,6 +99,8 @@ export const Icons = {
   checkCircle: createAppIcon(CheckmarkCircle01Icon),
   clock: createAppIcon(Clock01Icon),
   cloudDownload: createAppIcon(CloudDownloadIcon),
+  download: createAppIcon(Download04Icon),
+  cursorPointer: createAppIcon(CursorPointer01Icon),
   cloudUpload: createAppIcon(CloudUploadIcon),
   dashboard: createAppIcon(DashboardCircleAddIcon),
   delete: createAppIcon(Delete02Icon),

@@ -114,33 +114,3 @@ export function filterAssistantSuggestions(
     return canViewSeo;
   });
 }
-
-export function assistantTypingPhrases(
-  canViewLeads: boolean,
-  canViewAnalytics: boolean,
-  canViewSeo: boolean,
-  fallback: string,
-): string[] {
-  const phrases: string[] = [];
-  if (canViewLeads) {
-    phrases.push(
-      ASSISTANT_TYPING_PHRASES.leadsThisMonth,
-      ASSISTANT_TYPING_PHRASES.leadsLastMonth,
-    );
-  }
-  if (canViewAnalytics) {
-    phrases.push(
-      ASSISTANT_TYPING_PHRASES.clicksOverview,
-      ASSISTANT_TYPING_PHRASES.topQueries,
-      ASSISTANT_TYPING_PHRASES.topPages,
-    );
-  }
-  if (canViewSeo) {
-    phrases.push(
-      ASSISTANT_TYPING_PHRASES.blogs,
-      ASSISTANT_TYPING_PHRASES.backlinks,
-      ASSISTANT_TYPING_PHRASES.technicalWork,
-    );
-  }
-  return phrases.length > 0 ? phrases : [fallback];
-}
