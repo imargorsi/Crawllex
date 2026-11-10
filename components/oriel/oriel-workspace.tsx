@@ -153,7 +153,7 @@ export function OrielWorkspace({
 
   return (
     <>
-      <div className="grid min-h-0 w-full min-w-0 flex-1 gap-4 xl:grid-cols-[18rem_minmax(0,1fr)]">
+      <div className="grid min-h-0 w-full min-w-0 flex-1 gap-4 xl:h-[calc(100dvh-12rem)] xl:grid-cols-[18rem_minmax(0,1fr)]">
         <OrielSidebar
           threads={threads}
           activeThreadId={activeThreadId}

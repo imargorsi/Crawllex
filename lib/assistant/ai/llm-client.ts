@@ -1,6 +1,7 @@
 // Local model on logibox (Qwen3-4B via llama-server behind Caddy basic auth), reached over Tailscale.
 // Tailscale encrypts the link; basic auth is still required by the gateway.
-export const LLM_TIMEOUT_MS = 180_000;
+/** Interactive chat: after this long the answer falls back to the data brief instead of spinning. */
+export const LLM_TIMEOUT_MS = 30_000;
 const DEFAULT_MODEL = "qwen3-4b";
 
 export type TAssistantAiFailure =
