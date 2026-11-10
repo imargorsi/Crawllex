@@ -53,7 +53,8 @@ export type TReportDeliveryDto = {
   email: string | null;
   status: TReportDeliveryStatus;
   error: string | null;
-  at: string;
+  /** Null for a recipient who has not been sent the report yet. */
+  at: string | null;
 };
 
 export type TReportNotesDto = {

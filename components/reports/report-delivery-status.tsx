@@ -57,7 +57,7 @@ export function ReportDeliveryStatus({ report, variant = "inline" }: { report: T
     rows: deliveries.map((item: TReportDeliveryDto) => [
       item.name && item.email ? `${item.name} · ${item.email}` : item.name || item.email || "—",
       t(STATUS_LABEL[item.status]),
-      timeFormatter.format(new Date(item.at)),
+      item.at ? timeFormatter.format(new Date(item.at)) : "—",
       item.error ?? "—",
     ]),
     emptyText: t("deliveryNoRecipients"),
