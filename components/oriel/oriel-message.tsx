@@ -24,7 +24,7 @@ export function OrielUserMessage({ label, text }: { label: string; text: string 
     <div className="flex flex-col items-end gap-1.5">
       <SenderLabel label={label} align="end" />
       <div
-        className="type-body max-w-[80%] rounded-2xl rounded-tr-md px-4 py-2.5 whitespace-pre-wrap text-text-primary"
+        className="type-body max-w-[70%] rounded-2xl rounded-tr-md px-4 py-2.5 whitespace-pre-wrap text-text-primary"
         style={{
           background:
             "linear-gradient(135deg, color-mix(in srgb, var(--brand) 22%, transparent), color-mix(in srgb, var(--brand) 12%, transparent))",
@@ -41,7 +41,7 @@ export function OrielAssistantMessage({ label, text }: { label: string; text: st
   return (
     <div className="flex items-start gap-3">
       <OrielMark size="sm" className="mt-5" />
-      <div className="flex min-w-0 max-w-[88%] flex-col gap-1.5">
+      <div className="flex min-w-0 max-w-[min(100%,56rem)] flex-col gap-1.5">
         <SenderLabel label={label} align="start" />
         <div className={cn(glassPanelSurfaceClass, "rounded-2xl rounded-tl-md px-5 py-4")}>
           <AssistantMessage message={text} />
