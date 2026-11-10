@@ -85,7 +85,7 @@ export function OrielSidebar({
           type="button"
           onClick={onDeleteAll}
           disabled={disabled || threads.length === 0}
-          className="type-caption flex w-full items-center justify-center gap-1.5 rounded-lg py-2 font-medium text-text-muted transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
+          className="type-caption flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-text-primary/20 font-medium text-text-secondary transition-colors hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
         >
           <Icons.delete className="size-3.5" aria-hidden />
           {labels.deleteAll}

@@ -25,7 +25,7 @@ function InlineText({ text }: { text: string }) {
 function AssistantBlock({ block }: { block: TAssistantBlock }) {
   if (block.type === "heading") {
     return (
-      <h3 className="mt-4 mb-1 first:mt-0 type-caption font-semibold tracking-wide text-brand uppercase">
+      <h3 className="mt-4 mb-1 first:mt-0 type-caption font-semibold text-brand">
         <InlineText text={block.text} />
       </h3>
     );

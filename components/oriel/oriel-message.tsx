@@ -10,7 +10,7 @@ function SenderLabel({ label, align }: { label: string; align: "start" | "end" }
   return (
     <span
       className={cn(
-        "type-caption font-semibold tracking-wide text-text-muted uppercase",
+        "type-caption font-semibold text-text-muted",
         align === "end" ? "text-end" : "text-start",
       )}
     >
