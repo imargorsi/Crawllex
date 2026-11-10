@@ -28,6 +28,7 @@ export interface Translation {
     leads: string;
     reports: string;
     oriel: string;
+    lens: string;
     settings: string;
   };
   breadcrumb: {
@@ -255,6 +256,151 @@ export interface Translation {
       noPermissions: string;
       linkChangePassword: string;
     };
+  };
+  lens: {
+    title: string;
+    description: string;
+    notConnectedTitle: string;
+    notConnectedBody: string;
+    loadFailedTitle: string;
+    loadFailedBody: string;
+    openIssues: string;
+    runs: string;
+    incidents: string;
+    latestRun: string;
+    issuesTitle: string;
+    noIssues: string;
+    runsTitle: string;
+    noRuns: string;
+    selectRun: string;
+    findingsTitle: string;
+    noFindings: string;
+    screenshotsTitle: string;
+    noScreenshots: string;
+    issue: string;
+    severity: string;
+    status: string;
+    target: string;
+    seen: string;
+    statusOpen: string;
+    statusResolved: string;
+    statusReopened: string;
+    severityHigh: string;
+    severityMedium: string;
+    severityLow: string;
+    coverageComplete: string;
+    coveragePartial: string;
+    runCompleted: string;
+    runRunning: string;
+    runFailed: string;
+    recommendation: string;
+    viewports: string;
+    tabsLabel: string;
+    tabSeo: string;
+    tabUiux: string;
+    uptimeTitle: string;
+    uptimeSetup: string;
+    healthScore: string;
+    healthScoreNote: string;
+    bySeverity: string;
+    uptime7d: string;
+    avgResponse: string;
+    probes: string;
+    incidentsCount: string;
+    byTopic: string;
+    needsAttention: string;
+    showAll: string;
+    showLess: string;
+    tabOverview: string;
+    tabUptime: string;
+    tabPages: string;
+    pagesInRun: string;
+    noIncidents: string;
+    exampleData: string;
+    exampleNote: string;
+    noOpenIssues: string;
+    coverage: string;
+    lastRun: string;
+    noRunYet: string;
+    open: string;
+    sitePages: string;
+    group_titles: string;
+    group_descriptions: string;
+    group_headings: string;
+    group_urls: string;
+    group_indexing: string;
+    group_robots: string;
+    group_content: string;
+    group_links: string;
+    group_structured_data: string;
+    group_images: string;
+    group_layout: string;
+    group_touch: string;
+    group_text: string;
+    group_accessibility: string;
+    group_other: string;
+    where: string;
+    seenCount: string;
+    pageIssues: string;
+    upNow: string;
+    down: string;
+    uptimeIncidents: string;
+    seoTitle: string;
+    seoSubtitle: string;
+    lastCheck: string;
+    tabHistory: string;
+    scoreNote: string;
+    band_good: string;
+    band_work: string;
+    band_attention: string;
+    summary_good: string;
+    summary_work: string;
+    summary_attention: string;
+    summaryPages: string;
+    issuesToFix: string;
+    urgentIssues: string;
+    pagesAffected: string;
+    startHere: string;
+    howToFix: string;
+    severityMix: string;
+    page: string;
+    issuesCount: string;
+    mainProblem: string;
+    pagesCount: string;
+    foundOnPages: string;
+    pagesAffectedNote: string;
+    openIssuesCount: string;
+    summaryCoverage: string;
+    summaryPagesPartial: string;
+    scoreRule: string;
+    mustFixNote: string;
+    shouldFixNote: string;
+    worthNote: string;
+    onpageTitle: string;
+    technicalTitle: string;
+    onpageHelp: string;
+    technicalHelp: string;
+    workingWell: string;
+    noProblems: string;
+    glossaryTitle: string;
+    glossary_sitemap: string;
+    glossary_robots: string;
+    glossary_canonical: string;
+    glossary_noindex: string;
+    glossary_structured: string;
+    glossary_h1: string;
+    glossary_meta: string;
+    tabCategories: string;
+    failedLabel: string;
+    warningsLabel: string;
+    noticesLabel: string;
+    categoriesTitle: string;
+    historyTitle: string;
+    checksLabel: string;
+    whatToDo: string;
+    categoryIssues: string;
+    noCategoryIssues: string;
+    readMore: string;
   };
   oriel: {
     conversations: string;
@@ -1762,6 +1908,7 @@ const translation: Translation = {
     seoActivities: "SEO Activities",
     reports: "Reports",
     oriel: "Oriel",
+    lens: "Lens",
     leads: "Leads",
     settings: "Settings",
   },
@@ -1995,6 +2142,152 @@ const translation: Translation = {
       noPermissions: "No permissions on this account.",
       linkChangePassword: "Change password",
     },
+  },
+  lens: {
+    title: "Lens",
+    description: "Website health, SEO and UI checks for this project. Read-only.",
+    notConnectedTitle: "Lens is not connected",
+    notConnectedBody: "This server cannot reach the Lens service. Check the Lens settings.",
+    loadFailedTitle: "Lens could not load",
+    loadFailedBody: "Try again in a moment.",
+    openIssues: "Open Issues",
+    runs: "Runs",
+    incidents: "Incidents",
+    latestRun: "Latest Run",
+    issuesTitle: "Open Issues",
+    noIssues: "No open issues. Lens found nothing that is still open.",
+    runsTitle: "Runs",
+    noRuns: "No runs yet.",
+    selectRun: "Select a run to see its findings and screenshots.",
+    findingsTitle: "Findings",
+    noFindings: "No findings in this run.",
+    screenshotsTitle: "Screenshots",
+    noScreenshots: "No screenshots for this run.",
+    issue: "Issue",
+    severity: "Severity",
+    status: "Status",
+    target: "Where",
+    seen: "Seen",
+    statusOpen: "Open",
+    statusResolved: "Resolved",
+    statusReopened: "Reopened",
+    severityHigh: "High",
+    severityMedium: "Medium",
+    severityLow: "Low",
+    coverageComplete: "Complete",
+    coveragePartial: "Partial",
+    runCompleted: "Completed",
+    runRunning: "Running",
+    runFailed: "Failed",
+    recommendation: "What to do",
+    viewports: "Viewports",
+    tabsLabel: "Issue categories",
+    tabSeo: "SEO",
+    tabUiux: "UI/UX",
+    uptimeTitle: "Uptime",
+    uptimeSetup: "Uptime monitoring is not set up yet. Downtime history will show here.",
+    uptimeIncidents: "Availability incidents",
+    seoTitle: "SEO health",
+    seoSubtitle: "How well your website is set up for search engines, in plain words.",
+    lastCheck: "Last check",
+    tabHistory: "History",
+    scoreNote: "Higher is better. Based on open SEO issues.",
+    band_good: "Good",
+    band_work: "Needs work",
+    band_attention: "Needs attention",
+    summary_good: "Your site is in good shape for search.",
+    summary_work: "A good base. A few improvements will help.",
+    summary_attention: "Your site needs several improvements.",
+    summaryPages: "We checked {{checked}} pages of your site.",
+    issuesToFix: "Issues to fix",
+    urgentIssues: "Urgent",
+    pagesAffected: "Pages affected",
+    startHere: "Start here: the most important fixes",
+    howToFix: "How to fix",
+    severityMix: "Severity mix",
+    page: "Page",
+    issuesCount: "Issues",
+    mainProblem: "Main problem",
+    pagesCount: "{{count}} pages",
+    foundOnPages: "Found on {{count}} page(s)",
+    pagesAffectedNote: "{{count}} pages on your site have at least one open SEO issue.",
+    openIssuesCount: "{{count}} open issues",
+    summaryCoverage: "We checked {{checked}} of {{known}} pages of your site.",
+    summaryPagesPartial: "We checked {{checked}} pages of your site.",
+    scoreRule: "Higher is better. Based on open issues.",
+    mustFixNote: "Hurts your results now",
+    shouldFixNote: "Should be improved",
+    worthNote: "Small improvements",
+    onpageTitle: "On-page SEO",
+    technicalTitle: "Technical SEO",
+    onpageHelp: "What your pages say: titles, descriptions, headings, text and pictures.",
+    technicalHelp: "How search engines reach your pages: indexing, robots and sitemap, links, addresses and structured data.",
+    workingWell: "Working well",
+    noProblems: "No open issues in this group.",
+    glossaryTitle: "What these words mean",
+    glossary_sitemap: "Sitemap: a list of your pages that you give to search engines.",
+    glossary_robots: "Robots file: a small file that tells search engines which pages they may visit.",
+    glossary_canonical: "Canonical: the one address you want search engines to show for a page.",
+    glossary_noindex: "Noindex: an instruction that asks search engines not to show a page.",
+    glossary_structured: "Structured data: hidden labels that describe a page in a form search engines read.",
+    glossary_h1: "H1: the main heading of a page.",
+    glossary_meta: "Meta description: the summary text under a page title in search results.",
+    tabCategories: "By category",
+    failedLabel: "Must fix",
+    warningsLabel: "Should fix",
+    noticesLabel: "Worth checking",
+    categoriesTitle: "Issues by category",
+    historyTitle: "Past checks",
+    checksLabel: "Checks",
+    whatToDo: "What to do",
+    categoryIssues: "{{count}} issues",
+    noCategoryIssues: "No issues in this category.",
+    readMore: "Why this matters",
+
+    healthScore: "Health score",
+    healthScoreNote: "Lens formula. Not a search ranking signal.",
+    bySeverity: "By severity",
+    uptime7d: "Uptime, 7 days",
+    avgResponse: "Average response",
+    probes: "Checks",
+    incidentsCount: "Incidents",
+    byTopic: "Issues by topic",
+    needsAttention: "Needs attention",
+    showAll: "Show all",
+    showLess: "Show less",
+    tabOverview: "Overview",
+    tabUptime: "Uptime",
+    tabPages: "Pages and runs",
+    pagesInRun: "Pages in latest run",
+    noIncidents: "No incidents in this period.",
+    exampleData: "Example data",
+    exampleNote: "Dummy uptime data until Uptime Kuma is set up.",
+    noOpenIssues: "No open issues in this group.",
+    coverage: "Coverage",
+    lastRun: "Last run",
+    noRunYet: "No run yet",
+    open: "open",
+    sitePages: "Pages",
+    group_titles: "Titles",
+    group_descriptions: "Descriptions",
+    group_headings: "Headings",
+    group_urls: "URLs",
+    group_indexing: "Indexing and canonicals",
+    group_robots: "Robots and sitemap",
+    group_content: "Content",
+    group_links: "Links",
+    group_structured_data: "Structured data",
+    group_images: "Images",
+    group_layout: "Layout",
+    group_touch: "Touch targets",
+    group_text: "Text size",
+    group_accessibility: "Accessibility",
+    group_other: "Other",
+    where: "Where",
+    seenCount: "Seen",
+    pageIssues: "Issues",
+    upNow: "Up",
+    down: "Down",
   },
   oriel: {
     conversations: "Conversations",

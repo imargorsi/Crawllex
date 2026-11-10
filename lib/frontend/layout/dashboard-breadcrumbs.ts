@@ -5,6 +5,7 @@ export type BreadcrumbTranslate = (key: string) => string;
 const SEGMENT_KEYS: Record<string, string> = {
   dashboard: "home.title",
   oriel: "oriel.title",
+  lens: "lens.title",
   users: "modules.users.title",
   projects: "modules.projects.title",
   roles: "modules.roles.title",

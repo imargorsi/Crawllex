@@ -9,6 +9,7 @@ export type SidebarNavLabelKey =
   | "reports"
   | "leads"
   | "oriel"
+  | "lens"
   | "users"
   | "rolesPermissions"
   | "settings";
@@ -113,6 +114,14 @@ export const SIDEBAR_NAV_DEFINITIONS: readonly SidebarNavDefinition[] = [
     labelKey: "reports",
     icon: Icons.file,
     viewPermission: "reports.view",
+    permissionScope: "project",
+    group: "reporting",
+  },
+  {
+    path: "/lens",
+    labelKey: "lens",
+    icon: Icons.view,
+    viewPermission: "dashboard.view",
     permissionScope: "project",
     group: "reporting",
   },
