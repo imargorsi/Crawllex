@@ -6,6 +6,11 @@ import { leakedTerm } from "./output-guard";
 export const ORIEL_NOT_COVERED =
   "This is not covered in the Crawllex guides. Please contact your project owner or the Crawllex team.";
 
+export const ORIEL_GREETING = "Hey, I am Oriel. What can I help you with?";
+
+/** Short greetings only. Anything longer goes through retrieval. */
+const GREETING_PATTERN = /^(hi|hey|hello|hiya|yo|good (morning|afternoon|evening))( there)?( oriel)?[\s!.?,]*$/i;
+
 export type TOrielOutcome =
   | { kind: "answer"; message: string; sources: string[] }
   | { kind: "not_covered"; message: string; sources: string[] };
@@ -39,6 +44,7 @@ export function buildGroundedPrompt(question: string, hits: TScoredChunk[]): str
 export async function answerGuideQuestion(raw: string, deps: TOrielDeps): Promise<TOrielOutcome> {
   const question = cleanQuestion(raw);
   if (!question) return { kind: "not_covered", message: ORIEL_NOT_COVERED, sources: [] };
+  if (GREETING_PATTERN.test(question)) return { kind: "answer", message: ORIEL_GREETING, sources: [] };
 
   const hits = retrieve(question, deps.chunks);
   if (hits.length === 0) return { kind: "not_covered", message: ORIEL_NOT_COVERED, sources: [] };
