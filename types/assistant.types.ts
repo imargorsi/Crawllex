@@ -9,6 +9,7 @@ export type TAssistantIntent =
   | "analytics_top"
   | "seo_count"
   | "ai_answer"
+  | "greeting"
   | "unknown";
 
 export type TAssistantAnalyticsMetric =

@@ -26,6 +26,12 @@ const CONVERSATION_TURNS = 4;
  */
 const EXPLANATORY = /\b(why|how come|explain|reason|because|what should|next steps?|what can i do|recommend|suggest|improve|help me)\b/i;
 
+/** Reply to a bare greeting. Fixed text: no data read, no model call. */
+export const ASSISTANT_GREETING = "Hey, I am Oriel. What can I help you with?";
+
+/** Short greetings only. Anything longer goes through the parser and the model. */
+const GREETING = /^(hi|hey|hello|hiya|yo|good (morning|afternoon|evening))( there)?( oriel)?[\s!.?,]*$/i;
+
 function denyModule(
   permission: "leads.view" | "analytics.view" | "seo_activities.view" | null,
 ): "leads" | "analytics" | "seo_activities" {
@@ -98,6 +104,19 @@ export async function runAssistantQuery(
 ): Promise<TAssistantQueryResult> {
   const userId = auth.user._id.toString();
   const threadId = input.threadId ?? randomUUID();
+
+  if (GREETING.test(input.query.trim())) {
+    const history = await appendAssistantHistory({
+      projectId,
+      userId,
+      threadId,
+      query: input.query,
+      answer: ASSISTANT_GREETING,
+      intent: "greeting",
+    });
+    return { threadId, message: ASSISTANT_GREETING, intent: "greeting", source: "nlp", history };
+  }
+
   const parsed = parseAssistantQuery(input.query);
 
   if (parsed.kind === "unknown" || EXPLANATORY.test(input.query)) {
