@@ -197,6 +197,16 @@ describe("answerWithAi", () => {
     }
   });
 
+  it("reads the period it is given instead of the default 30 days", async () => {
+    const execute = vi.fn(okData);
+    const generate = vi.fn(async (_request: TChatRequest, _onToken?: (text: string) => void) => textReply("Clicks rose."));
+    await answerWithAi("is it up or down?", { generate, execute }, NOW, undefined, FOLLOW_UP, { from: "2025-10-20", to: "2026-10-19" });
+    for (const call of execute.mock.calls) {
+      expect(call[1]).toEqual({ from: "2025-10-20", to: "2026-10-19" });
+    }
+    expect(generate.mock.calls[0]?.[0].messages.at(-1)?.content).toContain("2025-10-20 to 2026-10-19");
+  });
+
   it("leaves out a section whose tool returned an error instead of showing zeros", async () => {
     const execute = vi.fn(async (name: string, _args: unknown) =>
       name === "get_leads_count" ? { ok: false as const, error: "Module Not Available." } : { ok: true as const, data: {} },

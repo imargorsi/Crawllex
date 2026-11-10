@@ -25,7 +25,10 @@ function isoDay(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-export function answerRange(now: Date): { from: string; to: string } {
+/** Period the model answers for: the question's own window, or the window carried from the thread. */
+export type TAnswerRange = { from: string; to: string };
+
+export function answerRange(now: Date): TAnswerRange {
   const yesterday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) - DAY_MS);
   const from = new Date(yesterday.getTime() - (ANSWER_RANGE_DAYS - 1) * DAY_MS);
   return { from: isoDay(from), to: isoDay(yesterday) };
@@ -98,8 +101,9 @@ export async function answerWithAi(
   now: Date = new Date(),
   onToken?: (text: string) => void,
   history: TThreadTurn[] = [],
+  period: TAnswerRange | undefined = undefined,
 ): Promise<TAiAnswer> {
-  const range = answerRange(now);
+  const range = period ?? answerRange(now);
   const results = await Promise.all(
     PREFETCH_TOOLS.map(async (name) => ({ name, result: await deps.execute(name, range) })),
   );
@@ -176,10 +180,11 @@ export async function tryAnswerWithAi(
   now = Date.now(),
   onToken?: (text: string) => void,
   history: TThreadTurn[] = [],
+  period: TAnswerRange | undefined = undefined,
 ): Promise<TAiAnswer | null> {
   if (aiBreakerOpen(now)) return null;
   try {
-    const answer = await answerWithAi(query, deps, new Date(now), onToken, history);
+    const answer = await answerWithAi(query, deps, new Date(now), onToken, history, period);
     recordAiSuccess();
     return answer;
   } catch (error) {
