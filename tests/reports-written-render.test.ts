@@ -41,8 +41,10 @@ describe("written report text", () => {
     expect(html).toContain("<li>Blog live</li>");
   });
 
-  it("never renders next steps in the document", () => {
-    expect(renderReportHtml(writtenSnapshot())).not.toContain("NEXT-STEPS-MARKER");
+  it("renders the written next steps as section 06 in the document", () => {
+    const html = renderReportHtml(writtenSnapshot());
+    expect(html).toContain('data-id="next"');
+    expect(html).toContain("NEXT-STEPS-MARKER");
   });
 
   it("drops unsafe links even if they reach the renderer", () => {

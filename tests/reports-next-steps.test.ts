@@ -7,7 +7,7 @@ import { reportSnapshot } from "./helpers/report-snapshot";
 const nextSteps: TRichDoc = [{ type: "paragraph", runs: [{ text: "Publish two guides next month." }] }];
 
 describe("next steps tab (dashboard)", () => {
-  it("is not in the default view, so the PDF keeps its current sections", () => {
+  it("is not in the default view", () => {
     const snapshot = reportSnapshot("Silver Foundation", "unused");
     snapshot.notes = { nextSteps };
     const view = buildReportView(snapshot);
