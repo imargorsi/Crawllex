@@ -4,6 +4,13 @@ import { executeAssistantTool } from "@/lib/assistant/ai/tools";
 import { randomUUID } from "node:crypto";
 import { tryAnswerWithAi, type TAnswerRange, type TThreadTurn } from "@/lib/assistant/ai/run-ai-query";
 import { resolveAnalyticsWindow } from "@/lib/assistant/nlp/windows";
+import {
+  buildComparisonBrief,
+  comparePeriodsFor,
+  defaultComparePeriods,
+  isComparisonQuestion,
+  type TCompareRange,
+} from "@/lib/assistant/compare";
 import type { TAssistantParse, TAssistantWindowSpec } from "@/types/assistant.types";
 import type { AuthContext } from "@/lib/auth/guards";
 import { permissionForAssistantParse } from "@/lib/assistant/detect-intent";
@@ -64,23 +71,58 @@ function windowOf(parsed: TAssistantParse): TAssistantWindowSpec | null {
   return "window" in parsed ? parsed.window : null;
 }
 
+/** The question's own period, or the period of the last earlier question in the thread that has one. */
+export function periodSpecFor(query: string, history: TThreadTurn[]): TAssistantWindowSpec | null {
+  return (
+    windowOf(parseAssistantQuery(query)) ??
+    [...history]
+      .reverse()
+      .map((turn) => windowOf(parseAssistantQuery(turn.query)))
+      .find((spec) => spec != null) ??
+    null
+  );
+}
+
 /**
  * Period for an AI answer. The question's own period wins. Otherwise a follow-up keeps the period
  * of the last earlier question in the thread (e.g. "so far", then "is it up or down?").
  * Undefined → the default 30 days.
  */
 export function answerWindowFor(query: string, history: TThreadTurn[]): TAnswerRange | undefined {
-  const own = windowOf(parseAssistantQuery(query));
-  const carried =
-    own ??
-    [...history]
-      .reverse()
-      .map((turn) => windowOf(parseAssistantQuery(turn.query)))
-      .find((spec) => spec != null) ??
-    null;
+  const carried = periodSpecFor(query, history);
   if (!carried) return undefined;
   const range = resolveAnalyticsWindow(carried);
   return range.from && range.to ? { from: range.from, to: range.to } : undefined;
+}
+
+/**
+ * "Is it up or down?" style questions. Two periods are read and compared in code: the question's
+ * period (or the thread's) against the period before it, or this month so far against last month.
+ * Returns null when the user may not view analytics, so the normal path handles the denial.
+ */
+async function comparisonAnswer(
+  auth: AuthContext,
+  projectId: string,
+  query: string,
+  history: TThreadTurn[],
+): Promise<string | null> {
+  const access = await getProjectAccessForUser(auth, projectId);
+  if (!access || !hasPermission(access.permissions, "analytics.view")) return null;
+
+  // "All time" has no earlier period, so it compares this month against last month instead.
+  const spec = periodSpecFor(query, history);
+  const explicit = spec && spec.preset !== "all" ? comparePeriodsFor(spec) : null;
+  const periods = explicit ?? defaultComparePeriods();
+
+  const run = (range: TCompareRange) =>
+    executeAssistantTool("get_analytics_overview", range, projectId, access.permissions);
+  const [current, previous] = await Promise.all([run(periods.current), run(periods.previous)]);
+  if (!current.ok || !previous.ok) return "Comparison data is not available right now. Please try again later.";
+  return buildComparisonBrief(
+    current.data as Record<string, unknown>,
+    previous.data as Record<string, unknown>,
+    periods,
+  );
 }
 
 async function tryAiAnswer(
@@ -141,6 +183,22 @@ export async function runAssistantQuery(
       intent: "greeting",
     });
     return { threadId, message: ASSISTANT_GREETING, intent: "greeting", source: "nlp", history };
+  }
+
+  if (isComparisonQuestion(input.query) && !EXPLANATORY.test(input.query)) {
+    const history = await recentTurns(projectId, userId, input.threadId);
+    const message = await comparisonAnswer(auth, projectId, input.query, history);
+    if (message != null) {
+      const saved = await appendAssistantHistory({
+        projectId,
+        userId,
+        threadId,
+        query: input.query,
+        answer: message,
+        intent: "analytics_compare",
+      });
+      return { threadId, message, intent: "analytics_compare", source: "nlp", history: saved };
+    }
   }
 
   const parsed = parseAssistantQuery(input.query);
