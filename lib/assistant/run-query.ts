@@ -2,7 +2,9 @@ import { answerCacheKey, getCachedAnswer, setCachedAnswer } from "@/lib/assistan
 import { generateChatCompletion, llmConfig } from "@/lib/assistant/ai/llm-client";
 import { executeAssistantTool } from "@/lib/assistant/ai/tools";
 import { randomUUID } from "node:crypto";
-import { tryAnswerWithAi, type TThreadTurn } from "@/lib/assistant/ai/run-ai-query";
+import { tryAnswerWithAi, type TAnswerRange, type TThreadTurn } from "@/lib/assistant/ai/run-ai-query";
+import { resolveAnalyticsWindow } from "@/lib/assistant/nlp/windows";
+import type { TAssistantParse, TAssistantWindowSpec } from "@/types/assistant.types";
 import type { AuthContext } from "@/lib/auth/guards";
 import { permissionForAssistantParse } from "@/lib/assistant/detect-intent";
 import {
@@ -58,6 +60,29 @@ async function recentTurns(projectId: string, userId: string, threadId: string |
     .map((message) => ({ query: message.query, answer: message.answer }));
 }
 
+function windowOf(parsed: TAssistantParse): TAssistantWindowSpec | null {
+  return "window" in parsed ? parsed.window : null;
+}
+
+/**
+ * Period for an AI answer. The question's own period wins. Otherwise a follow-up keeps the period
+ * of the last earlier question in the thread (e.g. "so far", then "is it up or down?").
+ * Undefined → the default 30 days.
+ */
+export function answerWindowFor(query: string, history: TThreadTurn[]): TAnswerRange | undefined {
+  const own = windowOf(parseAssistantQuery(query));
+  const carried =
+    own ??
+    [...history]
+      .reverse()
+      .map((turn) => windowOf(parseAssistantQuery(turn.query)))
+      .find((spec) => spec != null) ??
+    null;
+  if (!carried) return undefined;
+  const range = resolveAnalyticsWindow(carried);
+  return range.from && range.to ? { from: range.from, to: range.to } : undefined;
+}
+
 async function tryAiAnswer(
   auth: AuthContext,
   projectId: string,
@@ -87,6 +112,7 @@ async function tryAiAnswer(
     Date.now(),
     onToken,
     history,
+    answerWindowFor(query, history),
   );
   if (answer?.message && history.length === 0) setCachedAnswer(key, answer.message);
   return answer?.message ?? null;
