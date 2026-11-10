@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { runAssistantQuery } from "@/lib/assistant/run-query";
+import { ASSISTANT_GREETING, runAssistantQuery } from "@/lib/assistant/run-query";
 import { listAssistantHistory } from "@/lib/assistant/history";
 import { hashPassword } from "@/lib/auth/password";
 import { utcYesterdayString } from "@/lib/integrations/date.utils";
@@ -21,6 +21,36 @@ import {
 import { authContextFor, projectInput } from "@/tests/helpers/project-test-utils";
 
 describe("Dashboard assistant query", () => {
+  it("answers a bare greeting with the fixed Oriel reply and no data read", async () => {
+    await seedSystemRoles();
+
+    const owner = await User.create({
+      name: "Greeting Owner",
+      email: "dash-greeting@example.com",
+      password: await hashPassword("password"),
+      emailVerifiedAt: new Date(),
+      roles: [],
+    });
+
+    const { project } = await createProject(
+      authContextFor(owner),
+      projectInput({
+        businessName: "Greeting Project",
+        websiteUrl: "https://greeting.example.com",
+      }),
+    );
+    await Project.findByIdAndUpdate(project._id, { status: "active" });
+    const projectId = project._id.toString();
+    const auth = authContextFor(owner);
+
+    for (const query of ["hello", "Hey!", "hi there", "hey oriel"]) {
+      const result = await runAssistantQuery(auth, projectId, { query });
+      expect(result.intent).toBe("greeting");
+      expect(result.source).toBe("nlp");
+      expect(result.message).toBe(ASSISTANT_GREETING);
+    }
+  });
+
   it("answers lead intents for members with leads.view and stores history", async () => {
     await seedSystemRoles();
 
