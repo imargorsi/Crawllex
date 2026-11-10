@@ -51,7 +51,7 @@ export function OrielSection() {
         </div>
       </div>
 
-      <div className="relative flex min-h-0 flex-1 flex-col">
+      <div className="relative flex min-h-0 w-full min-w-0 flex-1 flex-col">
         <OrielWorkspace
           projectId={projectId}
           canViewLeads={hasPermission(permissions, "leads.view")}

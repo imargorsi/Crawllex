@@ -53,7 +53,7 @@ export function OrielConversationList({
   const renderGroup = (title: string, items: TAssistantThreadSummary[]) =>
     items.length === 0 ? null : (
       <section className="flex flex-col gap-1">
-        <h3 className="type-caption px-3 pt-2 pb-1 font-semibold tracking-wide text-text-muted uppercase">{title}</h3>
+        <h3 className="type-caption px-3 pt-2 pb-1 font-semibold tracking-wide text-text-muted">{title}</h3>
         <ul className="flex flex-col gap-0.5">
           {items.map((thread) => {
             const active = thread.threadId === activeThreadId;

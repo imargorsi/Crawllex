@@ -294,7 +294,7 @@ export type TReportHtmlOptions = {
 
 /** Full print document for one report snapshot. The same HTML is used for the browser preview and the PDF. */
 export function renderReportHtml(snapshot: TReportSnapshotDto, assets: TReportAssets = EMPTY_REPORT_ASSETS, options: TReportHtmlOptions = {}): string {
-  const view = buildReportView(snapshot);
+  const view = buildReportView(snapshot, { nextSteps: true });
   const footer = snapshot.project.name;
   const sources = view.sections.map((section) => sectionSource(section, footer, options.dashboardUrl)).join("\n");
   const pages = [coverPage(view, assets), `<div id="sources" class="sources">${sources}</div>`, closingPage(view, assets)];

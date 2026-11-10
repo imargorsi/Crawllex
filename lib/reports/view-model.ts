@@ -102,7 +102,7 @@ export type TBlockView =
   | { type: "note"; text: string };
 
 export type TSectionView = {
-  id: "summary" | "search" | "traffic" | "engagement" | "work";
+  id: "summary" | "search" | "traffic" | "engagement" | "work" | "next";
   number: string;
   title: string;
   blocks: TBlockView[];
@@ -459,10 +459,31 @@ function workSection(snapshot: TReportSnapshotDto, text: TReportText): TSectionV
   return { id: "work", number: copy.number, title: copy.title, blocks };
 }
 
+/** Written next steps for the client. Shows a note when none were written (older reports). */
+function nextStepsSection(snapshot: TReportSnapshotDto): TSectionView {
+  const copy = REPORT_COPY.sections.next;
+  const doc = snapshot.notes?.nextSteps;
+  const blocks: TBlockView[] = doc ? [{ type: "rich", doc }] : [{ type: "note", text: copy.empty }];
+  return { id: "next", number: copy.number, title: copy.title, blocks };
+}
+
+export type TReportViewOptions = {
+  /** Adds the Next steps tab. Dashboard only; the PDF does not include it yet. */
+  nextSteps?: boolean;
+};
+
 /** Builds the full report view from a stored snapshot. Pure: no I/O. */
-export function buildReportView(snapshot: TReportSnapshotDto): TReportView {
+export function buildReportView(snapshot: TReportSnapshotDto, options: TReportViewOptions = {}): TReportView {
   const monthTitle = formatMonthTitle(snapshot.period.from);
   const text = buildReportText(snapshot);
+  const sections = [
+    summarySection(snapshot, text),
+    searchSection(snapshot, text),
+    trafficSection(snapshot, text),
+    engagementSection(snapshot, text),
+    workSection(snapshot, text),
+  ];
+  if (options.nextSteps) sections.push(nextStepsSection(snapshot));
   return {
     title: `${snapshot.project.name} — ${monthTitle}`,
     cover: {
@@ -473,13 +494,7 @@ export function buildReportView(snapshot: TReportSnapshotDto): TReportView {
       periodLabel: formatPeriodLabel(snapshot.period.from, snapshot.period.to),
       websiteUrl: snapshot.project.websiteUrl,
     },
-    sections: [
-      summarySection(snapshot, text),
-      searchSection(snapshot, text),
-      trafficSection(snapshot, text),
-      engagementSection(snapshot, text),
-      workSection(snapshot, text),
-    ],
+    sections,
     contact: {
       phones: [...REPORT_BRAND.phones],
       addresses: [...REPORT_BRAND.addresses],

@@ -168,7 +168,7 @@ export function DashboardOrielShortcut({
       ) : null}
 
       <div className="relative flex flex-col gap-2.5">
-        <p className="type-caption font-semibold tracking-wide text-text-muted uppercase">{tOriel("recentChats")}</p>
+        <p className="type-caption font-semibold text-text-muted">{tOriel("recentChats")}</p>
         {threadsQuery.isLoading ? null : recentChats.length === 0 ? (
           <p className="type-caption text-text-muted">{tOriel("noConversations")}</p>
         ) : (

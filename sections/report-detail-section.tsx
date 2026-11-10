@@ -68,7 +68,7 @@ export function ReportDetailSection({ reportId }: TReportDetailSectionProps) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const view = useMemo(() => (reportQuery.data ? buildReportView(reportQuery.data.snapshot) : null), [reportQuery.data]);
+  const view = useMemo(() => (reportQuery.data ? buildReportView(reportQuery.data.snapshot, { nextSteps: true }) : null), [reportQuery.data]);
 
   if (!projectId) {
     return (

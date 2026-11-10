@@ -153,7 +153,7 @@ export function OrielWorkspace({
 
   return (
     <>
-      <div className="grid min-h-0 w-full min-w-0 flex-1 gap-4 xl:grid-cols-[18rem_minmax(0,1fr)]">
+      <div className="grid min-h-0 w-full min-w-0 flex-1 gap-4 xl:h-[calc(100dvh-12rem)] xl:grid-cols-[18rem_minmax(0,1fr)]">
         <OrielSidebar
           threads={threads}
           activeThreadId={activeThreadId}
@@ -179,7 +179,7 @@ export function OrielWorkspace({
         />
 
         <section className={cn(glassPanelSurfaceClass, "relative flex min-h-[60vh] min-w-0 flex-col overflow-hidden rounded-2xl xl:min-h-0")}>
-          <header className="flex items-center justify-between gap-3 px-6 pt-5 pb-4">
+          <header className="m-3 mb-0 flex items-center justify-between gap-3 rounded-xl border border-text-primary/15 bg-bg-card/40 px-4 py-3 backdrop-blur-sm">
             <div className="flex min-w-0 items-center gap-3">
               <OrielMark size="md" />
               <div className="flex min-w-0 flex-col">
@@ -194,7 +194,6 @@ export function OrielWorkspace({
               </div>
             </div>
           </header>
-          <div aria-hidden className="mx-6 h-px" style={{ background: "linear-gradient(90deg, transparent, var(--brand), transparent)", opacity: 0.35 }} />
 
           <OrielThread
             messages={messages}

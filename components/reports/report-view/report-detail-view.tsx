@@ -17,7 +17,7 @@ import {
 } from "@/components/reports/report-view/report-view-blocks";
 import { Modal } from "@/components/ui/modal";
 import type { TAppIconComponent } from "@/components/ui/app-icon";
-import { Icons } from "@/lib/frontend/icons/app-icons";
+import { Icons, type TIconName } from "@/lib/frontend/icons/app-icons";
 import { toolbarFilterChipClass, toolbarFilterShellClass } from "@/lib/frontend/layout/dashboard-chrome";
 import { cn } from "@/lib/utils";
 import type { TBlockView, TCardView, TNamedTable, TReportView, TSectionView, TTableView } from "@/lib/reports/view-model";
@@ -98,6 +98,16 @@ function DrilldownButton({
   );
 }
 
+/** Icon per report section. Keys match the section ids in the view model. */
+const SECTION_ICON: Record<string, TIconName> = {
+  summary: "file",
+  search: "search",
+  traffic: "globe",
+  engagement: "userGroup",
+  work: "wrench",
+  next: "rocket",
+};
+
 /** Section tabs, same pill style as the other module tabs. Right-aligned. One section shows at a time. */
 function SectionTabs({
   items,
@@ -113,6 +123,7 @@ function SectionTabs({
       <div role="tablist" aria-label="Report sections" className={toolbarFilterShellClass}>
         {items.map((item) => {
           const isActive = activeId === item.id;
+          const Icon = Icons[SECTION_ICON[item.id] ?? "file"];
           return (
             <button
               key={item.id}
@@ -125,6 +136,7 @@ function SectionTabs({
                 isActive ? "bg-brand text-text-on-brand shadow-xs" : "text-text-secondary hover:bg-bg-hover hover:text-text-primary",
               )}
             >
+              <Icon className="size-4 shrink-0" aria-hidden />
               {item.label}
             </button>
           );
