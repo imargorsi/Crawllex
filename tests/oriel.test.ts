@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { ORIEL_NOT_COVERED, answerGuideQuestion, cleanQuestion } from "@/lib/oriel/answer";
+import { ORIEL_GREETING, ORIEL_NOT_COVERED, answerGuideQuestion, cleanQuestion } from "@/lib/oriel/answer";
 import { callOriel, OrielError } from "@/lib/oriel/client";
 import { chunkMarkdown, loadCorpus, type TCorpusChunk } from "@/lib/oriel/corpus";
 import { leakedTerm } from "@/lib/oriel/output-guard";
@@ -60,6 +60,23 @@ describe("oriel answers", () => {
     const out = await answerGuideQuestion("What is the price of Crawllex?", { chunks: SAMPLE, generate });
     expect(out).toEqual({ kind: "not_covered", message: ORIEL_NOT_COVERED, sources: [] });
     expect(generate).not.toHaveBeenCalled();
+  });
+
+  it.each(["hey", "Hi!", "hello there", "Good morning", "hey oriel"])(
+    "greets %j without retrieval or a model call",
+    async (question) => {
+      const generate = vi.fn<(content: string) => Promise<string>>(async () => "should not be used");
+      const out = await answerGuideQuestion(question, { chunks: SAMPLE, generate });
+      expect(out).toEqual({ kind: "answer", message: ORIEL_GREETING, sources: [] });
+      expect(generate).not.toHaveBeenCalled();
+    },
+  );
+
+  it("does not treat a real question that starts with a greeting as small talk", async () => {
+    const generate = vi.fn<(content: string) => Promise<string>>(async () => "Use Members in the sidebar.");
+    const out = await answerGuideQuestion("hi, how do I invite a member", { chunks: SAMPLE, generate });
+    expect(out.kind).toBe("answer");
+    expect(generate).toHaveBeenCalledTimes(1);
   });
 
   it("sends only matching excerpts and the cleaned question to the model", async () => {
