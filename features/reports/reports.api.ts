@@ -96,13 +96,7 @@ export async function fetchReportPdf(projectId: string, reportId: string): Promi
   return response.blob();
 }
 
-/** Same document as the PDF, for the browser preview. */
-export async function fetchReportHtml(projectId: string, reportId: string): Promise<Blob> {
-  const response = await fetchReportResponse(projectId, reportId, "html");
-  return response.blob();
-}
-
-/** Emails the report to its recipients. Run only after the preview has been checked. */
+/** Emails the report to its recipients. Run only after the report has been reviewed. */
 export function useSendReportMutation(projectId: string | null | undefined) {
   const queryClient = useQueryClient();
   return useMutation({

@@ -1002,7 +1002,7 @@ export interface Translation {
       downloadPdf: string;
       preparingPdf: string;
       pdfError: string;
-      previewHtml: string;
+      sendHint: string;
       sendReport: string;
       sendingReport: string;
       sentNotice: string;
@@ -1012,7 +1012,6 @@ export interface Translation {
       deleteBody: string;
       deleted: string;
       previewLoading: string;
-      previewError: string;
       notFoundTitle: string;
       notFoundBody: string;
     };
@@ -2682,7 +2681,7 @@ const translation: Translation = {
       invalidPeriod: "Choose a valid month.",
       nextStepsRequired: "Next steps are required.",
       sendToLabel: "Send PDF and dashboard link to",
-      sendToHint: "Saved with the report. Email sending is not set up yet. The project owner is added by default.",
+      sendToHint: "Adding recipients does not send the report. Add them now, then send it after you review the report. The project owner is added by default.",
       toolbarBold: "Bold",
       toolbarItalic: "Italic",
       toolbarHeading: "Heading",
@@ -2755,7 +2754,7 @@ const translation: Translation = {
       downloadPdf: "Download PDF",
       preparingPdf: "Preparing PDF…",
       pdfError: "The PDF could not be created. Try again.",
-      previewHtml: "Preview HTML",
+      sendHint: "Adding recipients does not send the report. Review it, then click Send Report.",
       sendReport: "Send Report",
       sendingReport: "Sending…",
       sentNotice: "Report sent to recipients.",
@@ -2765,7 +2764,6 @@ const translation: Translation = {
       deleteBody: "The saved report and its snapshot will be removed. This cannot be undone.",
       deleted: "Report deleted.",
       previewLoading: "Loading report…",
-      previewError: "The report preview could not be loaded.",
       notFoundTitle: "Report Not Found",
       notFoundBody: "This report does not exist or was deleted.",
     },

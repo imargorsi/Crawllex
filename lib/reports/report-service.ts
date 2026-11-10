@@ -32,14 +32,31 @@ type TReportLean = {
   notes?: { deliveries?: TReportDelivery[] };
 };
 
-/** Options for reads. Delivery details are for users who can create reports. */
-type TReadOptions = { includeDeliveries: boolean };
+type TRecipient = { name: string; email: string | null };
 
-/** Latest attempt per recipient, in the order each recipient was first attempted. */
-function latestDeliveries(attempts: TReportDelivery[]): TReportDeliveryDto[] {
+/** Options for reads. Delivery details are for users who can create reports. */
+type TReadOptions = { includeDeliveries: boolean; recipients?: Map<string, TRecipient> };
+
+/** Name and email of each recipient, so recipients without a delivery yet can still be listed. */
+async function recipientsById(ids: string[]): Promise<Map<string, TRecipient>> {
+  const valid = [...new Set(ids)].filter((id) => Types.ObjectId.isValid(id));
+  if (valid.length === 0) return new Map();
+  const users = await User.find({ _id: { $in: valid } }).select("name email").lean();
+  return new Map(users.map((user) => [String(user._id), { name: user.name, email: user.email ?? null }]));
+}
+
+/**
+ * One row per recipient. Latest attempt if the report was sent to them; otherwise a `not_sent` row,
+ * so recipients added before sending are visible.
+ */
+function latestDeliveries(
+  attempts: TReportDelivery[],
+  recipientIds: string[],
+  recipients: Map<string, TRecipient>,
+): TReportDeliveryDto[] {
   const latest = new Map<string, TReportDelivery>();
   for (const attempt of attempts) latest.set(attempt.userId, attempt);
-  return [...latest.values()].map((attempt) => ({
+  const attempted = [...latest.values()].map((attempt) => ({
     userId: attempt.userId,
     name: attempt.name,
     email: attempt.email,
@@ -47,6 +64,17 @@ function latestDeliveries(attempts: TReportDelivery[]): TReportDeliveryDto[] {
     error: attempt.error,
     at: new Date(attempt.at).toISOString(),
   }));
+  const pending = recipientIds
+    .filter((id) => !latest.has(id))
+    .map((id) => ({
+      userId: id,
+      name: recipients.get(id)?.name ?? "",
+      email: recipients.get(id)?.email ?? null,
+      status: "not_sent" as const,
+      error: null,
+      at: null,
+    }));
+  return [...attempted, ...pending];
 }
 
 function listKpis(doc: TReportLean): TReportListKpisDto | null {
@@ -77,7 +105,11 @@ function toListItem(doc: TReportLean, options: TReadOptions): TReportListItemDto
     ...(options.includeDeliveries
       ? {
           recipientCount: doc.snapshot?.notes?.recipientUserIds?.length ?? 0,
-          deliveries: latestDeliveries(doc.notes?.deliveries ?? []),
+          deliveries: latestDeliveries(
+            doc.notes?.deliveries ?? [],
+            doc.snapshot?.notes?.recipientUserIds ?? [],
+            options.recipients ?? new Map(),
+          ),
         }
       : {}),
   };
@@ -141,8 +173,9 @@ export async function createReport(
     createdBy: userId,
   });
 
-  // Not sent here. The team reviews the HTML preview first, then sends with sendReport().
-  return toDetail(doc.toObject() as unknown as TReportLean, { includeDeliveries: true });
+  // Not sent here. The team reviews the report first, then sends with sendReport().
+  const recipients = await recipientsById(input.recipientUserIds);
+  return toDetail(doc.toObject() as unknown as TReportLean, { includeDeliveries: true, recipients });
 }
 
 /**
@@ -163,13 +196,20 @@ export async function listReports(projectId: string, options: TReadOptions): Pro
       "title summary periodFrom periodTo createdAt projectId notes.deliveries snapshot.notes.recipientUserIds snapshot.gsc.current snapshot.ga4.current snapshot.leads snapshot.events.contacts",
     )
     .lean<TReportLean[]>();
-  return docs.map((doc) => toListItem(doc, options));
+  const recipients = options.includeDeliveries
+    ? await recipientsById(docs.flatMap((doc) => doc.snapshot?.notes?.recipientUserIds ?? []))
+    : new Map<string, TRecipient>();
+  return docs.map((doc) => toListItem(doc, { ...options, recipients }));
 }
 
 export async function getReport(projectId: string, reportId: string, options: TReadOptions): Promise<TReportDetailDto | null> {
   if (!Types.ObjectId.isValid(reportId)) return null;
   const doc = await Report.findOne({ _id: reportId, projectId }).lean<TReportLean | null>();
-  return doc ? toDetail(doc, options) : null;
+  if (!doc) return null;
+  const recipients = options.includeDeliveries
+    ? await recipientsById(doc.snapshot?.notes?.recipientUserIds ?? [])
+    : new Map<string, TRecipient>();
+  return toDetail(doc, { ...options, recipients });
 }
 
 export async function deleteReport(projectId: string, reportId: string): Promise<boolean> {

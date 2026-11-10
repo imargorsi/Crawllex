@@ -145,12 +145,16 @@ describe("report delivery", () => {
     expect(withoutDetails[0]).not.toHaveProperty("recipientCount");
   });
 
-  it("reports recipients that are still pending as recipientCount without deliveries", async () => {
+  it("lists recipients that are still pending as not_sent rows with name and email", async () => {
     const { owner, projectId } = await seedTestProject();
     await createTestReport(projectId, String(owner._id), [String(owner._id)]);
 
     const list = await listReports(projectId, { includeDeliveries: true });
-    expect(list[0]).toMatchObject({ recipientCount: 1, deliveries: [] });
+    expect(list[0]).toMatchObject({
+      recipientCount: 1,
+      deliveries: [{ userId: String(owner._id), status: "not_sent", at: null, error: null }],
+    });
+    expect(list[0].deliveries?.[0].email).toBe(owner.email);
   });
 });
 
