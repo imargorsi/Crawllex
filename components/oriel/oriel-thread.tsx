@@ -59,8 +59,8 @@ export function OrielThread({
   }
 
   return (
-    <div ref={scrollRef} className="themed-scrollbar flex min-h-0 flex-1 justify-center overflow-y-auto px-6 py-6" aria-live="polite">
-      <div className="flex w-full max-w-3xl flex-col gap-7">
+    <div ref={scrollRef} className="themed-scrollbar flex min-h-0 flex-1 overflow-y-auto px-6 py-6" aria-live="polite">
+      <div className="flex w-full min-w-0 flex-col gap-7">
         {isLoading && messages.length === 0 ? <p className="type-caption text-text-muted">…</p> : null}
 
         {messages.map((message) => (
