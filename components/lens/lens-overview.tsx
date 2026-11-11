@@ -238,9 +238,9 @@ function SeoScoreCard({ data, t }: { data: TLensDemoDashboard; t: TLensT }) {
             {seo.score >= 85 ? t("stayHealthy") : t("pointsToHealthy", { points: 85 - seo.score })}
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
-            <CountTile tone="danger" label={t("failedLabel")} value={seo.failed} help={t("mustFixNote")} />
-            <CountTile tone="warning" label={t("warningsLabel")} value={seo.warnings} help={t("shouldFixNote")} />
-            <CountTile tone="muted" label={t("noticesLabel")} value={seo.notices} help={t("worthNote")} />
+            <CountTile tone="danger" label={t("mustFixLabel")} value={seo.failed} help={t("mustFixNote")} />
+            <CountTile tone="warning" label={t("shouldFixLabel")} value={seo.warnings} help={t("shouldFixNote")} />
+            <CountTile tone="muted" label={t("worthLookLabel")} value={seo.notices} help={t("worthNote")} />
           </div>
           <LensSeoSummary bullets={bullets} heading={t("summaryHeading")} t={t} className="flex-1" />
         </div>

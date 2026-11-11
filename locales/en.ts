@@ -274,9 +274,6 @@ export interface Translation {
     band_good: string;
     band_work: string;
     band_attention: string;
-    failedLabel: string;
-    warningsLabel: string;
-    noticesLabel: string;
     mustFixNote: string;
     shouldFixNote: string;
     worthNote: string;
@@ -2237,9 +2234,6 @@ const translation: Translation = {
     band_good: "Healthy",
     band_work: "Needs Work",
     band_attention: "Needs Attention",
-    failedLabel: "Failed",
-    warningsLabel: "Warnings",
-    noticesLabel: "Notices",
     mustFixNote: "Must fix. Hurts search visibility.",
     shouldFixNote: "Should fix. Important, not blocking.",
     worthNote: "Worth a look. Guidelines only, no score impact.",

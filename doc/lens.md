@@ -28,12 +28,12 @@ Strings: `lens` block in `locales/en.ts` and `locales/ar.ts`. Arabic values are 
 1. **Header:** title and subtitle, Last check block, Start check button (no action yet).
 2. **Top nav:** one glass bar with icons and counts: Overview · SEO Health (open issues) · Pages (checked) · Uptime Monitoring. View History sits beside it (opens scan history). No search. Demo notice is removed from the UI.
 3. **Overview**
-   - SEO health score card: ring (3 band segments, marker at score), band legend, points to Healthy, Failed / Warnings / Notices tiles, rule-based summary bullets (two columns), uptime block under the ring, partial/complete scan pill and band pill in the card header.
+   - SEO health score card: ring (3 band segments, marker at score), band legend, points to Healthy, Must Fix / Should Fix / Worth a Look tiles, rule-based summary bullets (two columns), uptime block under the ring, partial/complete scan pill and band pill in the card header.
    - Pages affected (severity bars) and Priority issues (top 4 by severity).
    - Four section cards: On-Page SEO, Technical SEO, Pages, Issues (severity strip). On-Page and Technical open the All Issues tab with that type filter set.
    - Uptime monitoring: headline strip (uptime, downtime, incidents, average response, lowest day), 30 daily bars with legend.
 4. **SEO Health tab (command center):** current open issues only.
-   - Summary tiles: High, Medium, Advisory, Page Issues.
+   - Stat tiles: Must Fix (High), Should Fix (Medium), Worth a Look (Advisory), Page Issues. Each has a trend wave with a caption.
    - No outer card: the page sits directly on the backdrop. One filter bar: type tabs (All Issues, On-Page SEO, Technical SEO, with counts) and the shared `TableListSort` dropdowns for rule and severity. Issues are ordered by severity, then affected pages.
    - Rule dropdown (shared `TableListSort`, with counts): Meta Title, Meta Description, Headings, Content, Images, Indexing and Canonicals, Robots and Sitemap, Page URL.
    - Summary list (jump links to each card), partial-scan notice in the header, status and last check shown once in the header.
@@ -72,7 +72,7 @@ Implementation status: rules are decided. Retention job and default enrolment ar
 ## Rules the UI follows
 
 - Score bands: Needs attention below 60, Needs work 60–84, Healthy 85 and above.
-- Failed = must fix, Warnings = should fix, Notices = advisory (shown, not scored).
+- Must Fix = high (scored), Should Fix = medium (scored), Worth a Look = advisory (shown, not scored). Same names on the overview, All Issues, and Pages.
 - Labels Title Case, descriptions sentence case. Colors from theme tokens only (no raw hex in Lens components).
 - Every number shown comes from the view model. Demo values are not computed.
 
@@ -95,6 +95,10 @@ Score formula (proposed): per scored rule, weight (high 10, medium 4, advisory 0
 - Advisory tier and severity changes (crawllex-lens `docs/SEO-RULES.md`, pending owner approval and a re-audit).
 - Penalty breakdown view on scan history (stored in the snapshot once the snapshot change lands).
 - Arabic translations are first drafts. Need a native review.
+- Uptime retention job (30 days) and default enrolment of active sites: decided, not built (see Uptime rules).
+- Mobile (390px) pass for all views: not done.
+- Tab panels: LensNavBar and LensTabs have tab roles but no linked tabpanel yet.
+- Issue event text in the issue log and timeline is English in demo data for both languages.
 
 ## Client review pass (2026-11-11)
 
