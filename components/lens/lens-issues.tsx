@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import { formatWhen, type TLensT } from "@/components/lens/lens-overview";
 import { TableListSort } from "@/components/table/table-list-sort";
-import { LENS_FLOAT_CARD, LensCardHeader, LensEmpty, LensPill, LensTabs, LensWave, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
+import { LENS_FLOAT_CARD, LensEmpty, LensNavBar, LensPill, LensTabs, LensWave, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
 import type { TLensDemoDashboard, TLensDemoIssue, TLensGroup, TLensRuleGroup } from "@/features/lens/lens.demo";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
@@ -108,12 +108,18 @@ export function LensIssues({ data, t, locale, presetType }: {
   ];
 
   return (
-    <section className={cn(LENS_FLOAT_CARD, "gap-6 p-6 sm:p-7")}>
-      <LensCardHeader
-        icon={Icons.list}
-        title={t("seoAllIssues")}
-        action={<LensPill tone="brand">{t("openIssuesCount", { count: open.length })}</LensPill>}
-      />
+    <section className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <span className="inline-flex size-10 items-center justify-center rounded-xl border border-brand/30 bg-brand/10">
+            <Icons.list className="size-4 text-brand" aria-hidden />
+          </span>
+          <div className="flex flex-col">
+            <h2 className="text-xl font-semibold text-text-primary">{t("seoAllIssues")}</h2>
+            <span className="text-sm text-text-muted">{t("openIssuesCount", { count: open.length })}</span>
+          </div>
+        </div>
+      </div>
 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <StatTile icon={Icons.alert} label={t("tileHigh")} value={counts.high} tone="danger" trend={[2, 3, 2, 4, 3, 5, counts.high]} />
@@ -122,34 +128,31 @@ export function LensIssues({ data, t, locale, presetType }: {
         <StatTile icon={Icons.grid} label={t("pageIssues")} value={counts.pageIssues} tone="brand" trend={[20, 24, 22, 28, 26, 30, counts.pageIssues]} />
       </div>
 
-      <div className="flex flex-col gap-4 rounded-2xl border border-border p-4 sm:p-5">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <LensTabs<TTypeFilter>
-            label={t("filterType")}
-            value={type}
-            onChange={setType}
-            items={[
-              { id: "all", label: t("filterAll"), count: open.length },
-              { id: "onpage", label: t("typeOnpage"), count: open.filter((i) => i.group === "onpage").length },
-              { id: "technical", label: t("typeTechnical"), count: open.filter((i) => i.group === "technical").length },
-            ]}
-          />
-          <div className="flex flex-wrap items-center gap-2">
-            <TableListSort
-              label={t("filterSeverity")}
-              value={severity}
-              onChange={(v) => setSeverity(v as TSeverityFilter)}
-              options={[
-                { value: "all", label: t("filterAll") },
-                { value: "high", label: t("severityHigh") },
-                { value: "medium", label: t("severityMedium") },
-                { value: "advisory", label: t("severityAdvisory") },
-              ]}
-            />
-          </div>
-        </div>
-        <LensTabs<TRuleTab> label={t("filterRule")} value={rule} onChange={setRule} items={ruleItems} />
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <LensNavBar<TTypeFilter>
+          label={t("filterType")}
+          value={type}
+          onChange={setType}
+          items={[
+            { id: "all", label: t("seoAllIssues"), icon: Icons.list, count: open.length },
+            { id: "onpage", label: t("linkOnpage"), icon: Icons.file, count: open.filter((i) => i.group === "onpage").length },
+            { id: "technical", label: t("linkTechnical"), icon: Icons.wrench, count: open.filter((i) => i.group === "technical").length },
+          ]}
+        />
+        <TableListSort
+          label={t("filterSeverity")}
+          value={severity}
+          onChange={(v) => setSeverity(v as TSeverityFilter)}
+          options={[
+            { value: "all", label: t("filterAll") },
+            { value: "high", label: t("severityHigh") },
+            { value: "medium", label: t("severityMedium") },
+            { value: "advisory", label: t("severityAdvisory") },
+          ]}
+        />
       </div>
+
+      <LensTabs<TRuleTab> label={t("filterRule")} value={rule} onChange={setRule} items={ruleItems} />
 
       <p className="-mb-2 text-sm text-text-muted">{t("showingIssues", { shown: rows.length, total: open.length })}</p>
 

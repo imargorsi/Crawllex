@@ -32,7 +32,7 @@ Strings: `lens` block in `locales/en.ts` and `locales/ar.ts`. Arabic values are 
    - Uptime monitoring: headline strip (uptime, downtime, incidents, average response, lowest day), 30 daily bars with legend.
 4. **SEO Health tab (command center):** current open issues only.
    - Summary tiles: High, Medium, Advisory, Page Issues.
-   - Type tabs (All, On-Page, Technical) with counts. Severity uses the shared `TableListSort` dropdown. Issues are ordered by severity, then affected pages.
+   - No outer card: the page sits directly on the backdrop. One filter bar: type tabs (All Issues, On-Page SEO, Technical SEO, with counts) and the shared `TableListSort` severity dropdown. Issues are ordered by severity, then affected pages.
    - Rule tabs with counts (Meta Title, Meta Description, Headings, Content, Images, Indexing and Canonicals, Robots and Sitemap, Page URL).
    - Each issue card (reference layout): severity, type and rule chips; title with the one-line finding; page count on the right. Affected Pages strip with page chips and View All Pages. Four equal panels: What We Found (cyan), Why It Matters (amber), How To Fix (coral, highlighted), AI Suggestion (neutral). Dummy data for AI, source to be decided. Footer: score impact (advisory items say they do not change the score), last check, Open Issue Details.
 5. **Pages tab:** every checked page with status (Checked, Check Failed, Not Evaluated) and issue counts, sorted by priority, with URL search. Detailed per-page SEO report comes later.
