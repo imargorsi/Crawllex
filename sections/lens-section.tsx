@@ -48,7 +48,6 @@ export function LensSection() {
     sort: pick<TSortFilter>(queryParams.sort, SORT_FILTERS, "severity"),
   };
   const issueParam = typeof queryParams.issue === "string" ? queryParams.issue : null;
-  const queryParam = typeof queryParams.q === "string" ? queryParams.q : "";
   const pageParam = typeof queryParams.page === "string" ? data.pages.find((p) => p.url === queryParams.page) ?? null : null;
 
   /** Switch view. Filters and pages options are kept only for their own view, so other views get a clean URL. */
@@ -136,11 +135,10 @@ export function LensSection() {
       ) : null}
       {view === "pages" ? (
         <LensPages
-          key={queryParam}
           data={data}
           t={t}
+          locale={locale}
           issueId={issueParam}
-          initialQuery={queryParam}
           onIssueChange={(value) => (value === "all" ? deleteQueryParams(["issue"]) : setQueryParams({ issue: value }))}
           onOpenPage={(url) => setQueryParams({ page: url })}
         />

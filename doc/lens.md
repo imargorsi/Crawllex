@@ -89,7 +89,7 @@ Score formula (proposed): per scored rule, weight (high 10, medium 4, advisory 0
 ## Client review pass (2026-11-11)
 
 - Affected page chips open Pages filtered to that URL. View All Pages opens Pages filtered to the issue.
-- Open Issue Details shows status (local in demo), owner, due date, times reopened, last seen and a timeline. View in History opens the history view.
+- Open Issue Details shows status (Still Open or Resolved), first seen, and a timeline. View in History opens the history view. No owner, due date, or assignment.
 - Stat tiles: Must Fix, Should Fix, Worth a Look. Trend waves sit below the figure and say "Trend, last 7 checks" (dummy data).
 - AI Suggestion carries the review note again ("Suggested by AI. Review before you apply it."). This reverses the earlier removal, per the client review.
 - Gaps still open: Lens API states (loading, error), mobile pass at 390px, per-issue points cost, page detail view.

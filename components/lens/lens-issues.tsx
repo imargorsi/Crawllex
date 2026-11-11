@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { formatWhen, type TLensT } from "@/components/lens/lens-overview";
 import { LensEmpty, LensNavBar, LensPill, LensWave, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
 import { TableListSort } from "@/components/table/table-list-sort";
-import type { TLensDemoDashboard, TLensDemoIssue, TLensGroup, TLensRuleGroup, TLensWorkflow } from "@/features/lens/lens.demo";
+import type { TLensDemoDashboard, TLensDemoIssue, TLensGroup, TLensRuleGroup } from "@/features/lens/lens.demo";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
 
@@ -231,7 +231,6 @@ function IssueSummary({ rows, t }: { rows: TLensDemoIssue[]; t: TLensT }) {
               <LensPill tone={severityTone(issue.severity)}>{t(severityLabel(issue.severity))}</LensPill>
               <span className="min-w-0 flex-1 truncate font-medium text-text-primary">{issue.title}</span>
               <span className="tabular-nums text-text-secondary">{t("pagesCount", { count: issue.affected })}</span>
-              <span className="text-text-muted">{t(WORKFLOW_KEY[issue.tracking.workflow])}</span>
             </a>
           </li>
         ))}
@@ -240,19 +239,9 @@ function IssueSummary({ rows, t }: { rows: TLensDemoIssue[]; t: TLensT }) {
   );
 }
 
-const WORKFLOW_KEY: Record<TLensWorkflow, "wfTodo" | "wfProgress" | "wfVerify"> = {
-  todo: "wfTodo",
-  in_progress: "wfProgress",
-  awaiting_verification: "wfVerify",
-};
-
-const WORKFLOW_OPTIONS: TLensWorkflow[] = ["todo", "in_progress", "awaiting_verification"];
-
 /** One issue. Header, affected pages, four panels, footer. Details (tracking and history) open on demand. */
 export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { issue: TLensDemoIssue; t: TLensT; locale: string; onNavigate: TNavigate; compact?: boolean }) {
   const [open, setOpen] = useState(false);
-  // Demo only: the status change is local until the Lens API stores it.
-  const [workflow, setWorkflow] = useState<TLensWorkflow>(issue.tracking.workflow);
   const scored = issue.severity !== "advisory";
   const tracking = issue.tracking;
 
@@ -286,7 +275,7 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
             <li key={url}>
               <button
                 type="button"
-                onClick={() => onNavigate("pages", { q: url })}
+                onClick={() => onNavigate("pages", { page: url, issue: issue.id })}
                 className="rounded-full border border-border px-3 py-1 font-mono text-xs text-text-secondary transition-colors hover:border-brand/50 hover:text-text-primary"
               >
                 {url}
@@ -339,21 +328,16 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
         </div>
 
         {open ? (
-          <div className="grid gap-4 rounded-2xl border border-border bg-text-primary/[0.03] p-4 sm:p-5 lg:grid-cols-2 dark:border-text-primary/35">
+          <div className="grid gap-5 rounded-2xl border border-border bg-text-primary/[0.03] p-4 sm:p-5 lg:grid-cols-2 dark:border-text-primary/35">
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col gap-2">
-                <span className="text-xs font-medium text-text-muted">{t("statusLabel")}</span>
-                <TableListSort
-                  label={t("statusLabel")}
-                  value={workflow}
-                  onChange={(v) => setWorkflow(v as TLensWorkflow)}
-                  options={WORKFLOW_OPTIONS.map((w) => ({ value: w, label: t(WORKFLOW_KEY[w]) }))}
-                />
-              </div>
-              <DetailRow label={t("ownerLabel")} value={tracking.owner ?? t("noOwner")} />
-              <DetailRow label={t("dueLabel")} value={tracking.dueOn ? formatDay(tracking.dueOn, locale) : t("noDue")} />
-              <DetailRow label={t("reopenedLabel")} value={String(tracking.reopened)} />
-              <DetailRow label={t("lastSeen")} value={formatDay(tracking.lastSeen, locale)} />
+              <DetailRow label={t("statusLabel")}>
+                <LensPill tone={issue.status === "open" ? "danger" : "success"}>
+                  {issue.status === "open" ? t("stillOpen") : t("statusResolved")}
+                </LensPill>
+              </DetailRow>
+              <DetailRow label={t("firstSeen")}>
+                <span className="text-sm text-text-primary">{formatDay(tracking.firstSeen, locale)}</span>
+              </DetailRow>
               <button
                 type="button"
                 onClick={() => onNavigate("history")}
@@ -386,11 +370,11 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
 
 const EFFORT_KEY = { low: "effortLow", medium: "effortMedium", high: "effortHigh" } as const;
 
-function DetailRow({ label, value }: { label: string; value: string }) {
+function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-0.5">
+    <div className="flex flex-col gap-1.5">
       <span className="text-xs font-medium text-text-muted">{label}</span>
-      <span className="text-sm text-text-primary">{value}</span>
+      {children}
     </div>
   );
 }

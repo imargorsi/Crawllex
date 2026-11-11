@@ -18,17 +18,11 @@ export type TLensRuleGroup =
   | "links"
   | "structured";
 
-export type TLensWorkflow = "todo" | "in_progress" | "awaiting_verification";
 export type TLensEffort = "low" | "medium" | "high";
 
 export type TLensTracking = {
   effort: TLensEffort;
-  workflow: TLensWorkflow;
-  owner: string | null;
-  dueOn: string | null;
   firstSeen: string;
-  lastSeen: string;
-  reopened: number;
   events: { date: string; text: string }[];
 };
 
@@ -68,10 +62,8 @@ export type TLensDemoRun = {
 
 export type TLensDemoPage = {
   url: string;
+  metaTitle: string | null;
   state: "checked" | "failed" | "not_evaluated";
-  failed: number;
-  warnings: number;
-  suggestions: number;
 };
 
 export type TLensDemoIncident = {
@@ -125,7 +117,7 @@ const ISSUES: TLensDemoIssue[] = [
     fix: "Add a unique, descriptive title that names the page topic.",
     verify: "Run another SEO check and confirm a valid title is detected on each page.",
     aiSuggestion: "Example for a service page: \"SEO Audit Services | Argorsi\". Keep it under 60 characters.",
-    tracking: { effort: "low", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-12", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
+    tracking: { effort: "low", firstSeen: "2026-10-12", events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/services/seo", "/blog/guide", "/pricing", "/contact", "/careers"],
   },
   {
@@ -136,7 +128,7 @@ const ISSUES: TLensDemoIssue[] = [
     fix: "Remove noindex from pages you want found, or remove those URLs from the sitemap.",
     verify: "Run another SEO check and confirm no sitemap page is marked noindex.",
     aiSuggestion: "Check the CMS SEO setting for each listed URL before changing the sitemap; one toggle often covers several pages.",
-    tracking: { effort: "low", workflow: "in_progress", owner: "Web team", dueOn: "2026-11-20", firstSeen: "2026-10-12", lastSeen: "2026-11-10", reopened: 1, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-01", text: "Reopened after a fix" }, { date: "2026-11-10", text: "Still open" }] },
+    tracking: { effort: "low", firstSeen: "2026-10-12", events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-01", text: "Reopened after a fix" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/old-offers", "/landing/spring", "/thank-you"],
   },
   {
@@ -147,7 +139,7 @@ const ISSUES: TLensDemoIssue[] = [
     fix: "Write one or two sentences that describe the page for a visitor.",
     verify: "Run another SEO check and confirm a meta description is detected on each page.",
     aiSuggestion: "Start with the offer, then the proof: \"Monthly SEO audits for retail brands, with a fix list in 48 hours.\"",
-    tracking: { effort: "medium", workflow: "in_progress", owner: "Content team", dueOn: "2026-11-30", firstSeen: "2026-10-12", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-06", text: "Assigned to content team" }, { date: "2026-11-10", text: "Still open" }] },
+    tracking: { effort: "medium", firstSeen: "2026-10-12", events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/about", "/services/seo", "/blog/guide", "/blog/tips", "/faq", "/team"],
   },
   {
@@ -158,7 +150,7 @@ const ISSUES: TLensDemoIssue[] = [
     fix: "Add one main heading that names the page topic.",
     verify: "Run another SEO check and confirm one visible H1 is found.",
     aiSuggestion: "Use the page title as the H1 when it already matches the topic, to keep both in line.",
-    tracking: { effort: "low", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-20", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-20", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
+    tracking: { effort: "low", firstSeen: "2026-10-20", events: [{ date: "2026-10-20", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/landing/spring", "/thank-you"],
   },
   {
@@ -169,7 +161,7 @@ const ISSUES: TLensDemoIssue[] = [
     fix: "Rewrite the title to describe the page in about 30 to 60 characters.",
     verify: "Run another SEO check. Advisory items do not reduce the score.",
     aiSuggestion: "Trim the longest title first and keep the brand name at the end.",
-    tracking: { effort: "low", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-12", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
+    tracking: { effort: "low", firstSeen: "2026-10-12", events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/about", "/faq", "/team", "/blog/tips"],
   },
   {
@@ -180,7 +172,7 @@ const ISSUES: TLensDemoIssue[] = [
     fix: "Set each canonical tag to the page's own preferred address, or remove it if it is not needed.",
     verify: "Run another SEO check and confirm each canonical matches its page.",
     aiSuggestion: "Use the https version of the page as the canonical target.",
-    tracking: { effort: "low", workflow: "awaiting_verification", owner: "Web team", dueOn: "2026-11-14", firstSeen: "2026-10-18", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-18", text: "First seen" }, { date: "2026-11-08", text: "Marked as fixed" }, { date: "2026-11-10", text: "Awaiting verification" }] },
+    tracking: { effort: "low", firstSeen: "2026-10-18", events: [{ date: "2026-10-18", text: "First seen" }, { date: "2026-11-08", text: "Marked as fixed" }, { date: "2026-11-10", text: "Awaiting verification" }] },
     pages: ["/pricing", "/services/seo"],
   },
   {
@@ -191,7 +183,7 @@ const ISSUES: TLensDemoIssue[] = [
     fix: "Rename the page address or remove tracking parameters from internal links.",
     verify: "Run another SEO check. Advisory items do not reduce the score.",
     aiSuggestion: "Map the old address to the new one with a 301 redirect before publishing.",
-    tracking: { effort: "high", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-11-03", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-11-03", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
+    tracking: { effort: "high", firstSeen: "2026-11-03", events: [{ date: "2026-11-03", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/Services/SEO?ref=newsletter"],
   },  {
     id: "robots_blocks_sitemap_page", title: "Sitemap page blocked by robots.txt", severity: "high", group: "technical", ruleGroup: "robots", status: "open", resolvedOn: null, affected: 1,
@@ -201,7 +193,7 @@ const ISSUES: TLensDemoIssue[] = [
     fix: "Remove the Disallow rule for this page, or remove the page from the sitemap.",
     verify: "Run another SEO check and confirm the page is allowed.",
     aiSuggestion: "Test the URL in the robots.txt tester before and after the change so the fix is confirmed.",
-    tracking: { effort: "low", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-11-01", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-11-01", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
+    tracking: { effort: "low", firstSeen: "2026-11-01", events: [{ date: "2026-11-01", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/private-offers"],
   },
   {
@@ -212,7 +204,7 @@ const ISSUES: TLensDemoIssue[] = [
     fix: "Add short, accurate alt text. Use empty alt text for decorative images.",
     verify: "Run another SEO check and confirm each meaningful image has alt text.",
     aiSuggestion: "Start with the subject, then the context: \"Team reviewing a crawl report on a laptop.\"",
-    tracking: { effort: "medium", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-27", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-27", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
+    tracking: { effort: "medium", firstSeen: "2026-10-27", events: [{ date: "2026-10-27", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/services/seo", "/about", "/team"],
   },
   {
@@ -223,7 +215,7 @@ const ISSUES: TLensDemoIssue[] = [
     fix: "Add useful detail that answers the page's main question.",
     verify: "Advisory. Does not change the score.",
     aiSuggestion: "Add a short FAQ with three questions the page should answer.",
-    tracking: { effort: "high", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-12", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
+    tracking: { effort: "high", firstSeen: "2026-10-12", events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/careers", "/thank-you", "/contact", "/landing/spring"],
   },
   {
@@ -234,28 +226,28 @@ const ISSUES: TLensDemoIssue[] = [
     fix: "Add a canonical tag that points to the page's own address.",
     verify: "Confirmed fixed on the next check.",
     aiSuggestion: "Use the page address without tracking parameters as the canonical target.",
-    tracking: { effort: "low", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-12", lastSeen: "2026-11-08", reopened: 0, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-08", text: "Fixed and verified" }] },
+    tracking: { effort: "low", firstSeen: "2026-10-12", events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-08", text: "Fixed and verified" }] },
     pages: ["/blog/tips"],
   },
 ];
 
 const PAGES: TLensDemoPage[] = [
-  { url: "/", state: "checked", failed: 0, warnings: 1, suggestions: 2 },
-  { url: "/services/seo", state: "checked", failed: 2, warnings: 3, suggestions: 1 },
-  { url: "/about", state: "checked", failed: 1, warnings: 0, suggestions: 1 },
-  { url: "/blog/guide", state: "checked", failed: 1, warnings: 2, suggestions: 3 },
-  { url: "/pricing", state: "checked", failed: 1, warnings: 1, suggestions: 0 },
-  { url: "/contact", state: "checked", failed: 0, warnings: 0, suggestions: 0 },
-  { url: "/faq", state: "checked", failed: 0, warnings: 1, suggestions: 1 },
-  { url: "/team", state: "checked", failed: 1, warnings: 0, suggestions: 1 },
-  { url: "/landing/spring", state: "checked", failed: 1, warnings: 1, suggestions: 0 },
-  { url: "/careers", state: "failed", failed: 0, warnings: 0, suggestions: 0 },
-  { url: "/blog/tips", state: "checked", failed: 0, warnings: 2, suggestions: 1 },
-  { url: "/old-offers", state: "checked", failed: 1, warnings: 0, suggestions: 0 },
-  { url: "/archive/2019", state: "not_evaluated", failed: 0, warnings: 0, suggestions: 0 },
-  { url: "/thank-you", state: "checked", failed: 1, warnings: 0, suggestions: 0 },
-  { url: "/Services/SEO?ref=newsletter", state: "checked", failed: 1, warnings: 0, suggestions: 0 },
-  { url: "/private-offers", state: "checked", failed: 1, warnings: 0, suggestions: 0 },
+  { url: "/", metaTitle: "Argorsi | SEO Audits and Growth", state: "checked" },
+  { url: "/services/seo", metaTitle: null, state: "checked" },
+  { url: "/about", metaTitle: "About Argorsi", state: "checked" },
+  { url: "/blog/guide", metaTitle: null, state: "checked" },
+  { url: "/pricing", metaTitle: null, state: "checked" },
+  { url: "/contact", metaTitle: null, state: "checked" },
+  { url: "/faq", metaTitle: "FAQ | Argorsi", state: "checked" },
+  { url: "/team", metaTitle: "Our Team | Argorsi", state: "checked" },
+  { url: "/landing/spring", metaTitle: "Spring Offer | Argorsi", state: "checked" },
+  { url: "/careers", metaTitle: null, state: "checked" },
+  { url: "/blog/tips", metaTitle: "SEO Tips for Small Business", state: "checked" },
+  { url: "/old-offers", metaTitle: "Old Offers | Argorsi", state: "checked" },
+  { url: "/archive/2019", metaTitle: null, state: "not_evaluated" },
+  { url: "/thank-you", metaTitle: "Thank You | Argorsi", state: "checked" },
+  { url: "/Services/SEO?ref=newsletter", metaTitle: "SEO Services | Argorsi", state: "checked" },
+  { url: "/private-offers", metaTitle: "Private Offers | Argorsi", state: "checked" },
 ];
 
 const RUNS: TLensDemoRun[] = [

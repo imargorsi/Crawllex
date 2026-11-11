@@ -318,12 +318,8 @@ export interface Translation {
     historyTitle: string;
     issueWhy: string;
     issuePages: string;
-    searchPages: string;
     showingPages: string;
     colPage: string;
-    colFailed: string;
-    colWarnings: string;
-    colSuggestions: string;
     colState: string;
     stateChecked: string;
     stateFailed: string;
@@ -432,21 +428,12 @@ export interface Translation {
     trendCaption: string;
     allClear: string;
     issueSummary: string;
-    wfTodo: string;
-    wfProgress: string;
-    wfVerify: string;
     effortLabel: string;
     effortLow: string;
     effortMedium: string;
     effortHigh: string;
     firstSeen: string;
-    lastSeen: string;
-    reopenedLabel: string;
     statusLabel: string;
-    ownerLabel: string;
-    dueLabel: string;
-    noOwner: string;
-    noDue: string;
     viewInHistory: string;
     timeline: string;
     scoreCounted: string;
@@ -478,6 +465,8 @@ export interface Translation {
     rsFinding: string;
     rsNotEvaluated: string;
     filterIssue: string;
+    noTitle: string;
+    stillOpen: string;
   };
   oriel: {
     conversations: string;
@@ -2281,12 +2270,8 @@ const translation: Translation = {
     historyTitle: "Scan History",
     issueWhy: "Why It Matters",
     issuePages: "Affected Pages",
-    searchPages: "Search by URL",
     showingPages: "Showing {{shown}} of {{total}} pages",
     colPage: "Page",
-    colFailed: "Failed",
-    colWarnings: "Warnings",
-    colSuggestions: "Suggestions",
     colState: "Status",
     stateChecked: "Checked",
     stateFailed: "Check Failed",
@@ -2395,21 +2380,12 @@ const translation: Translation = {
     trendCaption: "Trend, last 7 checks",
     allClear: "No open issues. Nothing needs fixing right now.",
     issueSummary: "Issue summary",
-    wfTodo: "To Do",
-    wfProgress: "In Progress",
-    wfVerify: "Awaiting Verification",
     effortLabel: "Effort",
     effortLow: "Low",
     effortMedium: "Medium",
     effortHigh: "High",
     firstSeen: "First seen",
-    lastSeen: "Last seen",
-    reopenedLabel: "Times reopened",
     statusLabel: "Status",
-    ownerLabel: "Owner",
-    dueLabel: "Due date",
-    noOwner: "Unassigned",
-    noDue: "No due date",
     viewInHistory: "View in history",
     timeline: "Timeline",
     scoreCounted: "Counts toward the SEO health score",
@@ -2441,6 +2417,8 @@ const translation: Translation = {
     rsFinding: "Finding",
     rsNotEvaluated: "Not Evaluated",
     filterIssue: "Issue",
+    noTitle: "No title",
+    stillOpen: "Still Open",
   },
   oriel: {
     conversations: "Conversations",
