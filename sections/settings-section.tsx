@@ -7,7 +7,7 @@ import { Heading } from "@/components/heading";
 import { Paragraph } from "@/components/paragraph";
 import { SettingsCategoriesLayout } from "@/components/settings/settings-categories-layout";
 import { SettingsIntegrationsPanel } from "@/components/settings/settings-integrations-panel";
-import { SettingsModulesPanel } from "@/components/settings/settings-modules-panel";
+import { SettingsAgentsPanel } from "@/components/settings/settings-agents-panel";
 import { SettingsThemePanel } from "@/components/settings/settings-theme-panel";
 import { LoadingState } from "@/components/ui/loading-state";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -56,8 +56,8 @@ export function SettingsSection() {
               if (categoryId === "integrations") {
                 return <SettingsIntegrationsPanel />;
               }
-              if (categoryId === "modules") {
-                return <SettingsModulesPanel />;
+              if (categoryId === "agents") {
+                return <SettingsAgentsPanel />;
               }
               return null;
             }}

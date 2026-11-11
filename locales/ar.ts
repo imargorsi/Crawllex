@@ -82,10 +82,11 @@ const translation: Translation = {
     emptyTitle: "لا توجد إعدادات متاحة",
     emptyBody: "لا توجد وحدات إعدادات متاحة لحسابك بعد.",
     categoriesHeading: "الفئات",
-    modulesHeading: "الوحدات",
-    modules: {
-      title: "الوحدات",
-      lead: "فعّل الوحدات الاختيارية للمشروع المحدد.",
+    agentsHeading: "الوكلاء والذكاء الاصطناعي",
+    agents: {
+      title: "الوكلاء والذكاء الاصطناعي",
+      lead: "تحكم في وحدات الذكاء الاصطناعي والوكلاء للمشروع المحدد.",
+      projectContext: "المشروع: {{name}}",
       noProject: "اختر مشروعًا لإدارة وحداته.",
       lensTitle: "فحوصات SEO عبر Lens",
       lensLead: "التسجيل يبدأ أول فحص SEO في الخلفية. يمكن للمسؤولين تشغيل فحوصات أخرى من صفحة Lens.",
@@ -101,7 +102,7 @@ const translation: Translation = {
     categories: {
       theme: "المظهر",
       integrations: "التكاملات",
-      modules: "الوحدات",
+      agents: "الوكلاء والذكاء الاصطناعي",
     },
     themePacks: {
       sectionTitle: "سمة الألوان",

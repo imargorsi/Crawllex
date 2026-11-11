@@ -81,10 +81,11 @@ export interface Translation {
     emptyTitle: string;
     emptyBody: string;
     categoriesHeading: string;
-    modulesHeading: string;
-    modules: {
+    agentsHeading: string;
+    agents: {
       title: string;
       lead: string;
+      projectContext: string;
       noProject: string;
       lensTitle: string;
       lensLead: string;
@@ -100,7 +101,7 @@ export interface Translation {
     categories: {
       theme: string;
       integrations: string;
-      modules: string;
+      agents: string;
     };
     themePacks: {
       sectionTitle: string;
@@ -2057,10 +2058,11 @@ const translation: Translation = {
     emptyTitle: "No Settings Available",
     emptyBody: "There are no settings modules available for your account yet.",
     categoriesHeading: "Categories",
-    modulesHeading: "Modules",
-    modules: {
-      title: "Modules",
-      lead: "Turn on optional modules for the selected project.",
+    agentsHeading: "Agents & AI",
+    agents: {
+      title: "Agents & AI",
+      lead: "Control the AI and agent modules for the selected project.",
+      projectContext: "Project: {{name}}",
       noProject: "Select a project to manage its modules.",
       lensTitle: "Lens SEO Checks",
       lensLead: "Enrolling runs the first SEO audit in the background. Admins run more checks from the Lens page.",
@@ -2076,7 +2078,7 @@ const translation: Translation = {
     categories: {
       theme: "Theme",
       integrations: "Integrations",
-      modules: "Modules",
+      agents: "Agents & AI",
     },
     themePacks: {
       sectionTitle: "Color Theme",
