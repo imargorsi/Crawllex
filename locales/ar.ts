@@ -10,6 +10,7 @@ const translation: Translation = {
     listHeading: "مشاريعك",
     cardLabel: "المشروع",
     emptyLabel: "لا توجد مشاريع متاحة",
+    selectPrompt: "اختر مشروعًا للمتابعة",
   },
   nav: {
     aria: "التنقل الرئيسي",
@@ -667,6 +668,7 @@ const translation: Translation = {
         lead: "أسند هذا المستخدم إلى مشاريع مع دور مشروع. تغييرات الدور في التعديل تُحفظ فورًا.",
         count: "{{count}} مُسنَد",
         empty: "لا توجد مشاريع مُسنَدة بعد.",
+        projectLabel: "المشروع",
         projectPh: "اختر مشروعًا",
         roleLabel: "الدور",
         rolePh: "اختر دورًا",
