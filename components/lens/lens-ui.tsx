@@ -3,6 +3,7 @@
 import type { ComponentType, ReactNode } from "react";
 
 import { elevatedCardSurfaceClass } from "@/lib/frontend/layout/dashboard-chrome";
+import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
 
 /** Lens card: Crawllex glass panel with the 24px radius. Colors come from theme tokens only. */
@@ -308,6 +309,41 @@ export function LensNavBar<T extends string>({ items, value, onChange, label }: 
           </button>
         );
       })}
+    </div>
+  );
+}
+
+export const TILE_TONE = {
+  danger: { well: "bg-destructive/15", icon: "text-destructive", color: "var(--destructive)" },
+  warning: { well: "bg-warning/15", icon: "text-warning", color: "var(--warning)" },
+  muted: { well: "bg-bg-hover", icon: "text-text-secondary", color: "var(--text-muted)" },
+  brand: { well: "bg-brand/15", icon: "text-brand", color: "var(--brand)" },
+  success: { well: "bg-success/15", icon: "text-success", color: "var(--color-success)" },
+} as const;
+
+/** Stat tile: label and figure first, then a trend wave in the tile colour. Caption says what the wave shows. */
+export function LensStatTile({ icon: Icon, label, value, tone, trend, caption }: {
+  icon: typeof Icons.alert;
+  label: string;
+  value: number | string;
+  tone: keyof typeof TILE_TONE;
+  trend?: number[];
+  caption: string;
+}) {
+  const c = TILE_TONE[tone];
+  return (
+    <div className="flex min-h-[9.5rem] flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-text-primary/[0.03] p-4 shadow-sm dark:border-text-primary/35">
+      <div className="flex items-center gap-3">
+        <span className={cn("inline-flex size-9 shrink-0 items-center justify-center rounded-xl", c.well)}>
+          <Icon className={cn("size-4", c.icon)} aria-hidden />
+        </span>
+        <span className="text-sm font-medium text-text-secondary">{label}</span>
+      </div>
+      <span className="text-3xl font-semibold tabular-nums leading-none text-text-primary">{value}</span>
+      <div className="mt-auto flex flex-col gap-1">
+        {trend ? <LensWave values={trend} color={c.color} /> : null}
+        <span className="text-xs text-text-muted">{caption}</span>
+      </div>
     </div>
   );
 }

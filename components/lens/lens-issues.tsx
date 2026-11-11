@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 
 import { formatWhen, type TLensT } from "@/components/lens/lens-overview";
-import { LensEmpty, LensNavBar, LensPill, LensWave, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
+import { LensEmpty, LensNavBar, LensPill, LensStatTile, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
 import { TableListSort } from "@/components/table/table-list-sort";
 import type { TLensDemoDashboard, TLensDemoIssue, TLensGroup, TLensRuleGroup } from "@/features/lens/lens.demo";
 import { Icons } from "@/lib/frontend/icons/app-icons";
@@ -38,13 +38,6 @@ const RULE_LABEL_KEY: Record<TLensRuleGroup, "ruleTitles" | "ruleDescriptions" |
 
 const RULE_ORDER: TLensRuleGroup[] = ["titles", "descriptions", "headings", "content", "images", "indexing", "robots", "urls", "links", "structured"];
 
-const TILE_TONE = {
-  danger: { well: "bg-destructive/15", icon: "text-destructive", color: "var(--destructive)" },
-  warning: { well: "bg-warning/15", icon: "text-warning", color: "var(--warning)" },
-  muted: { well: "bg-bg-hover", icon: "text-text-secondary", color: "var(--text-muted)" },
-  brand: { well: "bg-brand/15", icon: "text-brand", color: "var(--brand)" },
-} as const;
-
 const PANEL_TONE = {
   neutral: { box: "border-border bg-text-primary/[0.03] dark:border-text-primary/35", well: "bg-bg-hover", icon: "text-text-secondary", label: "text-text-primary" },
   info: { box: "border-status-invited/40 bg-status-invited/[0.06]", well: "bg-status-invited/15", icon: "text-status-invited", label: "text-status-invited" },
@@ -56,32 +49,6 @@ function formatDay(iso: string, locale: string) {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
 
-/** Stat tile: label and figure first, then a trend wave in the tile colour. Caption says what the wave shows. */
-function StatTile({ icon: Icon, label, value, tone, trend, caption }: {
-  icon: typeof Icons.alert;
-  label: string;
-  value: number;
-  tone: keyof typeof TILE_TONE;
-  trend: number[];
-  caption: string;
-}) {
-  const c = TILE_TONE[tone];
-  return (
-    <div className="flex min-h-[9.5rem] flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-text-primary/[0.03] p-4 shadow-sm dark:border-text-primary/35">
-      <div className="flex items-center gap-3">
-        <span className={cn("inline-flex size-9 shrink-0 items-center justify-center rounded-xl", c.well)}>
-          <Icon className={cn("size-4", c.icon)} aria-hidden />
-        </span>
-        <span className="text-sm font-medium text-text-secondary">{label}</span>
-      </div>
-      <span className="text-3xl font-semibold tabular-nums leading-none text-text-primary">{value}</span>
-      <div className="mt-auto flex flex-col gap-1">
-        <LensWave values={trend} color={c.color} />
-        <span className="text-xs text-text-muted">{caption}</span>
-      </div>
-    </div>
-  );
-}
 
 /**
  * All Issues: the SEO command center for current open issues.
@@ -152,10 +119,10 @@ export function LensIssues({ data, t, locale, filters, onFilterChange, onNavigat
       </div>
 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <StatTile icon={Icons.alert} label={t("tileHigh")} value={counts.high} tone="danger" trend={[2, 3, 2, 4, 3, 5, counts.high]} caption={t("trendCaption")} />
-        <StatTile icon={Icons.alert} label={t("tileMedium")} value={counts.medium} tone="warning" trend={[4, 6, 5, 7, 6, 8, counts.medium]} caption={t("trendCaption")} />
-        <StatTile icon={Icons.sparkles} label={t("tileAdvisory")} value={counts.advisory} tone="muted" trend={[3, 2, 4, 3, 3, 4, counts.advisory]} caption={t("trendCaption")} />
-        <StatTile icon={Icons.grid} label={t("pageIssues")} value={counts.pageIssues} tone="brand" trend={[20, 24, 22, 28, 26, 30, counts.pageIssues]} caption={t("trendCaption")} />
+        <LensStatTile icon={Icons.alert} label={t("tileHigh")} value={counts.high} tone="danger" trend={[2, 3, 2, 4, 3, 5, counts.high]} caption={t("trendCaption")} />
+        <LensStatTile icon={Icons.alert} label={t("tileMedium")} value={counts.medium} tone="warning" trend={[4, 6, 5, 7, 6, 8, counts.medium]} caption={t("trendCaption")} />
+        <LensStatTile icon={Icons.sparkles} label={t("tileAdvisory")} value={counts.advisory} tone="muted" trend={[3, 2, 4, 3, 3, 4, counts.advisory]} caption={t("trendCaption")} />
+        <LensStatTile icon={Icons.grid} label={t("pageIssues")} value={counts.pageIssues} tone="brand" trend={[20, 24, 22, 28, 26, 30, counts.pageIssues]} caption={t("trendCaption")} />
       </div>
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">

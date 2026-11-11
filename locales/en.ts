@@ -334,16 +334,11 @@ export interface Translation {
     coverageComplete: string;
     coveragePartial: string;
     runFailedNote: string;
-    uptimeStatusTitle: string;
     lastSuccessfulCheck: string;
     currentOutage: string;
     noOutage: string;
-    availabilityTitle: string;
     checksRecorded: string;
-    uptimeUnknownNote: string;
     timelineTitle: string;
-    responseTitle: string;
-    avgLabel: string;
     p95Label: string;
     incidentHistoryTitle: string;
     incidentDetailTitle: string;
@@ -418,8 +413,6 @@ export interface Translation {
     filterType: string;
     filterSeverity: string;
     aiSuggestion: string;
-    severityImpact: string;
-    advisoryNoImpact: string;
     openIssueDetails: string;
     tileHigh: string;
     tileMedium: string;
@@ -467,6 +460,9 @@ export interface Translation {
     filterIssue: string;
     noTitle: string;
     stillOpen: string;
+    uptimeSubtitle: string;
+    dailyCaption: string;
+    last30Days: string;
   };
   oriel: {
     conversations: string;
@@ -2286,16 +2282,11 @@ const translation: Translation = {
     coverageComplete: "Complete",
     coveragePartial: "Partial",
     runFailedNote: "Check failed: {{code}}",
-    uptimeStatusTitle: "Current Status",
     lastSuccessfulCheck: "Last Successful Check",
     currentOutage: "Current outage",
     noOutage: "No outage right now",
-    availabilityTitle: "Availability",
     checksRecorded: "Checks Recorded",
-    uptimeUnknownNote: "No monitoring data yet. Missing time is not counted as uptime.",
     timelineTitle: "Daily Uptime, Last 30 Days",
-    responseTitle: "Response Time",
-    avgLabel: "Average",
     p95Label: "95th Percentile",
     incidentHistoryTitle: "Incident History",
     incidentDetailTitle: "Incident Details",
@@ -2370,8 +2361,6 @@ const translation: Translation = {
     filterType: "Type",
     filterSeverity: "Severity",
     aiSuggestion: "AI Suggestion",
-    severityImpact: "Severity Impacts SEO Health Score",
-    advisoryNoImpact: "Advisory. Does not change the score.",
     openIssueDetails: "Open Issue Details",
     tileHigh: "Must Fix (High)",
     tileMedium: "Should Fix (Medium)",
@@ -2419,6 +2408,9 @@ const translation: Translation = {
     filterIssue: "Issue",
     noTitle: "No title",
     stillOpen: "Still Open",
+    uptimeSubtitle: "Availability over the last 30 days.",
+    dailyCaption: "Daily, last 30 days",
+    last30Days: "Last 30 days",
   },
   oriel: {
     conversations: "Conversations",
