@@ -14,7 +14,7 @@ export type SidebarNavLabelKey =
   | "rolesPermissions"
   | "settings";
 
-export type SidebarNavGroupId = "general" | "reporting" | "settings";
+export type SidebarNavGroupId = "general" | "reporting" | "agents" | "settings";
 
 export type SidebarNavItem = {
   path: string;
@@ -40,6 +40,7 @@ export type SidebarNavGroup = {
 export const SIDEBAR_NAV_GROUP_ORDER: readonly SidebarNavGroupId[] = [
   "general",
   "reporting",
+  "agents",
   "settings",
 ] as const;
 
@@ -59,7 +60,7 @@ export const SIDEBAR_NAV_DEFINITIONS: readonly SidebarNavDefinition[] = [
     icon: Icons.sparkles,
     viewPermission: "dashboard.view",
     permissionScope: "project",
-    group: "general",
+    group: "agents",
   },
   {
     path: "/projects",
@@ -123,7 +124,7 @@ export const SIDEBAR_NAV_DEFINITIONS: readonly SidebarNavDefinition[] = [
     icon: Icons.view,
     viewPermission: "dashboard.view",
     permissionScope: "project",
-    group: "reporting",
+    group: "agents",
   },
   {
     path: "/settings",

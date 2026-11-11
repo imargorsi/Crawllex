@@ -181,7 +181,7 @@ Elementor layout is not applied yet. The post body is WordPress HTML: core block
 
 ## Oriel (Module 14) and the dashboard shortcut
 
-The chat lives in the **Oriel** module: sidebar item `/oriel`, page `sections/oriel-section.tsx`, components in `components/oriel/`.
+The chat lives in the **Oriel** module: sidebar item `/oriel` in the **Agents & AI** group, page `sections/oriel-section.tsx`, components in `components/oriel/`.
 The dashboard home (`sections/dashboard-home-section.tsx`) shows a shortcut panel (`components/dashboard/dashboard-oriel-shortcut.tsx`):
 greeting, a question box, suggestion chips, and the five most recent chats. Every action there opens `/oriel`:
 The shortcut passes a one-shot hand-off (question or conversation id) in `sessionStorage` (`lib/frontend/oriel/handoff.ts`, this tab only). The Oriel workspace reads it on mount and clears it. Nothing is stored server-side and no URL params are used.
@@ -211,7 +211,7 @@ A separate **Onboarding workspace** (sidebar workspace toggle, `lib/frontend/lay
 
 ## Lens (SEO health and uptime, `feature/lens-dashboard`)
 
-- UI: `/lens` (`sections/lens-section.tsx`, `components/lens/*`). Tabs: Overview, SEO health (All issues, On-page, Technical, Pages), Uptime monitoring, plus View history for scan history. Full layout and rules: `doc/lens.md`.
+- UI: `/lens` in the **Agents & AI** sidebar group, next to Oriel (`sections/lens-section.tsx`, `components/lens/*`). Tabs: Overview, SEO health (All issues, On-page, Technical, Pages), Uptime monitoring, plus View history for scan history. Full layout and rules: `doc/lens.md`.
 - Data: phase 1 uses demo data (`features/lens/lens.demo.ts`). Phase 3 replaces the hook with the proxy API (`features/lens/lens.api.ts`, `api/v1/projects/[id]/lens/*`, see `doc/api.md`).
 - Engine and storage: separate service at `/mnt/projects/crawllex-lens` (Node, SQLite). Its rules and decisions: `docs/SEO-RULES.md`, `docs/DECISIONS.md`.
 - Theme: Lens cards are no-fill glass with a soft shadow; colors from theme tokens only.
@@ -224,7 +224,7 @@ A separate **Onboarding workspace** (sidebar workspace toggle, `lib/frontend/lay
   `dashboard-selected-project-id`). Project modules stay gated until a project is selected.
 - `context/project-access-context.tsx`: loads `GET /projects/{id}/access` for that project's permissions.
 - Route gating: `components/auth/auth-guard.tsx` + `route-access-guard.tsx` using
-  `lib/frontend/layout/route-access.ts`. Nav is built in `lib/frontend/layout/build-sidebar-nav.ts`.
+  `lib/frontend/layout/route-access.ts`. Nav is built in `lib/frontend/layout/build-sidebar-nav.ts`. Groups in order: General, Reporting, Agents & AI (Oriel, Lens), Settings. Group ids in `lib/frontend/layout/sidebar-nav.ts`.
 - Pattern per module: `app/(dashboard)/<module>/page.tsx` → `sections/<module>-section.tsx` →
   `components/<module>/*` + `hooks/use-<module>-table-columns.hook.tsx` + `features/<module>/<module>.api.ts`.
 - A 401 mid-session dispatches `auth:session-expired`, which clears the query cache and logs out.

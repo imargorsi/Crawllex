@@ -41,9 +41,10 @@ import {
 import { isSuperAdmin } from "@/lib/rbac/access";
 import { cn } from "@/lib/utils";
 
-const GROUP_LABEL_KEY: Record<SidebarNavGroupId, "groupGeneral" | "groupReporting" | "groupSettings"> = {
+const GROUP_LABEL_KEY: Record<SidebarNavGroupId, "groupGeneral" | "groupReporting" | "groupAgents" | "groupSettings"> = {
   general: "groupGeneral",
   reporting: "groupReporting",
+  agents: "groupAgents",
   settings: "groupSettings",
 };
 

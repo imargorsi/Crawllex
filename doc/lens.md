@@ -3,6 +3,8 @@
 Status: UI phase done on `feature/lens-dashboard`, demo data only. Live API wiring is the next phase.
 Lens service itself: `/mnt/projects/crawllex-lens` (see its `docs/STATUS.md`).
 
+Sidebar: **Agents & AI** group (`lib/frontend/layout/sidebar-nav.ts`), with Oriel. Label key `lens`.
+
 ## Route and files
 
 | Item | Location |

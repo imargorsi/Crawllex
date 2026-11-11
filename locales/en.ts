@@ -18,6 +18,7 @@ export interface Translation {
     expandSidebar: string;
     groupGeneral: string;
     groupReporting: string;
+    groupAgents: string;
     groupSettings: string;
     dashboard: string;
     users: string;
@@ -1961,6 +1962,7 @@ const translation: Translation = {
     expandSidebar: "Expand Sidebar",
     groupGeneral: "General",
     groupReporting: "Reporting",
+    groupAgents: "Agents & AI",
     groupSettings: "Settings",
     dashboard: "Dashboard",
     users: "Users",

@@ -20,6 +20,7 @@ const translation: Translation = {
     expandSidebar: "توسيع الشريط الجانبي",
     groupGeneral: "عام",
     groupReporting: "التقارير والتحليلات",
+    groupAgents: "الوكلاء والذكاء الاصطناعي",
     groupSettings: "الإعدادات",
     dashboard: "لوحة التحكم",
     users: "المستخدمون",
