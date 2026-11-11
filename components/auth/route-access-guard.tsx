@@ -38,10 +38,11 @@ export function RequireRouteAccess({ children }: { children: ReactNode }) {
   const awaitingProjectAccess =
     Boolean(selectedProject?.id) && !isPlatformAdmin && isProjectAccessLoading;
 
+  const projectFlags = { lensEnrolled: Boolean(selectedProject?.lensEnrolled) };
   const allowed =
     user &&
     !awaitingProjectAccess &&
-    canAccessRoute(pathname, user.permissions, projectPermissions, user.roles);
+    canAccessRoute(pathname, user.permissions, projectPermissions, user.roles, projectFlags);
 
   const fallbackPath = user
     ? resolveDefaultAccessiblePath(user.permissions, projectPermissions, user.roles)

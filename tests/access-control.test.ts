@@ -139,3 +139,22 @@ describe("Access control", () => {
     expect(plainNav.map((item) => item.path)).toEqual(["/projects", "/settings"]);
   });
 });
+
+describe("Lens enrollment gate", () => {
+  const lensPerms = ["lens.view"];
+
+  it("hides the Lens route and nav item until the project is enrolled", () => {
+    expect(canAccessRoute("/lens", [], lensPerms, [])).toBe(false);
+    expect(canAccessRoute("/lens", [], lensPerms, [], { lensEnrolled: false })).toBe(false);
+    expect(canAccessRoute("/lens", [], lensPerms, [], { lensEnrolled: true })).toBe(true);
+
+    const hidden = buildSidebarNavItems([], lensPerms, [], { lensEnrolled: false }).map((i) => i.path);
+    const shown = buildSidebarNavItems([], lensPerms, [], { lensEnrolled: true }).map((i) => i.path);
+    expect(hidden).not.toContain("/lens");
+    expect(shown).toContain("/lens");
+  });
+
+  it("still needs lens.view even when enrolled", () => {
+    expect(canAccessRoute("/lens", [], [], [], { lensEnrolled: true })).toBe(false);
+  });
+});

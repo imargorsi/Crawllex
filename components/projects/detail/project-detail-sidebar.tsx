@@ -8,6 +8,7 @@ import {
   ProjectDetailInfoCard,
   ProjectDetailTagList,
 } from "@/components/projects/detail/project-detail-info-card";
+import { ProjectDetailLensCard } from "@/components/projects/detail/project-detail-lens-card";
 import { ProjectDetailMembersCard } from "@/components/projects/detail/project-detail-members-card";
 import type { TProjectDetail } from "@/features/projects/projects.api";
 import {
@@ -82,6 +83,8 @@ export function ProjectDetailSidebar({ project }: ProjectDetailSidebarProps) {
   return (
     <div className="space-y-4">
       <ProjectDetailMembersCard project={project} />
+
+      <ProjectDetailLensCard project={project} />
 
       <ProjectDetailInfoCard
         title={t("timelineTitle")}

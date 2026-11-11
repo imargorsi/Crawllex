@@ -1,4 +1,4 @@
-import type { SidebarNavGroup, SidebarNavItem } from "@/lib/frontend/layout/sidebar-nav";
+import type { SidebarNavGroup, SidebarNavItem, SidebarProjectFlags } from "@/lib/frontend/layout/sidebar-nav";
 import {
   SIDEBAR_NAV_DEFINITIONS,
   SIDEBAR_NAV_GROUP_ORDER,
@@ -11,7 +11,9 @@ function isNavDefinitionVisible(
   platformPermissions: readonly string[],
   projectPermissions: readonly string[],
   roles: readonly string[],
+  flags: SidebarProjectFlags,
 ): boolean {
+  if (item.requiresLensEnrollment && !flags.lensEnrolled) return false;
   if (item.viewPermission === null) return true;
 
   const permissions = permissionsForScope(
@@ -36,9 +38,10 @@ export function buildSidebarNavItems(
   platformPermissions: readonly string[],
   projectPermissions: readonly string[],
   roles: readonly string[],
+  flags: SidebarProjectFlags = { lensEnrolled: false },
 ): SidebarNavItem[] {
   return SIDEBAR_NAV_DEFINITIONS.filter((item) =>
-    isNavDefinitionVisible(item, platformPermissions, projectPermissions, roles),
+    isNavDefinitionVisible(item, platformPermissions, projectPermissions, roles, flags),
   ).map(toSidebarNavItem);
 }
 
@@ -46,9 +49,10 @@ export function buildSidebarNavGroups(
   platformPermissions: readonly string[],
   projectPermissions: readonly string[],
   roles: readonly string[],
+  flags: SidebarProjectFlags = { lensEnrolled: false },
 ): SidebarNavGroup[] {
   const visible = SIDEBAR_NAV_DEFINITIONS.filter((item) =>
-    isNavDefinitionVisible(item, platformPermissions, projectPermissions, roles),
+    isNavDefinitionVisible(item, platformPermissions, projectPermissions, roles, flags),
   );
 
   return SIDEBAR_NAV_GROUP_ORDER.map((groupId) => ({

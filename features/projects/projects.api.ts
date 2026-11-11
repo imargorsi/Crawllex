@@ -232,3 +232,24 @@ export function useDeleteProjectMutation() {
 }
 
 export type { TProjectStatusAction } from "@/lib/projects/project-card-actions.utils";
+
+export type TEnrollProjectInLensResponse = {
+  lensEnrolled: boolean;
+  alreadyEnrolled: boolean;
+  firstRunQueued: boolean;
+};
+
+/** Super admin only. Enrolls an active project in Lens; Lens queues the first audit in the background. */
+export function useEnrollProjectInLensMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (projectId: string) => {
+      const envelope = await baseQuery.post<TEnrollProjectInLensResponse>(`projects/${projectId}/lens/enroll`);
+      return envelope.data;
+    },
+    onSuccess: () => {
+      // The enrollment flag lives on the project record: refresh lists, details and access so the Lens nav updates.
+      void queryClient.invalidateQueries({ queryKey: projectKeys.all });
+    },
+  });
+}

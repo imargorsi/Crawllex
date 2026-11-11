@@ -30,7 +30,12 @@ export type SidebarNavDefinition = SidebarNavItem & {
   viewPermission: string | null;
   permissionScope: "platform" | "project";
   group: SidebarNavGroupId;
+  /** Only shown when the selected project is enrolled in Lens. */
+  requiresLensEnrollment?: boolean;
 };
+
+/** Facts about the selected project that decide which modules appear. */
+export type SidebarProjectFlags = { lensEnrolled: boolean };
 
 export type SidebarNavGroup = {
   id: SidebarNavGroupId;
@@ -125,6 +130,7 @@ export const SIDEBAR_NAV_DEFINITIONS: readonly SidebarNavDefinition[] = [
     viewPermission: "lens.view",
     permissionScope: "project",
     group: "agents",
+    requiresLensEnrollment: true,
   },
   {
     path: "/settings",

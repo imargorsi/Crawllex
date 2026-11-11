@@ -1,3 +1,4 @@
+import type { SidebarProjectFlags } from "@/lib/frontend/layout/sidebar-nav";
 import { hasAnyPermission } from "@/lib/rbac/access";
 import { permissionsForScope } from "@/lib/rbac/scope-permissions";
 
@@ -14,6 +15,8 @@ export type RouteAccessRule = {
   pattern: RegExp;
   viewPermissions: readonly string[];
   scope: "platform" | "project";
+  /** Route only exists for projects enrolled in Lens. */
+  requiresLensEnrollment?: boolean;
 };
 
 export const ROUTE_ACCESS_RULES: readonly RouteAccessRule[] = [
@@ -21,7 +24,7 @@ export const ROUTE_ACCESS_RULES: readonly RouteAccessRule[] = [
   { pattern: /^\/roles(?:\/|$)/, viewPermissions: ["admin.roles.view"], scope: "platform" },
   { pattern: /^\/dashboard$/, viewPermissions: ["dashboard.view"], scope: "project" },
   { pattern: /^\/oriel(?:\/|$)/, viewPermissions: ["oriel.view"], scope: "project" },
-  { pattern: /^\/lens(?:\/|$)/, viewPermissions: ["lens.view"], scope: "project" },
+  { pattern: /^\/lens(?:\/|$)/, viewPermissions: ["lens.view"], scope: "project", requiresLensEnrollment: true },
   { pattern: /^\/projects(?:\/|$)/, viewPermissions: ["projects.view"], scope: "project" },
   { pattern: /^\/analytics(?:\/|$)/, viewPermissions: ["analytics.view"], scope: "project" },
   { pattern: /^\/seo-activities(?:\/|$)/, viewPermissions: ["seo_activities.view"], scope: "project" },
@@ -40,11 +43,13 @@ export function canAccessRoute(
   platformPermissions: readonly string[],
   projectPermissions: readonly string[],
   roles: readonly string[],
+  flags: SidebarProjectFlags = { lensEnrolled: false },
 ): boolean {
   if (isAuthOnlyRoute(pathname)) return true;
 
   const rule = ROUTE_ACCESS_RULES.find((entry) => entry.pattern.test(pathname));
   if (!rule) return true;
+  if (rule.requiresLensEnrollment && !flags.lensEnrolled) return false;
 
   const permissions = permissionsForScope(
     rule.scope,

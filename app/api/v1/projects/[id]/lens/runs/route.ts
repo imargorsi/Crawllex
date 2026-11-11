@@ -28,6 +28,7 @@ export const POST = withApiHandler(async (request, context) => {
   const project = await Project.findById(projectId);
   if (!project) return ApiResponse.error("Project Not Found.", {}, 404);
   if (project.status !== "active") return ApiResponse.error("Only active projects can be checked.", {}, 409);
+  if (!project.lensEnrolledAt) return ApiResponse.error("Enroll the project in Lens first.", {}, 409);
 
   try {
     const job = await queueLensRun({

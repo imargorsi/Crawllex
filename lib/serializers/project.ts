@@ -37,6 +37,7 @@ export function serializeProjectListItem(
     owner: owner ?? null,
     createdByUserId: project.createdByUserId.toString(),
     integrations: integrations ?? DEFAULT_LIST_INTEGRATIONS,
+    lensEnrolled: Boolean(project.lensEnrolledAt),
   };
 }
 
@@ -65,6 +66,7 @@ export function serializeProject(
     createdByUserId: project.createdByUserId.toString(),
     approvedAt: serializeTimestamp(project.approvedAt),
     approvedByUserId: project.approvedByUserId?.toString() ?? null,
+    lensEnrolled: Boolean(project.lensEnrolledAt),
     rejectedAt: serializeTimestamp(project.rejectedAt),
     rejectedByUserId: project.rejectedByUserId?.toString() ?? null,
     createdAt: project.createdAt.toISOString(),

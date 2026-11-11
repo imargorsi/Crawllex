@@ -40,6 +40,9 @@ const projectSchema = new Schema(
     approvedByUserId: { type: Schema.Types.ObjectId, ref: "User", default: null },
     rejectedAt: { type: Date, default: null },
     rejectedByUserId: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    // Lens enrollment: set by a super admin from project settings. Null = not enrolled.
+    lensEnrolledAt: { type: Date, default: null },
+    lensEnrolledByUserId: { type: Schema.Types.ObjectId, ref: "User", default: null },
   },
   { timestamps: true },
 );
@@ -72,6 +75,8 @@ export type ProjectDocument = InferSchemaType<typeof projectSchema> &
     approvedByUserId: Types.ObjectId | null;
     rejectedAt: Date | null;
     rejectedByUserId: Types.ObjectId | null;
+    lensEnrolledAt: Date | null;
+    lensEnrolledByUserId: Types.ObjectId | null;
   };
 
 const PROJECT_MODEL_NAME = "Project";

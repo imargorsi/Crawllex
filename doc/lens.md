@@ -5,11 +5,14 @@ Lens service itself: `/mnt/projects/crawllex-lens` (see its `docs/STATUS.md`).
 
 Sidebar: **Agents & AI** group (`lib/frontend/layout/sidebar-nav.ts`), with Oriel. Label key `lens`.
 
-## Check process (decided 2026-11-11)
+## Enrollment and checks (decided 2026-11-11, revised)
 
-- **First check:** runs automatically when a super admin approves the project (`POST /api/v1/projects/[id]/approve`). The approval enrolls the project in Lens (`POST /v1/projects/:id/enroll`), and Lens queues one run if the project has none. Enrollment is best effort: if Lens is down, the approval still succeeds and the first check can be started by hand.
-- **Later checks:** manual only. The "Start check" button on `/lens` shows only with `lens.run`, and `POST /api/v1/projects/[id]/lens/runs` checks `lens.run` on the server. `lens.run` and `lens.view` are restricted: no role has them by default; only a super admin can assign them. Project must be active.
-- **Scheduled checks** are off by default (not part of this process). Lens schedules still exist in the engine.
+- **Enroll:** a super admin clicks "Enroll In Lens" in the project detail sidebar (card shown to super admin only). `POST /api/v1/projects/[id]/lens/enroll` requires an active project and calls Lens `POST /v1/projects/:id/enroll`. The flag `lensEnrolledAt` is saved only after Lens accepts.
+- **First audit:** Lens queues it in the background on enrollment, if the project has no runs. Enrolling again does not queue another.
+- **Approval** no longer enrolls a project. Approval and enrollment are separate steps.
+- **Lens page:** shown only when the project is enrolled (`lensEnrolled` on the project; sidebar and route guard). Also needs `lens.view`.
+- **Later checks:** `lens.run` (restricted, super admin assigns). The Start check button and `POST /api/v1/projects/[id]/lens/runs` require enrollment and `lens.run`.
+- **Scheduled checks** are off by default. Lens schedules still exist in the engine.
 
 ## Route and files
 

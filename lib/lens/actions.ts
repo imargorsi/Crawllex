@@ -16,8 +16,7 @@ export async function enrollLensProject(project: TLensProject): Promise<{ firstR
   return { firstRunQueued: body.firstRun !== null };
 }
 
-/** Queues a manual check. Enrolls first, so projects approved before enrollment existed can be checked. */
+/** Queues a manual check. The project must already be enrolled (the route checks this). */
 export async function queueLensRun(project: TLensProject): Promise<{ jobId: string; status: string; created: boolean }> {
-  await enrollLensProject(project);
   return lensPost<{ jobId: string; status: string; created: boolean }>(lensPath("projects", project.id, "runs"), {});
 }

@@ -105,7 +105,8 @@ Read-only proxies to the local Lens API, plus the manual check route. GET guard:
 | Route | Returns |
 |---|---|
 | `GET /api/v1/projects/[id]/lens/seo` | The whole SEO dashboard: `siteUrl`, `lastCheckAt`, `latestRunId`, `seo` (score, band, coverage, counts by severity), `issues` (one per rule, with catalog text, per-URL `pages`, lifecycle `tracking.events`), `pages` (per URL: meta title, state, counts, `ruleChecks` Pass / Finding / Not evaluated), `runs` (score and counts per run). Contract: `features/lens/lens.types.ts`. |
-| `POST /api/v1/projects/[id]/lens/runs` | Queues a manual SEO check. Needs `lens.run`; project must be active. Returns `{jobId, status, created}`. Enrolls the project first if needed. |
+| `POST /api/v1/projects/[id]/lens/enroll` | Super admin only. Enrolls an active project in Lens and sets `lensEnrolled`. Lens queues the first audit if the project has no runs. Idempotent. |
+| `POST /api/v1/projects/[id]/lens/runs` | Queues a manual SEO check. Needs `lens.run`; project must be active and enrolled. Returns `{jobId, status, created}`. Enrolls the project first if needed. |
 | `GET /api/v1/projects/[id]/lens/uptime` | Uptime summary and daily values (rolling 30 days). Not used by the screen yet (uptime phase). |
 
 

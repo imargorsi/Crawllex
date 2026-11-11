@@ -873,6 +873,16 @@ export interface Translation {
         sectionLocationsLead: string;
         sectionCompetitorsTitle: string;
         sectionCompetitorsLead: string;
+        lensCardTitle: string;
+        lensCardLead: string;
+        lensStatusEnrolled: string;
+        lensStatusNotEnrolled: string;
+        lensEnrollButton: string;
+        lensEnrollBusy: string;
+        lensEnrollQueued: string;
+        lensEnrollAlready: string;
+        lensEnrollFailed: string;
+        lensNeedsActive: string;
         sidebarMembersTitle: string;
         memberOwnerBadge: string;
         memberUserBadge: string;
@@ -2840,6 +2850,16 @@ const translation: Translation = {
         sectionLocationsLead: "Geographic Areas This Project Focuses On.",
         sectionCompetitorsTitle: "Competitors",
         sectionCompetitorsLead: "Competitor Names Or Websites Provided For Benchmarking.",
+        lensCardTitle: "Lens SEO Checks",
+        lensCardLead: "Enrolling runs the first SEO audit in the background. Admins run more checks from the Lens page.",
+        lensStatusEnrolled: "Enrolled",
+        lensStatusNotEnrolled: "Not enrolled",
+        lensEnrollButton: "Enroll In Lens",
+        lensEnrollBusy: "Enrolling…",
+        lensEnrollQueued: "Enrolled. The first audit is running in the background.",
+        lensEnrollAlready: "This project is already enrolled.",
+        lensEnrollFailed: "Could not enroll the project. Try again shortly.",
+        lensNeedsActive: "Approve the project before enrolling it in Lens.",
         sidebarMembersTitle: "Project Members",
         memberOwnerBadge: "Project Owner",
         memberUserBadge: "Project User",

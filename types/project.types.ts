@@ -34,6 +34,8 @@ export type TProjectListItem = {
   owner: TProjectOwnerSummary | null;
   createdByUserId: string;
   integrations: TProjectListIntegrations;
+  /** Enrolled in Crawllex Lens (SEO checks). Set by a super admin. */
+  lensEnrolled: boolean;
 };
 
 export type TProjectDetail = {
@@ -57,6 +59,7 @@ export type TProjectDetail = {
   createdByUserId: string;
   approvedAt: string | null;
   approvedByUserId: string | null;
+  lensEnrolled: boolean;
   rejectedAt: string | null;
   rejectedByUserId: string | null;
   createdAt: string;

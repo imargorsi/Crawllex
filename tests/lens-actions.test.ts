@@ -42,17 +42,16 @@ describe("enrollLensProject", () => {
 });
 
 describe("queueLensRun", () => {
-  it("enrolls first, then queues the run", async () => {
-    const calls: string[] = [];
-    vi.stubGlobal("fetch", vi.fn(async (url: string) => {
-      calls.push(url);
-      return new Response(JSON.stringify(url.endsWith("/runs") ? { jobId: "j2", status: "queued", created: true } : { enrolled: true, firstRun: null }), { status: 200 });
-    }));
+  it("queues a run only; enrollment is a separate super admin action", async () => {
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ jobId: "j2", status: "queued", created: true }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
 
     const job = await queueLensRun(PROJECT);
 
     expect(job).toEqual({ jobId: "j2", status: "queued", created: true });
-    expect(calls[0]).toMatch(/\/enroll$/);
-    expect(calls[1]).toMatch(/\/runs$/);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toMatch(/\/runs$/);
+    expect(init.method).toBe("POST");
   });
 });

@@ -109,7 +109,7 @@ export function DashboardSidebar({ onClose }: DashboardSidebarProps) {
   const { t: tLayout } = useTranslation("translation", { keyPrefix: "layout" });
   const pathname = usePathname();
   const { data: user } = useAuthUserQuery();
-  const { projects } = useSelectedProject();
+  const { projects, selectedProject } = useSelectedProject();
   const { projectPermissions, hasProjectContext, isLoading: isProjectAccessLoading } = useProjectAccess();
   const sidebar = useDashboardSidebar();
   const isCollapsed = Boolean(sidebar?.isSidebarCollapsed);
@@ -125,8 +125,10 @@ export function DashboardSidebar({ onClose }: DashboardSidebarProps) {
 
   const navGroups = useMemo(() => {
     if (!user || !canRenderNav) return [];
-    return buildSidebarNavGroups(user.permissions, projectPermissions, user.roles);
-  }, [canRenderNav, projectPermissions, user]);
+    return buildSidebarNavGroups(user.permissions, projectPermissions, user.roles, {
+      lensEnrolled: Boolean(selectedProject?.lensEnrolled),
+    });
+  }, [canRenderNav, projectPermissions, selectedProject?.lensEnrolled, user]);
 
   const collapseLabel = isCollapsed ? tNav("expandSidebar") : tNav("collapseSidebar");
 
