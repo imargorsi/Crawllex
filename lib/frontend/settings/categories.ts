@@ -1,7 +1,7 @@
 import type { TAppIconComponent } from "@/components/ui/app-icon";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 
-export const SETTINGS_CATEGORY_IDS = ["theme", "integrations"] as const;
+export const SETTINGS_CATEGORY_IDS = ["theme", "integrations", "modules"] as const;
 
 export type TSettingsCategoryId = (typeof SETTINGS_CATEGORY_IDS)[number];
 
@@ -29,6 +29,13 @@ export const SETTINGS_CATEGORIES: readonly TSettingsCategory[] = [
     icon: Icons.link,
     requiresSuperAdmin: false,
     requiresIntegrationsView: true,
+  },
+  {
+    // Optional modules per project (Lens enrollment). Super admin only.
+    id: "modules",
+    labelKey: "modules",
+    icon: Icons.settings,
+    requiresSuperAdmin: true,
   },
 ];
 
