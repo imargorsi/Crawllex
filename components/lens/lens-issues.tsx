@@ -179,14 +179,14 @@ function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
         </div>
       </header>
 
-      <div className="flex flex-col divide-y divide-border/70 overflow-hidden rounded-2xl border border-border bg-brand/[0.025] shadow-sm backdrop-blur-sm dark:border-text-primary/35">
+      <div className="grid overflow-hidden rounded-2xl border border-border bg-brand/[0.025] shadow-sm backdrop-blur-sm md:grid-cols-2 md:divide-x md:divide-border/70 dark:border-text-primary/35">
         <FindingRow icon={Icons.search} label={t("issueFound")} text={issue.found} />
         <FindingRow icon={Icons.alert} label={t("issueWhy")} text={issue.why} />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">{issue.fix}</Panel>
-        <Panel icon={Icons.sparkles} label={t("aiSuggestion")} note={t("aiSuggestionNote")}>{issue.aiSuggestion}</Panel>
+        <Panel icon={Icons.sparkles} label={t("aiSuggestion")}>{issue.aiSuggestion}</Panel>
       </div>
     </li>
   );
@@ -215,11 +215,10 @@ function Tag({ children }: { children: string }) {
 }
 
 /** Info panel used for every block in an issue card. Same size and padding everywhere. */
-function Panel({ icon: Icon, label, children, note, tone = "neutral" }: {
+function Panel({ icon: Icon, label, children, tone = "neutral" }: {
   icon: typeof Icons.alert;
   label: string;
   children: React.ReactNode;
-  note?: string;
   tone?: "neutral" | "brand";
 }) {
   return (
@@ -238,7 +237,6 @@ function Panel({ icon: Icon, label, children, note, tone = "neutral" }: {
         <span className={cn("text-sm font-semibold", tone === "brand" ? "text-brand" : "text-text-primary")}>{label}</span>
       </div>
       <div className="text-sm leading-relaxed text-text-secondary">{children}</div>
-      {note ? <p className="text-xs text-text-muted">{note}</p> : null}
     </div>
   );
 }

@@ -422,7 +422,6 @@ export interface Translation {
     filterType: string;
     filterSeverity: string;
     aiSuggestion: string;
-    aiSuggestionNote: string;
   };
   oriel: {
     conversations: string;
@@ -2330,7 +2329,6 @@ const translation: Translation = {
     filterType: "Type",
     filterSeverity: "Severity",
     aiSuggestion: "AI Suggestion",
-    aiSuggestionNote: "Suggested by AI. Review before you apply it.",
   },
   oriel: {
     conversations: "Conversations",
