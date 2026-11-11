@@ -30,7 +30,7 @@ const RULE_LABEL_KEY: Record<TLensRuleGroup, "ruleTitles" | "ruleDescriptions" |
 
 const RULE_ORDER: TLensRuleGroup[] = ["titles", "descriptions", "headings", "content", "images", "indexing", "robots", "urls", "links", "structured"];
 
-/** Filter chip: severity and type. Active chip uses the brand tint. */
+/** Filter chip (severity and type). Active chip uses the brand tint. */
 function FilterChip({ active, onClick, children, count }: { active: boolean; onClick: () => void; children: string; count?: number }) {
   return (
     <button
@@ -38,21 +38,36 @@ function FilterChip({ active, onClick, children, count }: { active: boolean; onC
       aria-pressed={active}
       onClick={onClick}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors duration-200",
+        "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors duration-200",
         active
           ? "border-brand/60 bg-brand/15 text-text-primary"
           : "border-border text-text-secondary hover:border-text-primary/40 hover:text-text-primary",
       )}
     >
       {children}
-      {count != null ? <span className={cn("tabular-nums text-xs", active ? "text-text-primary" : "text-text-muted")}>{count}</span> : null}
+      {count != null ? <span className={cn("rounded-full px-1.5 text-xs tabular-nums", active ? "bg-brand/25 text-text-primary" : "bg-bg-hover text-text-muted")}>{count}</span> : null}
     </button>
   );
 }
 
+function StatTile({ icon: Icon, label, value, tone }: { icon: typeof Icons.alert; label: string; value: number; tone: "danger" | "warning" | "muted" | "brand" }) {
+  const iconClass = { danger: "text-destructive", warning: "text-warning", muted: "text-text-muted", brand: "text-brand" }[tone];
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3.5">
+      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-bg-hover/60">
+        <Icon className={cn("size-4", iconClass)} aria-hidden />
+      </span>
+      <div className="flex min-w-0 flex-col">
+        <span className="text-xs text-text-muted">{label}</span>
+        <span className="text-2xl font-semibold tabular-nums leading-tight text-text-primary">{value}</span>
+      </div>
+    </div>
+  );
+}
+
 /**
- * All Issues: the SEO command center for current open issues. Rules are tabs; severity and type are chips.
- * Resolved issues are not shown here. They belong in History.
+ * All Issues: the SEO command center for current open issues.
+ * Rule tabs, severity and type chips, sort. Resolved issues are not shown here (they belong in History).
  */
 export function LensIssues({ data, t, locale, presetType }: {
   data: TLensDemoDashboard;
@@ -95,10 +110,7 @@ export function LensIssues({ data, t, locale, presetType }: {
 
   const ruleItems = [
     { id: "all" as const, label: `${t("filterAll")} (${open.length})` },
-    ...rulesPresent.map((r) => ({
-      id: r,
-      label: `${t(RULE_LABEL_KEY[r])} (${open.filter((i) => i.ruleGroup === r).length})`,
-    })),
+    ...rulesPresent.map((r) => ({ id: r, label: `${t(RULE_LABEL_KEY[r])} (${open.filter((i) => i.ruleGroup === r).length})` })),
   ];
 
   return (
@@ -109,45 +121,39 @@ export function LensIssues({ data, t, locale, presetType }: {
         action={<LensPill tone="brand">{t("openIssuesCount", { count: open.length })}</LensPill>}
       />
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {([
-          { id: "high", label: t("severityHigh"), value: counts.high },
-          { id: "medium", label: t("severityMedium"), value: counts.medium },
-          { id: "advisory", label: t("severityAdvisory"), value: counts.advisory },
-          { id: "pages", label: t("pageIssues"), value: counts.pageIssues },
-        ] as const).map((item) => (
-          <div key={item.id} className="flex flex-col gap-1 rounded-2xl border border-border px-4 py-3">
-            <span className="text-xs text-text-muted">{item.label}</span>
-            <span className="text-2xl font-semibold tabular-nums text-text-primary">{item.value}</span>
-          </div>
-        ))}
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <StatTile icon={Icons.alert} label={t("severityHigh")} value={counts.high} tone="danger" />
+        <StatTile icon={Icons.alert} label={t("severityMedium")} value={counts.medium} tone="warning" />
+        <StatTile icon={Icons.sparkles} label={t("severityAdvisory")} value={counts.advisory} tone="muted" />
+        <StatTile icon={Icons.grid} label={t("pageIssues")} value={counts.pageIssues} tone="brand" />
       </div>
 
-      <LensTabs<TRuleTab> label={t("filterRule")} value={rule} onChange={setRule} items={ruleItems} />
-
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-wrap items-center gap-2">
-          <FilterChip active={severity === "all"} onClick={() => setSeverity("all")}>{t("filterAll")}</FilterChip>
-          <FilterChip active={severity === "high"} onClick={() => setSeverity("high")} count={counts.high}>{t("severityHigh")}</FilterChip>
-          <FilterChip active={severity === "medium"} onClick={() => setSeverity("medium")} count={counts.medium}>{t("severityMedium")}</FilterChip>
-          <FilterChip active={severity === "advisory"} onClick={() => setSeverity("advisory")} count={counts.advisory}>{t("severityAdvisory")}</FilterChip>
-          <span className="mx-1 hidden h-5 w-px bg-border md:inline-block" aria-hidden />
-          <FilterChip active={type === "all"} onClick={() => setType("all")}>{t("filterAll")}</FilterChip>
-          <FilterChip active={type === "onpage"} onClick={() => setType("onpage")}>{t("typeOnpage")}</FilterChip>
-          <FilterChip active={type === "technical"} onClick={() => setType("technical")}>{t("typeTechnical")}</FilterChip>
+      <div className="flex flex-col gap-4 rounded-2xl border border-border p-4 sm:p-5">
+        <LensTabs<TRuleTab> label={t("filterRule")} value={rule} onChange={setRule} items={ruleItems} />
+        <div className="flex flex-col gap-3 border-t border-border/60 pt-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-wrap items-center gap-2">
+            <FilterChip active={severity === "all"} onClick={() => setSeverity("all")}>{t("filterAll")}</FilterChip>
+            <FilterChip active={severity === "high"} onClick={() => setSeverity("high")} count={counts.high}>{t("severityHigh")}</FilterChip>
+            <FilterChip active={severity === "medium"} onClick={() => setSeverity("medium")} count={counts.medium}>{t("severityMedium")}</FilterChip>
+            <FilterChip active={severity === "advisory"} onClick={() => setSeverity("advisory")} count={counts.advisory}>{t("severityAdvisory")}</FilterChip>
+            <span className="mx-1 hidden h-6 w-px bg-border lg:inline-block" aria-hidden />
+            <FilterChip active={type === "all"} onClick={() => setType("all")}>{t("filterAll")}</FilterChip>
+            <FilterChip active={type === "onpage"} onClick={() => setType("onpage")}>{t("typeOnpage")}</FilterChip>
+            <FilterChip active={type === "technical"} onClick={() => setType("technical")}>{t("typeTechnical")}</FilterChip>
+          </div>
+          <label className="flex items-center gap-2 text-sm text-text-muted">
+            {t("sortBy")}
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as TSort)}
+              className="h-9 rounded-full border border-border bg-transparent px-3 text-sm text-text-primary"
+            >
+              <option value="severity">{t("sortSeverity")}</option>
+              <option value="pages">{t("sortPages")}</option>
+              <option value="title">{t("sortTitle")}</option>
+            </select>
+          </label>
         </div>
-        <label className="flex items-center gap-2 text-sm text-text-muted">
-          {t("sortBy")}
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value as TSort)}
-            className="h-9 rounded-full border border-border bg-transparent px-3 text-sm text-text-primary"
-          >
-            <option value="severity">{t("sortSeverity")}</option>
-            <option value="pages">{t("sortPages")}</option>
-            <option value="title">{t("sortTitle")}</option>
-          </select>
-        </label>
       </div>
 
       <p className="-mb-2 text-sm text-text-muted">{t("showingIssues", { shown: rows.length, total: open.length })}</p>
@@ -155,7 +161,7 @@ export function LensIssues({ data, t, locale, presetType }: {
       {rows.length === 0 ? (
         <LensEmpty>{t("noIssuesMatch")}</LensEmpty>
       ) : (
-        <ul className="flex flex-col gap-4">
+        <ul className="flex flex-col gap-5">
           {rows.map((issue) => (
             <IssueCard key={issue.id} issue={issue} t={t} />
           ))}
@@ -165,7 +171,7 @@ export function LensIssues({ data, t, locale, presetType }: {
   );
 }
 
-/** One issue as an info box. Every section is visible: nothing is hidden behind a toggle. */
+/** One issue. Header, then findings and fix side by side, then verification. Every section is always visible. */
 function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
   return (
     <li className="flex flex-col gap-5 rounded-2xl border border-border p-5 sm:p-6 dark:border-text-primary/40">
@@ -173,55 +179,71 @@ function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <LensPill tone={severityTone(issue.severity)}>{t(severityLabel(issue.severity))}</LensPill>
-            <span className="rounded-full border border-border px-3 py-0.5 text-xs font-medium text-text-secondary">
+            <span className="rounded-full bg-bg-hover px-3 py-1 text-xs font-medium text-text-secondary">
               {issue.group === "onpage" ? t("typeOnpage") : t("typeTechnical")}
             </span>
-            <span className="rounded-full border border-border px-3 py-0.5 text-xs font-medium text-text-secondary">
+            <span className="rounded-full bg-bg-hover px-3 py-1 text-xs font-medium text-text-secondary">
               {t(RULE_LABEL_KEY[issue.ruleGroup])}
             </span>
           </div>
           <h3 className="text-lg font-semibold leading-snug text-text-primary">{issue.title}</h3>
         </div>
-        <div className="flex shrink-0 flex-col items-end">
-          <span className="text-3xl font-semibold tabular-nums leading-none text-text-primary">{issue.affected}</span>
-          <span className="mt-1 text-xs text-text-muted">{t("pagesUnit")}</span>
+        <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-border px-4 py-2.5">
+          <Icons.globe className="size-4 text-text-muted" aria-hidden />
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-2xl font-semibold tabular-nums leading-none text-text-primary">{issue.affected}</span>
+            <span className="text-xs text-text-muted">{t("pagesUnit")}</span>
+          </div>
         </div>
       </header>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <InfoBox label={t("issueFound")} text={issue.found} />
-        <InfoBox label={t("issueWhy")} text={issue.why} />
-      </div>
-
-      <div className="flex gap-4 rounded-xl border border-brand/40 bg-brand/5 p-4">
-        <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand/15">
-          <Icons.bulb className="size-4 text-brand" aria-hidden />
-        </span>
-        <div className="flex min-w-0 flex-col gap-1">
-          <span className="text-sm font-semibold text-brand">{t("howToFix")}</span>
-          <p className="text-sm leading-relaxed text-text-primary">{issue.fix}</p>
+      <div className="grid gap-5 lg:grid-cols-2">
+        <div className="flex flex-col gap-4">
+          <Section icon={Icons.search} label={t("issueFound")} text={issue.found} />
+          <Section icon={Icons.alert} label={t("issueWhy")} text={issue.why} />
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2 rounded-2xl border border-brand/40 bg-brand/5 p-4">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex size-7 items-center justify-center rounded-lg bg-brand/15">
+                <Icons.bulb className="size-4 text-brand" aria-hidden />
+              </span>
+              <span className="text-sm font-semibold text-brand">{t("howToFix")}</span>
+            </div>
+            <p className="text-sm leading-relaxed text-text-primary">{issue.fix}</p>
+          </div>
+          <div className="flex flex-col gap-2 rounded-2xl border border-border p-4">
+            <span className="flex items-center gap-2 text-xs font-medium text-text-muted">
+              <Icons.globe className="size-3.5" aria-hidden />
+              {t("issuePages")}
+            </span>
+            <ul className="flex flex-wrap gap-1.5">
+              {issue.pages.map((url) => (
+                <li key={url} className="rounded-full bg-bg-hover px-2.5 py-1 font-mono text-xs text-text-secondary">{url}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <InfoBox label={t("issueVerify")} text={issue.verify} />
-        <div className="flex flex-col gap-2 rounded-xl border border-border/70 p-4">
-          <span className="text-xs font-medium text-text-muted">{t("issuePages")}</span>
-          <ul className="flex flex-wrap gap-1.5">
-            {issue.pages.map((url) => (
-              <li key={url} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-text-secondary">{url}</li>
-            ))}
-          </ul>
+      <div className="flex items-start gap-3 rounded-xl bg-bg-hover/50 px-4 py-3">
+        <Icons.checkCircle className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="text-xs font-medium text-text-muted">{t("issueVerify")}</span>
+          <p className="text-sm text-text-secondary">{issue.verify}</p>
         </div>
       </div>
     </li>
   );
 }
 
-function InfoBox({ label, text }: { label: string; text: string }) {
+function Section({ icon: Icon, label, text }: { icon: typeof Icons.alert; label: string; text: string }) {
   return (
-    <div className="flex flex-col gap-1.5 rounded-xl border border-border/70 bg-bg-hover/40 p-4">
-      <span className="text-xs font-medium text-text-muted">{label}</span>
+    <div className="flex flex-col gap-1.5">
+      <span className="flex items-center gap-2 text-xs font-medium text-text-muted">
+        <Icon className="size-3.5" aria-hidden />
+        {label}
+      </span>
       <p className="text-sm leading-relaxed text-text-secondary">{text}</p>
     </div>
   );
@@ -230,4 +252,3 @@ function InfoBox({ label, text }: { label: string; text: string }) {
 function severityLabel(severity: TLensSeverity) {
   return severity === "high" ? "severityHigh" : severity === "medium" ? "severityMedium" : "severityAdvisory";
 }
-

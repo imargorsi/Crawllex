@@ -24,20 +24,20 @@ Strings: `lens` block in `locales/en.ts` and `locales/ar.ts`. Arabic values are 
 ## Layout (top to bottom)
 
 1. **Header:** title and subtitle, Last check block, Start check button (no action yet).
-2. **Tab row:** Overview · SEO health · Uptime monitoring, then View history. Demo notice is removed from the UI.
+2. **Tab row:** Overview · SEO Health · Pages · Uptime Monitoring, then View History (opens scan history). Demo notice is removed from the UI.
 3. **Overview**
    - SEO health score card: ring (3 band segments, marker at score), band legend, points to Healthy, Failed / Warnings / Notices tiles, rule-based summary bullets (two columns), uptime block under the ring, partial/complete scan pill and band pill in the card header.
    - Pages affected (severity bars) and Priority issues (top 4 by severity).
    - Four section cards: On-Page SEO, Technical SEO, Pages, Issues (severity strip). On-Page and Technical open the All Issues tab with that type filter set.
    - Uptime monitoring: headline strip (uptime, downtime, incidents, average response, lowest day), 30 daily bars with legend.
-4. **SEO Health tab (command center):** subtabs All Issues and Pages.
-   - All Issues shows current open issues only. Resolved issues are not shown here; they belong in View History.
-   - Summary: High, Medium, Advisory, Page Issues.
-   - Rule tabs (counts): Meta Title, Meta Description, Headings, Content, Images, Indexing and Canonicals, Robots and Sitemap, Page URL, and others as they appear.
+4. **SEO Health tab (command center):** current open issues only.
+   - Summary tiles: High, Medium, Advisory, Page Issues.
+   - Rule tabs with counts (Meta Title, Meta Description, Headings, Content, Images, Indexing and Canonicals, Robots and Sitemap, Page URL).
    - Chips: severity (All, High, Medium, Advisory) and type (All, On-Page, Technical). Sort (Severity, Most Pages, Title).
-   - Each issue is an info box with every section visible: severity, type, rule, title, affected page count, What We Found, Why It Matters, How to Fix, How to Verify, affected pages.
-   - Pages subtab: pages table (per-page status and counts), sorted by priority. Detailed per-page SEO report comes later.
-5. **View history:** scan history table (date, status, coverage, score, pages checked, new, resolved, open). Failed runs show error code, no score.
+   - Each issue card: severity, type and rule chips, title, affected page count; What We Found and Why It Matters beside How to Fix and Affected Pages; How to Verify at the bottom. Nothing is hidden.
+   - Resolved issues are not shown here. They belong in View History.
+5. **Pages tab:** every checked page with status (Checked, Check Failed, Not Evaluated) and issue counts, sorted by priority, with URL search. Detailed per-page SEO report comes later.
+6. **View History:** scan history table (date, status, coverage, score, pages checked, new, resolved, open). Failed runs show error code, no score.
 6. **Uptime monitoring tab:** current status, availability, response time, daily timeline, incident history with detail panel.
 
 Clickable cards: `LensClickCard`. Only the four section cards and the tab/button links route (to tabs). Other cards have the affordance but no action yet.

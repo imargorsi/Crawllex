@@ -8,31 +8,42 @@ import { Paragraph } from "@/components/paragraph";
 import { PageBackdrop } from "@/components/ui/page-backdrop";
 import { Button } from "@/components/ui/button";
 import { LensOverview, formatWhen, type TLensNavigate, type TLensTab } from "@/components/lens/lens-overview";
-import { LensSeoHealth, type TSeoSub, type TTypePreset } from "@/components/lens/lens-seo-health";
+import { LensHistory } from "@/components/lens/lens-history";
+import { LensIssues } from "@/components/lens/lens-issues";
+import { LensPages } from "@/components/lens/lens-pages";
 import { LensUptime } from "@/components/lens/lens-uptime";
 import { LensTabs } from "@/components/lens/lens-ui";
 import { useLensDashboard } from "@/features/lens/use-lens-dashboard";
 import { Icons } from "@/lib/frontend/icons/app-icons";
+import { cn } from "@/lib/utils";
 
 
-/** Lens dashboard: header, three tabs (Overview, SEO health, Uptime monitoring). Phase 1 renders demo data only. */
+/** Lens dashboard: header, tabs (Overview, SEO Health, Pages, Uptime Monitoring) and View History. Demo data only. */
+type TLensView = TLensTab | "pages" | "history";
+type TTypePreset = "all" | "onpage" | "technical";
+
 export function LensSection() {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "lens" });
   const { data } = useLensDashboard();
   const locale = i18n.language;
-  const [tab, setTab] = useState<TLensTab>("overview");
-  const [sub, setSub] = useState<TSeoSub>("all");
-  const [presetType, setPresetType] = useState<TTypePreset>("all");
+  const [view, setView] = useState<TLensView>("overview");
+  const [typePreset, setTypePreset] = useState<TTypePreset>("all");
 
   const go: TLensNavigate = (next, nextSub) => {
-    setTab(next);
-    if (next !== "seo") return;
-    if (nextSub === "pages" || nextSub === "history") {
-      setSub(nextSub);
+    if (next === "seo") {
+      if (nextSub === "history" || nextSub === "pages") {
+        setView(nextSub === "history" ? "history" : "pages");
+        return;
+      }
+      setView("seo");
+      setTypePreset(nextSub === "onpage" || nextSub === "technical" ? nextSub : "all");
       return;
     }
-    setSub("all");
-    setPresetType(nextSub === "onpage" || nextSub === "technical" ? nextSub : "all");
+    if (next === "overview" || next === "uptime") {
+      setView(next);
+      return;
+    }
+    setView("pages");
   };
 
   return (
@@ -68,41 +79,29 @@ export function LensSection() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <LensTabs<TLensTab>
+          <LensTabs<TLensTab | "pages">
             label={t("seoTitle")}
-            value={tab}
-            onChange={setTab}
+            value={view === "history" ? null : view}
+            onChange={(id) => setView(id)}
             items={[
               { id: "overview", label: t("tabOverview") },
               { id: "seo", label: t("tabSeo") },
+              { id: "pages", label: t("pagesTitle") },
               { id: "uptime", label: t("tabUptime") },
             ]}
           />
-          <Button variant="outlined" size="lg" onClick={() => go("seo", "history")} className="h-11 rounded-full">
+          <Button variant="outlined" size="lg" onClick={() => go("seo", "history")} className={cn("h-11 rounded-full", view === "history" && "border-brand/60 bg-brand/15")}>
             <Icons.clock aria-hidden />
             {t("viewHistory")}
           </Button>
         </div>
       </div>
 
-      {tab === "overview" ? <LensOverview data={data} t={t} locale={locale} go={go} /> : null}
-
-      {tab === "seo" ? (
-        <div className="flex flex-col gap-4">
-          <LensTabs<TSeoSub>
-            label={t("tabSeo")}
-            value={sub}
-            onChange={setSub}
-            items={[
-              { id: "all", label: t("seoAllIssues") },
-              { id: "pages", label: t("pagesTitle") },
-            ]}
-          />
-          <LensSeoHealth data={data} t={t} locale={locale} sub={sub} presetType={presetType} />
-        </div>
-      ) : null}
-
-      {tab === "uptime" ? <LensUptime data={data} t={t} locale={locale} /> : null}
+      {view === "overview" ? <LensOverview data={data} t={t} locale={locale} go={go} /> : null}
+      {view === "seo" ? <LensIssues key={typePreset} data={data} t={t} locale={locale} presetType={typePreset} /> : null}
+      {view === "pages" ? <LensPages data={data} t={t} /> : null}
+      {view === "history" ? <LensHistory data={data} t={t} locale={locale} /> : null}
+      {view === "uptime" ? <LensUptime data={data} t={t} locale={locale} /> : null}
       </div>
     </div>
   );

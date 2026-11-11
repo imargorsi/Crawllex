@@ -160,7 +160,7 @@ export function LensScoreRing({ score, bands, size = 180, centerLabel }: {
 /** Segmented pill tabs. Items with `disabled` stay visible as placeholders until their page exists. */
 export function LensTabs<T extends string>({ items, value, onChange, label }: {
   items: { id: T; label: string; disabled?: boolean; hint?: string }[];
-  value: T;
+  value: T | null;
   onChange: (id: T) => void;
   label: string;
 }) {

@@ -399,8 +399,6 @@ export interface Translation {
     notEvaluated: string;
     bullet_robots_sitemap_page: string;
     bullet_thin_content: string;
-    filterSeverity: string;
-    filterType: string;
     filterRule: string;
     filterAll: string;
     typeOnpage: string;
@@ -423,7 +421,6 @@ export interface Translation {
     noIssuesMatch: string;
     openIssuesCount: string;
     howToFix: string;
-    resolvedOn: string;
     pageIssues: string;
     pagesUnit: string;
     issueFound: string;
@@ -2311,8 +2308,6 @@ const translation: Translation = {
     notEvaluated: "Not Evaluated",
     bullet_robots_sitemap_page: "Sitemap pages blocked by robots.txt: {{pages}}. Search engines cannot read them.",
     bullet_thin_content: "{{pages}} pages have very little content. Advisory only.",
-    filterSeverity: "Severity",
-    filterType: "Type",
     filterRule: "Rule",
     filterAll: "All",
     typeOnpage: "On-Page",
@@ -2335,7 +2330,6 @@ const translation: Translation = {
     noIssuesMatch: "No issues match these filters.",
     openIssuesCount: "{{count}} open",
     howToFix: "How to Fix",
-    resolvedOn: "Resolved {{date}}",
     pageIssues: "Page Issues",
     pagesUnit: "pages",
     issueFound: "What We Found",
