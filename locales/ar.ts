@@ -424,6 +424,9 @@ const translation: Translation = {
     filterType: "النوع",
     filterSeverity: "الشدة",
     aiSuggestion: "اقتراح الذكاء الاصطناعي",
+    severityImpact: "الشدة تؤثر على درجة SEO",
+    advisoryNoImpact: "استشاري. لا يغير الدرجة.",
+    openIssueDetails: "فتح تفاصيل المشكلة",
   },
   oriel: {
     conversations: "المحادثات",

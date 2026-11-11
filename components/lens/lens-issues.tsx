@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import type { TLensT } from "@/components/lens/lens-overview";
+import { formatWhen, type TLensT } from "@/components/lens/lens-overview";
 import { TableListSort } from "@/components/table/table-list-sort";
 import { LENS_FLOAT_CARD, LensCardHeader, LensEmpty, LensPill, LensTabs, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
 import type { TLensDemoDashboard, TLensDemoIssue, TLensGroup, TLensRuleGroup } from "@/features/lens/lens.demo";
@@ -49,9 +49,10 @@ function StatTile({ icon: Icon, label, value, tone }: { icon: typeof Icons.alert
  * All Issues: the SEO command center for current open issues.
  * Rule tabs, severity and type chips, sort. Resolved issues are not shown here (they belong in History).
  */
-export function LensIssues({ data, t, presetType }: {
+export function LensIssues({ data, t, locale, presetType }: {
   data: TLensDemoDashboard;
   t: TLensT;
+  locale: string;
   presetType: TTypeFilter;
 }) {
   const [severity, setSeverity] = useState<TSeverityFilter>("all");
@@ -142,7 +143,7 @@ export function LensIssues({ data, t, presetType }: {
       ) : (
         <ul className="flex flex-col gap-5">
           {rows.map((issue) => (
-            <IssueCard key={issue.id} issue={issue} t={t} />
+            <IssueCard key={issue.id} issue={issue} t={t} locale={locale} lastCheckAt={data.lastCheckAt} />
           ))}
         </ul>
       )}
@@ -150,10 +151,11 @@ export function LensIssues({ data, t, presetType }: {
   );
 }
 
-/** One issue. Title with its affected pages under it, count on the right, then findings, fix and AI suggestion. */
-function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
+/** One issue, laid out like the reference: header with count, affected pages strip, four equal panels, footer. */
+function IssueCard({ issue, t, locale, lastCheckAt }: { issue: TLensDemoIssue; t: TLensT; locale: string; lastCheckAt: string }) {
+  const scored = issue.severity !== "advisory";
   return (
-    <li className={cn(LENS_FLOAT_CARD, "gap-5 p-5 sm:p-6")}>
+    <li className={cn(LENS_FLOAT_CARD, "gap-6 p-5 sm:p-7")}>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -161,48 +163,63 @@ function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
             <Tag>{issue.group === "onpage" ? t("typeOnpage") : t("typeTechnical")}</Tag>
             <Tag>{t(RULE_LABEL_KEY[issue.ruleGroup])}</Tag>
           </div>
-          <div className="flex flex-col gap-2">
-            <h3 className="text-lg font-semibold leading-snug text-text-primary">{issue.title}</h3>
-            <ul className="flex flex-wrap gap-1.5">
-              {issue.pages.map((url) => (
-                <li key={url} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-text-secondary">{url}</li>
-              ))}
-            </ul>
+          <div className="flex flex-col gap-1">
+            <h3 className="text-xl font-semibold leading-snug text-text-primary">{issue.title}</h3>
+            <p className="text-sm text-text-secondary">{issue.found}</p>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-border bg-text-primary/[0.03] px-4 py-2.5 shadow-sm dark:border-text-primary/35">
+        <div className="flex shrink-0 items-center gap-2.5 rounded-full border border-border bg-text-primary/[0.03] px-4 py-2 shadow-sm dark:border-text-primary/35">
           <Icons.globe className="size-4 text-text-muted" aria-hidden />
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-2xl font-semibold tabular-nums leading-none text-text-primary">{issue.affected}</span>
-            <span className="text-xs text-text-muted">{t("pagesUnit")}</span>
-          </div>
+          <span className="text-xl font-semibold tabular-nums text-text-primary">{issue.affected}</span>
+          <span className="text-sm text-text-muted">{t("pagesUnit")}</span>
         </div>
       </header>
 
-      <div className="grid overflow-hidden rounded-2xl border border-border bg-brand/[0.025] shadow-sm backdrop-blur-sm md:grid-cols-2 md:divide-x md:divide-border/70 dark:border-text-primary/35">
-        <FindingRow icon={Icons.search} label={t("issueFound")} text={issue.found} />
-        <FindingRow icon={Icons.alert} label={t("issueWhy")} text={issue.why} />
+      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-text-primary/[0.03] p-4 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center dark:border-text-primary/35">
+        <div className="flex min-w-0 shrink-0 items-center gap-3">
+          <span className="inline-flex size-9 items-center justify-center rounded-xl bg-brand/15">
+            <Icons.file className="size-4 text-brand" aria-hidden />
+          </span>
+          <span className="text-sm font-semibold text-text-primary">{t("issuePages")}</span>
+        </div>
+        <ul className="flex min-w-0 flex-1 flex-wrap gap-1.5">
+          {issue.pages.map((url) => (
+            <li key={url} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-text-secondary">{url}</li>
+          ))}
+        </ul>
+        <button type="button" className="inline-flex shrink-0 items-center gap-1 text-xs font-medium text-brand hover:underline">
+          {t("viewAllPages")}
+          <Icons.arrowRight className="size-3.5" aria-hidden />
+        </button>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Panel icon={Icons.search} label={t("issueFound")}>{issue.found}</Panel>
+        <Panel icon={Icons.alert} label={t("issueWhy")}>{issue.why}</Panel>
         <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">{issue.fix}</Panel>
         <Panel icon={Icons.sparkles} label={t("aiSuggestion")}>{issue.aiSuggestion}</Panel>
       </div>
-    </li>
-  );
-}
 
-function FindingRow({ icon: Icon, label, text }: { icon: typeof Icons.alert; label: string; text: string }) {
-  return (
-    <div className="flex gap-3 px-4 py-3.5">
-      <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-bg-hover">
-        <Icon className="size-3.5 text-text-secondary" aria-hidden />
-      </span>
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-xs font-medium text-text-muted">{label}</span>
-        <p className="text-sm leading-relaxed text-text-primary">{text}</p>
-      </div>
-    </div>
+      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-border/70 pt-4">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-text-muted">
+          <span className="inline-flex items-center gap-2">
+            <Icons.chartBar className="size-4 text-text-secondary" aria-hidden />
+            {scored ? t("severityImpact") : t("advisoryNoImpact")}
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <Icons.clock className="size-4 text-text-secondary" aria-hidden />
+            {t("lastCheck")} {formatWhen(lastCheckAt, locale)}
+          </span>
+        </div>
+        <button
+          type="button"
+          className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-text-primary transition-colors hover:border-brand/50"
+        >
+          <Icons.linkSquare className="size-4" aria-hidden />
+          {t("openIssueDetails")}
+        </button>
+      </footer>
+    </li>
   );
 }
 
@@ -214,7 +231,7 @@ function Tag({ children }: { children: string }) {
   );
 }
 
-/** Info panel used for every block in an issue card. Same size and padding everywhere. */
+/** Equal-size panel used for the four blocks of an issue. */
 function Panel({ icon: Icon, label, children, tone = "neutral" }: {
   icon: typeof Icons.alert;
   label: string;
@@ -224,19 +241,19 @@ function Panel({ icon: Icon, label, children, tone = "neutral" }: {
   return (
     <div
       className={cn(
-        "flex flex-col gap-2 rounded-2xl border p-4 shadow-sm backdrop-blur-sm",
+        "flex min-h-[9.5rem] flex-col gap-3 rounded-2xl border p-4 shadow-sm backdrop-blur-sm sm:p-5",
         tone === "brand"
-          ? "border-brand/45 bg-brand/[0.06]"
+          ? "border-brand/50 bg-brand/[0.07]"
           : "border-border bg-text-primary/[0.03] dark:border-text-primary/35",
       )}
     >
-      <div className="flex items-center gap-2">
-        <span className={cn("inline-flex size-7 shrink-0 items-center justify-center rounded-lg", tone === "brand" ? "bg-brand/15" : "bg-bg-hover")}>
-          <Icon className={cn("size-3.5", tone === "brand" ? "text-brand" : "text-text-secondary")} aria-hidden />
+      <div className="flex items-center gap-3">
+        <span className={cn("inline-flex size-9 shrink-0 items-center justify-center rounded-xl", tone === "brand" ? "bg-brand/20" : "bg-bg-hover")}>
+          <Icon className={cn("size-4", tone === "brand" ? "text-brand" : "text-text-secondary")} aria-hidden />
         </span>
         <span className={cn("text-sm font-semibold", tone === "brand" ? "text-brand" : "text-text-primary")}>{label}</span>
       </div>
-      <div className="text-sm leading-relaxed text-text-secondary">{children}</div>
+      <p className="text-sm leading-relaxed text-text-secondary">{children}</p>
     </div>
   );
 }

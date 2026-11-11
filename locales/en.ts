@@ -422,6 +422,9 @@ export interface Translation {
     filterType: string;
     filterSeverity: string;
     aiSuggestion: string;
+    severityImpact: string;
+    advisoryNoImpact: string;
+    openIssueDetails: string;
   };
   oriel: {
     conversations: string;
@@ -2322,13 +2325,16 @@ const translation: Translation = {
     showingIssues: "Showing {{shown}} of {{total}} issues",
     noIssuesMatch: "No issues match these filters.",
     openIssuesCount: "{{count}} open",
-    howToFix: "How to Fix",
+    howToFix: "How To Fix",
     pageIssues: "Page Issues",
     pagesUnit: "pages",
     issueFound: "What We Found",
     filterType: "Type",
     filterSeverity: "Severity",
     aiSuggestion: "AI Suggestion",
+    severityImpact: "Severity Impacts SEO Health Score",
+    advisoryNoImpact: "Advisory. Does not change the score.",
+    openIssueDetails: "Open Issue Details",
   },
   oriel: {
     conversations: "Conversations",
