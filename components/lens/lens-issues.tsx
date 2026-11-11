@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { formatWhen, type TLensT } from "@/components/lens/lens-overview";
 import { TableListSort } from "@/components/table/table-list-sort";
@@ -9,9 +9,13 @@ import type { TLensDemoDashboard, TLensDemoIssue, TLensGroup, TLensRuleGroup } f
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
 
-type TSeverityFilter = "all" | TLensSeverity;
-type TTypeFilter = "all" | TLensGroup;
-type TRuleTab = "all" | TLensRuleGroup;
+export type TSeverityFilter = "all" | TLensSeverity;
+export type TTypeFilter = "all" | TLensGroup;
+export type TRuleTab = "all" | TLensRuleGroup;
+
+export const SEVERITY_FILTERS: TSeverityFilter[] = ["all", "high", "medium", "advisory"];
+export const TYPE_FILTERS: TTypeFilter[] = ["all", "onpage", "technical"];
+export const RULE_FILTERS: TRuleTab[] = ["all", "titles", "descriptions", "headings", "content", "images", "indexing", "robots", "urls", "links", "structured"];
 
 const SEVERITY_RANK: Record<TLensSeverity, number> = { high: 3, medium: 2, advisory: 1 };
 
@@ -64,15 +68,17 @@ function StatTile({ icon: Icon, label, value, tone, trend }: {
  * All Issues: the SEO command center for current open issues.
  * Rule tabs, severity and type chips, sort. Resolved issues are not shown here (they belong in History).
  */
-export function LensIssues({ data, t, locale, presetType }: {
+export function LensIssues({ data, t, locale, filters, onFilterChange }: {
   data: TLensDemoDashboard;
   t: TLensT;
   locale: string;
-  presetType: TTypeFilter;
+  filters: { type: TTypeFilter; severity: TSeverityFilter; rule: TRuleTab };
+  onFilterChange: (key: "type" | "severity" | "rule", value: string) => void;
 }) {
-  const [severity, setSeverity] = useState<TSeverityFilter>("all");
-  const [type, setType] = useState<TTypeFilter>(presetType);
-  const [rule, setRule] = useState<TRuleTab>("all");
+  const { type, severity, rule } = filters;
+  const setType = (v: TTypeFilter) => onFilterChange("type", v);
+  const setSeverity = (v: TSeverityFilter) => onFilterChange("severity", v);
+  const setRule = (v: TRuleTab) => onFilterChange("rule", v);
 
   const open = useMemo(() => data.issues.filter((i) => i.status === "open"), [data.issues]);
 

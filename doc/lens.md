@@ -41,6 +41,19 @@ Strings: `lens` block in `locales/en.ts` and `locales/ar.ts`. Arabic values are 
 
 Clickable cards: `LensClickCard`. Only the four section cards and the tab/button links route (to tabs). Other cards have the affordance but no action yet.
 
+## URL state (shareable screens)
+
+Every view and filter lives in the URL, read and written with `hooks/use-query-params.hook.ts`:
+
+| Param | Values | Default (not written) |
+|---|---|---|
+| `view` | `seo`, `pages`, `uptime`, `history` | overview |
+| `type` | `onpage`, `technical` | all (SEO Health only) |
+| `severity` | `high`, `medium`, `advisory` | all (SEO Health only) |
+| `rule` | `titles`, `descriptions`, `headings`, `content`, `images`, `indexing`, `robots`, `urls`, `links`, `structured` | all (SEO Health only) |
+
+Example: `/lens?view=seo&type=technical&severity=high` opens SEO Health, Technical, High. Unknown values fall back to the default. Switching view clears the filters.
+
 ## Rules the UI follows
 
 - Score bands: Needs attention below 60, Needs work 60–84, Healthy 85 and above.
