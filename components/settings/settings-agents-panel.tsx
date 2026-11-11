@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { useSelectedProject } from "@/context/selected-project-context";
 import { useEnrollProjectInLensMutation } from "@/features/projects/projects.api";
 import { Icons } from "@/lib/frontend/icons/app-icons";
+import { analyticsPanelClass, elevatedCardSurfaceClass } from "@/lib/frontend/layout/dashboard-chrome";
 import { cn } from "@/lib/utils";
 import type { TProjectListItem } from "@/types/project.types";
 
@@ -59,25 +60,25 @@ function LensAgentCard({ project }: { project: TProjectListItem }) {
       : t("lensStatusNotEnrolled");
 
   return (
-    <section className="rounded-3xl border border-text-primary/30 bg-text-primary/[0.04] p-6 shadow-(--shadow-elevated) backdrop-blur-xl sm:p-7">
+    <section className={cn(elevatedCardSurfaceClass, analyticsPanelClass)}>
       <div className="flex flex-wrap items-center justify-between gap-5">
         <div className="flex min-w-0 items-center gap-5">
           <span
-            className="inline-flex size-14 shrink-0 items-center justify-center rounded-2xl border border-brand/60 bg-brand/10 shadow-[0_0_28px_-8px_var(--brand)]"
+            className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-bg-card/40 dark:border-text-primary/40 dark:bg-transparent"
             aria-hidden
           >
-            <Icons.search className="size-6 text-brand" />
+            <Icons.search className="size-4 text-brand" />
           </span>
           <div className="flex min-w-0 flex-col gap-1.5">
-            <h3 className="text-2xl font-semibold text-text-primary">{t("lensTitle")}</h3>
-            <p className="text-base text-text-muted">{t("lensLead")}</p>
+            <h3 className="type-title text-text-primary">{t("lensTitle")}</h3>
+            <p className="type-caption text-text-muted">{t("lensLead")}</p>
             {project.status !== "active" && !project.lensEnrolled ? (
               <p className="type-caption text-text-muted">{t("lensNeedsActive")}</p>
             ) : null}
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-3">
-          <span className="inline-flex items-center gap-2.5 rounded-full border border-text-primary/30 bg-text-primary/[0.03] px-4 py-2 text-base text-text-primary">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-0.5 type-caption-xs font-medium text-text-secondary">
             <span
               aria-hidden
               className={cn("size-2 rounded-full", project.lensEnrolled ? "bg-status-active" : "bg-text-muted")}
@@ -93,15 +94,15 @@ function LensAgentCard({ project }: { project: TProjectListItem }) {
         </div>
       </div>
 
-      <div className="my-7 h-px bg-text-primary/15" aria-hidden />
+      <div className="my-5 h-px bg-border/60" aria-hidden />
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2">
         <LensFixedField icon={Icons.analytics} label={t("uptimeWindowLabel")} value="30" suffix={t("daysUnit")} note={t("fixedNote")} />
         <LensFixedField icon={Icons.grid} label={t("pagesLimitLabel")} value="30" note={t("fixedNote")} />
       </div>
 
-      {message ? <p className="mt-5 type-caption text-success">{message}</p> : null}
-      {failed ? <p className="mt-5 type-caption text-destructive">{t("lensEnrollFailed")}</p> : null}
+      {message ? <p className="mt-4 type-caption text-success">{message}</p> : null}
+      {failed ? <p className="mt-4 type-caption text-destructive">{t("lensEnrollFailed")}</p> : null}
     </section>
   );
 }
@@ -121,12 +122,12 @@ function LensFixedField({
   note: string;
 }) {
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-text-primary/25 bg-text-primary/[0.03] p-5">
-      <div className="flex items-center gap-3.5">
-        <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-text-primary/25 bg-text-primary/[0.04]" aria-hidden>
-          <Icon className="size-4 text-text-primary" />
+    <div className="flex flex-col gap-3 rounded-2xl border border-border p-4 dark:border-text-primary/35">
+      <div className="flex items-center gap-2.5">
+        <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/60 dark:border-text-primary/40" aria-hidden>
+          <Icon className="size-3.5 text-text-secondary" />
         </span>
-        <span className="text-lg font-semibold text-text-primary">{label}</span>
+        <span className="type-body-strong text-text-primary">{label}</span>
       </div>
       <div className="flex items-center gap-3">
         <Input
@@ -134,12 +135,12 @@ function LensFixedField({
           value={value}
           disabled
           readOnly
-          className="h-12 w-36 border-text-primary/35 bg-transparent text-lg text-text-primary/75"
+          className="h-9 w-24 text-text-muted"
           aria-label={label}
         />
-        {suffix ? <span className="text-base text-text-muted">{suffix}</span> : null}
+        {suffix ? <span className="type-caption text-text-muted">{suffix}</span> : null}
       </div>
-      <span className="text-sm text-text-muted">{note}</span>
+      <span className="type-caption-xs text-text-muted">{note}</span>
     </div>
   );
 }
