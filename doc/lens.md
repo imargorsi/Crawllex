@@ -9,6 +9,7 @@ Sidebar: **Agents & AI** group (`lib/frontend/layout/sidebar-nav.ts`), with Orie
 
 - **Enroll:** a super admin clicks "Enroll In Lens" in Settings > Agents & AI (category shown to super admin only), for the selected project. `POST /api/v1/projects/[id]/lens/enroll` requires an active project and calls Lens `POST /v1/projects/:id/enroll`. The flag `lensEnrolledAt` is saved only after Lens accepts.
 - **First audit:** Lens queues it in the background on enrollment, if the project has no runs. Enrolling again does not queue another.
+- **Switch:** Agents & AI card. On enrolls; there is no un-enroll route yet, so an enrolled project stays on. Two fields show the fixed values as disabled inputs: uptime monitoring 30 days, pages per check 30. Not editable until the Lens settings phase.
 - **Approval** no longer enrolls a project. Approval and enrollment are separate steps.
 - **Lens page:** shown only when the project is enrolled (`lensEnrolled` on the project; sidebar and route guard). Also needs `lens.view`.
 - **Later checks:** `lens.run` (restricted, super admin assigns). The Start check button and `POST /api/v1/projects/[id]/lens/runs` require enrollment and `lens.run`.

@@ -91,12 +91,15 @@ export interface Translation {
       lensLead: string;
       lensStatusEnrolled: string;
       lensStatusNotEnrolled: string;
-      lensEnrollButton: string;
       lensEnrollBusy: string;
       lensEnrollQueued: string;
       lensEnrollAlready: string;
       lensEnrollFailed: string;
       lensNeedsActive: string;
+      uptimeWindowLabel: string;
+      pagesLimitLabel: string;
+      daysUnit: string;
+      fixedNote: string;
     };
     categories: {
       theme: string;
@@ -2068,12 +2071,15 @@ const translation: Translation = {
       lensLead: "Enrolling runs the first SEO audit in the background. Admins run more checks from the Lens page.",
       lensStatusEnrolled: "Enrolled",
       lensStatusNotEnrolled: "Not enrolled",
-      lensEnrollButton: "Enroll In Lens",
       lensEnrollBusy: "Enrolling…",
       lensEnrollQueued: "Enrolled. The first audit is running in the background.",
       lensEnrollAlready: "This project is already enrolled.",
       lensEnrollFailed: "Could not enroll the project. Try again shortly.",
       lensNeedsActive: "Approve the project before enrolling it in Lens.",
+      uptimeWindowLabel: "Uptime monitoring",
+      pagesLimitLabel: "Pages per check",
+      daysUnit: "days",
+      fixedNote: "Fixed for now. Not editable yet.",
     },
     categories: {
       theme: "Theme",
