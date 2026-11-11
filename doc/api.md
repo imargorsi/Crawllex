@@ -105,9 +105,10 @@ Read-only proxies to the local Lens API. The `/lens` screen does not call these 
 | Route | Returns |
 |---|---|
 | `GET /api/v1/projects/[id]/lens` | `{runs, issues, incidents}` |
+| `GET /api/v1/projects/[id]/lens/uptime` | uptime summary and daily values (rolling 30 days) |
 | `GET /api/v1/projects/[id]/lens/runs/[runId]/findings` | `{items}` findings of one run |
 | `GET /api/v1/projects/[id]/lens/runs/[runId]/screenshots` | `{items}` png names (relative paths) |
-| `GET /api/v1/projects/[id]/lens/runs/[runId]/screenshot/[...path]` | one png, streamed |
+| `GET /api/v1/projects/[id]/lens/runs/[runId]/screenshot?name=<png>` | one png, streamed |
 
 ## Regenerate
 

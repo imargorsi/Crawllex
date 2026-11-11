@@ -1,4 +1,8 @@
 /**
+ * STATUS: superseded. This is the old formula (6/3/1 per open issue, cap 70). It is not used by the UI.
+ * The decided formula (2026-11-11, crawllex-lens docs/DECISIONS.md) replaces it: per-rule weights
+ * high 10, medium 4, advisory 0, scaled by affected/checked; cap 60, floor 40. Implementation pending.
+ *
  * Lens health score for the dashboard. This is OUR formula, not a search ranking signal.
  * Each open issue costs points by severity; the total penalty is capped so a long list still reads as a number, not zero.
  */
