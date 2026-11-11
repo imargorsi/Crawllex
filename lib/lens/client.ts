@@ -20,20 +20,33 @@ export function lensPath(...segments: string[]): string {
 
 /** GET one JSON document from the Lens local API. Never logs the token or the body. */
 export async function lensGet<T>(path: string): Promise<T> {
-  const response = await lensRequest(path);
+  return readJson<T>(await lensRequest(path));
+}
+
+/** POST a JSON body to the Lens local API and read the JSON reply. Used for enrollment and queued runs. */
+export async function lensPost<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  return readJson<T>(await lensRequest(path, { method: "POST", body }));
+}
+
+async function readJson<T>(response: Response): Promise<T> {
   const data: unknown = await response.json().catch(() => null);
   if (data == null || typeof data !== "object") throw new LensError("invalid_response");
   return data as T;
 }
 
-async function lensRequest(path: string): Promise<Response> {
+async function lensRequest(path: string, init: { method?: "POST"; body?: Record<string, unknown> } = {}): Promise<Response> {
   const config = lensConfig();
   if (!config) throw new LensError("disabled");
 
   let response: Response;
   try {
     response = await fetch(`${config.baseUrl}/v1/${path}`, {
-      headers: { Authorization: `Bearer ${config.token}` },
+      method: init.method ?? "GET",
+      headers: {
+        Authorization: `Bearer ${config.token}`,
+        ...(init.body ? { "Content-Type": "application/json" } : {}),
+      },
+      body: init.body ? JSON.stringify(init.body) : undefined,
       redirect: "error",
       cache: "no-store",
       signal: AbortSignal.timeout(LENS_TIMEOUT_MS),

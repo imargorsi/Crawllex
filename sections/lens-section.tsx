@@ -15,6 +15,9 @@ import { LensUptime } from "@/components/lens/lens-uptime";
 import { LensNavBar } from "@/components/lens/lens-ui";
 import { LensPageSheet } from "@/components/lens/lens-page-sheet";
 import { useSelectedProject } from "@/context/selected-project-context";
+import { useAuthUserQuery } from "@/features/auth/auth.api";
+import { useStartLensRunMutation } from "@/features/lens/lens.api";
+import { isSuperAdmin } from "@/lib/rbac/access";
 import { useLensDashboard } from "@/features/lens/use-lens-dashboard";
 import { useQueryParams } from "@/hooks/use-query-params.hook";
 import { Icons } from "@/lib/frontend/icons/app-icons";
@@ -48,6 +51,9 @@ export function LensSection() {
   const { selectedProject } = useSelectedProject();
   const projectId = selectedProject?.id ?? null;
   const { data, isLoading, isError } = useLensDashboard(projectId);
+  const { data: authUser } = useAuthUserQuery();
+  const canRunCheck = isSuperAdmin(authUser?.roles);
+  const startCheck = useStartLensRunMutation(projectId);
   const locale = i18n.language;
   const router = useRouter();
   const { queryParams, setQueryParams, deleteQueryParams } = useQueryParams();
@@ -128,10 +134,18 @@ export function LensSection() {
             </div>
           </div>
           <span className="inline-flex">
-            <Button variant="primary" size="lg" className="h-11">
-              <Icons.rocket aria-hidden />
-              {t("startCheck")}
-            </Button>
+            {canRunCheck ? (
+              <Button
+                variant="primary"
+                size="lg"
+                className="h-11"
+                disabled={startCheck.isPending}
+                onClick={() => startCheck.mutate()}
+              >
+                <Icons.rocket aria-hidden />
+                {startCheck.isPending ? t("checkQueuing") : t("startCheck")}
+              </Button>
+            ) : null}
           </span>
         </div>
       </header>
@@ -156,6 +170,8 @@ export function LensSection() {
         </div>
       </div>
 
+      {startCheck.isSuccess ? <p className="text-sm text-text-muted">{t("checkQueuedNote")}</p> : null}
+      {startCheck.isError ? <p className="text-sm text-destructive">{t("checkFailedNote")}</p> : null}
       {view === "overview" ? <LensOverview data={data} t={t} locale={locale} go={go} /> : null}
       {view === "seo" ? (
         <LensIssues data={data} t={t} locale={locale} filters={filters} onFilterChange={onFilterChange} onNavigate={navigate} />

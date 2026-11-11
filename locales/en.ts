@@ -436,6 +436,9 @@ export interface Translation {
     stateLoading: string;
     stateError: string;
     stateEmpty: string;
+    checkQueuing: string;
+    checkQueuedNote: string;
+    checkFailedNote: string;
     eventOpened: string;
     eventSeen: string;
     eventReopened: string;
@@ -2397,6 +2400,9 @@ const translation: Translation = {
     stateLoading: "Loading SEO health…",
     stateError: "SEO health could not be loaded. Try again shortly.",
     stateEmpty: "No SEO check has been saved for this project yet.",
+    checkQueuing: "Queuing…",
+    checkQueuedNote: "Check queued. Results appear here when it finishes.",
+    checkFailedNote: "The check could not be started. Try again shortly.",
     eventOpened: "First seen",
     eventSeen: "Still open",
     eventReopened: "Reopened after a fix",
