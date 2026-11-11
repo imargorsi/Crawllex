@@ -14,6 +14,7 @@ import { LensPages } from "@/components/lens/lens-pages";
 import { LensUptime } from "@/components/lens/lens-uptime";
 import { LensNavBar } from "@/components/lens/lens-ui";
 import { LensPageSheet } from "@/components/lens/lens-page-sheet";
+import { useSelectedProject } from "@/context/selected-project-context";
 import { useLensDashboard } from "@/features/lens/use-lens-dashboard";
 import { useQueryParams } from "@/hooks/use-query-params.hook";
 import { Icons } from "@/lib/frontend/icons/app-icons";
@@ -23,6 +24,15 @@ import { cn } from "@/lib/utils";
 type TLensView = TLensTab | "pages" | "history";
 const VIEWS: TLensView[] = ["overview", "seo", "pages", "uptime", "history"];
 
+/** Host of the site for the subtitle. Empty when the URL is missing or invalid. */
+function siteHost(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return "";
+  }
+}
+
 /** Keep a query value only if it is one of the allowed values; anything else falls back to the default. */
 function pick<T extends string>(value: string | string[] | undefined, allowed: T[], fallback: T): T {
   return typeof value === "string" && (allowed as string[]).includes(value) ? (value as T) : fallback;
@@ -31,14 +41,31 @@ function pick<T extends string>(value: string | string[] | undefined, allowed: T
 /**
  * Lens dashboard: header, top nav, and the views. The view and every filter live in the URL
  * (?view, ?type, ?severity, ?rule), so a shared link opens the same screen. Defaults are not written.
- * Demo data only.
+ * SEO data from the Lens API. Uptime is demo data until the uptime phase.
  */
 export function LensSection() {
   const { t, i18n } = useTranslation("translation", { keyPrefix: "lens" });
-  const { data } = useLensDashboard();
+  const { selectedProject } = useSelectedProject();
+  const projectId = selectedProject?.id ?? null;
+  const { data, isLoading, isError } = useLensDashboard(projectId);
   const locale = i18n.language;
   const router = useRouter();
   const { queryParams, setQueryParams, deleteQueryParams } = useQueryParams();
+
+  if (!data) {
+    const message = !projectId ? t("stateNoProject") : isError ? t("stateError") : isLoading ? t("stateLoading") : t("stateEmpty");
+    return (
+      <div className="relative w-full min-w-0">
+        <PageBackdrop />
+        <div className="relative flex flex-col gap-5 px-4 py-6 sm:px-6 sm:py-8">
+          <Heading id="lens-title" pageTitle>
+            {t("seoTitle")}
+          </Heading>
+          <Paragraph className="text-text-muted">{message}</Paragraph>
+        </div>
+      </div>
+    );
+  }
 
   const view = pick<TLensView>(queryParams.view, VIEWS, "overview");
   const filters = {
@@ -88,7 +115,7 @@ export function LensSection() {
           <Heading id="lens-title" pageTitle>
             {t("seoTitle")}
           </Heading>
-          <Paragraph className="text-text-muted">{t("subtitle", { site: new URL(data.siteUrl).hostname })}</Paragraph>
+          <Paragraph className="text-text-muted">{t("subtitle", { site: siteHost(data.siteUrl) })}</Paragraph>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3">
           <div className="flex h-11 items-center gap-3 px-1">

@@ -5,23 +5,10 @@ import { useEffect } from "react";
 import { IssueCard } from "@/components/lens/lens-issues";
 import { formatWhen, type TLensT } from "@/components/lens/lens-overview";
 import { LensPill } from "@/components/lens/lens-ui";
-import { pageRuleChecks, RULE_CHECK_IDS, type TLensDemoDashboard, type TLensDemoPage, type TRuleCheckId, type TRuleCheckState } from "@/features/lens/lens.demo";
+import type { TLensDashboard, TLensPage, TLensRuleResult } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 
-const CHECK_LABEL: Record<TRuleCheckId, "checkTitlePresent" | "checkTitleLength" | "checkDescription" | "checkH1" | "checkCanonical" | "checkNoindex" | "checkRobots" | "checkUrl" | "checkImageAlt" | "checkContent"> = {
-  title_present: "checkTitlePresent",
-  title_length: "checkTitleLength",
-  description_present: "checkDescription",
-  h1_present: "checkH1",
-  canonical: "checkCanonical",
-  noindex: "checkNoindex",
-  robots: "checkRobots",
-  url_readable: "checkUrl",
-  image_alt: "checkImageAlt",
-  content_length: "checkContent",
-};
-
-const CHECK_STATE: Record<TRuleCheckState, { tone: "success" | "danger" | "muted"; key: "rsPass" | "rsFinding" | "rsNotEvaluated" }> = {
+const CHECK_STATE: Record<TLensRuleResult, { tone: "success" | "danger" | "muted"; key: "rsPass" | "rsFinding" | "rsNotEvaluated" }> = {
   pass: { tone: "success", key: "rsPass" },
   finding: { tone: "danger", key: "rsFinding" },
   not_evaluated: { tone: "muted", key: "rsNotEvaluated" },
@@ -32,8 +19,8 @@ const CHECK_STATE: Record<TRuleCheckState, { tone: "success" | "danger" | "muted
  * counts, every rule check with its result, and the issue cards for this page (the same cards as SEO Health).
  */
 export function LensPageSheet({ page, data, t, locale, onClose, onNavigate }: {
-  page: TLensDemoPage;
-  data: TLensDemoDashboard;
+  page: TLensPage;
+  data: TLensDashboard;
   t: TLensT;
   locale: string;
   onClose: () => void;
@@ -48,11 +35,10 @@ export function LensPageSheet({ page, data, t, locale, onClose, onNavigate }: {
   }, [onClose]);
 
   const issues = data.issues.filter((i) => i.status === "open" && i.pages.includes(page.url));
-  const checks = pageRuleChecks(page.url, page.state, data.issues);
   const counts = {
-    high: issues.filter((i) => i.severity === "high").length,
-    medium: issues.filter((i) => i.severity === "medium").length,
-    advisory: issues.filter((i) => i.severity === "advisory").length,
+    high: page.counts.mustFix,
+    medium: page.counts.shouldFix,
+    advisory: page.counts.worthALook,
   };
   const scanTone = page.state === "checked" ? "success" : page.state === "failed" ? "danger" : "muted";
   const scanLabel = page.state === "checked" ? t("stateChecked") : page.state === "failed" ? t("stateFailed") : t("notEvaluated");
@@ -101,12 +87,11 @@ export function LensPageSheet({ page, data, t, locale, onClose, onNavigate }: {
         <section className="flex flex-col gap-3">
           <h3 className="text-base font-semibold text-text-primary">{t("ruleChecks")}</h3>
           <ul className="grid gap-2 sm:grid-cols-2">
-            {RULE_CHECK_IDS.map((id) => {
-              const state = checks.find((c) => c.id === id)?.state ?? "not_evaluated";
-              const meta = CHECK_STATE[state];
+            {page.ruleChecks.map((check) => {
+              const meta = CHECK_STATE[check.result];
               return (
-                <li key={id} className="flex items-center justify-between gap-3 rounded-xl border border-border px-4 py-3 dark:border-text-primary/35">
-                  <span className="text-sm text-text-primary">{t(CHECK_LABEL[id])}</span>
+                <li key={check.id} className="flex items-center justify-between gap-3 rounded-xl border border-border px-4 py-3 dark:border-text-primary/35">
+                  <span className="text-sm text-text-primary">{check.title}</span>
                   <LensPill tone={meta.tone}>{t(meta.key)}</LensPill>
                 </li>
               );

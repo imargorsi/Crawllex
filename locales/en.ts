@@ -419,10 +419,6 @@ export interface Translation {
     trendCaption: string;
     allClear: string;
     issueSummary: string;
-    effortLabel: string;
-    effortLow: string;
-    effortMedium: string;
-    effortHigh: string;
     firstSeen: string;
     statusLabel: string;
     viewInHistory: string;
@@ -433,6 +429,21 @@ export interface Translation {
     sortSeverity: string;
     sortPages: string;
     aiSuggestionNote: string;
+    aiSuggestionPending: string;
+    verifyLabel: string;
+    noScore: string;
+    stateNoProject: string;
+    stateLoading: string;
+    stateError: string;
+    stateEmpty: string;
+    eventOpened: string;
+    eventSeen: string;
+    eventReopened: string;
+    eventResolved: string;
+    eventFixFailed: string;
+    eventVerified: string;
+    eventNotSeenPartial: string;
+    eventVerificationInconclusive: string;
     hideDetails: string;
     close: string;
     pageDetailTitle: string;
@@ -442,16 +453,6 @@ export interface Translation {
     ruleChecks: string;
     issuesOnPage: string;
     noIssuesOnPage: string;
-    checkTitlePresent: string;
-    checkTitleLength: string;
-    checkDescription: string;
-    checkH1: string;
-    checkCanonical: string;
-    checkNoindex: string;
-    checkRobots: string;
-    checkUrl: string;
-    checkImageAlt: string;
-    checkContent: string;
     rsPass: string;
     rsFinding: string;
     rsNotEvaluated: string;
@@ -2379,10 +2380,6 @@ const translation: Translation = {
     trendCaption: "Trend, last 7 checks",
     allClear: "No open issues. Nothing needs fixing right now.",
     issueSummary: "Issue summary",
-    effortLabel: "Effort",
-    effortLow: "Low",
-    effortMedium: "Medium",
-    effortHigh: "High",
     firstSeen: "First seen",
     statusLabel: "Status",
     viewInHistory: "View in history",
@@ -2393,6 +2390,21 @@ const translation: Translation = {
     sortSeverity: "Severity",
     sortPages: "Most pages",
     aiSuggestionNote: "Suggested by AI. Review before you apply it.",
+    aiSuggestionPending: "Not generated yet.",
+    verifyLabel: "How To Verify",
+    noScore: "No score yet. Run a check to get a score.",
+    stateNoProject: "Select a project to see its SEO health.",
+    stateLoading: "Loading SEO health…",
+    stateError: "SEO health could not be loaded. Try again shortly.",
+    stateEmpty: "No SEO check has been saved for this project yet.",
+    eventOpened: "First seen",
+    eventSeen: "Still open",
+    eventReopened: "Reopened after a fix",
+    eventResolved: "Resolved",
+    eventFixFailed: "Fix not confirmed",
+    eventVerified: "Verified fixed",
+    eventNotSeenPartial: "Not seen in a partial check",
+    eventVerificationInconclusive: "Verification inconclusive",
     hideDetails: "Hide details",
     close: "Close",
     pageDetailTitle: "Page Details",
@@ -2402,16 +2414,6 @@ const translation: Translation = {
     ruleChecks: "Rule Checks",
     issuesOnPage: "Issues on This Page",
     noIssuesOnPage: "No open issues on this page.",
-    checkTitlePresent: "Page Title Present",
-    checkTitleLength: "Title Length",
-    checkDescription: "Meta Description",
-    checkH1: "Main Heading",
-    checkCanonical: "Canonical Tag",
-    checkNoindex: "Indexing (noindex)",
-    checkRobots: "Robots and Sitemap",
-    checkUrl: "Page URL",
-    checkImageAlt: "Image Alt Text",
-    checkContent: "Content Length",
     rsPass: "Pass",
     rsFinding: "Finding",
     rsNotEvaluated: "Not Evaluated",

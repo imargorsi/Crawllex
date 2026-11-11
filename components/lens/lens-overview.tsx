@@ -16,7 +16,7 @@ import {
   type TLensSeverity,
   type TLensTone,
 } from "@/components/lens/lens-ui";
-import type { TLensDemoDashboard, TLensDemoIssue } from "@/features/lens/lens.demo";
+import type { TLensDashboard, TLensIssue } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { buildSeoSummary } from "@/lib/lens/seo-summary";
 import { cn } from "@/lib/utils";
@@ -25,7 +25,7 @@ export type TLensT = TFunction<"translation", "lens">;
 export type TLensTab = "overview" | "seo" | "uptime";
 export type TLensNavigate = (tab: TLensTab, sub?: "onpage" | "technical" | "pages" | "history") => void;
 
-type TProps = { data: TLensDemoDashboard; t: TLensT; locale: string; go: TLensNavigate };
+type TProps = { data: TLensDashboard; t: TLensT; locale: string; go: TLensNavigate };
 
 export function scoreBandOf(score: number): "good" | "work" | "attention" {
   if (score >= 85) return "good";
@@ -85,7 +85,7 @@ function HealthLegend({ score, t }: { score: number; t: TLensT }) {
 }
 
 /** Uptime: the most important availability number. Neutral glass panel (not a band chip), large figure, 30 daily bars. */
-function UptimeBlock({ data, t }: { data: TLensDemoDashboard; t: TLensT }) {
+function UptimeBlock({ data, t }: { data: TLensDashboard; t: TLensT }) {
   const operational = data.uptime.status === "operational";
   return (
     <div className="flex w-full flex-col gap-4 rounded-2xl border border-border bg-text-primary/[0.04] p-5 shadow-(--shadow) dark:border-text-primary/40 dark:bg-text-primary/[0.06]">
@@ -109,7 +109,8 @@ function UptimeBlock({ data, t }: { data: TLensDemoDashboard; t: TLensT }) {
 }
 const SEVERITY_RANK: Record<TLensSeverity, number> = { high: 3, medium: 2, advisory: 1 };
 
-export function formatWhen(iso: string, locale: string) {
+export function formatWhen(iso: string | null, locale: string) {
+  if (!iso) return "—";
   return new Date(iso).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" });
 }
 
@@ -121,7 +122,7 @@ export function severityKey(severity: TLensSeverity) {
   return severity === "high" ? "severityHigh" : severity === "medium" ? "severityMedium" : "severityAdvisory";
 }
 
-function sumAffected(issues: TLensDemoIssue[], group: "onpage" | "technical") {
+function sumAffected(issues: TLensIssue[], group: "onpage" | "technical") {
   return issues.filter((i) => i.group === group).reduce((sum, i) => sum + i.affected, 0);
 }
 
@@ -202,9 +203,9 @@ export function LensOverview({ data, t, locale, go }: TProps) {
 }
 
 /** Full-width SEO score: ring and band, three explained counts, rule-based summary bullets. */
-function SeoScoreCard({ data, t }: { data: TLensDemoDashboard; t: TLensT }) {
+function SeoScoreCard({ data, t }: { data: TLensDashboard; t: TLensT }) {
   const { seo } = data;
-  const band = scoreBandOf(seo.score);
+  const band = seo.score === null ? null : scoreBandOf(seo.score);
   const bullets = buildSeoSummary({
     issues: data.issues.map((i) => ({ id: i.id, title: i.title, severity: i.severity, affected: i.affected })),
     checked: seo.checked,
@@ -222,21 +223,29 @@ function SeoScoreCard({ data, t }: { data: TLensDemoDashboard; t: TLensT }) {
             <LensPill tone={seo.partial ? "warning" : "success"} className="px-3.5 py-1.5 text-sm">
               {seo.partial ? t("partialScan") : t("completeScan")}
             </LensPill>
-            <LensPill tone={BAND_TONE[band]} className="px-3.5 py-1.5 text-sm">{t(`band_${band}`)}</LensPill>
+            {band ? <LensPill tone={BAND_TONE[band]} className="px-3.5 py-1.5 text-sm">{t(`band_${band}`)}</LensPill> : null}
           </div>
         }
       />
       <div className="grid gap-6 lg:grid-cols-[3fr_7fr] lg:items-stretch">
         <div className="flex flex-col items-center justify-center gap-4 text-center">
-          <LensScoreRing score={seo.score} bands={HEALTH_BANDS} size={164} />
-          <HealthLegend score={seo.score} t={t} />
+          {seo.score === null ? (
+            <div className="flex size-[164px] items-center justify-center rounded-full border border-dashed border-border text-center text-sm text-text-muted">{t("noScore")}</div>
+          ) : (
+            <>
+              <LensScoreRing score={seo.score} bands={HEALTH_BANDS} size={164} />
+              <HealthLegend score={seo.score} t={t} />
+            </>
+          )}
           <UptimeBlock data={data} t={t} />
         </div>
 
         <div className="flex min-w-0 flex-col gap-4">
-          <p className="text-sm font-medium text-text-primary">
-            {seo.score >= 85 ? t("stayHealthy") : t("pointsToHealthy", { points: 85 - seo.score })}
-          </p>
+          {seo.score !== null ? (
+            <p className="text-sm font-medium text-text-primary">
+              {seo.score >= 85 ? t("stayHealthy") : t("pointsToHealthy", { points: 85 - seo.score })}
+            </p>
+          ) : null}
           <div className="grid gap-3 sm:grid-cols-3">
             <CountTile tone="danger" label={t("mustFixLabel")} value={seo.failed} help={t("mustFixNote")} />
             <CountTile tone="warning" label={t("shouldFixLabel")} value={seo.warnings} help={t("shouldFixNote")} />
@@ -274,7 +283,7 @@ function CountTile({ tone, label, value, help }: { tone: TLensTone; label: strin
   );
 }
 
-function PagesAffectedCard({ data, t }: { data: TLensDemoDashboard; t: TLensT }) {
+function PagesAffectedCard({ data, t }: { data: TLensDashboard; t: TLensT }) {
   const { seo } = data;
   return (
     <LensClickCard label={t("pagesAffectedTitle")} interactive={false}>
@@ -303,7 +312,7 @@ function PagesAffectedCard({ data, t }: { data: TLensDemoDashboard; t: TLensT })
   );
 }
 
-function PriorityCard({ data, t, go }: { data: TLensDemoDashboard; t: TLensT; go: TLensNavigate }) {
+function PriorityCard({ data, t, go }: { data: TLensDashboard; t: TLensT; go: TLensNavigate }) {
   const rows = [...data.issues]
     .filter((i) => i.affected > 0)
     .sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity] || b.affected - a.affected)
@@ -336,7 +345,7 @@ function PriorityCard({ data, t, go }: { data: TLensDemoDashboard; t: TLensT; go
                 <td className="px-2 py-3"><LensPill tone={severityTone(row.severity)}>{t(severityKey(row.severity))}</LensPill></td>
                 <td className="px-2 py-3 font-medium text-text-primary">{row.title}</td>
                 <td className="px-2 py-3 tabular-nums text-text-secondary">{t("pagesCount", { count: row.affected })}</td>
-                <td className="px-2 py-3 text-text-secondary">{row.action}</td>
+                <td className="px-2 py-3 text-text-secondary">{row.fix}</td>
               </tr>
             ))}
           </tbody>
@@ -400,11 +409,11 @@ function LinkCard({ icon: Icon, title, value, unit, description, segments, footn
   );
 }
 
-function allIssueTotal(issues: TLensDemoIssue[]) {
+function allIssueTotal(issues: TLensIssue[]) {
   return issues.reduce((sum, i) => sum + i.affected, 0);
 }
 
-function allSeverityTotals(issues: TLensDemoIssue[]) {
+function allSeverityTotals(issues: TLensIssue[]) {
   return [
     { value: issues.filter((i) => i.severity === "high").reduce((s, i) => s + i.affected, 0), tone: "danger" as const },
     { value: issues.filter((i) => i.severity === "medium").reduce((s, i) => s + i.affected, 0), tone: "warning" as const },
@@ -412,7 +421,7 @@ function allSeverityTotals(issues: TLensDemoIssue[]) {
   ];
 }
 
-function severityTotals(issues: TLensDemoIssue[], group: "onpage" | "technical") {
+function severityTotals(issues: TLensIssue[], group: "onpage" | "technical") {
   const totals = { high: 0, medium: 0, advisory: 0 };
   for (const issue of issues) if (issue.group === group) totals[issue.severity] += issue.affected;
   return [
@@ -423,7 +432,7 @@ function severityTotals(issues: TLensDemoIssue[], group: "onpage" | "technical")
 }
 
 /** Uptime, last 30 days: headline figures first, then the daily chart with its legend and the lowest day. */
-function UptimeChartCard({ data, t, locale, go }: { data: TLensDemoDashboard; t: TLensT; locale: string; go: TLensNavigate }) {
+function UptimeChartCard({ data, t, locale, go }: { data: TLensDashboard; t: TLensT; locale: string; go: TLensNavigate }) {
   const { uptime } = data;
   const operational = uptime.status === "operational";
   const measured = uptime.daily.filter((d) => d.uptimePct != null);

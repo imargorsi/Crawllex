@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import { formatWhen, type TLensT } from "@/components/lens/lens-overview";
 import { LensEmpty, LensNavBar, LensPill, LensStatTile, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
 import { TableListSort } from "@/components/table/table-list-sort";
-import type { TLensDemoDashboard, TLensDemoIssue, TLensGroup, TLensRuleGroup } from "@/features/lens/lens.demo";
+import type { TLensDashboard, TLensEventCode, TLensIssue, TLensGroup, TLensRuleGroup } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +22,18 @@ export const SORT_FILTERS: TSortFilter[] = ["severity", "pages"];
 type TNavigate = (view: "pages" | "history", extra?: Record<string, string>) => void;
 
 const SEVERITY_RANK: Record<TLensSeverity, number> = { high: 3, medium: 2, advisory: 1 };
+
+/** Lens lifecycle event code to label. */
+export const EVENT_LABEL_KEY: Record<TLensEventCode, "eventOpened" | "eventSeen" | "eventReopened" | "eventResolved" | "eventFixFailed" | "eventVerified" | "eventNotSeenPartial" | "eventVerificationInconclusive"> = {
+  opened: "eventOpened",
+  seen: "eventSeen",
+  reopened: "eventReopened",
+  resolved: "eventResolved",
+  fix_failed: "eventFixFailed",
+  verified: "eventVerified",
+  not_seen_partial: "eventNotSeenPartial",
+  verification_inconclusive: "eventVerificationInconclusive",
+};
 
 const RULE_LABEL_KEY: Record<TLensRuleGroup, "ruleTitles" | "ruleDescriptions" | "ruleHeadings" | "ruleContent" | "ruleImages" | "ruleIndexing" | "ruleRobots" | "ruleUrls" | "ruleLinks" | "ruleStructured"> = {
   titles: "ruleTitles",
@@ -55,7 +67,7 @@ function formatDay(iso: string, locale: string) {
  * Filters, sort and view state come from the URL (see LensSection). Resolved issues belong in History.
  */
 export function LensIssues({ data, t, locale, filters, onFilterChange, onNavigate }: {
-  data: TLensDemoDashboard;
+  data: TLensDashboard;
   t: TLensT;
   locale: string;
   filters: { type: TTypeFilter; severity: TSeverityFilter; rule: TRuleTab; sort: TSortFilter };
@@ -183,7 +195,7 @@ export function LensIssues({ data, t, locale, filters, onFilterChange, onNavigat
 }
 
 /** Compact list of the filtered issues. Each row jumps to its card, so long lists stay easy to scan. */
-function IssueSummary({ rows, t }: { rows: TLensDemoIssue[]; t: TLensT }) {
+function IssueSummary({ rows, t }: { rows: TLensIssue[]; t: TLensT }) {
   if (rows.length === 0) return null;
   return (
     <div className="flex flex-col gap-1 rounded-2xl border border-border p-2 dark:border-text-primary/35">
@@ -207,7 +219,7 @@ function IssueSummary({ rows, t }: { rows: TLensDemoIssue[]; t: TLensT }) {
 }
 
 /** One issue. Header, affected pages, four panels, footer. Details (tracking and history) open on demand. */
-export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { issue: TLensDemoIssue; t: TLensT; locale: string; onNavigate: TNavigate; compact?: boolean }) {
+export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { issue: TLensIssue; t: TLensT; locale: string; onNavigate: TNavigate; compact?: boolean }) {
   const [open, setOpen] = useState(false);
   const scored = issue.severity !== "advisory";
   const tracking = issue.tracking;
@@ -264,7 +276,7 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
         <Panel icon={Icons.search} label={t("issueFound")} tone="info">{issue.found}</Panel>
         <Panel icon={Icons.alert} label={t("issueWhy")} tone="warn">{issue.why}</Panel>
         <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">{issue.fix}</Panel>
-        <Panel icon={Icons.sparkles} label={t("aiSuggestion")} note={t("aiSuggestionNote")}>{issue.aiSuggestion}</Panel>
+        <Panel icon={Icons.sparkles} label={t("aiSuggestion")} note={t("aiSuggestionNote")}>{issue.aiSuggestion ?? t("aiSuggestionPending")}</Panel>
       </div>
 
       <footer className="flex flex-col gap-4 border-t border-border/70 pt-5">
@@ -273,10 +285,6 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
             <span className="inline-flex items-center gap-2">
               <Icons.chartBar className="size-4 text-text-secondary" aria-hidden />
               {scored ? t("scoreCounted") : t("scoreNotCounted")}
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <Icons.settings className="size-4 text-text-secondary" aria-hidden />
-              {t("effortLabel")}: {t(EFFORT_KEY[tracking.effort])}
             </span>
             <span className="inline-flex items-center gap-2">
               <Icons.clock className="size-4 text-text-secondary" aria-hidden />
@@ -305,6 +313,9 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
               <DetailRow label={t("firstSeen")}>
                 <span className="text-sm text-text-primary">{formatDay(tracking.firstSeen, locale)}</span>
               </DetailRow>
+              <DetailRow label={t("verifyLabel")}>
+                <span className="text-sm text-text-primary">{issue.verify}</span>
+              </DetailRow>
               <button
                 type="button"
                 onClick={() => onNavigate("history")}
@@ -318,10 +329,10 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
               <span className="text-xs font-medium text-text-muted">{t("timeline")}</span>
               <ol className="flex flex-col gap-3">
                 {tracking.events.map((event) => (
-                  <li key={`${event.date}-${event.text}`} className="flex items-start gap-3 text-sm">
+                  <li key={`${event.date}-${event.event}`} className="flex items-start gap-3 text-sm">
                     <span className="mt-1.5 size-2 shrink-0 rounded-full bg-brand" aria-hidden />
                     <div className="flex flex-col">
-                      <span className="text-text-primary">{event.text}</span>
+                      <span className="text-text-primary">{t(EVENT_LABEL_KEY[event.event])}</span>
                       <span className="text-xs text-text-muted">{formatDay(event.date, locale)}</span>
                     </div>
                   </li>
@@ -334,8 +345,6 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
     </li>
   );
 }
-
-const EFFORT_KEY = { low: "effortLow", medium: "effortMedium", high: "effortHigh" } as const;
 
 function DetailRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (

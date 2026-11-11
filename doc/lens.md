@@ -1,6 +1,6 @@
 # Lens (SEO health and uptime) — UI reference
 
-Status: UI phase done on `feature/lens-dashboard`, demo data only. Live API wiring is the next phase.
+Status: SEO data is live from the Lens API (`/v1/projects/:id/seo`). Uptime and incidents are still demo data until the uptime phase.
 Lens service itself: `/mnt/projects/crawllex-lens` (see its `docs/STATUS.md`).
 
 Sidebar: **Agents & AI** group (`lib/frontend/layout/sidebar-nav.ts`), with Oriel. Label key `lens`.
@@ -16,8 +16,10 @@ Sidebar: **Agents & AI** group (`lib/frontend/layout/sidebar-nav.ts`), with Orie
 | Shared UI | `components/lens/lens-ui.tsx` (cards, pills, ring, tabs, severity bars) |
 | Summary bullets | `components/lens/lens-seo-summary.tsx`, `lib/lens/seo-summary.ts` |
 | Uptime bars and legend | `components/lens/lens-charts.tsx` |
-| Data (phase 1) | `features/lens/lens.demo.ts`, `features/lens/use-lens-dashboard.ts` |
-| Live API client (phase 3) | `features/lens/lens.api.ts`, `lib/lens/client.ts`, `lib/lens/config.ts` |
+| Contract (Lens to UI) | `features/lens/lens.types.ts` |
+| Data hook | `features/lens/use-lens-dashboard.ts` (SEO from API; uptime from demo) |
+| Live API | `features/lens/lens.api.ts`, `app/api/v1/projects/[id]/lens/seo/route.ts`, `lib/lens/client.ts`, `lib/lens/config.ts` |
+| Uptime demo (temporary) | `features/lens/lens.demo.ts` |
 | Entrance motion | `app/globals.css` (`.lens-rise`, honours reduced motion) |
 | Page wash | `components/ui/page-backdrop.tsx` (shared with Reports detail) |
 
@@ -76,29 +78,31 @@ Implementation status: rules are decided. Retention job and default enrolment ar
 - Labels Title Case, descriptions sentence case. Colors from theme tokens only (no raw hex in Lens components).
 - Every number shown comes from the view model. Demo values are not computed.
 
-## Data contract (proposed, not implemented)
+## Data contract (implemented)
 
-Per completed run, saved snapshot (Lens `docs/DECISIONS.md`, 2026-11-11):
-score, score band, score model version, pages checked, known URLs, coverage (complete or partial), coverage reason (none, cap_reached, gaps), scored high rules, scored medium rules, advisory rules, pages affected, new / resolved / reopened / still open issues, penalty breakdown.
+The Lens API returns the whole SEO dashboard from `GET /v1/projects/:id/seo` (Lens `src/api/lens-view.ts`). Crawllex passes it through `GET /api/v1/projects/[id]/lens/seo`. The shape is `TLensSeoDashboard` in `features/lens/lens.types.ts`.
 
-Evaluation per rule and page: Pass, Finding, Not applicable, Not evaluated. Not evaluated is never shown as Pass.
-
-Failed run: listed as failed with its error code, no score. Current view = latest completed run. Partial run: scored with a partial label, never resolves issues.
-
-Score formula (decided): per scored rule, weight (high 10, medium 4, advisory 0) × (0.5 + 0.5 × affected/checked). Site-wide findings count as full weight. Total capped at 60, so the floor is 40. Advisory rules never score. Numbers to be tuned on Gate 1 data.
+- **Rules:** one issue per catalog rule (Lens `src/seo/catalog.ts`, matches `docs/SEO-RULES.md`). Title, found, why, fix and verify text come from Lens. `group` = type (on-page or technical), `ruleGroup` = rule category. Non-catalog engine codes are not shown.
+- **Pages:** per URL, state checked or failed, meta title (null when empty), counts (Must Fix, Should Fix, Worth a Look) and `ruleChecks` with result pass, finding or not_evaluated. Not evaluated is never shown as Pass.
+- **Runs:** every run with status, coverage, coverage reason (none, cap_reached, gaps), score, pages checked, known URLs, new, resolved and open issues. Failed runs have an error code and no score.
+- **Score:** model v1 (Lens `src/seo/score.ts`). Per scored rule, weight (high 10, medium 4) x (0.5 + 0.5 x affected/checked) for page rules; full weight for site rules. Total penalty capped at 60, so the floor is 40. Advisory rules never score. No checked pages means no score (shown as "No score yet").
+- **Bands:** below 60 needs attention, 60 to 84 needs work, 85 and above healthy (`scoreBandOf` in `lens-overview.tsx`).
+- **Event labels:** Lens returns event codes (opened, seen, reopened, resolved, fix_failed, verified, not_seen_partial, verification_inconclusive). The UI translates them (`EVENT_LABEL_KEY` in `lens-issues.tsx`).
+- **AI suggestion:** no source yet. Lens returns `aiSuggestion: null`; the panel says "Not generated yet."
+- **Removed (no source):** effort and the old action text. Priority table shows the catalog fix text.
 
 ## Not done yet (tracked, not hidden)
 
 - Recent activity and Coverage & trends: removed from Overview. Owner decides whether they return and where.
-- Live data and API states (not connected, load failed, empty). Their strings were removed as unused and return with the API.
-- Scoring formula and per-run score snapshot: decided (crawllex-lens `docs/DECISIONS.md`, 2026-11-11). Not implemented yet; numbers tuned on Gate 1 data before release.
+- Uptime and incidents: demo data (`lens.demo.ts`) until the uptime phase.
+- AI suggestion source: not decided. Panel shows "Not generated yet."
+- Score numbers: formula implemented in Lens (model v1). Tune on Gate 1 data before release.
 - Tier and severity changes: decided (crawllex-lens `docs/SEO-RULES.md`). Re-audit of the Gate 1 site required before the change ships.
 - Penalty breakdown view on scan history (stored in the snapshot once the snapshot change lands).
 - Arabic translations are first drafts. Need a native review.
 - Uptime retention job (30 days) and default enrolment of active sites: decided, not built (see Uptime rules).
 - Mobile (390px) pass for all views: not done.
 - Tab panels: LensNavBar and LensTabs have tab roles but no linked tabpanel yet.
-- Issue event text in the issue log and timeline is English in demo data for both languages.
 
 ## Client review pass (2026-11-11)
 

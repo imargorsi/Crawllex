@@ -3,8 +3,9 @@
 import { useMemo } from "react";
 
 import { formatWhen, scoreBandOf, type TLensT } from "@/components/lens/lens-overview";
+import { EVENT_LABEL_KEY } from "@/components/lens/lens-issues";
 import { LENS_FLOAT_CARD, LensEmpty, LensPill, LensStatTile, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
-import type { TLensDemoDashboard, TLensDemoRun } from "@/features/lens/lens.demo";
+import type { TLensDashboard, TLensRun } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +13,7 @@ import { cn } from "@/lib/utils";
  * Scan History: every check with its saved score and counts, then the issue log built from each
  * issue's events. Same structure as All Issues, Pages and Uptime. Demo data only.
  */
-export function LensHistory({ data, t, locale }: { data: TLensDemoDashboard; t: TLensT; locale: string }) {
+export function LensHistory({ data, t, locale }: { data: TLensDashboard; t: TLensT; locale: string }) {
   const completed = data.runs.filter((r) => r.status === "completed");
   const current = completed[0]?.id ?? null;
 
@@ -91,9 +92,9 @@ export function LensHistory({ data, t, locale }: { data: TLensDemoDashboard; t: 
               </thead>
               <tbody>
                 {log.map((entry) => (
-                  <tr key={`${entry.issue.id}-${entry.date}-${entry.text}`} className="border-b border-border/40 last:border-0">
+                  <tr key={`${entry.issue.id}-${entry.date}-${entry.event}`} className="border-b border-border/40 last:border-0">
                     <td className="px-5 py-3 text-text-secondary">{new Date(`${entry.date}T00:00:00Z`).toLocaleDateString(locale, { dateStyle: "medium", timeZone: "UTC" })}</td>
-                    <td className="px-3 py-3 text-text-primary">{entry.text}</td>
+                    <td className="px-3 py-3 text-text-primary">{t(EVENT_LABEL_KEY[entry.event])}</td>
                     <td className="px-3 py-3 font-medium text-text-primary">{entry.issue.title}</td>
                     <td className="px-5 py-3">
                       <LensPill tone={severityTone(entry.issue.severity as TLensSeverity)}>{t(severityKey(entry.issue.severity))}</LensPill>
@@ -110,8 +111,8 @@ export function LensHistory({ data, t, locale }: { data: TLensDemoDashboard; t: 
 }
 
 function RunRow({ run, previous, isCurrent, t, locale }: {
-  run: TLensDemoRun;
-  previous: TLensDemoRun | null;
+  run: TLensRun;
+  previous: TLensRun | null;
   isCurrent: boolean;
   t: TLensT;
   locale: string;

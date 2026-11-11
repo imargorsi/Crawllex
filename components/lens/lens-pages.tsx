@@ -6,7 +6,7 @@ import type { TLensT } from "@/components/lens/lens-overview";
 import { formatWhen } from "@/components/lens/lens-overview";
 import { LENS_FLOAT_CARD, LensPill } from "@/components/lens/lens-ui";
 import { TableListSort } from "@/components/table/table-list-sort";
-import type { TLensDemoDashboard, TLensDemoPage } from "@/features/lens/lens.demo";
+import type { TLensDashboard, TLensPage } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
  * Layout matches All Issues: header, one filter bar, then the list. Filtered to one issue via the Issue dropdown.
  */
 export function LensPages({ data, t, locale, issueId, onIssueChange, onOpenPage }: {
-  data: TLensDemoDashboard;
+  data: TLensDashboard;
   t: TLensT;
   locale: string;
   issueId: string | null;
@@ -24,15 +24,9 @@ export function LensPages({ data, t, locale, issueId, onIssueChange, onOpenPage 
 }) {
   const issue = issueId ? data.issues.find((i) => i.id === issueId && i.status === "open") ?? null : null;
 
-  const countsFor = (page: TLensDemoPage) => {
-    if (page.state !== "checked") return null;
-    const open = data.issues.filter((i) => i.status === "open" && i.pages.includes(page.url));
-    return {
-      high: open.filter((i) => i.severity === "high").length,
-      medium: open.filter((i) => i.severity === "medium").length,
-      advisory: open.filter((i) => i.severity === "advisory").length,
-    };
-  };
+  /** Open issues on the page, from Lens. Null when the page was not checked. */
+  const countsFor = (page: TLensPage) =>
+    page.state !== "checked" ? null : { high: page.counts.mustFix, medium: page.counts.shouldFix, advisory: page.counts.worthALook };
 
   const rows = useMemo(
     () =>
@@ -40,8 +34,7 @@ export function LensPages({ data, t, locale, issueId, onIssueChange, onOpenPage 
         .filter((p) => (issue ? issue.pages.includes(p.url) : true))
         .map((p) => ({ page: p, counts: countsFor(p) }))
         .sort((a, b) => (b.counts?.high ?? -1) - (a.counts?.high ?? -1) || (b.counts?.medium ?? -1) - (a.counts?.medium ?? -1)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data.pages, data.issues, issue],
+    [data.pages, issue],
   );
 
   return (

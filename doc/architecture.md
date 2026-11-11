@@ -212,7 +212,7 @@ A separate **Onboarding workspace** (sidebar workspace toggle, `lib/frontend/lay
 ## Lens (SEO health and uptime, `feature/lens-dashboard`)
 
 - UI: `/lens` in the **Agents & AI** sidebar group, next to Oriel (`sections/lens-section.tsx`, `components/lens/*`). Top nav: Overview, SEO Health (All Issues, with On-Page and Technical as type filters), Pages (own tab, Page Details sheet), Uptime Monitoring, plus View History (scan history and issue log). Full layout and rules: `doc/lens.md`.
-- Data: phase 1 uses demo data (`features/lens/lens.demo.ts`). Phase 3 replaces the hook with the proxy API (`features/lens/lens.api.ts`, `api/v1/projects/[id]/lens/*`, see `doc/api.md`).
+- Data: SEO data comes from the Lens API through `GET /api/v1/projects/[id]/lens/seo` (`features/lens/lens.api.ts`, contract in `features/lens/lens.types.ts`). Uptime and incidents are still demo (`features/lens/lens.demo.ts`) until the uptime phase. Rule text, grouping and severity are owned by Lens (`crawllex-lens/src/seo/catalog.ts`); Crawllex does not keep its own copy, `api/v1/projects/[id]/lens/*`, see `doc/api.md`).
 - Engine and storage: separate service at `/mnt/projects/crawllex-lens` (Node, SQLite). Its rules and decisions: `docs/SEO-RULES.md`, `docs/DECISIONS.md`.
 - Uptime: rolling 30 days, all active sites monitored by default, independent of SEO scans (rules in `doc/lens.md`).
 - Theme: Lens cards are no-fill glass with a soft shadow; colors from theme tokens only.

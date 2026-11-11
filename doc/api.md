@@ -100,13 +100,13 @@ and public `/onboarding/[shareToken]`.
 
 ## Lens Routes (`feature/lens-dashboard`)
 
-Read-only proxies to the local Lens API. The `/lens` screen does not call these yet (demo data until the API phase). Guard: `dashboard.view` on the project. The Lens API must be reachable (`LENS_API_URL`, `LENS_API_TOKEN_FILE`), otherwise 503. Lens refuses projects outside its allowlist, which shows here as 404.
+Read-only proxies to the local Lens API. Guard: `dashboard.view` on the project. The Lens API must be reachable (`LENS_API` config); its URL and token never reach the browser.
 
 | Route | Returns |
 |---|---|
-| `GET /api/v1/projects/[id]/lens` | `{runs, issues, incidents}` |
-| `GET /api/v1/projects/[id]/lens/uptime` | uptime summary and daily values (rolling 30 days) |
-| `GET /api/v1/projects/[id]/lens/runs/[runId]/findings` | `{items}` findings of one run |
+| `GET /api/v1/projects/[id]/lens/seo` | The whole SEO dashboard: `siteUrl`, `lastCheckAt`, `latestRunId`, `seo` (score, band, coverage, counts by severity), `issues` (one per rule, with catalog text, per-URL `pages`, lifecycle `tracking.events`), `pages` (per URL: meta title, state, counts, `ruleChecks` Pass / Finding / Not evaluated), `runs` (score and counts per run). Contract: `features/lens/lens.types.ts`. |
+| `GET /api/v1/projects/[id]/lens/uptime` | Uptime summary and daily values (rolling 30 days). Not used by the screen yet (uptime phase). |
+
 
 ## Regenerate
 

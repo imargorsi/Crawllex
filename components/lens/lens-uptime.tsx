@@ -5,7 +5,7 @@ import { useState } from "react";
 import { UPTIME_LEGEND_COLORS, LensUptimeBars, LensUptimeLegend } from "@/components/lens/lens-charts";
 import { formatWhen, formatMinutes, type TLensT } from "@/components/lens/lens-overview";
 import { LENS_FLOAT_CARD, LensCardHeader, LensEmpty, LensPill, LensStatTile } from "@/components/lens/lens-ui";
-import type { TLensDemoDashboard, TLensDemoIncident } from "@/features/lens/lens.demo";
+import type { TLensDashboard, TLensIncident } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
  * Uptime Monitoring: same structure as All Issues and Pages. Header, status strip, four figures,
  * the daily chart, then incident history and the selected incident. Demo data only.
  */
-export function LensUptime({ data, t, locale }: { data: TLensDemoDashboard; t: TLensT; locale: string }) {
+export function LensUptime({ data, t, locale }: { data: TLensDashboard; t: TLensT; locale: string }) {
   const { uptime, incidents } = data;
   const [selectedId, setSelectedId] = useState<string | null>(incidents[0]?.id ?? null);
   const selected = incidents.find((i) => i.id === selectedId) ?? null;
@@ -129,7 +129,7 @@ export function LensUptime({ data, t, locale }: { data: TLensDemoDashboard; t: T
 }
 
 function IncidentRow({ incident, t, locale, active, onSelect }: {
-  incident: TLensDemoIncident;
+  incident: TLensIncident;
   t: TLensT;
   locale: string;
   active: boolean;
@@ -162,7 +162,7 @@ function IncidentRow({ incident, t, locale, active, onSelect }: {
   );
 }
 
-function IncidentStatus({ incident, t }: { incident: TLensDemoIncident; t: TLensT }) {
+function IncidentStatus({ incident, t }: { incident: TLensIncident; t: TLensT }) {
   return (
     <LensPill tone={incident.status === "resolved" ? "success" : "danger"}>
       {incident.status === "resolved" ? t("statusResolved") : t("statusOngoing")}
