@@ -214,6 +214,7 @@ A separate **Onboarding workspace** (sidebar workspace toggle, `lib/frontend/lay
 - UI: `/lens` in the **Agents & AI** sidebar group, next to Oriel (`sections/lens-section.tsx`, `components/lens/*`). Tabs: Overview, SEO health (All issues, On-page, Technical, Pages), Uptime monitoring, plus View history for scan history. Full layout and rules: `doc/lens.md`.
 - Data: phase 1 uses demo data (`features/lens/lens.demo.ts`). Phase 3 replaces the hook with the proxy API (`features/lens/lens.api.ts`, `api/v1/projects/[id]/lens/*`, see `doc/api.md`).
 - Engine and storage: separate service at `/mnt/projects/crawllex-lens` (Node, SQLite). Its rules and decisions: `docs/SEO-RULES.md`, `docs/DECISIONS.md`.
+- Uptime: rolling 30 days, all active sites monitored by default, independent of SEO scans (rules in `doc/lens.md`).
 - Theme: Lens cards are no-fill glass with a soft shadow; colors from theme tokens only.
 
 ## Frontend Shell

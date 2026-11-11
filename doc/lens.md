@@ -60,6 +60,15 @@ Every view and filter lives in the URL, read and written with `hooks/use-query-p
 
 Example: `/lens?view=seo&type=technical&severity=high` opens SEO Health, Technical, High. Unknown values fall back to the default. Switching view clears the filters.
 
+## Uptime rules (decided 2026-11-11)
+
+- Uptime monitoring tracks a rolling 30 days. Probe and incident rows older than 30 days are deleted.
+- Every active site in Crawllex is monitored by default. Adding or activating a site starts monitoring without a separate step.
+- Uptime is a separate monitor event stream. Running or re-running an SEO check does not change uptime figures, incidents, or the daily bars.
+- Uptime figures never come from SEO scan results.
+
+Implementation status: rules are decided. Retention job and default enrolment are not built yet (the Lens worker probes only projects with a schedule today).
+
 ## Rules the UI follows
 
 - Score bands: Needs attention below 60, Needs work 60–84, Healthy 85 and above.
