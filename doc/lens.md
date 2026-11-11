@@ -28,9 +28,13 @@ Strings: `lens` block in `locales/en.ts` and `locales/ar.ts`. Arabic values are 
 3. **Overview**
    - SEO health score card: ring (3 band segments, marker at score), band legend, points to Healthy, Failed / Warnings / Notices tiles, rule-based summary bullets (two columns), uptime block under the ring, partial/complete scan pill and band pill in the card header.
    - Pages affected (severity bars) and Priority issues (top 4 by severity).
-   - Four section cards: On-page SEO, Technical SEO, Pages, Issues (severity strip).
+   - Four section cards: On-Page SEO, Technical SEO, Pages, Issues (severity strip). On-Page and Technical open the All Issues tab with that type filter set.
    - Uptime monitoring: headline strip (uptime, downtime, incidents, average response, lowest day), 30 daily bars with legend.
-4. **SEO health tab:** subtabs All issues · On-page SEO · Technical SEO · Pages. Issue rows expand to found / why it matters / how to fix / how to verify / affected pages.
+4. **SEO Health tab (command center):** subtabs All Issues and Pages.
+   - All Issues is one card. Summary: High, Medium, Advisory, Page Issues.
+   - Filters: Severity (All, High, Medium, Advisory), Type (All, On-Page, Technical), Rule (Meta Title, Meta Description, Headings, Content, Images, Indexing and Canonicals, Robots and Sitemap, Page URL, ...), Status (Open, Resolved, All). Search and sort (Severity, Most Pages, Title).
+   - Each issue shows its chips (severity or resolved, type, rule), title, what we found, affected page count, and a visible "How to Fix" line. View Details expands why it matters, how to verify, and affected pages.
+   - Pages subtab: pages table (per-page status and counts), sorted by priority. Detailed per-page SEO report comes later.
 5. **View history:** scan history table (date, status, coverage, score, pages checked, new, resolved, open). Failed runs show error code, no score.
 6. **Uptime monitoring tab:** current status, availability, response time, daily timeline, incident history with detail panel.
 

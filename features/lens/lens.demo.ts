@@ -6,11 +6,26 @@
 export type TLensSeverity = "high" | "medium" | "advisory";
 export type TLensGroup = "onpage" | "technical";
 
+export type TLensRuleGroup =
+  | "titles"
+  | "descriptions"
+  | "headings"
+  | "content"
+  | "images"
+  | "indexing"
+  | "robots"
+  | "urls"
+  | "links"
+  | "structured";
+
 export type TLensDemoIssue = {
   id: string;
   title: string;
   severity: TLensSeverity;
   group: TLensGroup;
+  ruleGroup: TLensRuleGroup;
+  status: "open" | "resolved";
+  resolvedOn: string | null;
   affected: number;
   action: string;
   found: string;
@@ -87,7 +102,7 @@ export type TLensDemoDashboard = {
 
 const ISSUES: TLensDemoIssue[] = [
   {
-    id: "missing_title", title: "Missing page title", severity: "high", group: "onpage", affected: 5,
+    id: "missing_title", title: "Missing page title", severity: "high", group: "onpage", ruleGroup: "titles", status: "open", resolvedOn: null, affected: 5,
     action: "Add descriptive page titles to improve search visibility.",
     found: "The page has no title, or the title is empty.",
     why: "The title is the headline people see in search results. Without one, search engines write their own.",
@@ -96,7 +111,7 @@ const ISSUES: TLensDemoIssue[] = [
     pages: ["/services/seo", "/blog/guide", "/pricing", "/contact", "/careers"],
   },
   {
-    id: "sitemap_noindex", title: "Sitemap URLs marked noindex", severity: "high", group: "technical", affected: 3,
+    id: "sitemap_noindex", title: "Sitemap URLs marked noindex", severity: "high", group: "technical", ruleGroup: "indexing", status: "open", resolvedOn: null, affected: 3,
     action: "Allow indexed sitemap pages or remove them from the sitemap.",
     found: "Pages listed in the sitemap carry a noindex instruction.",
     why: "Listing a page in the sitemap asks search engines to index it. A noindex tag asks them not to. The two conflict.",
@@ -105,7 +120,7 @@ const ISSUES: TLensDemoIssue[] = [
     pages: ["/old-offers", "/landing/spring", "/thank-you"],
   },
   {
-    id: "missing_meta_description", title: "Missing meta description", severity: "medium", group: "onpage", affected: 6,
+    id: "missing_meta_description", title: "Missing meta description", severity: "medium", group: "onpage", ruleGroup: "descriptions", status: "open", resolvedOn: null, affected: 6,
     action: "Write concise summaries for search results.",
     found: "The page has no meta description.",
     why: "The meta description is the short summary shown under the title in search results.",
@@ -114,7 +129,7 @@ const ISSUES: TLensDemoIssue[] = [
     pages: ["/about", "/services/seo", "/blog/guide", "/blog/tips", "/faq", "/team"],
   },
   {
-    id: "missing_h1", title: "Missing main heading", severity: "medium", group: "onpage", affected: 2,
+    id: "missing_h1", title: "Missing main heading", severity: "medium", group: "onpage", ruleGroup: "headings", status: "open", resolvedOn: null, affected: 2,
     action: "Add one clear main heading per page.",
     found: "The page has no visible main heading (H1).",
     why: "The main heading tells visitors and search engines what the page is about.",
@@ -123,7 +138,7 @@ const ISSUES: TLensDemoIssue[] = [
     pages: ["/landing/spring", "/thank-you"],
   },
   {
-    id: "title_length", title: "Title length could be improved", severity: "advisory", group: "onpage", affected: 4,
+    id: "title_length", title: "Title length could be improved", severity: "advisory", group: "onpage", ruleGroup: "titles", status: "open", resolvedOn: null, affected: 4,
     action: "Adjust titles where length reduces clarity.",
     found: "The title is much shorter or longer than the suggested 30 to 60 characters.",
     why: "Very short or very long titles are often cut off or unclear in search results. This is a guideline, not a rule.",
@@ -132,7 +147,7 @@ const ISSUES: TLensDemoIssue[] = [
     pages: ["/about", "/faq", "/team", "/blog/tips"],
   },
   {
-    id: "canonical_conflict", title: "Conflicting canonical tags", severity: "medium", group: "technical", affected: 2,
+    id: "canonical_conflict", title: "Conflicting canonical tags", severity: "medium", group: "technical", ruleGroup: "indexing", status: "open", resolvedOn: null, affected: 2,
     action: "Point each canonical tag to the page's own address.",
     found: "The canonical tag points to a different page than the one being checked.",
     why: "The canonical tag tells search engines which address to keep. A conflicting tag can hide the page you want found.",
@@ -141,13 +156,48 @@ const ISSUES: TLensDemoIssue[] = [
     pages: ["/pricing", "/services/seo"],
   },
   {
-    id: "url_readable", title: "Hard-to-read page addresses", severity: "advisory", group: "technical", affected: 1,
+    id: "url_readable", title: "Hard-to-read page addresses", severity: "advisory", group: "technical", ruleGroup: "urls", status: "open", resolvedOn: null, affected: 1,
     action: "Use readable, lowercase page addresses where practical.",
     found: "The address contains uppercase letters, session IDs or tracking parameters.",
     why: "Readable addresses are easier for people to share and for search engines to understand.",
     fix: "Rename the page address or remove tracking parameters from internal links.",
     verify: "Run another SEO check. Advisory items do not reduce the score.",
     pages: ["/Services/SEO?ref=newsletter"],
+  },  {
+    id: "robots_blocks_sitemap_page", title: "Sitemap page blocked by robots.txt", severity: "high", group: "technical", ruleGroup: "robots", status: "open", resolvedOn: null, affected: 1,
+    action: "Allow crawling of this page in robots.txt.",
+    found: "robots.txt disallows a page that is listed in the sitemap.",
+    why: "The sitemap invites search engines to visit the page. robots.txt blocks them, so they cannot read it.",
+    fix: "Remove the Disallow rule for this page, or remove the page from the sitemap.",
+    verify: "Run another SEO check and confirm the page is allowed.",
+    pages: ["/private-offers"],
+  },
+  {
+    id: "missing_image_alt", title: "Images without alt text", severity: "medium", group: "onpage", ruleGroup: "images", status: "open", resolvedOn: null, affected: 3,
+    action: "Describe each meaningful image in its alt text.",
+    found: "Images on these pages have no alt attribute.",
+    why: "Alt text describes images to screen readers and to search engines.",
+    fix: "Add short, accurate alt text. Use empty alt text for decorative images.",
+    verify: "Run another SEO check and confirm each meaningful image has alt text.",
+    pages: ["/services/seo", "/about", "/team"],
+  },
+  {
+    id: "thin_content", title: "Thin content", severity: "advisory", group: "onpage", ruleGroup: "content", status: "open", resolvedOn: null, affected: 4,
+    action: "Add useful detail where a page is very short.",
+    found: "The main content has fewer than 300 visible words.",
+    why: "Very short pages rarely answer a visitor's main question. This is a guideline, not a rule.",
+    fix: "Add useful detail that answers the page's main question.",
+    verify: "Advisory. Does not change the score.",
+    pages: ["/careers", "/thank-you", "/contact", "/landing/spring"],
+  },
+  {
+    id: "missing_canonical", title: "Missing canonical tag", severity: "medium", group: "technical", ruleGroup: "indexing", status: "resolved", resolvedOn: "2026-11-08", affected: 0,
+    action: "Add a canonical tag that points to the page itself.",
+    found: "The page had no canonical tag.",
+    why: "The canonical tag tells search engines which address to keep when a page is reachable in more than one way.",
+    fix: "Add a canonical tag that points to the page's own address.",
+    verify: "Confirmed fixed on the next check.",
+    pages: ["/blog/tips"],
   },
 ];
 
@@ -197,14 +247,14 @@ export const LENS_DEMO: TLensDemoDashboard = {
   lastCheckAt: "2026-11-10T04:24:00Z",
   seo: {
     score: 76,
-    failed: 2,
-    warnings: 2,
-    notices: 1,
+    failed: 3,
+    warnings: 4,
+    notices: 3,
     checked: 30,
     known: 84,
     partial: true,
     pagesAffected: 18,
-    bySeverity: { high: 8, medium: 8, advisory: 4 },
+    bySeverity: { high: 9, medium: 13, advisory: 9 },
   },
   uptime: {
     status: "operational",

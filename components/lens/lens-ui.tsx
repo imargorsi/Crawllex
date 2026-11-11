@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 export const LENS_CARD = cn(elevatedCardSurfaceClass, "relative flex min-w-0 flex-col gap-4 overflow-hidden rounded-3xl border-border p-5 sm:p-6 dark:border-text-primary/40");
 
 /** Top-level Lens cards: no fill, soft 3D lift from the theme shadow token. */
-const LENS_FLOAT_CARD = cn(
+export const LENS_FLOAT_CARD = cn(
   "relative flex min-w-0 flex-col gap-4 overflow-hidden rounded-3xl border border-border bg-transparent p-5 shadow-(--shadow) transition-[border-color,box-shadow] duration-200 ease-out hover:border-accent-border/60 hover:shadow-(--shadow-elevated) sm:p-6 dark:border-text-primary/40",
 );
 

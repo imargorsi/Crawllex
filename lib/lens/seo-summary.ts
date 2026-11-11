@@ -26,6 +26,8 @@ export type TSummaryKey =
   | "bullet_title_length"
   | "bullet_canonical_conflict"
   | "bullet_url_readable"
+  | "bullet_robots_sitemap_page"
+  | "bullet_thin_content"
   | "bullet_generic_high"
   | "bullet_generic_medium"
   | "bullet_generic_advisory";
@@ -45,6 +47,8 @@ const RULE_KEY: Record<string, TSummaryKey> = {
   title_length: "bullet_title_length",
   canonical_conflict: "bullet_canonical_conflict",
   url_readable: "bullet_url_readable",
+  robots_blocks_sitemap_page: "bullet_robots_sitemap_page",
+  thin_content: "bullet_thin_content",
 };
 
 const SEVERITY_TONE: Record<TSummarySeverity, TSummaryTone> = { high: "attention", medium: "info", advisory: "info" };

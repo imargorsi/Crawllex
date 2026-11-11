@@ -314,15 +314,9 @@ export interface Translation {
     linkTechnicalDesc: string;
     linkPagesDesc: string;
     seoAllIssues: string;
-    onpageTitle: string;
-    technicalTitle: string;
     pagesTitle: string;
     historyTitle: string;
-    onpageHelp: string;
-    technicalHelp: string;
-    issueFound: string;
     issueWhy: string;
-    issueFix: string;
     issueVerify: string;
     issuePages: string;
     searchPages: string;
@@ -345,7 +339,6 @@ export interface Translation {
     coverageComplete: string;
     coveragePartial: string;
     runFailedNote: string;
-    noRunYet: string;
     uptimeStatusTitle: string;
     lastSuccessfulCheck: string;
     currentOutage: string;
@@ -404,6 +397,39 @@ export interface Translation {
     crawlLimitReached: string;
     sortedByPriority: string;
     notEvaluated: string;
+    bullet_robots_sitemap_page: string;
+    bullet_thin_content: string;
+    filterSeverity: string;
+    filterType: string;
+    filterRule: string;
+    filterStatus: string;
+    filterAll: string;
+    typeOnpage: string;
+    typeTechnical: string;
+    statusOpen: string;
+    statusAll: string;
+    ruleTitles: string;
+    ruleDescriptions: string;
+    ruleHeadings: string;
+    ruleContent: string;
+    ruleImages: string;
+    ruleIndexing: string;
+    ruleRobots: string;
+    ruleUrls: string;
+    ruleLinks: string;
+    ruleStructured: string;
+    searchIssues: string;
+    sortBy: string;
+    sortSeverity: string;
+    sortPages: string;
+    sortTitle: string;
+    showingIssues: string;
+    noIssuesMatch: string;
+    openIssuesCount: string;
+    howToFix: string;
+    resolvedOn: string;
+    hideDetails: string;
+    pageIssues: string;
   };
   oriel: {
     conversations: string;
@@ -2203,15 +2229,9 @@ const translation: Translation = {
     linkTechnicalDesc: "Across indexing, robots, canonicals and URLs.",
     linkPagesDesc: "Pages scanned in the latest check.",
     seoAllIssues: "All Issues",
-    onpageTitle: "On-Page SEO",
-    technicalTitle: "Technical SEO",
     pagesTitle: "Pages",
     historyTitle: "Scan History",
-    onpageHelp: "What each page says to visitors and search engines: titles, descriptions, headings, content and images.",
-    technicalHelp: "How search engines reach and read your pages: indexing, robots, canonicals and URLs.",
-    issueFound: "What We Found",
     issueWhy: "Why It Matters",
-    issueFix: "How to Fix It",
     issueVerify: "How to Verify",
     issuePages: "Affected Pages",
     searchPages: "Search by URL",
@@ -2234,7 +2254,6 @@ const translation: Translation = {
     coverageComplete: "Complete",
     coveragePartial: "Partial",
     runFailedNote: "Check failed: {{code}}",
-    noRunYet: "No check has run yet.",
     uptimeStatusTitle: "Current Status",
     lastSuccessfulCheck: "Last Successful Check",
     currentOutage: "Current outage",
@@ -2293,6 +2312,39 @@ const translation: Translation = {
     crawlLimitReached: "Crawl Limit Reached",
     sortedByPriority: "Sorted by priority: failed pages first.",
     notEvaluated: "Not Evaluated",
+    bullet_robots_sitemap_page: "Sitemap pages blocked by robots.txt: {{pages}}. Search engines cannot read them.",
+    bullet_thin_content: "{{pages}} pages have very little content. Advisory only.",
+    filterSeverity: "Severity",
+    filterType: "Type",
+    filterRule: "Rule",
+    filterStatus: "Status",
+    filterAll: "All",
+    typeOnpage: "On-Page",
+    typeTechnical: "Technical",
+    statusOpen: "Open",
+    statusAll: "All",
+    ruleTitles: "Meta Title",
+    ruleDescriptions: "Meta Description",
+    ruleHeadings: "Headings",
+    ruleContent: "Content",
+    ruleImages: "Images",
+    ruleIndexing: "Indexing and Canonicals",
+    ruleRobots: "Robots and Sitemap",
+    ruleUrls: "Page URL",
+    ruleLinks: "Links",
+    ruleStructured: "Structured Data",
+    searchIssues: "Search issues or pages",
+    sortBy: "Sort by",
+    sortSeverity: "Severity",
+    sortPages: "Most Pages",
+    sortTitle: "Title",
+    showingIssues: "Showing {{shown}} of {{total}} issues",
+    noIssuesMatch: "No issues match these filters.",
+    openIssuesCount: "{{count}} open",
+    howToFix: "How to Fix",
+    resolvedOn: "Resolved {{date}}",
+    hideDetails: "Hide Details",
+    pageIssues: "Page Issues",
   },
   oriel: {
     conversations: "Conversations",

@@ -8,18 +8,12 @@ import { Paragraph } from "@/components/paragraph";
 import { PageBackdrop } from "@/components/ui/page-backdrop";
 import { Button } from "@/components/ui/button";
 import { LensOverview, formatWhen, type TLensNavigate, type TLensTab } from "@/components/lens/lens-overview";
-import { LensSeoHealth, type TSeoSub } from "@/components/lens/lens-seo-health";
+import { LensSeoHealth, type TSeoSub, type TTypePreset } from "@/components/lens/lens-seo-health";
 import { LensUptime } from "@/components/lens/lens-uptime";
 import { LensTabs } from "@/components/lens/lens-ui";
 import { useLensDashboard } from "@/features/lens/use-lens-dashboard";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 
-const SEO_SUBS: { id: TSeoSub; key: "seoAllIssues" | "onpageTitle" | "technicalTitle" | "pagesTitle" }[] = [
-  { id: "all", key: "seoAllIssues" },
-  { id: "onpage", key: "onpageTitle" },
-  { id: "technical", key: "technicalTitle" },
-  { id: "pages", key: "pagesTitle" },
-];
 
 /** Lens dashboard: header, three tabs (Overview, SEO health, Uptime monitoring). Phase 1 renders demo data only. */
 export function LensSection() {
@@ -28,10 +22,17 @@ export function LensSection() {
   const locale = i18n.language;
   const [tab, setTab] = useState<TLensTab>("overview");
   const [sub, setSub] = useState<TSeoSub>("all");
+  const [presetType, setPresetType] = useState<TTypePreset>("all");
 
   const go: TLensNavigate = (next, nextSub) => {
     setTab(next);
-    if (next === "seo") setSub(nextSub ?? "all");
+    if (next !== "seo") return;
+    if (nextSub === "pages" || nextSub === "history") {
+      setSub(nextSub);
+      return;
+    }
+    setSub("all");
+    setPresetType(nextSub === "onpage" || nextSub === "technical" ? nextSub : "all");
   };
 
   return (
@@ -92,9 +93,12 @@ export function LensSection() {
             label={t("tabSeo")}
             value={sub}
             onChange={setSub}
-            items={SEO_SUBS.map((s) => ({ id: s.id, label: t(s.key) }))}
+            items={[
+              { id: "all", label: t("seoAllIssues") },
+              { id: "pages", label: t("pagesTitle") },
+            ]}
           />
-          <LensSeoHealth data={data} t={t} locale={locale} sub={sub} />
+          <LensSeoHealth data={data} t={t} locale={locale} sub={sub} presetType={presetType} />
         </div>
       ) : null}
 
