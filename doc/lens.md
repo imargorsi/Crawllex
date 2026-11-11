@@ -32,9 +32,9 @@ Strings: `lens` block in `locales/en.ts` and `locales/ar.ts`. Arabic values are 
    - Uptime monitoring: headline strip (uptime, downtime, incidents, average response, lowest day), 30 daily bars with legend.
 4. **SEO Health tab (command center):** current open issues only.
    - Summary tiles: High, Medium, Advisory, Page Issues.
+   - Type tabs (All, On-Page, Technical) with counts. Severity and Sort use the shared `TableListSort` dropdown.
    - Rule tabs with counts (Meta Title, Meta Description, Headings, Content, Images, Indexing and Canonicals, Robots and Sitemap, Page URL).
-   - Chips: severity (All, High, Medium, Advisory) and type (All, On-Page, Technical). Sort (Severity, Most Pages, Title).
-   - Each issue card: severity, type and rule chips, title, affected page count; What We Found and Why It Matters beside How to Fix and Affected Pages; How to Verify at the bottom. Nothing is hidden.
+   - Each issue card: severity, type and rule chips, title, affected page count; What We Found and Why It Matters beside How to Fix and Affected Pages. Nothing is hidden.
    - Resolved issues are not shown here. They belong in View History.
 5. **Pages tab:** every checked page with status (Checked, Check Failed, Not Evaluated) and issue counts, sorted by priority, with URL search. Detailed per-page SEO report comes later.
 6. **View History:** scan history table (date, status, coverage, score, pages checked, new, resolved, open). Failed runs show error code, no score.

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 
 import type { TLensT } from "@/components/lens/lens-overview";
+import { TableListSort } from "@/components/table/table-list-sort";
 import { LENS_FLOAT_CARD, LensCardHeader, LensEmpty, LensPill, LensTabs, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
 import type { TLensDemoDashboard, TLensDemoIssue, TLensGroup, TLensRuleGroup } from "@/features/lens/lens.demo";
 import { Icons } from "@/lib/frontend/icons/app-icons";
@@ -29,26 +30,6 @@ const RULE_LABEL_KEY: Record<TLensRuleGroup, "ruleTitles" | "ruleDescriptions" |
 };
 
 const RULE_ORDER: TLensRuleGroup[] = ["titles", "descriptions", "headings", "content", "images", "indexing", "robots", "urls", "links", "structured"];
-
-/** Filter chip (severity and type). Active chip uses the brand tint. */
-function FilterChip({ active, onClick, children, count }: { active: boolean; onClick: () => void; children: string; count?: number }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={active}
-      onClick={onClick}
-      className={cn(
-        "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors duration-200",
-        active
-          ? "border-brand/60 bg-brand/15 text-text-primary"
-          : "border-border text-text-secondary hover:border-text-primary/40 hover:text-text-primary",
-      )}
-    >
-      {children}
-      {count != null ? <span className={cn("rounded-full px-1.5 text-xs tabular-nums", active ? "bg-brand/25 text-text-primary" : "bg-bg-hover text-text-muted")}>{count}</span> : null}
-    </button>
-  );
-}
 
 function StatTile({ icon: Icon, label, value, tone }: { icon: typeof Icons.alert; label: string; value: number; tone: "danger" | "warning" | "muted" | "brand" }) {
   const iconClass = { danger: "text-destructive", warning: "text-warning", muted: "text-text-muted", brand: "text-brand" }[tone];
@@ -109,8 +90,12 @@ export function LensIssues({ data, t, locale, presetType }: {
   }, [open, severity, type, rule, sort, locale]);
 
   const ruleItems = [
-    { id: "all" as const, label: `${t("filterAll")} (${open.length})` },
-    ...rulesPresent.map((r) => ({ id: r, label: `${t(RULE_LABEL_KEY[r])} (${open.filter((i) => i.ruleGroup === r).length})` })),
+    { id: "all" as const, label: t("filterAll"), count: open.length },
+    ...rulesPresent.map((r) => ({
+      id: r,
+      label: t(RULE_LABEL_KEY[r]),
+      count: open.filter((i) => i.ruleGroup === r).length,
+    })),
   ];
 
   return (
@@ -129,31 +114,42 @@ export function LensIssues({ data, t, locale, presetType }: {
       </div>
 
       <div className="flex flex-col gap-4 rounded-2xl border border-border p-4 sm:p-5">
-        <LensTabs<TRuleTab> label={t("filterRule")} value={rule} onChange={setRule} items={ruleItems} />
-        <div className="flex flex-col gap-3 border-t border-border/60 pt-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <LensTabs<TTypeFilter>
+            label={t("filterType")}
+            value={type}
+            onChange={setType}
+            items={[
+              { id: "all", label: t("filterAll"), count: open.length },
+              { id: "onpage", label: t("typeOnpage"), count: open.filter((i) => i.group === "onpage").length },
+              { id: "technical", label: t("typeTechnical"), count: open.filter((i) => i.group === "technical").length },
+            ]}
+          />
           <div className="flex flex-wrap items-center gap-2">
-            <FilterChip active={severity === "all"} onClick={() => setSeverity("all")}>{t("filterAll")}</FilterChip>
-            <FilterChip active={severity === "high"} onClick={() => setSeverity("high")} count={counts.high}>{t("severityHigh")}</FilterChip>
-            <FilterChip active={severity === "medium"} onClick={() => setSeverity("medium")} count={counts.medium}>{t("severityMedium")}</FilterChip>
-            <FilterChip active={severity === "advisory"} onClick={() => setSeverity("advisory")} count={counts.advisory}>{t("severityAdvisory")}</FilterChip>
-            <span className="mx-1 hidden h-6 w-px bg-border lg:inline-block" aria-hidden />
-            <FilterChip active={type === "all"} onClick={() => setType("all")}>{t("filterAll")}</FilterChip>
-            <FilterChip active={type === "onpage"} onClick={() => setType("onpage")}>{t("typeOnpage")}</FilterChip>
-            <FilterChip active={type === "technical"} onClick={() => setType("technical")}>{t("typeTechnical")}</FilterChip>
-          </div>
-          <label className="flex items-center gap-2 text-sm text-text-muted">
-            {t("sortBy")}
-            <select
+            <TableListSort
+              label={t("filterSeverity")}
+              value={severity}
+              onChange={(v) => setSeverity(v as TSeverityFilter)}
+              options={[
+                { value: "all", label: t("filterAll") },
+                { value: "high", label: t("severityHigh") },
+                { value: "medium", label: t("severityMedium") },
+                { value: "advisory", label: t("severityAdvisory") },
+              ]}
+            />
+            <TableListSort
+              label={t("sortBy")}
               value={sort}
-              onChange={(e) => setSort(e.target.value as TSort)}
-              className="h-9 rounded-full border border-border bg-transparent px-3 text-sm text-text-primary"
-            >
-              <option value="severity">{t("sortSeverity")}</option>
-              <option value="pages">{t("sortPages")}</option>
-              <option value="title">{t("sortTitle")}</option>
-            </select>
-          </label>
+              onChange={(v) => setSort(v as TSort)}
+              options={[
+                { value: "severity", label: t("sortSeverity") },
+                { value: "pages", label: t("sortPages") },
+                { value: "title", label: t("sortTitle") },
+              ]}
+            />
+          </div>
         </div>
+        <LensTabs<TRuleTab> label={t("filterRule")} value={rule} onChange={setRule} items={ruleItems} />
       </div>
 
       <p className="-mb-2 text-sm text-text-muted">{t("showingIssues", { shown: rows.length, total: open.length })}</p>
@@ -226,13 +222,6 @@ function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
         </div>
       </div>
 
-      <div className="flex items-start gap-3 rounded-xl bg-bg-hover/50 px-4 py-3">
-        <Icons.checkCircle className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-xs font-medium text-text-muted">{t("issueVerify")}</span>
-          <p className="text-sm text-text-secondary">{issue.verify}</p>
-        </div>
-      </div>
     </li>
   );
 }

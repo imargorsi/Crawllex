@@ -159,7 +159,7 @@ export function LensScoreRing({ score, bands, size = 180, centerLabel }: {
 
 /** Segmented pill tabs. Items with `disabled` stay visible as placeholders until their page exists. */
 export function LensTabs<T extends string>({ items, value, onChange, label }: {
-  items: { id: T; label: string; disabled?: boolean; hint?: string }[];
+  items: { id: T; label: string; count?: number; disabled?: boolean; hint?: string }[];
   value: T | null;
   onChange: (id: T) => void;
   label: string;
@@ -185,7 +185,19 @@ export function LensTabs<T extends string>({ items, value, onChange, label }: {
                 : "text-text-secondary hover:bg-bg-hover hover:text-text-primary",
           )}
         >
-          {item.label}
+          <span className="inline-flex items-center gap-2">
+            {item.label}
+            {item.count != null ? (
+              <span
+                className={cn(
+                  "rounded-full px-1.5 text-xs tabular-nums",
+                  value === item.id && !item.disabled ? "bg-white/20" : "bg-bg-hover text-text-muted",
+                )}
+              >
+                {item.count}
+              </span>
+            ) : null}
+          </span>
         </button>
       ))}
     </div>

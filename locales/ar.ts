@@ -319,7 +319,6 @@ const translation: Translation = {
     pagesTitle: "الصفحات",
     historyTitle: "سجل الفحص",
     issueWhy: "لماذا يهم",
-    issueVerify: "كيف تتحقق",
     issuePages: "الصفحات المتأثرة",
     searchPages: "بحث بالرابط",
     showingPages: "عرض {{shown}} من {{total}} صفحات",
@@ -426,6 +425,8 @@ const translation: Translation = {
     pageIssues: "مشكلات الصفحات",
     pagesUnit: "صفحات",
     issueFound: "ما وجدناه",
+    filterType: "النوع",
+    filterSeverity: "الشدة",
   },
   oriel: {
     conversations: "المحادثات",

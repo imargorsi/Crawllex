@@ -317,7 +317,6 @@ export interface Translation {
     pagesTitle: string;
     historyTitle: string;
     issueWhy: string;
-    issueVerify: string;
     issuePages: string;
     searchPages: string;
     showingPages: string;
@@ -424,6 +423,8 @@ export interface Translation {
     pageIssues: string;
     pagesUnit: string;
     issueFound: string;
+    filterType: string;
+    filterSeverity: string;
   };
   oriel: {
     conversations: string;
@@ -2226,7 +2227,6 @@ const translation: Translation = {
     pagesTitle: "Pages",
     historyTitle: "Scan History",
     issueWhy: "Why It Matters",
-    issueVerify: "How to Verify",
     issuePages: "Affected Pages",
     searchPages: "Search by URL",
     showingPages: "Showing {{shown}} of {{total}} pages",
@@ -2333,6 +2333,8 @@ const translation: Translation = {
     pageIssues: "Page Issues",
     pagesUnit: "pages",
     issueFound: "What We Found",
+    filterType: "Type",
+    filterSeverity: "Severity",
   },
   oriel: {
     conversations: "Conversations",
