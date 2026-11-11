@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { UPTIME_LEGEND_COLORS, LensUptimeBars, LensUptimeLegend } from "@/components/lens/lens-charts";
 import { formatWhen, formatMinutes, type TLensT } from "@/components/lens/lens-overview";
-import { LENS_FLOAT_CARD, LensEmpty, LensPill, LensStatTile } from "@/components/lens/lens-ui";
+import { LENS_FLOAT_CARD, LensCardHeader, LensEmpty, LensPill, LensStatTile } from "@/components/lens/lens-ui";
 import type { TLensDemoDashboard, TLensDemoIncident } from "@/features/lens/lens.demo";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
@@ -75,47 +75,42 @@ export function LensUptime({ data, t, locale }: { data: TLensDemoDashboard; t: T
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
-        <div className={cn(LENS_FLOAT_CARD, "gap-4 p-0")}>
-          <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
-            <span className="text-base font-semibold text-text-primary">{t("incidentHistoryTitle")}</span>
-            <span className="text-xs text-text-muted">{t("viewDetails")}</span>
-          </div>
+        <section className={cn(LENS_FLOAT_CARD, "gap-4 p-5 sm:p-6")}>
+          <LensCardHeader icon={Icons.alert} title={t("incidentHistoryTitle")} />
           {incidents.length === 0 ? (
-            <div className="p-5">
-              <LensEmpty>{t("noIncidents")}</LensEmpty>
-            </div>
+            <LensEmpty>{t("noIncidents")}</LensEmpty>
           ) : (
-            <ul className="flex flex-col">
-              {incidents.map((incident) => (
-                <li key={incident.id}>
-                  <button
-                    type="button"
-                    aria-pressed={incident.id === selectedId}
-                    onClick={() => setSelectedId(incident.id)}
-                    className={cn(
-                      "flex w-full flex-wrap items-center justify-between gap-3 border-b border-border/40 px-5 py-4 text-start transition-colors last:border-0 hover:bg-bg-hover/50",
-                      incident.id === selectedId && "bg-bg-hover/60",
-                    )}
-                  >
-                    <div className="flex flex-col gap-0.5">
-                      <span className="text-sm font-medium text-text-primary">{incident.reason}</span>
-                      <span className="text-xs text-text-muted">{formatWhen(incident.startedAt, locale)}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm tabular-nums text-text-secondary">{formatMinutes(incident.durationMin, t)}</span>
-                      <IncidentStatus incident={incident} t={t} />
-                    </div>
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <div className="-mx-2 overflow-x-auto">
+              <table className="w-full min-w-[30rem] text-left text-sm">
+                <thead>
+                  <tr className="border-b border-border/60 text-xs text-text-muted">
+                    <th className="px-2 py-2 font-medium">{t("colDate")}</th>
+                    <th className="px-2 py-2 font-medium">{t("colDuration")}</th>
+                    <th className="px-2 py-2 font-medium">{t("colStatus")}</th>
+                    <th className="px-2 py-2 font-medium"><span className="sr-only">{t("viewDetails")}</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {incidents.map((incident) => (
+                    <IncidentRow
+                      key={incident.id}
+                      incident={incident}
+                      t={t}
+                      locale={locale}
+                      active={incident.id === selectedId}
+                      onSelect={() => setSelectedId(incident.id)}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
-        </div>
+        </section>
 
-        <div className={cn(LENS_FLOAT_CARD, "gap-5 p-5 sm:p-6")}>
-          <span className="text-base font-semibold text-text-primary">{t("incidentDetailTitle")}</span>
+        <section className={cn(LENS_FLOAT_CARD, "gap-4 p-5 sm:p-6")}>
+          <LensCardHeader icon={Icons.list} title={t("incidentDetailTitle")} />
           {selected ? (
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-5">
+            <dl className="grid grid-cols-1 gap-3 text-sm">
               <Detail label={t("reason")}>{selected.reason}</Detail>
               <Detail label={t("colStatus")}>
                 <IncidentStatus incident={selected} t={t} />
@@ -127,9 +122,43 @@ export function LensUptime({ data, t, locale }: { data: TLensDemoDashboard; t: T
           ) : (
             <LensEmpty>{t("noIncidents")}</LensEmpty>
           )}
-        </div>
+        </section>
       </div>
     </section>
+  );
+}
+
+function IncidentRow({ incident, t, locale, active, onSelect }: {
+  incident: TLensDemoIncident;
+  t: TLensT;
+  locale: string;
+  active: boolean;
+  onSelect: () => void;
+}) {
+  return (
+    <tr
+      className={cn("cursor-pointer border-b border-border/40 last:border-0 transition-colors hover:bg-bg-hover/50", active && "bg-bg-hover/60")}
+      onClick={onSelect}
+    >
+      <td className="px-2 py-3 text-text-primary">{formatWhen(incident.startedAt, locale)}</td>
+      <td className="px-2 py-3 tabular-nums text-text-secondary">{formatMinutes(incident.durationMin, t)}</td>
+      <td className="px-2 py-3">
+        <IncidentStatus incident={incident} t={t} />
+      </td>
+      <td className="px-2 py-3 text-end">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect();
+          }}
+          className="inline-flex items-center gap-1 text-xs font-medium text-brand hover:underline"
+        >
+          {t("viewDetails")}
+          <Icons.arrowRight className="size-3.5" aria-hidden />
+        </button>
+      </td>
+    </tr>
   );
 }
 
@@ -143,9 +172,9 @@ function IncidentStatus({ incident, t }: { incident: TLensDemoIncident; t: TLens
 
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <dt className="text-xs font-medium text-text-muted">{label}</dt>
-      <dd className="text-sm text-text-primary">{children}</dd>
+    <div className="flex flex-col gap-1">
+      <dt className="text-xs text-text-muted">{label}</dt>
+      <dd className="text-text-primary">{children}</dd>
     </div>
   );
 }
