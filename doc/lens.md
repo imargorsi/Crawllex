@@ -34,7 +34,7 @@ Strings: `lens` block in `locales/en.ts` and `locales/ar.ts`. Arabic values are 
    - Summary tiles: High, Medium, Advisory, Page Issues.
    - Type tabs (All, On-Page, Technical) with counts. Severity uses the shared `TableListSort` dropdown. Issues are ordered by severity, then affected pages.
    - Rule tabs with counts (Meta Title, Meta Description, Headings, Content, Images, Indexing and Canonicals, Robots and Sitemap, Page URL).
-   - Each issue card: severity, type and rule chips, title, affected page count; What We Found and Why It Matters beside How to Fix and Affected Pages; then an AI Suggestion block (dummy data for now, source to be decided, marked as AI and to be reviewed before use). Nothing is hidden.
+   - Each issue card: severity, type and rule chips, title with its affected pages as chips underneath, page count on the right; What We Found and Why It Matters in one box; How to Fix and AI Suggestion side by side (dummy data for now, source to be decided, marked as AI and to be reviewed before use). Nothing is hidden.
    - Resolved issues are not shown here. They belong in View History.
 5. **Pages tab:** every checked page with status (Checked, Check Failed, Not Evaluated) and issue counts, sorted by priority, with URL search. Detailed per-page SEO report comes later.
 6. **View History:** scan history table (date, status, coverage, score, pages checked, new, resolved, open). Failed runs show error code, no score.

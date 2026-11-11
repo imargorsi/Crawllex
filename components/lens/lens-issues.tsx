@@ -150,7 +150,7 @@ export function LensIssues({ data, t, presetType }: {
   );
 }
 
-/** One issue. Same glass card as the Overview. Findings on the left; fix, AI suggestion and pages on the right. */
+/** One issue. Title with its affected pages under it, count on the right, then findings, fix and AI suggestion. */
 function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
   return (
     <li className={cn(LENS_FLOAT_CARD, "gap-5 p-5 sm:p-6")}>
@@ -161,7 +161,14 @@ function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
             <Tag>{issue.group === "onpage" ? t("typeOnpage") : t("typeTechnical")}</Tag>
             <Tag>{t(RULE_LABEL_KEY[issue.ruleGroup])}</Tag>
           </div>
-          <h3 className="text-lg font-semibold leading-snug text-text-primary">{issue.title}</h3>
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-semibold leading-snug text-text-primary">{issue.title}</h3>
+            <ul className="flex flex-wrap gap-1.5">
+              {issue.pages.map((url) => (
+                <li key={url} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-text-secondary">{url}</li>
+              ))}
+            </ul>
+          </div>
         </div>
         <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-border bg-text-primary/[0.03] px-4 py-2.5 shadow-sm dark:border-text-primary/35">
           <Icons.globe className="size-4 text-text-muted" aria-hidden />
@@ -172,24 +179,30 @@ function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
         </div>
       </header>
 
+      <div className="flex flex-col divide-y divide-border/70 overflow-hidden rounded-2xl border border-border bg-brand/[0.025] shadow-sm backdrop-blur-sm dark:border-text-primary/35">
+        <FindingRow icon={Icons.search} label={t("issueFound")} text={issue.found} />
+        <FindingRow icon={Icons.alert} label={t("issueWhy")} text={issue.why} />
+      </div>
+
       <div className="grid gap-4 lg:grid-cols-2">
-        <div className="flex flex-col gap-4">
-          <Panel icon={Icons.search} label={t("issueFound")}>{issue.found}</Panel>
-          <Panel icon={Icons.alert} label={t("issueWhy")}>{issue.why}</Panel>
-        </div>
-        <div className="flex flex-col gap-4">
-          <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">{issue.fix}</Panel>
-          <Panel icon={Icons.sparkles} label={t("aiSuggestion")} note={t("aiSuggestionNote")}>{issue.aiSuggestion}</Panel>
-          <Panel icon={Icons.globe} label={t("issuePages")}>
-            <ul className="flex flex-wrap gap-1.5">
-              {issue.pages.map((url) => (
-                <li key={url} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-text-secondary">{url}</li>
-              ))}
-            </ul>
-          </Panel>
-        </div>
+        <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">{issue.fix}</Panel>
+        <Panel icon={Icons.sparkles} label={t("aiSuggestion")} note={t("aiSuggestionNote")}>{issue.aiSuggestion}</Panel>
       </div>
     </li>
+  );
+}
+
+function FindingRow({ icon: Icon, label, text }: { icon: typeof Icons.alert; label: string; text: string }) {
+  return (
+    <div className="flex gap-3 px-4 py-3.5">
+      <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-lg bg-bg-hover">
+        <Icon className="size-3.5 text-text-secondary" aria-hidden />
+      </span>
+      <div className="flex min-w-0 flex-col gap-0.5">
+        <span className="text-xs font-medium text-text-muted">{label}</span>
+        <p className="text-sm leading-relaxed text-text-primary">{text}</p>
+      </div>
+    </div>
   );
 }
 
