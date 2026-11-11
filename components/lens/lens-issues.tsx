@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import { formatWhen, type TLensT } from "@/components/lens/lens-overview";
 import { TableListSort } from "@/components/table/table-list-sort";
-import { LENS_FLOAT_CARD, LensEmpty, LensNavBar, LensPill, LensTabs, LensWave, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
+import { LENS_FLOAT_CARD, LensEmpty, LensNavBar, LensPill, LensWave, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
 import type { TLensDemoDashboard, TLensDemoIssue, TLensGroup, TLensRuleGroup } from "@/features/lens/lens.demo";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
@@ -98,15 +98,10 @@ export function LensIssues({ data, t, locale, presetType }: {
     return [...filtered].sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity] || b.affected - a.affected);
   }, [open, severity, type, rule]);
 
-  const ruleItems = [
-    { id: "all" as const, label: t("filterAll"), count: open.length },
-    ...rulesPresent.map((r) => ({
-      id: r,
-      label: t(RULE_LABEL_KEY[r]),
-      count: open.filter((i) => i.ruleGroup === r).length,
-    })),
+  const ruleOptions = [
+    { value: "all", label: `${t("filterAll")} (${open.length})` },
+    ...rulesPresent.map((r) => ({ value: r, label: `${t(RULE_LABEL_KEY[r])} (${open.filter((i) => i.ruleGroup === r).length})` })),
   ];
-
   return (
     <section className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -139,20 +134,27 @@ export function LensIssues({ data, t, locale, presetType }: {
             { id: "technical", label: t("linkTechnical"), icon: Icons.wrench, count: open.filter((i) => i.group === "technical").length },
           ]}
         />
-        <TableListSort
-          label={t("filterSeverity")}
+        <div className="flex flex-wrap items-center gap-2">
+          <TableListSort
+            label={t("filterRule")}
+            value={rule}
+            onChange={(v) => setRule(v as TRuleTab)}
+            options={ruleOptions}
+          />
+          <TableListSort
+            label={t("filterSeverity")}
           value={severity}
-          onChange={(v) => setSeverity(v as TSeverityFilter)}
-          options={[
-            { value: "all", label: t("filterAll") },
-            { value: "high", label: t("severityHigh") },
-            { value: "medium", label: t("severityMedium") },
-            { value: "advisory", label: t("severityAdvisory") },
-          ]}
-        />
+            onChange={(v) => setSeverity(v as TSeverityFilter)}
+            options={[
+              { value: "all", label: t("filterAll") },
+              { value: "high", label: t("severityHigh") },
+              { value: "medium", label: t("severityMedium") },
+              { value: "advisory", label: t("severityAdvisory") },
+            ]}
+          />
+        </div>
       </div>
 
-      <LensTabs<TRuleTab> label={t("filterRule")} value={rule} onChange={setRule} items={ruleItems} />
 
       <p className="-mb-2 text-sm text-text-muted">{t("showingIssues", { shown: rows.length, total: open.length })}</p>
 
