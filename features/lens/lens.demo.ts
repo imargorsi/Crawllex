@@ -18,6 +18,20 @@ export type TLensRuleGroup =
   | "links"
   | "structured";
 
+export type TLensWorkflow = "todo" | "in_progress" | "awaiting_verification";
+export type TLensEffort = "low" | "medium" | "high";
+
+export type TLensTracking = {
+  effort: TLensEffort;
+  workflow: TLensWorkflow;
+  owner: string | null;
+  dueOn: string | null;
+  firstSeen: string;
+  lastSeen: string;
+  reopened: number;
+  events: { date: string; text: string }[];
+};
+
 export type TLensDemoIssue = {
   id: string;
   title: string;
@@ -33,6 +47,7 @@ export type TLensDemoIssue = {
   fix: string;
   verify: string;
   aiSuggestion: string;
+  tracking: TLensTracking;
   pages: string[];
 };
 
@@ -109,7 +124,8 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The title is the headline people see in search results. Without one, search engines write their own.",
     fix: "Add a unique, descriptive title that names the page topic.",
     verify: "Run another SEO check and confirm a valid title is detected on each page.",
-    aiSuggestion: "Write a title of 50 to 60 characters that names the service and the brand, with the main topic first. Use one title per page.",
+    aiSuggestion: "Example for a service page: \"SEO Audit Services | Argorsi\". Keep it under 60 characters.",
+    tracking: { effort: "low", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-12", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/services/seo", "/blog/guide", "/pricing", "/contact", "/careers"],
   },
   {
@@ -119,7 +135,8 @@ const ISSUES: TLensDemoIssue[] = [
     why: "Listing a page in the sitemap asks search engines to index it. A noindex tag asks them not to. The two conflict.",
     fix: "Remove noindex from pages you want found, or remove those URLs from the sitemap.",
     verify: "Run another SEO check and confirm no sitemap page is marked noindex.",
-    aiSuggestion: "Remove noindex from pages you want found. If a page should stay hidden, remove it from the sitemap in the same release.",
+    aiSuggestion: "Check the CMS SEO setting for each listed URL before changing the sitemap; one toggle often covers several pages.",
+    tracking: { effort: "low", workflow: "in_progress", owner: "Web team", dueOn: "2026-11-20", firstSeen: "2026-10-12", lastSeen: "2026-11-10", reopened: 1, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-01", text: "Reopened after a fix" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/old-offers", "/landing/spring", "/thank-you"],
   },
   {
@@ -129,7 +146,8 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The meta description is the short summary shown under the title in search results.",
     fix: "Write one or two sentences that describe the page for a visitor.",
     verify: "Run another SEO check and confirm a meta description is detected on each page.",
-    aiSuggestion: "Write a summary of 120 to 155 characters that states what the visitor gets on this page. Do not repeat the title.",
+    aiSuggestion: "Start with the offer, then the proof: \"Monthly SEO audits for retail brands, with a fix list in 48 hours.\"",
+    tracking: { effort: "medium", workflow: "in_progress", owner: "Content team", dueOn: "2026-11-30", firstSeen: "2026-10-12", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-06", text: "Assigned to content team" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/about", "/services/seo", "/blog/guide", "/blog/tips", "/faq", "/team"],
   },
   {
@@ -139,7 +157,8 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The main heading tells visitors and search engines what the page is about.",
     fix: "Add one main heading that names the page topic.",
     verify: "Run another SEO check and confirm one visible H1 is found.",
-    aiSuggestion: "Add one main heading at the top of the content that states the page topic in plain words.",
+    aiSuggestion: "Use the page title as the H1 when it already matches the topic, to keep both in line.",
+    tracking: { effort: "low", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-20", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-20", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/landing/spring", "/thank-you"],
   },
   {
@@ -149,7 +168,8 @@ const ISSUES: TLensDemoIssue[] = [
     why: "Very short or very long titles are often cut off or unclear in search results. This is a guideline, not a rule.",
     fix: "Rewrite the title to describe the page in about 30 to 60 characters.",
     verify: "Run another SEO check. Advisory items do not reduce the score.",
-    aiSuggestion: "Shorten the title to under 60 characters by removing filler words. Keep the main topic first.",
+    aiSuggestion: "Trim the longest title first and keep the brand name at the end.",
+    tracking: { effort: "low", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-12", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/about", "/faq", "/team", "/blog/tips"],
   },
   {
@@ -159,7 +179,8 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The canonical tag tells search engines which address to keep. A conflicting tag can hide the page you want found.",
     fix: "Set each canonical tag to the page's own preferred address, or remove it if it is not needed.",
     verify: "Run another SEO check and confirm each canonical matches its page.",
-    aiSuggestion: "Point the canonical tag to the page's own preferred address, using the full https URL.",
+    aiSuggestion: "Use the https version of the page as the canonical target.",
+    tracking: { effort: "low", workflow: "awaiting_verification", owner: "Web team", dueOn: "2026-11-14", firstSeen: "2026-10-18", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-18", text: "First seen" }, { date: "2026-11-08", text: "Marked as fixed" }, { date: "2026-11-10", text: "Awaiting verification" }] },
     pages: ["/pricing", "/services/seo"],
   },
   {
@@ -169,7 +190,8 @@ const ISSUES: TLensDemoIssue[] = [
     why: "Readable addresses are easier for people to share and for search engines to understand.",
     fix: "Rename the page address or remove tracking parameters from internal links.",
     verify: "Run another SEO check. Advisory items do not reduce the score.",
-    aiSuggestion: "Rename the page to a lowercase, hyphenated address and redirect the old address to the new one.",
+    aiSuggestion: "Map the old address to the new one with a 301 redirect before publishing.",
+    tracking: { effort: "high", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-11-03", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-11-03", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/Services/SEO?ref=newsletter"],
   },  {
     id: "robots_blocks_sitemap_page", title: "Sitemap page blocked by robots.txt", severity: "high", group: "technical", ruleGroup: "robots", status: "open", resolvedOn: null, affected: 1,
@@ -178,7 +200,8 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The sitemap invites search engines to visit the page. robots.txt blocks them, so they cannot read it.",
     fix: "Remove the Disallow rule for this page, or remove the page from the sitemap.",
     verify: "Run another SEO check and confirm the page is allowed.",
-    aiSuggestion: "Delete the Disallow rule for /private-offers in robots.txt, or remove the page from the sitemap if it is meant to stay private.",
+    aiSuggestion: "Test the URL in the robots.txt tester before and after the change so the fix is confirmed.",
+    tracking: { effort: "low", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-11-01", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-11-01", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/private-offers"],
   },
   {
@@ -188,7 +211,8 @@ const ISSUES: TLensDemoIssue[] = [
     why: "Alt text describes images to screen readers and to search engines.",
     fix: "Add short, accurate alt text. Use empty alt text for decorative images.",
     verify: "Run another SEO check and confirm each meaningful image has alt text.",
-    aiSuggestion: "Describe what each image shows in 5 to 12 words. Use empty alt text for purely decorative images.",
+    aiSuggestion: "Start with the subject, then the context: \"Team reviewing a crawl report on a laptop.\"",
+    tracking: { effort: "medium", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-27", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-27", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/services/seo", "/about", "/team"],
   },
   {
@@ -198,7 +222,8 @@ const ISSUES: TLensDemoIssue[] = [
     why: "Very short pages rarely answer a visitor's main question. This is a guideline, not a rule.",
     fix: "Add useful detail that answers the page's main question.",
     verify: "Advisory. Does not change the score.",
-    aiSuggestion: "Add a short section that answers the page's main question: what it is, who it is for, and what the visitor should do next.",
+    aiSuggestion: "Add a short FAQ with three questions the page should answer.",
+    tracking: { effort: "high", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-12", lastSeen: "2026-11-10", reopened: 0, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-10", text: "Still open" }] },
     pages: ["/careers", "/thank-you", "/contact", "/landing/spring"],
   },
   {
@@ -208,7 +233,8 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The canonical tag tells search engines which address to keep when a page is reachable in more than one way.",
     fix: "Add a canonical tag that points to the page's own address.",
     verify: "Confirmed fixed on the next check.",
-    aiSuggestion: "Add a canonical tag that points to the page's own https address.",
+    aiSuggestion: "Use the page address without tracking parameters as the canonical target.",
+    tracking: { effort: "low", workflow: "todo", owner: null, dueOn: null, firstSeen: "2026-10-12", lastSeen: "2026-11-08", reopened: 0, events: [{ date: "2026-10-12", text: "First seen" }, { date: "2026-11-08", text: "Fixed and verified" }] },
     pages: ["/blog/tips"],
   },
 ];
@@ -227,6 +253,9 @@ const PAGES: TLensDemoPage[] = [
   { url: "/blog/tips", state: "checked", failed: 0, warnings: 2, suggestions: 1 },
   { url: "/old-offers", state: "checked", failed: 1, warnings: 0, suggestions: 0 },
   { url: "/archive/2019", state: "not_evaluated", failed: 0, warnings: 0, suggestions: 0 },
+  { url: "/thank-you", state: "checked", failed: 1, warnings: 0, suggestions: 0 },
+  { url: "/Services/SEO?ref=newsletter", state: "checked", failed: 1, warnings: 0, suggestions: 0 },
+  { url: "/private-offers", state: "checked", failed: 1, warnings: 0, suggestions: 0 },
 ];
 
 const RUNS: TLensDemoRun[] = [

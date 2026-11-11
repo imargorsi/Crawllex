@@ -34,6 +34,7 @@ Strings: `lens` block in `locales/en.ts` and `locales/ar.ts`. Arabic values are 
    - Summary tiles: High, Medium, Advisory, Page Issues.
    - No outer card: the page sits directly on the backdrop. One filter bar: type tabs (All Issues, On-Page SEO, Technical SEO, with counts) and the shared `TableListSort` dropdowns for rule and severity. Issues are ordered by severity, then affected pages.
    - Rule dropdown (shared `TableListSort`, with counts): Meta Title, Meta Description, Headings, Content, Images, Indexing and Canonicals, Robots and Sitemap, Page URL.
+   - Summary list (jump links to each card), partial-scan notice in the header, status and last check shown once in the header.
    - Each issue card (reference layout): severity, type and rule chips; title with the one-line finding; page count on the right. Affected Pages strip with page chips and View All Pages. Four equal panels: What We Found (cyan), Why It Matters (amber), How To Fix (coral, highlighted), AI Suggestion (neutral). Dummy data for AI, source to be decided. Footer: score impact (advisory items say they do not change the score), last check, Open Issue Details.
 5. **Pages tab:** every checked page with status (Checked, Check Failed, Not Evaluated) and issue counts, sorted by priority, with URL search. Detailed per-page SEO report comes later.
 6. **View History:** scan history table (date, status, coverage, score, pages checked, new, resolved, open). Failed runs show error code, no score.
@@ -50,6 +51,9 @@ Every view and filter lives in the URL, read and written with `hooks/use-query-p
 | `view` | `seo`, `pages`, `uptime`, `history` | overview |
 | `type` | `onpage`, `technical` | all (SEO Health only) |
 | `severity` | `high`, `medium`, `advisory` | all (SEO Health only) |
+| `sort` | `pages` (Most pages) | severity (SEO Health only) |
+| `issue` | issue id (Pages view: pages affected by that issue) | none |
+| `q` | page URL (Pages view: search) | none |
 | `rule` | `titles`, `descriptions`, `headings`, `content`, `images`, `indexing`, `robots`, `urls`, `links`, `structured` | all (SEO Health only) |
 
 Example: `/lens?view=seo&type=technical&severity=high` opens SEO Health, Technical, High. Unknown values fall back to the default. Switching view clears the filters.
@@ -80,6 +84,14 @@ Score formula (proposed): per scored rule, weight (high 10, medium 4, advisory 0
 - Advisory tier and severity changes (crawllex-lens `docs/SEO-RULES.md`, pending owner approval and a re-audit).
 - Penalty breakdown view on scan history (stored in the snapshot once the snapshot change lands).
 - Arabic translations are first drafts. Need a native review.
+
+## Client review pass (2026-11-11)
+
+- Affected page chips open Pages filtered to that URL. View All Pages opens Pages filtered to the issue.
+- Open Issue Details shows status (local in demo), owner, due date, times reopened, last seen and a timeline. View in History opens the history view.
+- Stat tiles: Must Fix, Should Fix, Worth a Look. Trend waves sit below the figure and say "Trend, last 7 checks" (dummy data).
+- AI Suggestion carries the review note again ("Suggested by AI. Review before you apply it."). This reverses the earlier removal, per the client review.
+- Gaps still open: Lens API states (loading, error), mobile pass at 390px, per-issue points cost, page detail view.
 
 ## Fixed in the UI pass (2026-11-11)
 

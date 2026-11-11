@@ -8,19 +8,35 @@ import { Input } from "@/components/ui/input";
 import type { TLensDemoDashboard } from "@/features/lens/lens.demo";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 
-/** Pages: every checked page with its status and issue counts, sorted by priority. */
-export function LensPages({ data, t }: { data: TLensDemoDashboard; t: TLensT }) {
-  const [query, setQuery] = useState("");
+/** Pages: every checked page with its status and issue counts, sorted by priority. Can be narrowed to one issue. */
+export function LensPages({ data, t, issueId, initialQuery, onClearIssue }: {
+  data: TLensDemoDashboard;
+  t: TLensT;
+  issueId: string | null;
+  initialQuery: string;
+  onClearIssue: () => void;
+}) {
+  const [query, setQuery] = useState(initialQuery);
+  const issue = issueId ? data.issues.find((i) => i.id === issueId) ?? null : null;
   const rows = useMemo(
     () =>
       data.pages
+        .filter((p) => (issue ? issue.pages.includes(p.url) : true))
         .filter((p) => p.url.toLowerCase().includes(query.trim().toLowerCase()))
         .sort((a, b) => b.failed - a.failed || b.warnings - a.warnings || b.suggestions - a.suggestions),
-    [data.pages, query],
+    [data.pages, issue, query],
   );
   return (
     <section className={LENS_FLOAT_CARD}>
       <LensCardHeader icon={Icons.grid} title={t("pagesTitle")} />
+      {issue ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-brand/40 bg-brand/[0.06] px-4 py-3 text-sm text-text-secondary">
+          <span>{t("pagesForIssue", { title: issue.title })}</span>
+          <button type="button" onClick={onClearIssue} className="font-medium text-brand hover:underline">
+            {t("clearFilter")}
+          </button>
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Input
           value={query}

@@ -257,7 +257,7 @@ export function LensWave({ values, color }: { values: number[]; color: string })
   const line = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
   const area = `${line} L${w},${h} L0,${h} Z`;
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="absolute inset-x-0 bottom-0 h-16 w-full" aria-hidden>
+    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="mt-auto block h-12 w-full" aria-hidden>
       <path d={area} fill={color} fillOpacity={0.16} />
       <path d={line} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
     </svg>
@@ -272,7 +272,18 @@ export function LensNavBar<T extends string>({ items, value, onChange, label }: 
   label: string;
 }) {
   return (
-    <div role="tablist" aria-label={label} className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-border bg-text-primary/[0.03] p-1.5 shadow-sm backdrop-blur-md dark:border-text-primary/35">
+    <div
+      role="tablist"
+      aria-label={label}
+      onKeyDown={(e) => {
+        if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+        const index = items.findIndex((item) => item.id === value);
+        const step = e.key === "ArrowRight" ? 1 : -1;
+        const next = items[(index + step + items.length) % items.length];
+        if (next) onChange(next.id);
+      }}
+      className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-border bg-text-primary/[0.03] p-1.5 shadow-sm backdrop-blur-md dark:border-text-primary/35"
+    >
       {items.map((item) => {
         const active = value === item.id;
         const Icon = item.icon;
@@ -282,9 +293,10 @@ export function LensNavBar<T extends string>({ items, value, onChange, label }: 
             role="tab"
             type="button"
             aria-selected={active}
+            tabIndex={active ? 0 : -1}
             onClick={() => onChange(item.id)}
             className={cn(
-              "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-200",
+              "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-border",
               active ? "bg-brand text-text-on-brand shadow-sm" : "text-text-secondary hover:bg-bg-hover hover:text-text-primary",
             )}
           >

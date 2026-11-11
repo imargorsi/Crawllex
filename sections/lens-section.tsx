@@ -9,7 +9,7 @@ import { PageBackdrop } from "@/components/ui/page-backdrop";
 import { Button } from "@/components/ui/button";
 import { LensOverview, formatWhen, type TLensNavigate, type TLensTab } from "@/components/lens/lens-overview";
 import { LensHistory } from "@/components/lens/lens-history";
-import { LensIssues, RULE_FILTERS, SEVERITY_FILTERS, TYPE_FILTERS, type TRuleTab, type TSeverityFilter, type TTypeFilter } from "@/components/lens/lens-issues";
+import { LensIssues, RULE_FILTERS, SEVERITY_FILTERS, SORT_FILTERS, TYPE_FILTERS, type TRuleTab, type TSeverityFilter, type TSortFilter, type TTypeFilter } from "@/components/lens/lens-issues";
 import { LensPages } from "@/components/lens/lens-pages";
 import { LensUptime } from "@/components/lens/lens-uptime";
 import { LensNavBar } from "@/components/lens/lens-ui";
@@ -44,13 +44,16 @@ export function LensSection() {
     type: pick<TTypeFilter>(queryParams.type, TYPE_FILTERS, "all"),
     severity: pick<TSeverityFilter>(queryParams.severity, SEVERITY_FILTERS, "all"),
     rule: pick<TRuleTab>(queryParams.rule, RULE_FILTERS, "all"),
+    sort: pick<TSortFilter>(queryParams.sort, SORT_FILTERS, "severity"),
   };
+  const issueParam = typeof queryParams.issue === "string" ? queryParams.issue : null;
+  const queryParam = typeof queryParams.q === "string" ? queryParams.q : "";
 
-  /** Switch view. Filters are kept only for the SEO Health view, so other views get a clean URL. */
+  /** Switch view. Filters and pages options are kept only for their own view, so other views get a clean URL. */
   const navigate = (next: TLensView, extra: Record<string, string> = {}) => {
     const params = new URLSearchParams();
     if (next !== "overview") params.set("view", next);
-    if (next === "seo") {
+    if (next === "seo" || next === "pages") {
       Object.entries(extra).forEach(([key, value]) => {
         if (value !== "all") params.set(key, value);
       });
@@ -60,7 +63,8 @@ export function LensSection() {
 
   const go: TLensNavigate = (next, nextSub) => {
     if (next === "seo") {
-      if (nextSub === "history" || nextSub === "pages") return navigate(nextSub);
+      if (nextSub === "history") return navigate("history");
+      if (nextSub === "pages") return navigate("pages");
       return navigate("seo", { type: nextSub === "onpage" || nextSub === "technical" ? nextSub : "all" });
     }
     if (next === "overview" || next === "uptime") return navigate(next);
@@ -68,7 +72,7 @@ export function LensSection() {
   };
 
   /** Filter change: write the value, or remove the parameter when it is back to the default. */
-  const onFilterChange = (key: "type" | "severity" | "rule", value: string) => {
+  const onFilterChange = (key: "type" | "severity" | "rule" | "sort", value: string) => {
     if (value === "all") deleteQueryParams([key]);
     else setQueryParams({ [key]: value });
   };
@@ -125,8 +129,19 @@ export function LensSection() {
       </div>
 
       {view === "overview" ? <LensOverview data={data} t={t} locale={locale} go={go} /> : null}
-      {view === "seo" ? <LensIssues data={data} t={t} locale={locale} filters={filters} onFilterChange={onFilterChange} /> : null}
-      {view === "pages" ? <LensPages data={data} t={t} /> : null}
+      {view === "seo" ? (
+        <LensIssues data={data} t={t} locale={locale} filters={filters} onFilterChange={onFilterChange} onNavigate={navigate} />
+      ) : null}
+      {view === "pages" ? (
+        <LensPages
+          key={`${issueParam ?? ""}|${queryParam}`}
+          data={data}
+          t={t}
+          issueId={issueParam}
+          initialQuery={queryParam}
+          onClearIssue={() => deleteQueryParams(["issue"])}
+        />
+      ) : null}
       {view === "history" ? <LensHistory data={data} t={t} locale={locale} /> : null}
       {view === "uptime" ? <LensUptime data={data} t={t} locale={locale} /> : null}
       </div>

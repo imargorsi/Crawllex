@@ -428,6 +428,36 @@ export interface Translation {
     tileHigh: string;
     tileMedium: string;
     tileAdvisory: string;
+    partialNotice: string;
+    trendCaption: string;
+    allClear: string;
+    issueSummary: string;
+    wfTodo: string;
+    wfProgress: string;
+    wfVerify: string;
+    effortLabel: string;
+    effortLow: string;
+    effortMedium: string;
+    effortHigh: string;
+    firstSeen: string;
+    lastSeen: string;
+    reopenedLabel: string;
+    statusLabel: string;
+    ownerLabel: string;
+    dueLabel: string;
+    noOwner: string;
+    noDue: string;
+    viewInHistory: string;
+    timeline: string;
+    scoreCounted: string;
+    scoreNotCounted: string;
+    sortBy: string;
+    sortSeverity: string;
+    sortPages: string;
+    aiSuggestionNote: string;
+    hideDetails: string;
+    pagesForIssue: string;
+    clearFilter: string;
   };
   oriel: {
     conversations: string;
@@ -2338,9 +2368,39 @@ const translation: Translation = {
     severityImpact: "Severity Impacts SEO Health Score",
     advisoryNoImpact: "Advisory. Does not change the score.",
     openIssueDetails: "Open Issue Details",
-    tileHigh: "Failed (High)",
-    tileMedium: "Warnings (Medium)",
-    tileAdvisory: "Notices (Advisory)",
+    tileHigh: "Must Fix (High)",
+    tileMedium: "Should Fix (Medium)",
+    tileAdvisory: "Worth a Look (Advisory)",
+    partialNotice: "Counts cover {{checked}} of {{known}} pages.",
+    trendCaption: "Trend, last 7 checks",
+    allClear: "No open issues. Nothing needs fixing right now.",
+    issueSummary: "Issue summary",
+    wfTodo: "To Do",
+    wfProgress: "In Progress",
+    wfVerify: "Awaiting Verification",
+    effortLabel: "Effort",
+    effortLow: "Low",
+    effortMedium: "Medium",
+    effortHigh: "High",
+    firstSeen: "First seen",
+    lastSeen: "Last seen",
+    reopenedLabel: "Times reopened",
+    statusLabel: "Status",
+    ownerLabel: "Owner",
+    dueLabel: "Due date",
+    noOwner: "Unassigned",
+    noDue: "No due date",
+    viewInHistory: "View in history",
+    timeline: "Timeline",
+    scoreCounted: "Counts toward the SEO health score",
+    scoreNotCounted: "Not counted in the SEO health score",
+    sortBy: "Sort by",
+    sortSeverity: "Severity",
+    sortPages: "Most pages",
+    aiSuggestionNote: "Suggested by AI. Review before you apply it.",
+    hideDetails: "Hide details",
+    pagesForIssue: "Showing pages affected by: {{title}}",
+    clearFilter: "Clear filter",
   },
   oriel: {
     conversations: "Conversations",
