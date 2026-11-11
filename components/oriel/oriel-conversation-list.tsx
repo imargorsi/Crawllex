@@ -17,7 +17,7 @@ type TOrielConversationListProps = {
   };
   disabled: boolean;
   onSelect: (threadId: string) => void;
-  onDelete: (threadId: string) => void;
+  onDelete?: (threadId: string) => void;
 };
 
 function startOfDay(date: Date): number {
@@ -86,15 +86,17 @@ export function OrielConversationList({
                     {formatTime(thread.updatedAt)} · {labels.messageCount(thread.messageCount)}
                   </span>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => onDelete(thread.threadId)}
-                  disabled={disabled}
-                  aria-label={labels.deleteLabel(thread.title)}
-                  className="text-text-muted hover:text-destructive my-2 mr-1 flex size-8 shrink-0 items-center justify-center self-center rounded-lg opacity-100 transition-all disabled:opacity-40 xl:opacity-0 xl:group-hover:opacity-100 xl:focus-visible:opacity-100"
-                >
-                  <Icons.delete className="size-4" aria-hidden />
-                </button>
+                {onDelete ? (
+                  <button
+                    type="button"
+                    onClick={() => onDelete(thread.threadId)}
+                    disabled={disabled}
+                    aria-label={labels.deleteLabel(thread.title)}
+                    className="text-text-muted hover:text-destructive my-2 mr-1 flex size-8 shrink-0 items-center justify-center self-center rounded-lg opacity-100 transition-all disabled:opacity-40 xl:opacity-0 xl:group-hover:opacity-100 xl:focus-visible:opacity-100"
+                  >
+                    <Icons.delete className="size-4" aria-hidden />
+                  </button>
+                ) : null}
               </li>
             );
           })}

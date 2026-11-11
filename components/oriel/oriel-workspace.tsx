@@ -25,6 +25,8 @@ import { clearOrielHandoff, peekOrielHandoff } from "@/lib/frontend/oriel/handof
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { buttonVariants } from "@/components/ui/button";
 import { glassPanelSurfaceClass } from "@/lib/frontend/layout/dashboard-chrome";
+import { useProjectAccess } from "@/context/project-access-context";
+import { hasPermission } from "@/lib/rbac/access";
 import { cn } from "@/lib/utils";
 import type { TAssistantThreadDto } from "@/types/assistant.types";
 
@@ -62,6 +64,8 @@ export function OrielWorkspace({
   const [deleteRequest, setDeleteRequest] = useState<TDeleteRequest>(null);
 
   const threadsQuery = useAssistantThreadsQuery(projectId);
+  const { projectPermissions } = useProjectAccess();
+  const canDelete = hasPermission(projectPermissions, "oriel.delete");
   const threadQuery = useAssistantThreadQuery(projectId, activeThreadId);
   const queryMutation = useAssistantQueryMutation(projectId);
   const deleteOneMutation = useDeleteAssistantThreadMutation(projectId);
@@ -171,11 +175,12 @@ export function OrielWorkspace({
           }}
           onNewChat={() => setActiveThreadId(null)}
           onSelect={setActiveThreadId}
-          onDelete={(threadId) => {
+          // Delete needs oriel.delete. Without it the controls are not rendered at all.
+          onDelete={canDelete ? (threadId) => {
             const thread = threads.find((item) => item.threadId === threadId);
             setDeleteRequest({ kind: "one", threadId, title: thread?.title ?? "" });
-          }}
-          onDeleteAll={() => setDeleteRequest({ kind: "all" })}
+          } : undefined}
+          onDeleteAll={canDelete ? () => setDeleteRequest({ kind: "all" }) : undefined}
         />
 
         <section className={cn(glassPanelSurfaceClass, "relative flex min-h-[60vh] min-w-0 flex-col overflow-hidden rounded-2xl xl:min-h-0")}>

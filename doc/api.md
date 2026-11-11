@@ -100,12 +100,12 @@ and public `/onboarding/[shareToken]`.
 
 ## Lens Routes (`feature/lens-dashboard`)
 
-Read-only proxies to the local Lens API, plus the manual check route. GET guard: `dashboard.view` on the project. POST guard: super admin. The Lens API must be reachable (`LENS_API` config); its URL and token never reach the browser.
+Read-only proxies to the local Lens API, plus the manual check route. GET guard: `lens.view` on the project. POST guard: `lens.run` on the project. Oriel routes: `oriel.view` (read, ask) and `oriel.delete` (delete threads). Both `lens.*` and `oriel.*` are restricted: no role has them by default, and only a super admin can add or remove them on a role (`lib/roles/restricted-permissions.ts`, checked on role create and update). The Lens API must be reachable (`LENS_API` config); its URL and token never reach the browser.
 
 | Route | Returns |
 |---|---|
 | `GET /api/v1/projects/[id]/lens/seo` | The whole SEO dashboard: `siteUrl`, `lastCheckAt`, `latestRunId`, `seo` (score, band, coverage, counts by severity), `issues` (one per rule, with catalog text, per-URL `pages`, lifecycle `tracking.events`), `pages` (per URL: meta title, state, counts, `ruleChecks` Pass / Finding / Not evaluated), `runs` (score and counts per run). Contract: `features/lens/lens.types.ts`. |
-| `POST /api/v1/projects/[id]/lens/runs` | Queues a manual SEO check. Super admin only; project must be active. Returns `{jobId, status, created}`. Enrolls the project first if needed. |
+| `POST /api/v1/projects/[id]/lens/runs` | Queues a manual SEO check. Needs `lens.run`; project must be active. Returns `{jobId, status, created}`. Enrolls the project first if needed. |
 | `GET /api/v1/projects/[id]/lens/uptime` | Uptime summary and daily values (rolling 30 days). Not used by the screen yet (uptime phase). |
 
 

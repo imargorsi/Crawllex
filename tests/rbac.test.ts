@@ -66,6 +66,8 @@ describe("RBAC permission catalog", () => {
       "Integrations",
       "Members",
       "Reports",
+      "Oriel",
+      "Lens",
     ]);
   });
 });

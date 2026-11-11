@@ -14,7 +14,7 @@ export const GET = withApiHandler(async (request, context) => {
   const { id: projectId } = await context!.params;
   if (!projectId) return ApiResponse.error("Project Not Found.", {}, 404);
 
-  const permissionError = await requireProjectPermission(auth, projectId, "dashboard.view");
+  const permissionError = await requireProjectPermission(auth, projectId, "oriel.view");
   if (permissionError) return permissionError;
 
   // Only the signed-in user's own conversations are listed.
@@ -32,7 +32,7 @@ export const DELETE = withApiHandler(async (request, context) => {
   const { id: projectId } = await context!.params;
   if (!projectId) return ApiResponse.error("Project Not Found.", {}, 404);
 
-  const permissionError = await requireProjectPermission(auth, projectId, "dashboard.view");
+  const permissionError = await requireProjectPermission(auth, projectId, "oriel.delete");
   if (permissionError) return permissionError;
 
   const removed = await deleteAllAssistantThreads(projectId, auth.user._id.toString());

@@ -4,6 +4,7 @@ import { ValidationError } from "@/lib/api/http-errors";
 import { ApiResponse } from "@/lib/api/response";
 import { isHiddenFromAdminRoleUi } from "@/lib/rbac/roles";
 import { assertKnownPermissions, sanitizeProjectPermissions } from "@/lib/roles/assert-known-permissions";
+import { assertCanAssignRestricted } from "@/lib/roles/restricted-permissions";
 import { getAdminRoleById } from "@/lib/roles/get-role";
 import { escapeRegex, isDuplicateKeyError } from "@/lib/roles/role-mutation.utils";
 import { resolveRoleMemberCounts } from "@/lib/roles/resolve-role-member-counts";
@@ -11,9 +12,11 @@ import { serializeAdminRoleDetail } from "@/lib/serializers/admin-role";
 import { Role, type RoleDocument } from "@/models";
 import type { UpdateRoleInput } from "@/schemas/role";
 
+/** `actor` is the signed-in user's roles. Routes always pass it; omit only in trusted server code. */
 export async function updateRole(
   roleId: string,
   input: UpdateRoleInput,
+  actor?: { roles: readonly string[] },
 ): Promise<{ role: RoleDocument }> {
   const role = await getAdminRoleById(roleId);
   const name = input.name.trim();
@@ -50,6 +53,7 @@ export async function updateRole(
 
   const permissions = sanitizeProjectPermissions(input.permissions);
   assertKnownPermissions(permissions);
+  if (actor) assertCanAssignRestricted(actor.roles, [...role.permissions], permissions);
 
   role.description = input.description.trim();
   role.permissions = permissions;

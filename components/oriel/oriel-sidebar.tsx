@@ -24,8 +24,9 @@ type TOrielSidebarProps = {
   };
   onNewChat: () => void;
   onSelect: (threadId: string) => void;
-  onDelete: (threadId: string) => void;
-  onDeleteAll: () => void;
+  /** Omit when the user cannot delete (oriel.delete). The delete controls are then not shown. */
+  onDelete?: (threadId: string) => void;
+  onDeleteAll?: () => void;
 };
 
 /**
@@ -80,17 +81,19 @@ export function OrielSidebar({
         />
       </div>
 
-      <footer className="p-3 pt-2">
-        <button
-          type="button"
-          onClick={onDeleteAll}
-          disabled={disabled || threads.length === 0}
-          className="type-caption flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-text-primary/20 font-medium text-text-secondary transition-colors hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
-        >
-          <Icons.delete className="size-3.5" aria-hidden />
-          {labels.deleteAll}
-        </button>
-      </footer>
+      {onDeleteAll ? (
+        <footer className="p-3 pt-2">
+          <button
+            type="button"
+            onClick={onDeleteAll}
+            disabled={disabled || threads.length === 0}
+            className="type-caption flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-text-primary/20 font-medium text-text-secondary transition-colors hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive disabled:opacity-40"
+          >
+            <Icons.delete className="size-3.5" aria-hidden />
+            {labels.deleteAll}
+          </button>
+        </footer>
+      ) : null}
     </aside>
   );
 }

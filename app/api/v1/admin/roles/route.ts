@@ -39,6 +39,6 @@ export const POST = withApiHandler(async (request) => {
   if (auth instanceof Response) return auth;
 
   const input = createRoleSchema.parse(await request.json());
-  const { role } = await createRole(input);
+  const { role } = await createRole(input, { roles: auth.user.roles });
   return buildCreateRoleResponse(role);
 });

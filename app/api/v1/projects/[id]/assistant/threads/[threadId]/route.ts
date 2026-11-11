@@ -16,7 +16,7 @@ export const GET = withApiHandler(async (request, context) => {
   const { id: projectId, threadId } = await context!.params;
   if (!projectId) return ApiResponse.error("Project Not Found.", {}, 404);
 
-  const permissionError = await requireProjectPermission(auth, projectId, "dashboard.view");
+  const permissionError = await requireProjectPermission(auth, projectId, "oriel.view");
   if (permissionError) return permissionError;
 
   if (!THREAD_ID.test(threadId)) return ApiResponse.error("Conversation Not Found.", {}, 404);
@@ -35,7 +35,7 @@ export const DELETE = withApiHandler(async (request, context) => {
   const { id: projectId, threadId } = await context!.params;
   if (!projectId) return ApiResponse.error("Project Not Found.", {}, 404);
 
-  const permissionError = await requireProjectPermission(auth, projectId, "dashboard.view");
+  const permissionError = await requireProjectPermission(auth, projectId, "oriel.delete");
   if (permissionError) return permissionError;
 
   if (!THREAD_ID.test(threadId)) return ApiResponse.error("Conversation Not Found.", {}, 404);

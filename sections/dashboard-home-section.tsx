@@ -56,6 +56,7 @@ export function DashboardHomeSection() {
 
   const canViewLeads = hasPermission(permissions, "leads.view");
   const canViewAnalytics = hasPermission(permissions, "analytics.view");
+  const canViewOriel = hasPermission(permissions, "oriel.view");
   const canViewSeo = hasPermission(permissions, "seo_activities.view");
   const analyticsEnabled = Boolean(projectId) && canViewAnalytics && hasRange;
 
@@ -213,15 +214,17 @@ export function DashboardHomeSection() {
                 "xl:min-h-0 xl:flex-1 xl:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] xl:items-stretch",
             )}
           >
-            <div className="min-h-0 min-w-0 w-full xl:h-full">
-              <DashboardOrielShortcut
-                projectId={projectId}
-                canViewLeads={canViewLeads}
-                canViewAnalytics={canViewAnalytics}
-                canViewSeo={canViewSeo}
-                className="w-full xl:h-full"
-              />
-            </div>
+            {canViewOriel ? (
+              <div className="min-h-0 min-w-0 w-full xl:h-full">
+                <DashboardOrielShortcut
+                  projectId={projectId}
+                  canViewLeads={canViewLeads}
+                  canViewAnalytics={canViewAnalytics}
+                  canViewSeo={canViewSeo}
+                  className="w-full xl:h-full"
+                />
+              </div>
+            ) : null}
 
             {canViewAnalytics ? (
               <section aria-label={t("trend.title")} className="min-h-0 min-w-0 w-full xl:h-full">

@@ -68,7 +68,15 @@ export type PermissionModuleDefinition = {
   slug: string;
   label: string;
   actions: readonly string[];
+  /**
+   * Restricted modules are never granted by default to any role. Only a super admin can assign them
+   * (enforced on role create and update). Super admin itself holds every catalog permission.
+   */
+  restricted?: boolean;
 };
+
+export const ORIEL_PERMISSION_ACTIONS = ["view", "delete"] as const;
+export const LENS_PERMISSION_ACTIONS = ["view", "run"] as const;
 
 export const PROJECT_PERMISSION_MODULES: readonly PermissionModuleDefinition[] = [
   { slug: "dashboard", label: "Dashboard", actions: VIEW_ONLY_ACTIONS },
@@ -79,6 +87,8 @@ export const PROJECT_PERMISSION_MODULES: readonly PermissionModuleDefinition[] =
   { slug: "integrations", label: "Integrations", actions: INTEGRATION_PERMISSION_ACTIONS },
   { slug: "members", label: "Members", actions: MEMBER_PERMISSION_ACTIONS },
   { slug: "reports", label: "Reports", actions: REPORT_PERMISSION_ACTIONS },
+  { slug: "oriel", label: "Oriel", actions: ORIEL_PERMISSION_ACTIONS, restricted: true },
+  { slug: "lens", label: "Lens", actions: LENS_PERMISSION_ACTIONS, restricted: true },
 ];
 
 export const ADMIN_MODULE_SLUGS = ["users", "roles"] as const;
@@ -105,8 +115,8 @@ export function leadPermission(action: LeadPermissionAction): string {
   return `leads.${action}`;
 }
 
-export function adminPermission(module: AdminModuleSlug, action: PermissionAction): string {
-  return `admin.${module}.${action}`;
+export function adminPermission(moduleSlug: AdminModuleSlug, action: PermissionAction): string {
+  return `admin.${moduleSlug}.${action}`;
 }
 
 export function allMemberPermissions(): string[] {
@@ -115,9 +125,9 @@ export function allMemberPermissions(): string[] {
 
 export function allAdminPermissions(): string[] {
   const permissions: string[] = ["admin.dashboard.view"];
-  for (const module of ADMIN_MODULE_SLUGS) {
+  for (const moduleSlug of ADMIN_MODULE_SLUGS) {
     for (const action of PERMISSION_ACTIONS) {
-      permissions.push(adminPermission(module, action));
+      permissions.push(adminPermission(moduleSlug, action));
     }
   }
   return permissions;
@@ -142,6 +152,7 @@ function permissionsForModule(
   mod: PermissionModuleDefinition,
   mode: "owner" | "user",
 ): string[] {
+  if (mod.restricted) return [];
   if (mod.slug === "leads") {
     return LEAD_DEFAULT_ROLE_ACTIONS.map((action) => leadPermission(action));
   }
@@ -159,6 +170,19 @@ export function defaultProjectOwnerPermissions(): string[] {
 /** Default seeded permissions for `project_user` — view everywhere; Leads also export. */
 export function defaultProjectUserPermissions(): string[] {
   return PROJECT_PERMISSION_MODULES.flatMap((mod) => permissionsForModule(mod, "user"));
+}
+
+export function orielPermission(action: (typeof ORIEL_PERMISSION_ACTIONS)[number]): string {
+  return `oriel.${action}`;
+}
+
+export function lensPermission(action: (typeof LENS_PERMISSION_ACTIONS)[number]): string {
+  return `lens.${action}`;
+}
+
+/** True for permissions of restricted modules (Oriel, Lens). */
+export function isRestrictedPermission(permission: string): boolean {
+  return PROJECT_PERMISSION_MODULES.some((mod) => mod.restricted && permission.startsWith(`${mod.slug}.`));
 }
 
 export function isKnownPermission(permission: string): boolean {

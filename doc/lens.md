@@ -8,7 +8,7 @@ Sidebar: **Agents & AI** group (`lib/frontend/layout/sidebar-nav.ts`), with Orie
 ## Check process (decided 2026-11-11)
 
 - **First check:** runs automatically when a super admin approves the project (`POST /api/v1/projects/[id]/approve`). The approval enrolls the project in Lens (`POST /v1/projects/:id/enroll`), and Lens queues one run if the project has none. Enrollment is best effort: if Lens is down, the approval still succeeds and the first check can be started by hand.
-- **Later checks:** manual only. The "Start check" button on `/lens` is visible to super admins only, and `POST /api/v1/projects/[id]/lens/runs` is guarded by super admin on the server. Project must be active.
+- **Later checks:** manual only. The "Start check" button on `/lens` shows only with `lens.run`, and `POST /api/v1/projects/[id]/lens/runs` checks `lens.run` on the server. `lens.run` and `lens.view` are restricted: no role has them by default; only a super admin can assign them. Project must be active.
 - **Scheduled checks** are off by default (not part of this process). Lens schedules still exist in the engine.
 
 ## Route and files

@@ -6,7 +6,7 @@ import { useAccessToken } from "@/hooks/use-access-token.hook";
 import { baseQuery } from "@/lib/frontend/api/base";
 import type { TLensSeoDashboard } from "@/features/lens/lens.types";
 
-/** Start a manual check. Super admin only (the server enforces it; the UI shows the button to super admins only). */
+/** Start a manual check. Needs lens.run on the project (restricted: super admin assigns it). The server enforces it. */
 export function useStartLensRunMutation(projectId: string | null | undefined) {
   const queryClient = useQueryClient();
   return useMutation({

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { ValidationError } from "@/lib/api/http-errors";
 import { ApiResponse } from "@/lib/api/response";
 import { assertKnownPermissions } from "@/lib/roles/assert-known-permissions";
+import { assertCanAssignRestricted } from "@/lib/roles/restricted-permissions";
 import { escapeRegex, isDuplicateKeyError } from "@/lib/roles/role-mutation.utils";
 import { generateUniqueRoleSlug } from "@/lib/roles/role-slug.utils";
 import { serializeAdminRoleDetail } from "@/lib/serializers/admin-role";
@@ -10,7 +11,8 @@ import { isHiddenFromAdminRoleUi } from "@/lib/rbac/roles";
 import { Role, type RoleDocument } from "@/models";
 import type { CreateRoleInput } from "@/schemas/role";
 
-export async function createRole(input: CreateRoleInput): Promise<{ role: RoleDocument }> {
+/** `actor` is the signed-in user's roles. Routes always pass it; omit only in trusted server code. */
+export async function createRole(input: CreateRoleInput, actor?: { roles: readonly string[] }): Promise<{ role: RoleDocument }> {
   const name = input.name.trim();
 
   if (isHiddenFromAdminRoleUi(name)) {
@@ -28,6 +30,7 @@ export async function createRole(input: CreateRoleInput): Promise<{ role: RoleDo
 
   const permissions = [...new Set(input.permissions)];
   assertKnownPermissions(permissions);
+  if (actor) assertCanAssignRestricted(actor.roles, [], permissions);
 
   const slug = await generateUniqueRoleSlug(name);
 

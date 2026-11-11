@@ -26,7 +26,7 @@ export const PATCH = withApiHandler(async (request, context) => {
 
   const input = updateRoleSchema.parse(await request.json());
   const { id } = await context!.params;
-  const { role } = await updateRole(id, input);
+  const { role } = await updateRole(id, input, { roles: auth.user.roles });
   return buildUpdateRoleResponse(role);
 });
 

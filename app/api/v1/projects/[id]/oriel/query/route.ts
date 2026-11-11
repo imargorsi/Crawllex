@@ -35,7 +35,7 @@ export const POST = withApiHandler(async (request, context) => {
   const { id: projectId } = await context!.params;
   if (!projectId) return ApiResponse.error("Project Not Found.", {}, 404);
 
-  const permissionError = await requireProjectPermission(auth, projectId, "dashboard.view");
+  const permissionError = await requireProjectPermission(auth, projectId, "oriel.view");
   if (permissionError) return permissionError;
 
   if (!allowOrielRequest(auth.user._id.toString())) {
