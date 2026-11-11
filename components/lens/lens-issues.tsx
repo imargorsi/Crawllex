@@ -49,10 +49,9 @@ function StatTile({ icon: Icon, label, value, tone }: { icon: typeof Icons.alert
  * All Issues: the SEO command center for current open issues.
  * Rule tabs, severity and type chips, sort. Resolved issues are not shown here (they belong in History).
  */
-export function LensIssues({ data, t, locale, presetType }: {
+export function LensIssues({ data, t, presetType }: {
   data: TLensDemoDashboard;
   t: TLensT;
-  locale: string;
   presetType: TTypeFilter;
 }) {
   const [severity, setSeverity] = useState<TSeverityFilter>("all");

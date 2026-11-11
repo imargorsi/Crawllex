@@ -98,7 +98,7 @@ export function LensSection() {
       </div>
 
       {view === "overview" ? <LensOverview data={data} t={t} locale={locale} go={go} /> : null}
-      {view === "seo" ? <LensIssues key={typePreset} data={data} t={t} locale={locale} presetType={typePreset} /> : null}
+      {view === "seo" ? <LensIssues key={typePreset} data={data} t={t} presetType={typePreset} /> : null}
       {view === "pages" ? <LensPages data={data} t={t} /> : null}
       {view === "history" ? <LensHistory data={data} t={t} locale={locale} /> : null}
       {view === "uptime" ? <LensUptime data={data} t={t} locale={locale} /> : null}
