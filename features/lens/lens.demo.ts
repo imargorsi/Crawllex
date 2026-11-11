@@ -32,6 +32,7 @@ export type TLensDemoIssue = {
   why: string;
   fix: string;
   verify: string;
+  aiSuggestion: string;
   pages: string[];
 };
 
@@ -108,6 +109,7 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The title is the headline people see in search results. Without one, search engines write their own.",
     fix: "Add a unique, descriptive title that names the page topic.",
     verify: "Run another SEO check and confirm a valid title is detected on each page.",
+    aiSuggestion: "Write a title of 50 to 60 characters that names the service and the brand, with the main topic first. Use one title per page.",
     pages: ["/services/seo", "/blog/guide", "/pricing", "/contact", "/careers"],
   },
   {
@@ -117,6 +119,7 @@ const ISSUES: TLensDemoIssue[] = [
     why: "Listing a page in the sitemap asks search engines to index it. A noindex tag asks them not to. The two conflict.",
     fix: "Remove noindex from pages you want found, or remove those URLs from the sitemap.",
     verify: "Run another SEO check and confirm no sitemap page is marked noindex.",
+    aiSuggestion: "Remove noindex from pages you want found. If a page should stay hidden, remove it from the sitemap in the same release.",
     pages: ["/old-offers", "/landing/spring", "/thank-you"],
   },
   {
@@ -126,6 +129,7 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The meta description is the short summary shown under the title in search results.",
     fix: "Write one or two sentences that describe the page for a visitor.",
     verify: "Run another SEO check and confirm a meta description is detected on each page.",
+    aiSuggestion: "Write a summary of 120 to 155 characters that states what the visitor gets on this page. Do not repeat the title.",
     pages: ["/about", "/services/seo", "/blog/guide", "/blog/tips", "/faq", "/team"],
   },
   {
@@ -135,6 +139,7 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The main heading tells visitors and search engines what the page is about.",
     fix: "Add one main heading that names the page topic.",
     verify: "Run another SEO check and confirm one visible H1 is found.",
+    aiSuggestion: "Add one main heading at the top of the content that states the page topic in plain words.",
     pages: ["/landing/spring", "/thank-you"],
   },
   {
@@ -144,6 +149,7 @@ const ISSUES: TLensDemoIssue[] = [
     why: "Very short or very long titles are often cut off or unclear in search results. This is a guideline, not a rule.",
     fix: "Rewrite the title to describe the page in about 30 to 60 characters.",
     verify: "Run another SEO check. Advisory items do not reduce the score.",
+    aiSuggestion: "Shorten the title to under 60 characters by removing filler words. Keep the main topic first.",
     pages: ["/about", "/faq", "/team", "/blog/tips"],
   },
   {
@@ -153,6 +159,7 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The canonical tag tells search engines which address to keep. A conflicting tag can hide the page you want found.",
     fix: "Set each canonical tag to the page's own preferred address, or remove it if it is not needed.",
     verify: "Run another SEO check and confirm each canonical matches its page.",
+    aiSuggestion: "Point the canonical tag to the page's own preferred address, using the full https URL.",
     pages: ["/pricing", "/services/seo"],
   },
   {
@@ -162,6 +169,7 @@ const ISSUES: TLensDemoIssue[] = [
     why: "Readable addresses are easier for people to share and for search engines to understand.",
     fix: "Rename the page address or remove tracking parameters from internal links.",
     verify: "Run another SEO check. Advisory items do not reduce the score.",
+    aiSuggestion: "Rename the page to a lowercase, hyphenated address and redirect the old address to the new one.",
     pages: ["/Services/SEO?ref=newsletter"],
   },  {
     id: "robots_blocks_sitemap_page", title: "Sitemap page blocked by robots.txt", severity: "high", group: "technical", ruleGroup: "robots", status: "open", resolvedOn: null, affected: 1,
@@ -170,6 +178,7 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The sitemap invites search engines to visit the page. robots.txt blocks them, so they cannot read it.",
     fix: "Remove the Disallow rule for this page, or remove the page from the sitemap.",
     verify: "Run another SEO check and confirm the page is allowed.",
+    aiSuggestion: "Delete the Disallow rule for /private-offers in robots.txt, or remove the page from the sitemap if it is meant to stay private.",
     pages: ["/private-offers"],
   },
   {
@@ -179,6 +188,7 @@ const ISSUES: TLensDemoIssue[] = [
     why: "Alt text describes images to screen readers and to search engines.",
     fix: "Add short, accurate alt text. Use empty alt text for decorative images.",
     verify: "Run another SEO check and confirm each meaningful image has alt text.",
+    aiSuggestion: "Describe what each image shows in 5 to 12 words. Use empty alt text for purely decorative images.",
     pages: ["/services/seo", "/about", "/team"],
   },
   {
@@ -188,6 +198,7 @@ const ISSUES: TLensDemoIssue[] = [
     why: "Very short pages rarely answer a visitor's main question. This is a guideline, not a rule.",
     fix: "Add useful detail that answers the page's main question.",
     verify: "Advisory. Does not change the score.",
+    aiSuggestion: "Add a short section that answers the page's main question: what it is, who it is for, and what the visitor should do next.",
     pages: ["/careers", "/thank-you", "/contact", "/landing/spring"],
   },
   {
@@ -197,6 +208,7 @@ const ISSUES: TLensDemoIssue[] = [
     why: "The canonical tag tells search engines which address to keep when a page is reachable in more than one way.",
     fix: "Add a canonical tag that points to the page's own address.",
     verify: "Confirmed fixed on the next check.",
+    aiSuggestion: "Add a canonical tag that points to the page's own https address.",
     pages: ["/blog/tips"],
   },
 ];

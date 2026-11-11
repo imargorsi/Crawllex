@@ -205,6 +205,16 @@ function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
         </div>
       </div>
 
+      <div className="flex flex-col gap-3 rounded-2xl border border-border p-4 sm:p-5">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex size-7 items-center justify-center rounded-lg bg-bg-hover">
+            <Icons.sparkles className="size-4 text-text-primary" aria-hidden />
+          </span>
+          <span className="text-sm font-semibold text-text-primary">{t("aiSuggestion")}</span>
+        </div>
+        <p className="text-sm leading-relaxed text-text-secondary">{issue.aiSuggestion}</p>
+        <p className="text-xs text-text-muted">{t("aiSuggestionNote")}</p>
+      </div>
     </li>
   );
 }

@@ -423,6 +423,8 @@ const translation: Translation = {
     issueFound: "ما وجدناه",
     filterType: "النوع",
     filterSeverity: "الشدة",
+    aiSuggestion: "اقتراح الذكاء الاصطناعي",
+    aiSuggestionNote: "مقترح من الذكاء الاصطناعي. راجعه قبل التطبيق.",
   },
   oriel: {
     conversations: "المحادثات",
