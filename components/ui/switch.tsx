@@ -10,7 +10,7 @@ type TSwitchProps = {
   className?: string;
 };
 
-/** Plain switch: outlined track, no fill background. Brand colour only marks the on state. */
+/** Plain switch: outlined track, no fill. Off knob is light; brand only marks the on state. */
 export function Switch({ checked, onCheckedChange, disabled = false, ariaLabel, className }: TSwitchProps) {
   return (
     <button
@@ -21,18 +21,18 @@ export function Switch({ checked, onCheckedChange, disabled = false, ariaLabel, 
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        "relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors duration-200 ease-out",
+        "relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition-colors duration-200 ease-out",
         "focus-visible:ring-2 focus-visible:ring-accent-border focus-visible:outline-none",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        checked ? "border-brand" : "border-border",
+        checked ? "border-brand" : "border-text-primary/35",
         className,
       )}
     >
       <span
         aria-hidden
         className={cn(
-          "absolute start-0.5 size-4 rounded-full transition-transform duration-200 ease-out",
-          checked ? "translate-x-5 rtl:-translate-x-5 bg-brand" : "translate-x-0 bg-text-muted",
+          "absolute start-0.5 size-5 rounded-full transition-transform duration-200 ease-out",
+          checked ? "translate-x-5 rtl:-translate-x-5 bg-brand" : "translate-x-0 bg-text-primary/85",
         )}
       />
     </button>

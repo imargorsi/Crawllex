@@ -8,7 +8,6 @@ export interface Translation {
     listHeading: string;
     cardLabel: string;
     emptyLabel: string;
-    selectPrompt: string;
   };
   nav: {
     aria: string;
@@ -96,8 +95,6 @@ export interface Translation {
       lensEnrollAlready: string;
       lensEnrollFailed: string;
       lensNeedsActive: string;
-      projectLabel: string;
-      selectPrompt: string;
       uptimeWindowLabel: string;
       pagesLimitLabel: string;
       daysUnit: string;
@@ -668,7 +665,6 @@ export interface Translation {
         lead: string;
         count: string;
         empty: string;
-        projectLabel: string;
         projectPh: string;
         roleLabel: string;
         rolePh: string;
@@ -1990,7 +1986,6 @@ const translation: Translation = {
     listHeading: "Your Projects",
     cardLabel: "Project",
     emptyLabel: "No Projects Available",
-    selectPrompt: "Select A Project To Continue",
   },
   nav: {
     aria: "Main Navigation",
@@ -2078,8 +2073,6 @@ const translation: Translation = {
       lensEnrollAlready: "This project is already enrolled.",
       lensEnrollFailed: "Could not enroll the project. Try again shortly.",
       lensNeedsActive: "Approve the project before enrolling it in Lens.",
-      projectLabel: "Project",
-      selectPrompt: "Select a project",
       uptimeWindowLabel: "Uptime monitoring",
       pagesLimitLabel: "Pages per check",
       daysUnit: "days",
@@ -2657,7 +2650,6 @@ const translation: Translation = {
         lead: "Assign This User To Projects With A Project Role. Role Changes On Edit Save Immediately.",
         count: "{{count}} Assigned",
         empty: "No projects assigned yet.",
-        projectLabel: "Project",
         projectPh: "Select Project",
         roleLabel: "Role",
         rolePh: "Select Role",
