@@ -96,6 +96,8 @@ export interface Translation {
       lensEnrollAlready: string;
       lensEnrollFailed: string;
       lensNeedsActive: string;
+      projectLabel: string;
+      selectPrompt: string;
       uptimeWindowLabel: string;
       pagesLimitLabel: string;
       daysUnit: string;
@@ -2076,6 +2078,8 @@ const translation: Translation = {
       lensEnrollAlready: "This project is already enrolled.",
       lensEnrollFailed: "Could not enroll the project. Try again shortly.",
       lensNeedsActive: "Approve the project before enrolling it in Lens.",
+      projectLabel: "Project",
+      selectPrompt: "Select a project",
       uptimeWindowLabel: "Uptime monitoring",
       pagesLimitLabel: "Pages per check",
       daysUnit: "days",

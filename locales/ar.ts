@@ -97,6 +97,8 @@ const translation: Translation = {
       lensEnrollAlready: "هذا المشروع مسجل بالفعل.",
       lensEnrollFailed: "تعذّر تسجيل المشروع. حاول مرة أخرى بعد قليل.",
       lensNeedsActive: "وافق على المشروع قبل تسجيله في Lens.",
+      projectLabel: "المشروع",
+      selectPrompt: "اختر مشروعًا",
       uptimeWindowLabel: "مراقبة وقت التشغيل",
       pagesLimitLabel: "عدد الصفحات لكل فحص",
       daysUnit: "يومًا",
