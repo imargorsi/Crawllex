@@ -150,24 +150,20 @@ export function LensIssues({ data, t, presetType }: {
   );
 }
 
-/** One issue. Header, then findings and fix side by side, then verification. Every section is always visible. */
+/** One issue. Same glass card as the Overview. Findings on the left; fix, AI suggestion and pages on the right. */
 function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
   return (
-    <li className="flex flex-col gap-5 rounded-2xl border border-border p-5 sm:p-6 dark:border-text-primary/40">
+    <li className={cn(LENS_FLOAT_CARD, "gap-5 p-5 sm:p-6")}>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex min-w-0 flex-1 flex-col gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <LensPill tone={severityTone(issue.severity)}>{t(severityLabel(issue.severity))}</LensPill>
-            <span className="rounded-full bg-bg-hover px-3 py-1 text-xs font-medium text-text-secondary">
-              {issue.group === "onpage" ? t("typeOnpage") : t("typeTechnical")}
-            </span>
-            <span className="rounded-full bg-bg-hover px-3 py-1 text-xs font-medium text-text-secondary">
-              {t(RULE_LABEL_KEY[issue.ruleGroup])}
-            </span>
+            <Tag>{issue.group === "onpage" ? t("typeOnpage") : t("typeTechnical")}</Tag>
+            <Tag>{t(RULE_LABEL_KEY[issue.ruleGroup])}</Tag>
           </div>
           <h3 className="text-lg font-semibold leading-snug text-text-primary">{issue.title}</h3>
         </div>
-        <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-border px-4 py-2.5">
+        <div className="flex shrink-0 items-center gap-3 rounded-2xl border border-border bg-text-primary/[0.03] px-4 py-2.5 shadow-sm dark:border-text-primary/35">
           <Icons.globe className="size-4 text-text-muted" aria-hidden />
           <div className="flex items-baseline gap-1.5">
             <span className="text-2xl font-semibold tabular-nums leading-none text-text-primary">{issue.affected}</span>
@@ -176,57 +172,60 @@ function IssueCard({ issue, t }: { issue: TLensDemoIssue; t: TLensT }) {
         </div>
       </header>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2">
         <div className="flex flex-col gap-4">
-          <Section icon={Icons.search} label={t("issueFound")} text={issue.found} />
-          <Section icon={Icons.alert} label={t("issueWhy")} text={issue.why} />
+          <Panel icon={Icons.search} label={t("issueFound")}>{issue.found}</Panel>
+          <Panel icon={Icons.alert} label={t("issueWhy")}>{issue.why}</Panel>
         </div>
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2 rounded-2xl border border-brand/40 bg-brand/5 p-4">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex size-7 items-center justify-center rounded-lg bg-brand/15">
-                <Icons.bulb className="size-4 text-brand" aria-hidden />
-              </span>
-              <span className="text-sm font-semibold text-brand">{t("howToFix")}</span>
-            </div>
-            <p className="text-sm leading-relaxed text-text-primary">{issue.fix}</p>
-          </div>
-          <div className="flex flex-col gap-2 rounded-2xl border border-border p-4">
-            <span className="flex items-center gap-2 text-xs font-medium text-text-muted">
-              <Icons.globe className="size-3.5" aria-hidden />
-              {t("issuePages")}
-            </span>
+          <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">{issue.fix}</Panel>
+          <Panel icon={Icons.sparkles} label={t("aiSuggestion")} note={t("aiSuggestionNote")}>{issue.aiSuggestion}</Panel>
+          <Panel icon={Icons.globe} label={t("issuePages")}>
             <ul className="flex flex-wrap gap-1.5">
               {issue.pages.map((url) => (
-                <li key={url} className="rounded-full bg-bg-hover px-2.5 py-1 font-mono text-xs text-text-secondary">{url}</li>
+                <li key={url} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-text-secondary">{url}</li>
               ))}
             </ul>
-          </div>
+          </Panel>
         </div>
-      </div>
-
-      <div className="flex flex-col gap-3 rounded-2xl border border-border p-4 sm:p-5">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex size-7 items-center justify-center rounded-lg bg-bg-hover">
-            <Icons.sparkles className="size-4 text-text-primary" aria-hidden />
-          </span>
-          <span className="text-sm font-semibold text-text-primary">{t("aiSuggestion")}</span>
-        </div>
-        <p className="text-sm leading-relaxed text-text-secondary">{issue.aiSuggestion}</p>
-        <p className="text-xs text-text-muted">{t("aiSuggestionNote")}</p>
       </div>
     </li>
   );
 }
 
-function Section({ icon: Icon, label, text }: { icon: typeof Icons.alert; label: string; text: string }) {
+function Tag({ children }: { children: string }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="flex items-center gap-2 text-xs font-medium text-text-muted">
-        <Icon className="size-3.5" aria-hidden />
-        {label}
-      </span>
-      <p className="text-sm leading-relaxed text-text-secondary">{text}</p>
+    <span className="rounded-full border border-border bg-text-primary/[0.03] px-3 py-0.5 text-xs font-medium text-text-secondary dark:border-text-primary/35">
+      {children}
+    </span>
+  );
+}
+
+/** Info panel used for every block in an issue card. Same size and padding everywhere. */
+function Panel({ icon: Icon, label, children, note, tone = "neutral" }: {
+  icon: typeof Icons.alert;
+  label: string;
+  children: React.ReactNode;
+  note?: string;
+  tone?: "neutral" | "brand";
+}) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-2 rounded-2xl border p-4 shadow-sm backdrop-blur-sm",
+        tone === "brand"
+          ? "border-brand/45 bg-brand/[0.06]"
+          : "border-border bg-text-primary/[0.03] dark:border-text-primary/35",
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <span className={cn("inline-flex size-7 shrink-0 items-center justify-center rounded-lg", tone === "brand" ? "bg-brand/15" : "bg-bg-hover")}>
+          <Icon className={cn("size-3.5", tone === "brand" ? "text-brand" : "text-text-secondary")} aria-hidden />
+        </span>
+        <span className={cn("text-sm font-semibold", tone === "brand" ? "text-brand" : "text-text-primary")}>{label}</span>
+      </div>
+      <div className="text-sm leading-relaxed text-text-secondary">{children}</div>
+      {note ? <p className="text-xs text-text-muted">{note}</p> : null}
     </div>
   );
 }
