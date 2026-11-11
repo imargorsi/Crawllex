@@ -456,8 +456,6 @@ export interface Translation {
     sortPages: string;
     aiSuggestionNote: string;
     hideDetails: string;
-    pagesForIssue: string;
-    clearFilter: string;
     close: string;
     pageDetailTitle: string;
     mustFixLabel: string;
@@ -479,6 +477,7 @@ export interface Translation {
     rsPass: string;
     rsFinding: string;
     rsNotEvaluated: string;
+    filterIssue: string;
   };
   oriel: {
     conversations: string;
@@ -2420,8 +2419,6 @@ const translation: Translation = {
     sortPages: "Most pages",
     aiSuggestionNote: "Suggested by AI. Review before you apply it.",
     hideDetails: "Hide details",
-    pagesForIssue: "Showing pages affected by: {{title}}",
-    clearFilter: "Clear filter",
     close: "Close",
     pageDetailTitle: "Page Details",
     mustFixLabel: "Must Fix",
@@ -2443,6 +2440,7 @@ const translation: Translation = {
     rsPass: "Pass",
     rsFinding: "Finding",
     rsNotEvaluated: "Not Evaluated",
+    filterIssue: "Issue",
   },
   oriel: {
     conversations: "Conversations",

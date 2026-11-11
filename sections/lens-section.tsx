@@ -136,12 +136,12 @@ export function LensSection() {
       ) : null}
       {view === "pages" ? (
         <LensPages
-          key={`${issueParam ?? ""}|${queryParam}`}
+          key={queryParam}
           data={data}
           t={t}
           issueId={issueParam}
           initialQuery={queryParam}
-          onClearIssue={() => deleteQueryParams(["issue"])}
+          onIssueChange={(value) => (value === "all" ? deleteQueryParams(["issue"]) : setQueryParams({ issue: value }))}
           onOpenPage={(url) => setQueryParams({ page: url })}
         />
       ) : null}

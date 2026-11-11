@@ -4,17 +4,18 @@ import { useMemo, useState } from "react";
 
 import type { TLensT } from "@/components/lens/lens-overview";
 import { LENS_FLOAT_CARD, LensCardHeader, LensPill } from "@/components/lens/lens-ui";
+import { TableListSort } from "@/components/table/table-list-sort";
 import { Input } from "@/components/ui/input";
 import type { TLensDemoDashboard } from "@/features/lens/lens.demo";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 
 /** Pages: every checked page with its status and issue counts, sorted by priority. Can be narrowed to one issue. */
-export function LensPages({ data, t, issueId, initialQuery, onClearIssue, onOpenPage }: {
+export function LensPages({ data, t, issueId, initialQuery, onIssueChange, onOpenPage }: {
   data: TLensDemoDashboard;
   t: TLensT;
   issueId: string | null;
   initialQuery: string;
-  onClearIssue: () => void;
+  onIssueChange: (value: string) => void;
   onOpenPage: (url: string) => void;
 }) {
   const [query, setQuery] = useState(initialQuery);
@@ -38,15 +39,18 @@ export function LensPages({ data, t, issueId, initialQuery, onClearIssue, onOpen
   return (
     <section className={LENS_FLOAT_CARD}>
       <LensCardHeader icon={Icons.grid} title={t("pagesTitle")} />
-      {issue ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-brand/40 bg-brand/[0.06] px-4 py-3 text-sm text-text-secondary">
-          <span>{t("pagesForIssue", { title: issue.title })}</span>
-          <button type="button" onClick={onClearIssue} className="font-medium text-brand hover:underline">
-            {t("clearFilter")}
-          </button>
-        </div>
-      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <TableListSort
+            label={t("filterIssue")}
+            value={issue?.id ?? "all"}
+            onChange={onIssueChange}
+            options={[
+              { value: "all", label: t("seoAllIssues") },
+              ...data.issues.filter((i) => i.status === "open").map((i) => ({ value: i.id, label: i.title })),
+            ]}
+          />
+        </div>
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}

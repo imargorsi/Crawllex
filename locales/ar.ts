@@ -458,8 +458,6 @@ const translation: Translation = {
     sortPages: "الأكثر صفحات",
     aiSuggestionNote: "مقترح من الذكاء الاصطناعي. راجعه قبل التطبيق.",
     hideDetails: "إخفاء التفاصيل",
-    pagesForIssue: "عرض الصفحات المتأثرة بـ: {{title}}",
-    clearFilter: "مسح الفلتر",
     close: "إغلاق",
     pageDetailTitle: "تفاصيل الصفحة",
     mustFixLabel: "يجب الإصلاح",
@@ -481,6 +479,7 @@ const translation: Translation = {
     rsPass: "ناجح",
     rsFinding: "ملاحظة",
     rsNotEvaluated: "لم تُقيَّم",
+    filterIssue: "المشكلة",
   },
   oriel: {
     conversations: "المحادثات",

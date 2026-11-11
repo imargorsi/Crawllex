@@ -52,7 +52,7 @@ Every view and filter lives in the URL, read and written with `hooks/use-query-p
 | `type` | `onpage`, `technical` | all (SEO Health only) |
 | `severity` | `high`, `medium`, `advisory` | all (SEO Health only) |
 | `sort` | `pages` (Most pages) | severity (SEO Health only) |
-| `issue` | issue id (Pages view: pages affected by that issue) | none |
+| `issue` | issue id (Pages view: pages affected by that issue, shown in the Issue dropdown) | none |
 | `q` | page URL (Pages view: search) | none |
 | `page` | page URL (Pages view: opens Page Details sheet) | none |
 | `rule` | `titles`, `descriptions`, `headings`, `content`, `images`, `indexing`, `robots`, `urls`, `links`, `structured` | all (SEO Health only) |
