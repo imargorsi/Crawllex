@@ -26,11 +26,6 @@ export async function lensGet<T>(path: string): Promise<T> {
   return data as T;
 }
 
-/** GET a raw file (a screenshot) from the Lens local API. The caller streams it on. */
-export async function lensGetRaw(path: string): Promise<Response> {
-  return lensRequest(path);
-}
-
 async function lensRequest(path: string): Promise<Response> {
   const config = lensConfig();
   if (!config) throw new LensError("disabled");

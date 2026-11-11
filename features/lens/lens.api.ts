@@ -3,9 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { useAccessToken } from "@/hooks/use-access-token.hook";
-import { ApiError } from "@/lib/frontend/api/errors";
 import { baseQuery } from "@/lib/frontend/api/base";
-import { getAccessToken } from "@/lib/frontend/auth/session";
 
 /** Lens data as Crawllex shows it. Read-only: Lens runs and issues are changed only by Lens. */
 export type TLensRun = {
@@ -79,7 +77,6 @@ export const lensKeys = {
   all: ["lens-api"] as const,
   overview: (projectId: string) => [...lensKeys.all, "overview", projectId] as const,
   findings: (projectId: string, runId: string) => [...lensKeys.all, "findings", projectId, runId] as const,
-  screenshots: (projectId: string, runId: string) => [...lensKeys.all, "screenshots", projectId, runId] as const,
   uptime: (projectId: string, days: number) => [...lensKeys.all, "uptime", projectId, days] as const,
 };
 
@@ -107,29 +104,6 @@ export function useLensFindingsQuery(projectId: string | null | undefined, runId
     enabled: Boolean(projectId) && Boolean(runId) && Boolean(token),
     retry: false,
   });
-}
-
-export function useLensScreenshotsQuery(projectId: string | null | undefined, runId: string | null) {
-  const token = useAccessToken();
-  return useQuery({
-    queryKey: lensKeys.screenshots(projectId ?? "", runId ?? ""),
-    queryFn: async () => {
-      const envelope = await baseQuery.get<{ items: string[] }>(`projects/${projectId}/lens/runs/${runId}/screenshots`);
-      return envelope.data?.items ?? [];
-    },
-    enabled: Boolean(projectId) && Boolean(runId) && Boolean(token),
-    retry: false,
-  });
-}
-
-/** One screenshot as an object URL. The bearer token is sent in the header, so the image needs no cookie. */
-export async function fetchLensScreenshot(projectId: string, runId: string, name: string): Promise<string> {
-  const token = getAccessToken();
-  const response = await fetch(`/api/v1/projects/${projectId}/lens/runs/${runId}/screenshot?name=${encodeURIComponent(name)}`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  if (!response.ok) throw new ApiError("Screenshot could not be loaded.", response.status);
-  return URL.createObjectURL(await response.blob());
 }
 
 export function useLensUptimeQuery(projectId: string | null | undefined, days = 7) {
