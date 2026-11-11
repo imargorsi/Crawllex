@@ -402,12 +402,9 @@ export interface Translation {
     filterSeverity: string;
     filterType: string;
     filterRule: string;
-    filterStatus: string;
     filterAll: string;
     typeOnpage: string;
     typeTechnical: string;
-    statusOpen: string;
-    statusAll: string;
     ruleTitles: string;
     ruleDescriptions: string;
     ruleHeadings: string;
@@ -418,7 +415,6 @@ export interface Translation {
     ruleUrls: string;
     ruleLinks: string;
     ruleStructured: string;
-    searchIssues: string;
     sortBy: string;
     sortSeverity: string;
     sortPages: string;
@@ -428,8 +424,9 @@ export interface Translation {
     openIssuesCount: string;
     howToFix: string;
     resolvedOn: string;
-    hideDetails: string;
     pageIssues: string;
+    pagesUnit: string;
+    issueFound: string;
   };
   oriel: {
     conversations: string;
@@ -2317,12 +2314,9 @@ const translation: Translation = {
     filterSeverity: "Severity",
     filterType: "Type",
     filterRule: "Rule",
-    filterStatus: "Status",
     filterAll: "All",
     typeOnpage: "On-Page",
     typeTechnical: "Technical",
-    statusOpen: "Open",
-    statusAll: "All",
     ruleTitles: "Meta Title",
     ruleDescriptions: "Meta Description",
     ruleHeadings: "Headings",
@@ -2333,7 +2327,6 @@ const translation: Translation = {
     ruleUrls: "Page URL",
     ruleLinks: "Links",
     ruleStructured: "Structured Data",
-    searchIssues: "Search issues or pages",
     sortBy: "Sort by",
     sortSeverity: "Severity",
     sortPages: "Most Pages",
@@ -2343,8 +2336,9 @@ const translation: Translation = {
     openIssuesCount: "{{count}} open",
     howToFix: "How to Fix",
     resolvedOn: "Resolved {{date}}",
-    hideDetails: "Hide Details",
     pageIssues: "Page Issues",
+    pagesUnit: "pages",
+    issueFound: "What We Found",
   },
   oriel: {
     conversations: "Conversations",
