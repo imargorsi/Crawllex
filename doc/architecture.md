@@ -209,6 +209,13 @@ A separate **Onboarding workspace** (sidebar workspace toggle, `lib/frontend/lay
 `/onboarding/[shareToken]` (`app/(public)`, IP rate limited at 30/min). API routes are currently
 `superAdmin: true`. The `clients.*` permission keys exist in the catalog for future delegation.
 
+## Lens (SEO health and uptime, `feature/lens-dashboard`)
+
+- UI: `/lens` (`sections/lens-section.tsx`, `components/lens/*`). Tabs: Overview, SEO health (All issues, On-page, Technical, Pages), Uptime monitoring, plus View history for scan history. Full layout and rules: `doc/lens.md`.
+- Data: phase 1 uses demo data (`features/lens/lens.demo.ts`). Phase 3 replaces the hook with the proxy API (`features/lens/lens.api.ts`, `api/v1/projects/[id]/lens/*`, see `doc/api.md`).
+- Engine and storage: separate service at `/mnt/projects/crawllex-lens` (Node, SQLite). Its rules and decisions: `docs/SEO-RULES.md`, `docs/DECISIONS.md`.
+- Theme: Lens cards are no-fill glass with a soft shadow; colors from theme tokens only.
+
 ## Frontend Shell
 
 - Providers (`components/providers/app-providers.tsx`): React Query, next-themes (light/dark), theme

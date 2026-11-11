@@ -43,10 +43,22 @@ Clickable cards: `LensClickCard`. Only the four section cards and the tab/button
 - Labels Title Case, descriptions sentence case. Colors from theme tokens only (no raw hex in Lens components).
 - Every number shown comes from the view model. Demo values are not computed.
 
+## Data contract (proposed, not implemented)
+
+Per completed run, saved snapshot (Lens `docs/DECISIONS.md`, 2026-11-11):
+score, score band, score model version, pages checked, known URLs, coverage (complete or partial), coverage reason (none, cap_reached, gaps), scored high rules, scored medium rules, advisory rules, pages affected, new / resolved / reopened / still open issues, penalty breakdown.
+
+Evaluation per rule and page: Pass, Finding, Not applicable, Not evaluated. Not evaluated is never shown as Pass.
+
+Failed run: listed as failed with its error code, no score. Current view = latest completed run. Partial run: scored with a partial label, never resolves issues.
+
+Score formula (proposed): per scored rule, weight (high 10, medium 4, advisory 0) × (0.5 + 0.5 × affected/checked). Site-wide findings count as full weight. Total capped at 60, so the floor is 40. Advisory rules never score. Numbers to be tuned on Gate 1 data.
+
 ## Not done yet (tracked, not hidden)
 
 - Live data and API states (not connected, load failed, empty). Their strings were removed as unused and must return with the API.
-- Scoring formula change and per-run score snapshot (see crawllex-lens `docs/DECISIONS.md`, pending owner approval).
+- Scoring formula change and per-run score snapshot (see Data contract above; crawllex-lens `docs/DECISIONS.md`, pending owner approval).
+- Advisory tier and severity changes (crawllex-lens `docs/SEO-RULES.md`, pending owner approval and a re-audit).
 - Website identity (domain) and coverage detail (discovered / selected / checked / not checked) on Overview.
 - Recent activity and Coverage & trends were removed from Overview to fit the agreed layout.
 - Pages and Issues as separate pages (currently SEO health subtabs).
