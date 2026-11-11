@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 type TSeverityFilter = "all" | TLensSeverity;
 type TTypeFilter = "all" | TLensGroup;
 type TRuleTab = "all" | TLensRuleGroup;
-type TSort = "severity" | "pages" | "title";
 
 const SEVERITY_RANK: Record<TLensSeverity, number> = { high: 3, medium: 2, advisory: 1 };
 
@@ -59,7 +58,6 @@ export function LensIssues({ data, t, locale, presetType }: {
   const [severity, setSeverity] = useState<TSeverityFilter>("all");
   const [type, setType] = useState<TTypeFilter>(presetType);
   const [rule, setRule] = useState<TRuleTab>("all");
-  const [sort, setSort] = useState<TSort>("severity");
 
   const open = useMemo(() => data.issues.filter((i) => i.status === "open"), [data.issues]);
 
@@ -82,12 +80,8 @@ export function LensIssues({ data, t, locale, presetType }: {
       if (rule !== "all" && issue.ruleGroup !== rule) return false;
       return true;
     });
-    return [...filtered].sort((a, b) => {
-      if (sort === "pages") return b.affected - a.affected || SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity];
-      if (sort === "title") return a.title.localeCompare(b.title, locale);
-      return SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity] || b.affected - a.affected;
-    });
-  }, [open, severity, type, rule, sort, locale]);
+    return [...filtered].sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity] || b.affected - a.affected);
+  }, [open, severity, type, rule]);
 
   const ruleItems = [
     { id: "all" as const, label: t("filterAll"), count: open.length },
@@ -135,16 +129,6 @@ export function LensIssues({ data, t, locale, presetType }: {
                 { value: "high", label: t("severityHigh") },
                 { value: "medium", label: t("severityMedium") },
                 { value: "advisory", label: t("severityAdvisory") },
-              ]}
-            />
-            <TableListSort
-              label={t("sortBy")}
-              value={sort}
-              onChange={(v) => setSort(v as TSort)}
-              options={[
-                { value: "severity", label: t("sortSeverity") },
-                { value: "pages", label: t("sortPages") },
-                { value: "title", label: t("sortTitle") },
               ]}
             />
           </div>

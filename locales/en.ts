@@ -412,10 +412,6 @@ export interface Translation {
     ruleUrls: string;
     ruleLinks: string;
     ruleStructured: string;
-    sortBy: string;
-    sortSeverity: string;
-    sortPages: string;
-    sortTitle: string;
     showingIssues: string;
     noIssuesMatch: string;
     openIssuesCount: string;
@@ -2322,10 +2318,6 @@ const translation: Translation = {
     ruleUrls: "Page URL",
     ruleLinks: "Links",
     ruleStructured: "Structured Data",
-    sortBy: "Sort by",
-    sortSeverity: "Severity",
-    sortPages: "Most Pages",
-    sortTitle: "Title",
     showingIssues: "Showing {{shown}} of {{total}} issues",
     noIssuesMatch: "No issues match these filters.",
     openIssuesCount: "{{count}} open",
