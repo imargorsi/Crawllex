@@ -458,6 +458,27 @@ export interface Translation {
     hideDetails: string;
     pagesForIssue: string;
     clearFilter: string;
+    close: string;
+    pageDetailTitle: string;
+    mustFixLabel: string;
+    shouldFixLabel: string;
+    worthLookLabel: string;
+    ruleChecks: string;
+    issuesOnPage: string;
+    noIssuesOnPage: string;
+    checkTitlePresent: string;
+    checkTitleLength: string;
+    checkDescription: string;
+    checkH1: string;
+    checkCanonical: string;
+    checkNoindex: string;
+    checkRobots: string;
+    checkUrl: string;
+    checkImageAlt: string;
+    checkContent: string;
+    rsPass: string;
+    rsFinding: string;
+    rsNotEvaluated: string;
   };
   oriel: {
     conversations: string;
@@ -2401,6 +2422,27 @@ const translation: Translation = {
     hideDetails: "Hide details",
     pagesForIssue: "Showing pages affected by: {{title}}",
     clearFilter: "Clear filter",
+    close: "Close",
+    pageDetailTitle: "Page Details",
+    mustFixLabel: "Must Fix",
+    shouldFixLabel: "Should Fix",
+    worthLookLabel: "Worth a Look",
+    ruleChecks: "Rule Checks",
+    issuesOnPage: "Issues on This Page",
+    noIssuesOnPage: "No open issues on this page.",
+    checkTitlePresent: "Page Title Present",
+    checkTitleLength: "Title Length",
+    checkDescription: "Meta Description",
+    checkH1: "Main Heading",
+    checkCanonical: "Canonical Tag",
+    checkNoindex: "Indexing (noindex)",
+    checkRobots: "Robots and Sitemap",
+    checkUrl: "Page URL",
+    checkImageAlt: "Image Alt Text",
+    checkContent: "Content Length",
+    rsPass: "Pass",
+    rsFinding: "Finding",
+    rsNotEvaluated: "Not Evaluated",
   },
   oriel: {
     conversations: "Conversations",

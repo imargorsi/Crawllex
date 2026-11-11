@@ -13,6 +13,7 @@ import { LensIssues, RULE_FILTERS, SEVERITY_FILTERS, SORT_FILTERS, TYPE_FILTERS,
 import { LensPages } from "@/components/lens/lens-pages";
 import { LensUptime } from "@/components/lens/lens-uptime";
 import { LensNavBar } from "@/components/lens/lens-ui";
+import { LensPageSheet } from "@/components/lens/lens-page-sheet";
 import { useLensDashboard } from "@/features/lens/use-lens-dashboard";
 import { useQueryParams } from "@/hooks/use-query-params.hook";
 import { Icons } from "@/lib/frontend/icons/app-icons";
@@ -48,6 +49,7 @@ export function LensSection() {
   };
   const issueParam = typeof queryParams.issue === "string" ? queryParams.issue : null;
   const queryParam = typeof queryParams.q === "string" ? queryParams.q : "";
+  const pageParam = typeof queryParams.page === "string" ? data.pages.find((p) => p.url === queryParams.page) ?? null : null;
 
   /** Switch view. Filters and pages options are kept only for their own view, so other views get a clean URL. */
   const navigate = (next: TLensView, extra: Record<string, string> = {}) => {
@@ -140,6 +142,17 @@ export function LensSection() {
           issueId={issueParam}
           initialQuery={queryParam}
           onClearIssue={() => deleteQueryParams(["issue"])}
+          onOpenPage={(url) => setQueryParams({ page: url })}
+        />
+      ) : null}
+      {view === "pages" && pageParam ? (
+        <LensPageSheet
+          page={pageParam}
+          data={data}
+          t={t}
+          locale={locale}
+          onClose={() => deleteQueryParams(["page"])}
+          onNavigate={navigate}
         />
       ) : null}
       {view === "history" ? <LensHistory data={data} t={t} locale={locale} /> : null}

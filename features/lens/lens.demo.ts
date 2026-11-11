@@ -317,3 +317,42 @@ export const LENS_DEMO: TLensDemoDashboard = {
     { id: "inc-1", startedAt: "2026-10-21T14:02:00Z", durationMin: 8, status: "resolved", reason: "Server error (503)", detected: "2026-10-21T14:02:00Z", recovered: "2026-10-21T14:10:00Z" },
   ],
 };
+
+export type TRuleCheckId =
+  | "title_present"
+  | "title_length"
+  | "description_present"
+  | "h1_present"
+  | "canonical"
+  | "noindex"
+  | "robots"
+  | "url_readable"
+  | "image_alt"
+  | "content_length";
+
+export type TRuleCheckState = "pass" | "finding" | "not_evaluated";
+
+/** Which open issue each rule check reports on. Demo derivation until the Lens API returns per-page results. */
+const CHECK_ISSUE: Record<TRuleCheckId, string> = {
+  title_present: "missing_title",
+  title_length: "title_length",
+  description_present: "missing_meta_description",
+  h1_present: "missing_h1",
+  canonical: "canonical_conflict",
+  noindex: "sitemap_noindex",
+  robots: "robots_blocks_sitemap_page",
+  url_readable: "url_readable",
+  image_alt: "missing_image_alt",
+  content_length: "thin_content",
+};
+
+export const RULE_CHECK_IDS = Object.keys(CHECK_ISSUE) as TRuleCheckId[];
+
+/** Per-page rule results: finding when the page is listed on that rule's open issue, otherwise pass. */
+export function pageRuleChecks(url: string, state: TLensDemoPage["state"], issues: TLensDemoIssue[]): { id: TRuleCheckId; state: TRuleCheckState }[] {
+  return RULE_CHECK_IDS.map((id) => {
+    if (state !== "checked") return { id, state: "not_evaluated" as const };
+    const issue = issues.find((i) => i.id === CHECK_ISSUE[id] && i.status === "open");
+    return { id, state: issue && issue.pages.includes(url) ? ("finding" as const) : ("pass" as const) };
+  });
+}

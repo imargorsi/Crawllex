@@ -249,7 +249,7 @@ const WORKFLOW_KEY: Record<TLensWorkflow, "wfTodo" | "wfProgress" | "wfVerify"> 
 const WORKFLOW_OPTIONS: TLensWorkflow[] = ["todo", "in_progress", "awaiting_verification"];
 
 /** One issue. Header, affected pages, four panels, footer. Details (tracking and history) open on demand. */
-function IssueCard({ issue, t, locale, onNavigate }: { issue: TLensDemoIssue; t: TLensT; locale: string; onNavigate: TNavigate }) {
+export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { issue: TLensDemoIssue; t: TLensT; locale: string; onNavigate: TNavigate; compact?: boolean }) {
   const [open, setOpen] = useState(false);
   // Demo only: the status change is local until the Lens API stores it.
   const [workflow, setWorkflow] = useState<TLensWorkflow>(issue.tracking.workflow);
@@ -304,7 +304,7 @@ function IssueCard({ issue, t, locale, onNavigate }: { issue: TLensDemoIssue; t:
         </button>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className={cn("grid gap-4 sm:grid-cols-2", !compact && "xl:grid-cols-4")}>
         <Panel icon={Icons.search} label={t("issueFound")} tone="info">{issue.found}</Panel>
         <Panel icon={Icons.alert} label={t("issueWhy")} tone="warn">{issue.why}</Panel>
         <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">{issue.fix}</Panel>
@@ -426,7 +426,7 @@ function Panel({ icon: Icon, label, children, tone = "neutral", note }: {
   );
 }
 
-function severityLabel(severity: TLensSeverity) {
+export function severityLabel(severity: TLensSeverity) {
   return severity === "high" ? "severityHigh" : severity === "medium" ? "severityMedium" : "severityAdvisory";
 }
 
