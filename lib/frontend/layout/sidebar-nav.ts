@@ -39,8 +39,8 @@ export type SidebarNavGroup = {
 
 export const SIDEBAR_NAV_GROUP_ORDER: readonly SidebarNavGroupId[] = [
   "general",
-  "reporting",
   "agents",
+  "reporting",
   "settings",
 ] as const;
 

@@ -224,7 +224,7 @@ A separate **Onboarding workspace** (sidebar workspace toggle, `lib/frontend/lay
   `dashboard-selected-project-id`). Project modules stay gated until a project is selected.
 - `context/project-access-context.tsx`: loads `GET /projects/{id}/access` for that project's permissions.
 - Route gating: `components/auth/auth-guard.tsx` + `route-access-guard.tsx` using
-  `lib/frontend/layout/route-access.ts`. Nav is built in `lib/frontend/layout/build-sidebar-nav.ts`. Groups in order: General, Reporting, Agents & AI (Oriel, Lens), Settings. Group ids in `lib/frontend/layout/sidebar-nav.ts`.
+  `lib/frontend/layout/route-access.ts`. Nav is built in `lib/frontend/layout/build-sidebar-nav.ts`. Groups in order: General, Agents & AI (Oriel, Lens), Reporting, Settings. Group ids in `lib/frontend/layout/sidebar-nav.ts`.
 - Pattern per module: `app/(dashboard)/<module>/page.tsx` → `sections/<module>-section.tsx` →
   `components/<module>/*` + `hooks/use-<module>-table-columns.hook.tsx` + `features/<module>/<module>.api.ts`.
 - A 401 mid-session dispatches `auth:session-expired`, which clears the query cache and logs out.
