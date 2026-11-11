@@ -13,13 +13,20 @@ const LENS_FLOAT_CARD = cn(
   "relative flex min-w-0 flex-col gap-4 overflow-hidden rounded-3xl border border-border bg-transparent p-5 shadow-(--shadow) transition-[border-color,box-shadow] duration-200 ease-out hover:border-accent-border/60 hover:shadow-(--shadow-elevated) sm:p-6 dark:border-text-primary/40",
 );
 
-/** Whole card is clickable. `onOpen` is optional: without it the card shows the same affordance and does nothing yet. */
-export function LensClickCard({ children, className, onOpen, label }: {
+/**
+ * Whole card is clickable. `onOpen` is optional: without it the card shows the same affordance and does nothing yet.
+ * Set `interactive={false}` for cards that hold their own buttons (nested interactive elements are not allowed).
+ */
+export function LensClickCard({ children, className, onOpen, label, interactive = true }: {
   children: ReactNode;
   className?: string;
   onOpen?: () => void;
   label?: string;
+  interactive?: boolean;
 }) {
+  if (!interactive) {
+    return <div className={cn(LENS_FLOAT_CARD, className)}>{children}</div>;
+  }
   return (
     <div
       role="button"

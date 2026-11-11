@@ -27,7 +27,7 @@ export type TLensNavigate = (tab: TLensTab, sub?: "onpage" | "technical" | "page
 
 type TProps = { data: TLensDemoDashboard; t: TLensT; locale: string; go: TLensNavigate };
 
-function scoreBandOf(score: number): "good" | "work" | "attention" {
+export function scoreBandOf(score: number): "good" | "work" | "attention" {
   if (score >= 85) return "good";
   if (score >= 60) return "work";
   return "attention";
@@ -170,6 +170,11 @@ export function LensOverview({ data, t, locale, go }: TProps) {
           value={data.seo.checked}
           unit={t("unitKnown", { known: data.seo.known })}
           description={t("linkPagesDesc")}
+          footnote={t("coverageBreakdown", {
+            checked: data.seo.checked,
+            notChecked: Math.max(0, data.seo.known - data.seo.checked),
+            reason: t("crawlLimitReached"),
+          })}
           segments={[
             { value: data.seo.checked, tone: "brand" },
             { value: Math.max(0, data.seo.known - data.seo.checked), tone: "muted" },
@@ -272,7 +277,7 @@ function CountTile({ tone, label, value, help }: { tone: TLensTone; label: strin
 function PagesAffectedCard({ data, t }: { data: TLensDemoDashboard; t: TLensT }) {
   const { seo } = data;
   return (
-    <LensClickCard label={t("pagesAffectedTitle")}>
+    <LensClickCard label={t("pagesAffectedTitle")} interactive={false}>
       <LensCardHeader
         icon={Icons.grid}
         title={t("pagesAffectedTitle")}
@@ -304,7 +309,7 @@ function PriorityCard({ data, t, go }: { data: TLensDemoDashboard; t: TLensT; go
     .sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity] || b.affected - a.affected)
     .slice(0, 4);
   return (
-    <LensClickCard label={t("priorityTitle")}>
+    <LensClickCard label={t("priorityTitle")} interactive={false}>
       <LensCardHeader
         icon={Icons.alert}
         title={t("priorityTitle")}
@@ -348,6 +353,7 @@ type TLinkCardProps = {
   unit: string;
   description: string;
   segments?: { value: number; tone: TLensTone }[];
+  footnote?: string;
   onOpen?: () => void;
 };
 
@@ -360,7 +366,7 @@ const SEGMENT_FILL: Record<TLensTone, string> = {
 };
 
 /** Section card: icon, big figure, optional severity strip, description. Whole card is clickable. */
-function LinkCard({ icon: Icon, title, value, unit, description, segments, onOpen }: TLinkCardProps) {
+function LinkCard({ icon: Icon, title, value, unit, description, segments, footnote, onOpen }: TLinkCardProps) {
   const total = segments?.reduce((sum, seg) => sum + seg.value, 0) ?? 0;
   return (
     <LensClickCard label={title} onOpen={onOpen} className="gap-5">
@@ -386,7 +392,10 @@ function LinkCard({ icon: Icon, title, value, unit, description, segments, onOpe
           ))}
         </div>
       ) : null}
-      <p className="text-xs leading-relaxed text-text-muted">{description}</p>
+      <div className="flex flex-col gap-1.5">
+        <p className="text-xs leading-relaxed text-text-muted">{description}</p>
+        {footnote ? <p className="text-xs font-medium text-text-secondary">{footnote}</p> : null}
+      </div>
     </LensClickCard>
   );
 }
@@ -430,7 +439,7 @@ function UptimeChartCard({ data, t, locale, go }: { data: TLensDemoDashboard; t:
     { label: t("lowestDay"), value: lowest ? t("lowestDayValue", { percent: lowest.uptimePct.toFixed(2), date: formatUptimeDay(lowest.day, locale) }) : "—" },
   ];
   return (
-    <LensClickCard label={t("uptimeTitle")} className="gap-6 p-6 sm:p-7">
+    <LensClickCard label={t("uptimeTitle")} className="gap-6 p-6 sm:p-7" interactive={false}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <LensCardHeader
           icon={Icons.analytics}

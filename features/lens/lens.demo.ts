@@ -22,6 +22,7 @@ export type TLensDemoIssue = {
 
 export type TLensDemoRun = {
   id: string;
+  coverageReason: "none" | "cap_reached" | "gaps" | null;
   startedAt: string;
   status: "completed" | "failed";
   coverage: "complete" | "partial" | null;
@@ -36,7 +37,7 @@ export type TLensDemoRun = {
 
 export type TLensDemoPage = {
   url: string;
-  state: "checked" | "failed";
+  state: "checked" | "failed" | "not_evaluated";
   failed: number;
   warnings: number;
   suggestions: number;
@@ -53,6 +54,7 @@ export type TLensDemoIncident = {
 };
 
 export type TLensDemoDashboard = {
+  siteUrl: string;
   lastCheckAt: string;
   seo: {
     score: number;
@@ -162,14 +164,15 @@ const PAGES: TLensDemoPage[] = [
   { url: "/careers", state: "failed", failed: 0, warnings: 0, suggestions: 0 },
   { url: "/blog/tips", state: "checked", failed: 0, warnings: 2, suggestions: 1 },
   { url: "/old-offers", state: "checked", failed: 1, warnings: 0, suggestions: 0 },
+  { url: "/archive/2019", state: "not_evaluated", failed: 0, warnings: 0, suggestions: 0 },
 ];
 
 const RUNS: TLensDemoRun[] = [
-  { id: "run-12", startedAt: "2026-11-10T04:24:00Z", status: "completed", coverage: "partial", score: 76, pagesChecked: 30, knownUrls: 84, newIssues: 1, resolvedIssues: 2, openIssues: 8, errorCode: null },
-  { id: "run-11", startedAt: "2026-11-08T09:10:00Z", status: "completed", coverage: "partial", score: 74, pagesChecked: 30, knownUrls: 84, newIssues: 3, resolvedIssues: 0, openIssues: 9, errorCode: null },
-  { id: "run-10", startedAt: "2026-11-05T03:02:00Z", status: "failed", coverage: null, score: null, pagesChecked: 0, knownUrls: null, newIssues: null, resolvedIssues: null, openIssues: null, errorCode: "run_failed" },
-  { id: "run-9", startedAt: "2026-11-01T08:40:00Z", status: "completed", coverage: "complete", score: 71, pagesChecked: 22, knownUrls: 22, newIssues: 4, resolvedIssues: 1, openIssues: 9, errorCode: null },
-  { id: "run-8", startedAt: "2026-10-27T10:15:00Z", status: "completed", coverage: "complete", score: 68, pagesChecked: 22, knownUrls: 22, newIssues: 0, resolvedIssues: 3, openIssues: 8, errorCode: null },
+  { id: "run-12", coverageReason: "cap_reached", startedAt: "2026-11-10T04:24:00Z", status: "completed", coverage: "partial", score: 76, pagesChecked: 30, knownUrls: 84, newIssues: 1, resolvedIssues: 2, openIssues: 8, errorCode: null },
+  { id: "run-11", coverageReason: "cap_reached", startedAt: "2026-11-08T09:10:00Z", status: "completed", coverage: "partial", score: 74, pagesChecked: 30, knownUrls: 84, newIssues: 3, resolvedIssues: 0, openIssues: 9, errorCode: null },
+  { id: "run-10", coverageReason: null, startedAt: "2026-11-05T03:02:00Z", status: "failed", coverage: null, score: null, pagesChecked: 0, knownUrls: null, newIssues: null, resolvedIssues: null, openIssues: null, errorCode: "run_failed" },
+  { id: "run-9", coverageReason: "none", startedAt: "2026-11-01T08:40:00Z", status: "completed", coverage: "complete", score: 71, pagesChecked: 22, knownUrls: 22, newIssues: 4, resolvedIssues: 1, openIssues: 9, errorCode: null },
+  { id: "run-8", coverageReason: "none", startedAt: "2026-10-27T10:15:00Z", status: "completed", coverage: "complete", score: 68, pagesChecked: 22, knownUrls: 22, newIssues: 0, resolvedIssues: 3, openIssues: 8, errorCode: null },
 ];
 
 /** 30 days of daily uptime. One day has no probes (null), shown as an empty slot. */
@@ -190,6 +193,7 @@ function dailyUptime(): { day: string; uptimePct: number | null }[] {
 }
 
 export const LENS_DEMO: TLensDemoDashboard = {
+  siteUrl: "https://argorsi.com/",
   lastCheckAt: "2026-11-10T04:24:00Z",
   seo: {
     score: 76,

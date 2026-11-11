@@ -44,7 +44,7 @@ export function LensSection() {
           <Heading id="lens-title" pageTitle>
             {t("seoTitle")}
           </Heading>
-          <Paragraph className="text-text-muted">{t("subtitle")}</Paragraph>
+          <Paragraph className="text-text-muted">{t("subtitle", { site: new URL(data.siteUrl).hostname })}</Paragraph>
         </div>
         <div className="flex flex-wrap items-center justify-end gap-3">
           <div className="flex h-11 items-center gap-3 px-1">

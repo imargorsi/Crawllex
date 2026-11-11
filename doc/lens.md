@@ -56,10 +56,18 @@ Score formula (proposed): per scored rule, weight (high 10, medium 4, advisory 0
 
 ## Not done yet (tracked, not hidden)
 
-- Live data and API states (not connected, load failed, empty). Their strings were removed as unused and must return with the API.
-- Scoring formula change and per-run score snapshot (see Data contract above; crawllex-lens `docs/DECISIONS.md`, pending owner approval).
+- Recent activity and Coverage & trends: removed from Overview. Owner decides whether they return and where.
+- Live data and API states (not connected, load failed, empty). Their strings were removed as unused and return with the API.
+- Scoring formula change and per-run score snapshot (see Data contract; crawllex-lens `docs/DECISIONS.md`, pending owner approval).
 - Advisory tier and severity changes (crawllex-lens `docs/SEO-RULES.md`, pending owner approval and a re-audit).
-- Website identity (domain) and coverage detail (discovered / selected / checked / not checked) on Overview.
-- Recent activity and Coverage & trends were removed from Overview to fit the agreed layout.
-- Pages and Issues as separate pages (currently SEO health subtabs).
-- Arabic translations.
+- Penalty breakdown view on scan history (stored in the snapshot once the snapshot change lands).
+- Arabic translations are first drafts. Need a native review.
+
+## Fixed in the UI pass (2026-11-11)
+
+- Labels use Title Case (tabs, card titles, band names, table headers, buttons).
+- Cards that hold their own buttons are not clickable cards (no nested interactive elements).
+- Website host shown in the subtitle.
+- Pages card shows the coverage breakdown: checked, not checked, reason (crawl limit).
+- Pages table has a Not Evaluated state and sorts failed pages first.
+- Scan history shows the band under each score and the crawl limit under partial coverage.

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { LENS_CARD, LensCardHeader, LensEmpty, LensPill, severityTone } from "@/components/lens/lens-ui";
-import { formatWhen, severityKey, type TLensT } from "@/components/lens/lens-overview";
+import { formatWhen, scoreBandOf, severityKey, type TLensT } from "@/components/lens/lens-overview";
 import type { TLensDemoDashboard, TLensDemoIssue, TLensGroup } from "@/features/lens/lens.demo";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
@@ -93,7 +93,10 @@ function Block({ label, text }: { label: string; text: string }) {
 function PagesView({ data, t }: { data: TLensDemoDashboard; t: TLensT }) {
   const [query, setQuery] = useState("");
   const rows = useMemo(
-    () => data.pages.filter((p) => p.url.toLowerCase().includes(query.trim().toLowerCase())),
+    () =>
+      data.pages
+        .filter((p) => p.url.toLowerCase().includes(query.trim().toLowerCase()))
+        .sort((a, b) => b.failed - a.failed || b.warnings - a.warnings || b.suggestions - a.suggestions),
     [data.pages, query],
   );
   return (
@@ -107,7 +110,7 @@ function PagesView({ data, t }: { data: TLensDemoDashboard; t: TLensT }) {
           aria-label={t("searchPages")}
           className="max-w-sm rounded-full"
         />
-        <span className="text-xs text-text-muted">{t("showingPages", { shown: rows.length, total: data.seo.checked })}</span>
+        <span className="text-xs text-text-muted">{t("showingPages", { shown: rows.length, total: data.seo.checked })} · {t("sortedByPriority")}</span>
       </div>
       <div className="-mx-2 overflow-x-auto">
         <table className="w-full min-w-[36rem] text-left text-sm">
@@ -125,8 +128,8 @@ function PagesView({ data, t }: { data: TLensDemoDashboard; t: TLensT }) {
               <tr key={page.url} className="border-b border-border/40 last:border-0 hover:bg-bg-hover/40">
                 <td className="px-2 py-2.5 font-mono text-xs text-text-primary">{page.url}</td>
                 <td className="px-2 py-2.5">
-                  <LensPill tone={page.state === "checked" ? "success" : "danger"}>
-                    {page.state === "checked" ? t("stateChecked") : t("stateFailed")}
+                  <LensPill tone={page.state === "checked" ? "success" : page.state === "failed" ? "danger" : "muted"}>
+                    {page.state === "checked" ? t("stateChecked") : page.state === "failed" ? t("stateFailed") : t("notEvaluated")}
                   </LensPill>
                 </td>
                 <td className="px-2 py-2.5 text-end tabular-nums text-text-primary">{page.failed}</td>
@@ -172,8 +175,12 @@ function HistoryView({ data, t, locale }: { data: TLensDemoDashboard; t: TLensT;
                     </td>
                     <td className="px-2 py-3 text-text-secondary">
                       {run.coverage === "partial" ? t("coveragePartial") : run.coverage === "complete" ? t("coverageComplete") : "—"}
+                      {run.coverageReason === "cap_reached" ? <p className="mt-1 text-xs text-text-muted">{t("crawlLimitReached")}</p> : null}
                     </td>
-                    <td className="px-2 py-3 text-end tabular-nums text-text-primary">{run.score ?? "—"}</td>
+                    <td className="px-2 py-3 text-end">
+                      <span className="block tabular-nums text-text-primary">{run.score ?? "—"}</span>
+                      {run.score != null ? <span className="text-xs text-text-muted">{t(`band_${scoreBandOf(run.score)}`)}</span> : null}
+                    </td>
                     <td className="px-2 py-3 text-end tabular-nums text-text-secondary">
                       {failed ? "—" : run.knownUrls ? `${run.pagesChecked} / ${run.knownUrls}` : run.pagesChecked}
                     </td>
