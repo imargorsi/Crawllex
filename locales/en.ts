@@ -464,6 +464,20 @@ export interface Translation {
     uptimeSubtitle: string;
     dailyCaption: string;
     last30Days: string;
+    historySubtitle: string;
+    fixedSinceFirst: string;
+    openNow: string;
+    checksCompleted: string;
+    checksFailed: string;
+    resolvedCaption: string;
+    currentIssues: string;
+    allTime: string;
+    noScoreSaved: string;
+    scanHistory: string;
+    issueLogTitle: string;
+    noIssueLog: string;
+    colEvent: string;
+    current: string;
   };
   oriel: {
     conversations: string;
@@ -2413,6 +2427,20 @@ const translation: Translation = {
     uptimeSubtitle: "Availability over the last 30 days.",
     dailyCaption: "Daily, last 30 days",
     last30Days: "Last 30 days",
+    historySubtitle: "{{count}} completed checks · last check {{time}}",
+    fixedSinceFirst: "Fixed Since First Check",
+    openNow: "Open Now",
+    checksCompleted: "Checks Completed",
+    checksFailed: "Checks Failed",
+    resolvedCaption: "Verified by a complete check",
+    currentIssues: "Current issues",
+    allTime: "All checks",
+    noScoreSaved: "No score saved",
+    scanHistory: "Scan History",
+    issueLogTitle: "Issue Log",
+    noIssueLog: "No issue events yet.",
+    colEvent: "Event",
+    current: "Current",
   },
   oriel: {
     conversations: "Conversations",
