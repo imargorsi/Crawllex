@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DataForSEO Test Report: Crawllex v2</title>
+<style>
+  @page { size: A4; margin: 16mm 14mm; }
+  body { font-family: "DejaVu Sans", Arial, sans-serif; color: #1d2330; font-size: 10.5pt; line-height: 1.45; margin: 0; }
+  h1 { font-size: 20pt; margin: 0 0 4px; color: #0b3d91; }
+  h2 { font-size: 13.5pt; color: #0b3d91; border-bottom: 2px solid #0b3d91; padding-bottom: 3px; margin: 22px 0 8px; page-break-after: avoid; }
+  h3 { font-size: 11pt; margin: 14px 0 4px; page-break-after: avoid; }
+  .meta { color: #5a6270; font-size: 9.5pt; margin-bottom: 10px; }
+  .phase { page-break-before: always; }
+  .phase:first-of-type { page-break-before: auto; }
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 10px; font-size: 9.2pt; page-break-inside: avoid; }
+  th, td { border: 1px solid #c9d1de; padding: 4px 6px; text-align: left; vertical-align: top; }
+  th { background: #e8eef8; font-weight: bold; }
+  td.num, th.num { text-align: right; white-space: nowrap; }
+  .kpi { display: table; width: 100%; border-spacing: 8px 0; margin: 6px -8px 10px; }
+  .kpi div { display: table-cell; background: #f2f5fb; border: 1px solid #c9d1de; border-radius: 4px; padding: 8px; text-align: center; width: 25%; }
+  .kpi b { display: block; font-size: 15pt; color: #0b3d91; }
+  .kpi span { font-size: 8.8pt; color: #5a6270; }
+  .note { background: #fff7e0; border-left: 4px solid #e3a600; padding: 6px 9px; margin: 8px 0; font-size: 9.6pt; }
+  .good { background: #e9f7ee; border-left: 4px solid #2e8b57; padding: 6px 9px; margin: 8px 0; font-size: 9.6pt; }
+  ul { margin: 4px 0 8px 18px; padding: 0; }
+  li { margin: 2px 0; }
+  .small { font-size: 8.6pt; color: #5a6270; }
+  .ask { border: 2px solid #0b3d91; border-radius: 6px; padding: 10px 12px; margin-top: 12px; }
+</style>
+</head>
+<body>
+
+<h1>DataForSEO Test Report: Crawllex v2</h1>
+<div class="meta">Client site: logicalcreations.net (Logical Creations, Lahore) &middot; Test date: 5 Nov 2026 &middot; Budget used: $0.7226 of $1.00 free credit &middot; Prepared for: senior review</div>
+
+<div class="kpi">
+  <div><b>$2.13–3.90 / $3.27–5.07 / $7.39–9.18</b><span>Est. monthly range: small / large / business site</span></div>
+  <div><b>$1.03</b><span>Est. one full cycle, 100 pages</span></div>
+  <div><b>19</b><span>Paid API calls run (test)</span></div>
+  <div><b>$0.2774</b><span>Credit left (for next test)</span></div>
+</div>
+
+<h2>Phase 1. Scope and method</h2>
+<ul>
+  <li>Goal: estimate DataForSEO cost per Crawllex project and show what data the API returns, focused on <b>LLM visibility</b> (AI answers) and <b>Local SEO</b> (Google Business Profile, Maps rank).</li>
+  <li>Method: one live or Standard-queue call per endpoint, measured with the <code>cost</code> field of each response. Results compared with the planning figures in product plan v2, section 5.7.</li>
+  <li>Test set: one client site (logicalcreations.net, about 263 URLs in sitemaps), 3 keyword sets, 2 locations (Lahore, Jeddah), 1 GBP listing.</li>
+  <li>No production data was changed. Read-only access to the Crawllex production record for the client.</li>
+</ul>
+
+<h2>Phase 2. Verified unit prices</h2>
+<table>
+  <tr><th>Endpoint</th><th>Mode</th><th class="num">Measured (USD)</th><th class="num">Plan figure (USD)</th><th>Status</th></tr>
+  <tr><td>LLM Mentions, top cited domains (10 rows)</td><td>Live</td><td class="num">0.110</td><td class="num">0.10 + 0.001/row</td><td>Confirmed</td></tr>
+  <tr><td>LLM Mentions, search or top brands (0 rows)</td><td>Live</td><td class="num">0.100</td><td class="num">0.10 floor</td><td>Floor confirmed</td></tr>
+  <tr><td>Maps SERP, 20 results</td><td>Standard</td><td class="num">0.0006</td><td class="num">0.0006</td><td>Confirmed</td></tr>
+  <tr><td>Maps SERP, 20 results</td><td>Live</td><td class="num">0.0020</td><td class="num">0.0006 (wrong)</td><td>Corrected</td></tr>
+  <tr><td>GBP profile</td><td>Standard</td><td class="num">0.0015</td><td class="num">0.0015</td><td>Confirmed</td></tr>
+  <tr><td>GBP profile</td><td>Live</td><td class="num">0.0054</td><td class="num">0.0015 (wrong)</td><td>Corrected</td></tr>
+  <tr><td>GBP reviews (50 requested, 15 returned)</td><td>Standard</td><td class="num">0.00375</td><td class="num">0.00075 per 10</td><td>Confirmed; retrieval free</td></tr>
+  <tr><td>Keyword ideas (30 items)</td><td>Live</td><td class="num">0.0156</td><td class="num">0.012 + 0.00012/item</td><td>Confirmed</td></tr>
+  <tr><td>Keyword volume (8 keywords)</td><td>Live</td><td class="num">0.090</td><td class="num">0.06 Standard</td><td>Confirmed</td></tr>
+  <tr><td>Backlinks summary</td><td>Live</td><td class="num">0.024</td><td class="num">0.024</td><td>Confirmed</td></tr>
+  <tr><td>Labs domain overview, ranked keywords, competitors</td><td>Live</td><td class="num">0.012</td><td class="num">0.012 + 0.00012/item</td><td>Fee confirmed; item price not tested (0 items)</td></tr>
+  <tr><td>Historical rank (Labs)</td><td>Live</td><td class="num">n/t</td><td class="num">0.12 + 0.0012/item</td><td>Official page; plan figure was wrong</td></tr>
+</table>
+<div class="note"><b>Rule for budgeting:</b> nightly and weekly jobs must use Standard (task_post). Live costs 3.3x more for Maps and 3.6x more for GBP profile.</div>
+
+<h2>Phase 3. Monthly cost estimate per project</h2>
+<table>
+  <tr><th>Job (100 keywords, one domain)</th><th>Frequency</th><th class="num">Plan (USD/mo)</th><th class="num">Updated (USD/mo)</th></tr>
+  <tr><td>Tracked keyword rank, 100 keywords (Maps/SERP Standard)</td><td>Daily</td><td class="num">1.80</td><td class="num">1.80</td></tr>
+  <tr><td>LLM visibility, 100 rows per task</td><td>Weekly</td><td class="num">0.86</td><td class="num">0.86</td></tr>
+  <tr><td>Ranked keyword discovery (1000 items max)</td><td>Weekly</td><td class="num">0.57</td><td class="num">0.57 (ceiling)</td></tr>
+  <tr><td>Keyword ideas (1000 items)</td><td>4 per month</td><td class="num">0.53</td><td class="num">0.53 (ceiling)</td></tr>
+  <tr><td>Historical rank (Labs, 36 months)</td><td>Monthly</td><td class="num">0.02</td><td class="num">0.16</td></tr>
+  <tr><td>Map rank, 100 keywords (Standard)</td><td>Weekly</td><td class="num">0.26</td><td class="num">0.26</td></tr>
+  <tr><td>Backlinks new and lost (up to 1000 rows)</td><td>Weekly</td><td class="num">0.26</td><td class="num">0.26</td></tr>
+  <tr><td>Backlinks summary</td><td>Weekly</td><td class="num">0.10</td><td class="num">0.10</td></tr>
+  <tr><td>Backlinks list, referring domains, anchors</td><td>Monthly</td><td class="num">0.18</td><td class="num">0.18</td></tr>
+  <tr><td>Domain overview, competitors, intersection (Labs)</td><td>Weekly / monthly</td><td class="num">0.09</td><td class="num">0.09</td></tr>
+  <tr><td>Keyword volume (Google Ads, Standard)</td><td>Monthly</td><td class="num">0.06</td><td class="num">0.06</td></tr>
+  <tr><td>On-page audit, 50 pages</td><td>Monthly</td><td class="num">0.01</td><td class="num">0.01</td></tr>
+  <tr><td>GBP profile and reviews</td><td>Weekly / monthly</td><td class="num">0.03</td><td class="num">0.03</td></tr>
+  <tr><td colspan="2"><b>Total, 100 keywords, 100 pages</b></td><td class="num"><b>4.77</b></td><td class="num"><b>4.91</b></td></tr>
+</table>
+<div class="small">Ceilings: Labs and keyword ideas are priced at the 1000-item maximum. This site returned 0 Labs items, so its real cost is lower.</div>
+
+<h3>Monthly cost by site size, USD per month (low to high range)</h3>
+<table>
+  <tr><th>Item</th><th class="num">Small (&lt;100 pages, 50 kw)</th><th class="num">Large (500–1000 pages, 100 kw)</th><th class="num">Business (&gt;1000 pages, 300 kw)</th><th>Range basis</th></tr>
+  <tr><td>Keyword rank, daily (Standard, 1 SERP per kw per day)</td><td class="num">0.900</td><td class="num">1.800</td><td class="num">5.400</td><td>Fixed: $0.0006 x kw x 30</td></tr>
+  <tr><td>Map rank, weekly (Standard)</td><td class="num">0.129</td><td class="num">0.258</td><td class="num">0.774</td><td>Fixed: $0.0006 x kw x 4.3</td></tr>
+  <tr><td>On-page audit, monthly</td><td class="num">0.013–0.015</td><td class="num">0.125–0.150</td><td class="num">0.125–0.150</td><td>$0.000125 (help center) to $0.00015 (pricing page) per page</td></tr>
+  <tr><td>LLM visibility, weekly (100 rows)</td><td class="num">0.430–0.860</td><td class="num">0.430–0.860</td><td class="num">0.430–0.860</td><td>0 rows ($0.10 floor) to 100 rows ($0.20 per task)</td></tr>
+  <tr><td>Keyword ideas, 4 per month</td><td class="num">0.062–0.528</td><td class="num">0.062–0.528</td><td class="num">0.062–0.528</td><td>30 items (measured) to 1000 items</td></tr>
+  <tr><td>Ranked keyword discovery, weekly</td><td class="num">0.052–0.568</td><td class="num">0.052–0.568</td><td class="num">0.052–0.568</td><td>0 items (measured) to 1000 items</td></tr>
+  <tr><td>Historical rank, monthly (36 months)</td><td class="num">0.120–0.163</td><td class="num">0.120–0.163</td><td class="num">0.120–0.163</td><td>0 items to 36 items</td></tr>
+  <tr><td>Domain overview, weekly</td><td class="num">0.052</td><td class="num">0.052</td><td class="num">0.052</td><td>Measured $0.012 per task</td></tr>
+  <tr><td>Competitors and intersection, monthly (2 tasks)</td><td class="num">0.024–0.037</td><td class="num">0.024–0.037</td><td class="num">0.024–0.037</td><td>0 to about 110 items</td></tr>
+  <tr><td>Keyword volume, monthly</td><td class="num">0.060–0.090</td><td class="num">0.060–0.090</td><td class="num">0.060–0.090</td><td>Standard $0.06 to Live $0.09 per task</td></tr>
+  <tr><td>Backlinks summary, weekly</td><td class="num">0.103</td><td class="num">0.103</td><td class="num">0.103</td><td>Measured $0.024 per task</td></tr>
+  <tr><td>Backlinks new and lost, weekly</td><td class="num">0.103–0.258</td><td class="num">0.103–0.258</td><td class="num">0.103–0.258</td><td>0 rows to 1000 rows</td></tr>
+  <tr><td>Backlinks list, monthly (3 tasks)</td><td class="num">0.072–0.180</td><td class="num">0.072–0.180</td><td class="num">0.072–0.180</td><td>0 rows to 1000 rows</td></tr>
+  <tr><td>GBP profile, weekly</td><td class="num">0.006</td><td class="num">0.006</td><td class="num">0.006</td><td>Measured Standard $0.0015</td></tr>
+  <tr><td>GBP reviews, monthly</td><td class="num">0.004–0.015</td><td class="num">0.004–0.015</td><td class="num">0.004–0.015</td><td>50 to 200 reviews</td></tr>
+  <tr><td><b>Total per month</b></td><td class="num"><b>2.13–3.90</b></td><td class="num"><b>3.27–5.07</b></td><td class="num"><b>7.39–9.18</b></td><td></td></tr>
+</table>
+<div class="small">Low end: no Labs or backlink rows, LLM at floor. High end: full 1000-item Labs calls, 100 LLM rows per week, 1000 backlink rows. Real cost for a site with a real footprint sits between the two. Labs item prices and backlink row prices are not yet measured on a site with data. Gap of 100 to 500 pages is not in the size groups.</div>
+
+<h3>Cost of one full cycle (first onboarding run, 100 pages)</h3>
+<table>
+  <tr><th>Item</th><th class="num">USD</th></tr>
+  <tr><td>LLM visibility (100 rows)</td><td class="num">0.20</td></tr>
+  <tr><td>Local: GBP profile, reviews (50), Maps rank 100 kw (Standard)</td><td class="num">0.08</td></tr>
+  <tr><td>Keywords: volume, ideas (1000 items), 100-keyword rank check</td><td class="num">0.25</td></tr>
+  <tr><td>Backlinks (summary, new/lost, list)</td><td class="num">0.14</td></tr>
+  <tr><td>Labs: domain, competitors, ranked keywords (1000 items), historical rank</td><td class="num">0.34</td></tr>
+  <tr><td>On-page crawl, 100 pages</td><td class="num">0.02</td></tr>
+  <tr><td><b>Total one cycle</b></td><td class="num"><b>1.03</b></td></tr>
+</table>
+
+<h2>Phase 4. Data returned by the test</h2>
+
+<h3>4a. Local SEO: Google Business Profile</h3>
+<ul>
+  <li><b>Listing:</b> Logical Creations, category "Software company", claimed, website logicalcreations.net, 6 photos. Lahore office, Johar Town.</li>
+  <li><b>Rating:</b> 4.4 from 15 reviews. Split: 12 five-star, 1 four-star, 2 one-star. Dates 23 Sep 2025 to 29 Jan 2026.</li>
+  <li><b>Owner replies:</b> 0 of 15 reviews answered. This is an actionable finding for the client.</li>
+  <li><b>Identifiers:</b> CID and place_id returned, so future calls can use them directly.</li>
+</ul>
+
+<h3>4b. Local SEO: Maps rank for "web development company" (top 20 each)</h3>
+<table>
+  <tr><th class="num">Market</th><th>Logical Creations position</th><th>Top 3 competitors (rating, reviews)</th></tr>
+  <tr><td class="num">Lahore</td><td>Not in top 20</td><td>GenXe Technologies (4.9, 263); First Idea Web Development (4.4, 160); SERPISTAN (4.9, 59)</td></tr>
+  <tr><td class="num">Jeddah</td><td>Not in top 20</td><td>Sohoby (4.9, 83); Stand Out (4.8, 18); Adonix AI (4.8, 36)</td></tr>
+</table>
+<div class="small">Competitor Whetstonez (listed in the client's competitor set) ranks #8 in Jeddah with 5.0 rating and 50 reviews.</div>
+
+<h3>4c. LLM visibility (AI answers, Google AI)</h3>
+<ul>
+  <li><b>Client domain:</b> 0 mentions for logicalcreations.net in Saudi Arabia for "AI automation", "website development" and the test target set. Cost still $0.10.</li>
+  <li><b>Top cited domains</b> for "AI automation" and "website development" (Saudi Arabia): youtube.com (29 mentions), coursera.org (15), reddit.com (15), wikipedia (13), geeksforgeeks.org (13). No agency domain in the top 10.</li>
+  <li><b>Competitor search</b> (whetstonez.com, telenoc.org): 0 mentions.</li>
+  <li><b>Implication:</b> AI visibility will show "not cited" for most small agencies. It is useful as a benchmark over time, not as a stand-alone sales proof.</li>
+</ul>
+
+<h3>4d. Keyword and demand data (Saudi Arabia, Google Ads)</h3>
+<table>
+  <tr><th>Keyword</th><th class="num">Volume / month</th><th class="num">CPC (USD)</th><th>Competition</th></tr>
+  <tr><td>website development</td><td class="num">12,100</td><td class="num">3.84</td><td>Low</td></tr>
+  <tr><td>mobile app development company</td><td class="num">210</td><td class="num">42.10</td><td>Medium</td></tr>
+  <tr><td>AI automation</td><td class="num">390</td><td class="num">7.02</td><td>Medium</td></tr>
+  <tr><td>web development company</td><td class="num">90</td><td class="num">12.79</td><td>Medium</td></tr>
+  <tr><td>web design company</td><td class="num">70</td><td class="num">11.12</td><td>Medium</td></tr>
+  <tr><td>software house</td><td class="num">110</td><td class="num">2.49</td><td>Low</td></tr>
+</table>
+<div class="small">Keyword ideas (Pakistan seeds): 146,577 related ideas available. Sample top ideas: "website design" 6,600/mo, "ai website builder" 3,600/mo, "ai automation" 2,900/mo.</div>
+
+<h3>4e. Backlinks and organic footprint</h3>
+<ul>
+  <li><b>Backlinks:</b> 254 total, 93 referring domains, 0 broken.</li>
+  <li><b>Labs organic data</b> (domain overview, ranked keywords, competitors): empty in Saudi Arabia and Pakistan. The site has no measurable organic keyword footprint in these markets.</li>
+</ul>
+
+<h2>Phase 5. Findings and gaps</h2>
+<div class="good"><b>Strong for Local SEO.</b> The GBP profile, reviews and Maps rank are populated and immediately useful: review gaps, owner replies and city-level rank gaps can be shown to clients per keyword.</div>
+<div class="note"><b>Weak for this client.</b> Labs organic data and LLM citations are empty or generic. The value case depends on the client's footprint, so the demo needs a site that ranks and is cited.</div>
+<ul>
+  <li><b>Fee floors:</b> LLM Mentions costs at least $0.10 per call even with 0 results. Plan the call count, not only the rows.</li>
+  <li><b>Live vs Standard:</b> nightly jobs must use Standard. Live Maps is $0.002 vs $0.0006 Standard.</li>
+  <li><b>Engineering gap:</b> ChatGPT-platform LLM search rejected the location field (error 40000). Not charged. Fix before the full test.</li>
+  <li><b>Plan document:</b> section 5.7 needs the corrections above. GBP reviews frequency (weekly vs monthly) and "manual refresh not charged" wording also need fixing.</li>
+</ul>
+
+<h2>Phase 6. Decision and next step</h2>
+<div class="ask">
+  <b>Approval requested: $50 top-up</b> (DataForSEO minimum).<br>
+  <ul>
+    <li>Covers the full test: one cycle on a site with real footprint, a 2-night Standard run, and repeat calls for the LLM and local sets.</li>
+    <li>Equivalent to <b>about 10 large-site projects for one month</b> at the high end ($5.07 each), or about 13 small-site projects at the high end, or about 48 full onboarding cycles.</li>
+    <li>Before the top-up: rotate the DataForSEO password (exposed in chat on 4 Nov 2026).</li>
+  </ul>
+</div>
+<div class="small" style="margin-top:14px">Sources: live API responses, cost-test folder (raw JSON and costs.csv). Planning basis: product plan v2, section 5.7 (Crawllex project docs). Official DataForSEO pricing pages checked 4 Nov 2026 for Standard/Live SERP, On-Page, Labs, Keywords Data, minimum payment.</div>
+
+</body>
+</html>

@@ -31,7 +31,7 @@ next-env.d.ts
 
 # user uploads (runtime data)
 /public/profile-images/
-# legacy scratch docs (doc/, AGENTS.md, CLAUDE.md are committed since 2026-10-11)
+# legacy scratch docs (AGENTS.md, CLAUDE.md stay local via .git/info/exclude)
 /docs/
 project.md
 
@@ -58,9 +58,6 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 scripts/_hostinger-sa-key.b64.txt
-
-# project docs: kept here, never committed (canonical copy is this folder)
-/doc/
 
 # report renderer service dependencies (services/report-renderer)
 services/**/node_modules/

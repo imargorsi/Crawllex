@@ -1,0 +1,15 @@
+{
+  "run": "20261103-142629",
+  "passed": 1,
+  "total": 1,
+  "gate_fail": [],
+  "results": [
+    {
+      "id": "H04",
+      "category": "hallucination",
+      "pass": true,
+      "fails": [],
+      "answer": "This is not covered in the Crawllex guides. Please contact your project owner or the Crawllex team."
+    }
+  ]
+}

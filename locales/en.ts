@@ -260,147 +260,146 @@ export interface Translation {
   lens: {
     title: string;
     description: string;
-    notConnectedTitle: string;
-    notConnectedBody: string;
-    loadFailedTitle: string;
-    loadFailedBody: string;
-    openIssues: string;
-    runs: string;
-    incidents: string;
-    latestRun: string;
-    issuesTitle: string;
-    noIssues: string;
-    runsTitle: string;
-    noRuns: string;
-    selectRun: string;
-    findingsTitle: string;
-    noFindings: string;
-    screenshotsTitle: string;
-    noScreenshots: string;
-    issue: string;
-    severity: string;
-    status: string;
-    target: string;
-    seen: string;
-    statusOpen: string;
-    statusResolved: string;
-    statusReopened: string;
-    severityHigh: string;
-    severityMedium: string;
-    severityLow: string;
-    coverageComplete: string;
-    coveragePartial: string;
-    runCompleted: string;
-    runRunning: string;
-    runFailed: string;
-    recommendation: string;
-    viewports: string;
-    tabsLabel: string;
-    tabSeo: string;
-    tabUiux: string;
-    uptimeTitle: string;
-    uptimeSetup: string;
-    healthScore: string;
-    healthScoreNote: string;
-    bySeverity: string;
-    uptime7d: string;
-    avgResponse: string;
-    probes: string;
-    incidentsCount: string;
-    byTopic: string;
-    needsAttention: string;
-    showAll: string;
-    showLess: string;
-    tabOverview: string;
-    tabUptime: string;
-    tabPages: string;
-    pagesInRun: string;
-    noIncidents: string;
-    exampleData: string;
-    exampleNote: string;
-    noOpenIssues: string;
-    coverage: string;
-    lastRun: string;
-    noRunYet: string;
-    open: string;
-    sitePages: string;
-    group_titles: string;
-    group_descriptions: string;
-    group_headings: string;
-    group_urls: string;
-    group_indexing: string;
-    group_robots: string;
-    group_content: string;
-    group_links: string;
-    group_structured_data: string;
-    group_images: string;
-    group_layout: string;
-    group_touch: string;
-    group_text: string;
-    group_accessibility: string;
-    group_other: string;
-    where: string;
-    seenCount: string;
-    pageIssues: string;
-    upNow: string;
-    down: string;
-    uptimeIncidents: string;
     seoTitle: string;
-    seoSubtitle: string;
+    subtitle: string;
     lastCheck: string;
-    tabHistory: string;
-    scoreNote: string;
+    lastCheckAt: string;
+    viewHistory: string;
+    startCheck: string;
+    tabOverview: string;
+    tabSeo: string;
+    tabUptime: string;
+    seoScoreTitle: string;
     band_good: string;
     band_work: string;
     band_attention: string;
-    summary_good: string;
-    summary_work: string;
-    summary_attention: string;
-    summaryPages: string;
-    issuesToFix: string;
-    urgentIssues: string;
-    pagesAffected: string;
-    startHere: string;
-    howToFix: string;
-    severityMix: string;
-    page: string;
-    issuesCount: string;
-    mainProblem: string;
-    pagesCount: string;
-    foundOnPages: string;
-    pagesAffectedNote: string;
-    openIssuesCount: string;
-    summaryCoverage: string;
-    summaryPagesPartial: string;
-    scoreRule: string;
-    mustFixNote: string;
-    shouldFixNote: string;
-    worthNote: string;
-    onpageTitle: string;
-    technicalTitle: string;
-    onpageHelp: string;
-    technicalHelp: string;
-    workingWell: string;
-    noProblems: string;
-    glossaryTitle: string;
-    glossary_sitemap: string;
-    glossary_robots: string;
-    glossary_canonical: string;
-    glossary_noindex: string;
-    glossary_structured: string;
-    glossary_h1: string;
-    glossary_meta: string;
-    tabCategories: string;
     failedLabel: string;
     warningsLabel: string;
     noticesLabel: string;
-    categoriesTitle: string;
+    mustFixNote: string;
+    shouldFixNote: string;
+    worthNote: string;
+    partialScan: string;
+    completeScan: string;
+    uptimeTitle: string;
+    statusOperational: string;
+    statusDown: string;
+    statusUnknown: string;
+    totalDowntime: string;
+    incidents: string;
+    avgResponse: string;
+    minutes: string;
+    pagesAffectedTitle: string;
+    pagesAffectedNote: string;
+    severityHigh: string;
+    severityMedium: string;
+    severityAdvisory: string;
+    priorityTitle: string;
+    viewAllIssues: string;
+    colSeverity: string;
+    colIssue: string;
+    colAffected: string;
+    colAction: string;
+    pagesCount: string;
+    viewUptimeDetails: string;
+    colDate: string;
+    colDuration: string;
+    colStatus: string;
+    statusResolved: string;
+    statusOngoing: string;
+    linkOnpage: string;
+    linkTechnical: string;
+    linkPages: string;
+    linkOnpageDesc: string;
+    linkTechnicalDesc: string;
+    linkPagesDesc: string;
+    seoAllIssues: string;
+    onpageTitle: string;
+    technicalTitle: string;
+    pagesTitle: string;
     historyTitle: string;
-    checksLabel: string;
-    whatToDo: string;
-    categoryIssues: string;
-    noCategoryIssues: string;
-    readMore: string;
+    onpageHelp: string;
+    technicalHelp: string;
+    issueFound: string;
+    issueWhy: string;
+    issueFix: string;
+    issueVerify: string;
+    issuePages: string;
+    searchPages: string;
+    showingPages: string;
+    colPage: string;
+    colFailed: string;
+    colWarnings: string;
+    colSuggestions: string;
+    colState: string;
+    stateChecked: string;
+    stateFailed: string;
+    colCoverage: string;
+    colScore: string;
+    colPagesChecked: string;
+    colNew: string;
+    colResolved: string;
+    colOpen: string;
+    runCompleted: string;
+    runFailed: string;
+    coverageComplete: string;
+    coveragePartial: string;
+    runFailedNote: string;
+    noRunYet: string;
+    uptimeStatusTitle: string;
+    lastSuccessfulCheck: string;
+    currentOutage: string;
+    noOutage: string;
+    availabilityTitle: string;
+    checksRecorded: string;
+    uptimeUnknownNote: string;
+    timelineTitle: string;
+    responseTitle: string;
+    avgLabel: string;
+    p95Label: string;
+    incidentHistoryTitle: string;
+    incidentDetailTitle: string;
+    detectedAt: string;
+    recoveredAt: string;
+    noIncidents: string;
+    viewDetails: string;
+    historyNote: string;
+    reason: string;
+    summaryHeading: string;
+    bullet_high_count: string;
+    bullet_clean: string;
+    bullet_partial: string;
+    bullet_uptime_good: string;
+    bullet_uptime_low: string;
+    bullet_missing_title: string;
+    bullet_sitemap_noindex: string;
+    bullet_missing_meta_description: string;
+    bullet_missing_h1: string;
+    bullet_title_length: string;
+    bullet_canonical_conflict: string;
+    bullet_url_readable: string;
+    bullet_generic_high: string;
+    bullet_generic_medium: string;
+    bullet_generic_advisory: string;
+    uptimeLabel: string;
+    pointsToHealthy: string;
+    stayHealthy: string;
+    bandLegendAttention: string;
+    bandLegendWork: string;
+    bandLegendGood: string;
+    viewAllPages: string;
+    unitIssues: string;
+    unitKnown: string;
+    legendGood: string;
+    legendDegraded: string;
+    legendDown: string;
+    legendNoData: string;
+    linkIssues: string;
+    linkIssuesDesc: string;
+    dailyUptimeTitle: string;
+    lowestDay: string;
+    lowestDayValue: string;
+    lastCheckedShort: string;
   };
   oriel: {
     conversations: string;
@@ -2145,149 +2144,147 @@ const translation: Translation = {
   },
   lens: {
     title: "Lens",
-    description: "Website health, SEO and UI checks for this project. Read-only.",
-    notConnectedTitle: "Lens is not connected",
-    notConnectedBody: "This server cannot reach the Lens service. Check the Lens settings.",
-    loadFailedTitle: "Lens could not load",
-    loadFailedBody: "Try again in a moment.",
-    openIssues: "Open Issues",
-    runs: "Runs",
-    incidents: "Incidents",
-    latestRun: "Latest Run",
-    issuesTitle: "Open Issues",
-    noIssues: "No open issues. Lens found nothing that is still open.",
-    runsTitle: "Runs",
-    noRuns: "No runs yet.",
-    selectRun: "Select a run to see its findings and screenshots.",
-    findingsTitle: "Findings",
-    noFindings: "No findings in this run.",
-    screenshotsTitle: "Screenshots",
-    noScreenshots: "No screenshots for this run.",
-    issue: "Issue",
-    severity: "Severity",
-    status: "Status",
-    target: "Where",
-    seen: "Seen",
-    statusOpen: "Open",
-    statusResolved: "Resolved",
-    statusReopened: "Reopened",
-    severityHigh: "High",
-    severityMedium: "Medium",
-    severityLow: "Low",
-    coverageComplete: "Complete",
-    coveragePartial: "Partial",
-    runCompleted: "Completed",
-    runRunning: "Running",
-    runFailed: "Failed",
-    recommendation: "What to do",
-    viewports: "Viewports",
-    tabsLabel: "Issue categories",
-    tabSeo: "SEO",
-    tabUiux: "UI/UX",
-    uptimeTitle: "Uptime",
-    uptimeSetup: "Uptime monitoring is not set up yet. Downtime history will show here.",
-    uptimeIncidents: "Availability incidents",
-    seoTitle: "SEO health",
-    seoSubtitle: "How well your website is set up for search engines, in plain words.",
+    description: "Website health, SEO and uptime for this project. Read-only.",
+    seoTitle: "Lens",
+    subtitle: "SEO health and uptime overview for the selected project.",
     lastCheck: "Last check",
-    tabHistory: "History",
-    scoreNote: "Higher is better. Based on open SEO issues.",
-    band_good: "Good",
+    lastCheckAt: "Last check · {{time}}",
+    viewHistory: "View history",
+    startCheck: "Start check",
+    tabOverview: "Overview",
+    tabSeo: "SEO health",
+    tabUptime: "Uptime monitoring",
+    seoScoreTitle: "SEO health score",
+    band_good: "Healthy",
     band_work: "Needs work",
     band_attention: "Needs attention",
-    summary_good: "Your site is in good shape for search.",
-    summary_work: "A good base. A few improvements will help.",
-    summary_attention: "Your site needs several improvements.",
-    summaryPages: "We checked {{checked}} pages of your site.",
-    issuesToFix: "Issues to fix",
-    urgentIssues: "Urgent",
-    pagesAffected: "Pages affected",
-    startHere: "Start here: the most important fixes",
-    howToFix: "How to fix",
-    severityMix: "Severity mix",
-    page: "Page",
-    issuesCount: "Issues",
-    mainProblem: "Main problem",
+    failedLabel: "Failed",
+    warningsLabel: "Warnings",
+    noticesLabel: "Notices",
+    mustFixNote: "Must fix. Hurts search visibility.",
+    shouldFixNote: "Should fix. Important, not blocking.",
+    worthNote: "Worth a look. Guidelines only, no score impact.",
+    partialScan: "Partial scan",
+    completeScan: "Complete scan",
+    uptimeTitle: "Uptime monitoring",
+    statusOperational: "Operational",
+    statusDown: "Down",
+    statusUnknown: "Unknown",
+    totalDowntime: "Total downtime",
+    incidents: "Incidents",
+    avgResponse: "Avg response",
+    minutes: "{{count}} min",
+    pagesAffectedTitle: "Pages affected",
+    pagesAffectedNote: "Unique pages with open SEO issues.",
+    severityHigh: "High",
+    severityMedium: "Medium",
+    severityAdvisory: "Advisory",
+    priorityTitle: "Priority issues",
+    viewAllIssues: "View all issues",
+    colSeverity: "Severity",
+    colIssue: "Issue",
+    colAffected: "Affected pages",
+    colAction: "Recommended action",
     pagesCount: "{{count}} pages",
-    foundOnPages: "Found on {{count}} page(s)",
-    pagesAffectedNote: "{{count}} pages on your site have at least one open SEO issue.",
-    openIssuesCount: "{{count}} open issues",
-    summaryCoverage: "We checked {{checked}} of {{known}} pages of your site.",
-    summaryPagesPartial: "We checked {{checked}} pages of your site.",
-    scoreRule: "Higher is better. Based on open issues.",
-    mustFixNote: "Hurts your results now",
-    shouldFixNote: "Should be improved",
-    worthNote: "Small improvements",
+    viewUptimeDetails: "View uptime details",
+    colDate: "Date",
+    colDuration: "Duration",
+    colStatus: "Status",
+    statusResolved: "Resolved",
+    statusOngoing: "Ongoing",
+    linkOnpage: "On-page SEO",
+    linkTechnical: "Technical SEO",
+    linkPages: "Pages",
+    linkOnpageDesc: "Across titles, descriptions, headings and content.",
+    linkTechnicalDesc: "Across indexing, robots, canonicals and URLs.",
+    linkPagesDesc: "Pages scanned in the latest check.",
+    seoAllIssues: "All issues",
     onpageTitle: "On-page SEO",
     technicalTitle: "Technical SEO",
-    onpageHelp: "What your pages say: titles, descriptions, headings, text and pictures.",
-    technicalHelp: "How search engines reach your pages: indexing, robots and sitemap, links, addresses and structured data.",
-    workingWell: "Working well",
-    noProblems: "No open issues in this group.",
-    glossaryTitle: "What these words mean",
-    glossary_sitemap: "Sitemap: a list of your pages that you give to search engines.",
-    glossary_robots: "Robots file: a small file that tells search engines which pages they may visit.",
-    glossary_canonical: "Canonical: the one address you want search engines to show for a page.",
-    glossary_noindex: "Noindex: an instruction that asks search engines not to show a page.",
-    glossary_structured: "Structured data: hidden labels that describe a page in a form search engines read.",
-    glossary_h1: "H1: the main heading of a page.",
-    glossary_meta: "Meta description: the summary text under a page title in search results.",
-    tabCategories: "By category",
-    failedLabel: "Must fix",
-    warningsLabel: "Should fix",
-    noticesLabel: "Worth checking",
-    categoriesTitle: "Issues by category",
-    historyTitle: "Past checks",
-    checksLabel: "Checks",
-    whatToDo: "What to do",
-    categoryIssues: "{{count}} issues",
-    noCategoryIssues: "No issues in this category.",
-    readMore: "Why this matters",
-
-    healthScore: "Health score",
-    healthScoreNote: "Lens formula. Not a search ranking signal.",
-    bySeverity: "By severity",
-    uptime7d: "Uptime, 7 days",
-    avgResponse: "Average response",
-    probes: "Checks",
-    incidentsCount: "Incidents",
-    byTopic: "Issues by topic",
-    needsAttention: "Needs attention",
-    showAll: "Show all",
-    showLess: "Show less",
-    tabOverview: "Overview",
-    tabUptime: "Uptime",
-    tabPages: "Pages and runs",
-    pagesInRun: "Pages in latest run",
-    noIncidents: "No incidents in this period.",
-    exampleData: "Example data",
-    exampleNote: "Dummy uptime data until Uptime Kuma is set up.",
-    noOpenIssues: "No open issues in this group.",
-    coverage: "Coverage",
-    lastRun: "Last run",
-    noRunYet: "No run yet",
-    open: "open",
-    sitePages: "Pages",
-    group_titles: "Titles",
-    group_descriptions: "Descriptions",
-    group_headings: "Headings",
-    group_urls: "URLs",
-    group_indexing: "Indexing and canonicals",
-    group_robots: "Robots and sitemap",
-    group_content: "Content",
-    group_links: "Links",
-    group_structured_data: "Structured data",
-    group_images: "Images",
-    group_layout: "Layout",
-    group_touch: "Touch targets",
-    group_text: "Text size",
-    group_accessibility: "Accessibility",
-    group_other: "Other",
-    where: "Where",
-    seenCount: "Seen",
-    pageIssues: "Issues",
-    upNow: "Up",
-    down: "Down",
+    pagesTitle: "Pages",
+    historyTitle: "Scan history",
+    onpageHelp: "What each page says to visitors and search engines: titles, descriptions, headings, content and images.",
+    technicalHelp: "How search engines reach and read your pages: indexing, robots, canonicals and URLs.",
+    issueFound: "What we found",
+    issueWhy: "Why it matters",
+    issueFix: "How to fix it",
+    issueVerify: "How to verify",
+    issuePages: "Affected pages",
+    searchPages: "Search by URL",
+    showingPages: "Showing {{shown}} of {{total}} pages",
+    colPage: "Page",
+    colFailed: "Failed",
+    colWarnings: "Warnings",
+    colSuggestions: "Suggestions",
+    colState: "Status",
+    stateChecked: "Checked",
+    stateFailed: "Check failed",
+    colCoverage: "Coverage",
+    colScore: "Score",
+    colPagesChecked: "Pages checked",
+    colNew: "New",
+    colResolved: "Resolved",
+    colOpen: "Open",
+    runCompleted: "Completed",
+    runFailed: "Failed",
+    coverageComplete: "Complete",
+    coveragePartial: "Partial",
+    runFailedNote: "Check failed: {{code}}",
+    noRunYet: "No check has run yet.",
+    uptimeStatusTitle: "Current status",
+    lastSuccessfulCheck: "Last successful check",
+    currentOutage: "Current outage",
+    noOutage: "No outage right now",
+    availabilityTitle: "Availability",
+    checksRecorded: "Checks recorded",
+    uptimeUnknownNote: "No monitoring data yet. Missing time is not counted as uptime.",
+    timelineTitle: "Daily uptime, last 30 days",
+    responseTitle: "Response time",
+    avgLabel: "Average",
+    p95Label: "95th percentile",
+    incidentHistoryTitle: "Incident history",
+    incidentDetailTitle: "Incident details",
+    detectedAt: "Detected",
+    recoveredAt: "Recovered",
+    noIncidents: "No incidents recorded in this period.",
+    viewDetails: "View details",
+    historyNote: "Scores and counts are saved per completed check. Failed checks keep no score.",
+    reason: "Reason",
+    summaryHeading: "How your SEO is going",
+    bullet_high_count: "{{count}} high-impact issues to fix first.",
+    bullet_clean: "No high-impact issues found. Keep monitoring.",
+    bullet_partial: "Only {{checked}} of {{known}} pages were checked. This score covers part of the site.",
+    bullet_uptime_good: "Site was online {{percent}}% of the last 30 days.",
+    bullet_uptime_low: "Uptime was {{percent}}% over 30 days. Check the incidents below.",
+    bullet_missing_title: "{{pages}} pages have no title. Search results cannot show what they are about.",
+    bullet_sitemap_noindex: "{{pages}} sitemap pages are set to noindex. Search engines are told to skip them.",
+    bullet_missing_meta_description: "{{pages}} pages have no meta description, so search results pick a random snippet.",
+    bullet_missing_h1: "{{pages}} pages have no main heading.",
+    bullet_title_length: "{{pages}} titles could be clearer. Advisory only, no score impact.",
+    bullet_canonical_conflict: "{{pages}} pages point their canonical tag to another address.",
+    bullet_url_readable: "{{pages}} page addresses are hard to read. Advisory only.",
+    bullet_generic_high: "{{pages}} pages affected: {{title}}.",
+    bullet_generic_medium: "{{pages}} pages affected: {{title}}.",
+    bullet_generic_advisory: "{{pages}} pages affected: {{title}}. Advisory only.",
+    uptimeLabel: "Uptime, last 30 days",
+    pointsToHealthy: "{{points}} points to reach Healthy",
+    stayHealthy: "Score is in the Healthy band. Keep it above 85.",
+    bandLegendAttention: "Below 60",
+    bandLegendWork: "60 to 84",
+    bandLegendGood: "85 and above",
+    viewAllPages: "View all pages",
+    unitIssues: "issues",
+    unitKnown: "of {{known}} known",
+    legendGood: "99.5% and above",
+    legendDegraded: "98% to 99.5%",
+    legendDown: "Below 98%",
+    legendNoData: "No checks",
+    linkIssues: "Issues",
+    linkIssuesDesc: "All open SEO issues across the checked pages.",
+    dailyUptimeTitle: "Daily uptime, last 30 days",
+    lowestDay: "Lowest day",
+    lowestDayValue: "{{percent}}% on {{date}}",
+    lastCheckedShort: "Last checked {{time}}",
   },
   oriel: {
     conversations: "Conversations",

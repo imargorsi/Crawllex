@@ -7,16 +7,8 @@ import { useTranslation } from "react-i18next";
 import { ReportDetailView } from "@/components/reports/report-view/report-detail-view";
 import { ReportHero } from "@/components/reports/report-view/report-hero";
 import { PageAmbientGlow } from "@/components/ui/page-ambient-glow";
+import { PageBackdrop } from "@/components/ui/page-backdrop";
 
-/** Brand gradient wash behind the whole report page. Boxes stay transparent so it shows through. */
-function PageBackdrop() {
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-x-0 top-0 h-[44rem] bg-[radial-gradient(70%_55%_at_50%_0%,color-mix(in_srgb,var(--brand)_22%,transparent),transparent_70%),linear-gradient(180deg,color-mix(in_srgb,var(--brand)_8%,transparent),transparent_60%)]"
-    />
-  );
-}
 import { DashboardModuleBreadcrumbSection } from "@/components/layout/dashboard-module-breadcrumb-section";
 import { AlertDialogCancel } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";

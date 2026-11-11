@@ -1,0 +1,23 @@
+date,call,endpoint,mode,input,items,cost_usd,balance_after_usd,status
+2026-11-05,00_locations_PK,serp/google/locations/PK,free,country lookup,,0,1.00,20000
+2026-11-05,00_locations_SA,serp/google/locations/SA,free,country lookup,,0,1.00,20000
+2026-11-05,01_llm_mentions_search,ai_optimization/llm_mentions/search_mentions,live,logicalcreations.net + 2 keywords SA,0,0.1000,0.9000,20000
+2026-11-05,02_serp_maps_lahore,serp/google/maps/live/advanced,live,web development company Lahore depth20,20,0.0020,,20000 (batch of 2 tasks: task 2 failed 40000)
+2026-11-05,03_gbp_info,business_data/google/my_business_info/live,live,Logical Creations Lahore,1,0.0054,0.8926,20000
+2026-11-05,04_serp_maps_jeddah,serp/google/maps/live/advanced,live,web development company Jeddah depth20,20,0.0020,0.8906,20000
+2026-11-05,05_labs_domain_overview,dataforseo_labs/google/domain_rank_overview,live,logicalcreations.net SA,0,0.0120,,20000 no organic items
+2026-11-05,06_labs_keyword_ideas,dataforseo_labs/google/keyword_ideas,live,3 seeds PK 30 items,30,0.0156,,20000
+2026-11-05,07_search_volume,keywords_data/google_ads/search_volume,live,8 keywords SA,8,0.0900,,20000
+2026-11-05,08_llm_top_domains,ai_optimization/llm_mentions/top_mentioned_domains,live,AI automation + website development google SA,10,0.1100,,20000
+2026-11-05,09_llm_competitors_search,ai_optimization/llm_mentions/search_mentions,live,whetstonez.com + telenoc.org SA,0,0.1000,,20000
+2026-11-05,10_maps_standard_task_post,serp/google/maps/task_post,standard,web development company Lahore depth20,,0.0006,,20000
+2026-11-05,11_gbp_reviews_task_post,business_data/google/reviews/task_post,standard,cid Logical Creations depth50,15,0.00375,,20000 task_get free returned 15
+2026-11-05,12_gbp_info_task_post,business_data/google/my_business_info/task_post,standard,Logical Creations Lahore,1,0.0015,,20000
+2026-11-05,13_labs_ranked_keywords,dataforseo_labs/google/ranked_keywords,live,logicalcreations.net SA,0,0.0120,,20000 no items
+2026-11-05,14_labs_competitors,dataforseo_labs/google/competitors_domain,live,logicalcreations.net SA,0,0.0120,,20000 no items
+2026-11-05,15_backlinks_summary,backlinks/summary,live,logicalcreations.net,1,0.0240,,20000 254 backlinks 93 ref domains
+2026-11-05,16_llm_top_brands,ai_optimization/llm_mentions/top_mentioned_brands,live,AI automation + website development SA,0,0.1000,,20000
+2026-11-05,17_labs_domain_overview_pk,dataforseo_labs/google/domain_rank_overview,live,logicalcreations.net PK,0,0.0120,,20000 no items
+2026-11-05,18_labs_ranked_keywords_pk,dataforseo_labs/google/ranked_keywords,live,logicalcreations.net PK,0,0.0120,,20000 no items
+2026-11-05,19_llm_search_chatgpt_pk,ai_optimization/llm_mentions/search_mentions,live,platform chat_gpt PK,,0,,40000 rejected location field (not charged)
+2026-11-05,20_llm_top_pages_pk,ai_optimization/llm_mentions/top_mentioned_pages,live,software house + web development company PK,10,0.1100,0.2774,20000

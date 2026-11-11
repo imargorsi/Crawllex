@@ -1,0 +1,114 @@
+{
+    "version": "0.1.20261103",
+    "status_code": 20000,
+    "status_message": "Ok.",
+    "time": "0.1849 sec.",
+    "cost": 0.024036,
+    "tasks_count": 1,
+    "tasks_error": 0,
+    "tasks": [
+        {
+            "id": "11050943-3042-0265-0000-ce1cacb2445c",
+            "status_code": 20000,
+            "status_message": "Ok.",
+            "time": "0.1633 sec.",
+            "cost": 0.024036,
+            "result_count": 1,
+            "path": [
+                "v3",
+                "backlinks",
+                "summary",
+                "live"
+            ],
+            "data": {
+                "api": "backlinks",
+                "function": "summary",
+                "target": "logicalcreations.net",
+                "include_subdomains": true
+            },
+            "result": [
+                {
+                    "target": "logicalcreations.net",
+                    "first_seen": "2022-01-30 18:59:05 +00:00",
+                    "lost_date": null,
+                    "rank": 200,
+                    "backlinks": 254,
+                    "backlinks_spam_score": 21,
+                    "crawled_pages": 216,
+                    "info": {
+                        "server": "LiteSpeed",
+                        "cms": "wordpress",
+                        "platform_type": [
+                            "cms",
+                            "blogs",
+                            "organization"
+                        ],
+                        "ip_address": "145.79.28.138",
+                        "country": null,
+                        "is_ip": false,
+                        "target_spam_score": 0
+                    },
+                    "internal_links_count": 4464,
+                    "external_links_count": 751,
+                    "broken_backlinks": 0,
+                    "broken_pages": 0,
+                    "referring_domains": 93,
+                    "referring_domains_nofollow": 21,
+                    "referring_main_domains": 90,
+                    "referring_main_domains_nofollow": 21,
+                    "referring_ips": 71,
+                    "referring_subnets": 70,
+                    "referring_pages": 232,
+                    "referring_pages_nofollow": 112,
+                    "referring_links_tld": {
+                        "com": 189,
+                        "eu": 4,
+                        "info": 3,
+                        "org": 3,
+                        "shop": 3,
+                        "ai": 3,
+                        "org.in": 2,
+                        "net": 2,
+                        "pages.dev": 2,
+                        "com.au": 2
+                    },
+                    "referring_links_types": {
+                        "anchor": 232
+                    },
+                    "referring_links_attributes": {
+                        "nofollow": 112,
+                        "noopener": 80,
+                        "noreferrer": 10
+                    },
+                    "referring_links_platform_types": {
+                        "blogs": 170,
+                        "cms": 163,
+                        "unknown": 51,
+                        "organization": 18,
+                        "ecommerce": 3,
+                        "news": 2
+                    },
+                    "referring_links_semantic_locations": {
+                        "section": 96,
+                        "": 76,
+                        "header": 40,
+                        "article": 17,
+                        "main": 3
+                    },
+                    "referring_links_countries": {
+                        "": 204,
+                        "WW": 6,
+                        "IN": 4,
+                        "PK": 3,
+                        "US": 3,
+                        "AI": 3,
+                        "GB": 2,
+                        "AU": 2,
+                        "NU": 1,
+                        "KR": 1
+                    }
+                }
+            ]
+        }
+    ]
+}

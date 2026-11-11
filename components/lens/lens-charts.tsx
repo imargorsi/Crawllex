@@ -1,112 +1,100 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
-/** Charts for the Lens dashboard. Plain SVG, colored from the theme tokens, so they follow light and dark themes. */
+/**
+ * Daily uptime bars for Lens. One bar per day, colored by availability.
+ * Null days (no checks) show a flat grey stub, never zero. Colors come from theme tokens.
+ */
 
-export type DonutSegment = { label: string; value: number; color: string };
+type TDay = { day: string; uptimePct: number | null };
 
-export function DonutChart({ segments, centerLabel, centerValue, size = 132 }: {
-  segments: DonutSegment[];
-  centerLabel: string;
-  centerValue: string;
-  size?: number;
-}) {
-  const total = segments.reduce((sum, s) => sum + s.value, 0);
-  const radius = size / 2 - 12;
-  const circumference = 2 * Math.PI * radius;
-  let offset = 0;
+const FLOOR = 98;
+const CEIL = 100;
+const LEVELS = [100, 99.5, 99, 98.5, 98];
+
+function barColor(pct: number | null) {
+  if (pct == null) return "var(--border)";
+  if (pct >= 99.5) return "var(--color-success)";
+  if (pct >= 98) return "var(--color-warning)";
+  return "var(--destructive)";
+}
+
+/** "2026-10-12" to "Oct 12", in UTC so the day never shifts. */
+export function formatUptimeDay(day: string, locale: string) {
+  return new Date(`${day}T00:00:00Z`).toLocaleDateString(locale, { month: "short", day: "numeric", timeZone: "UTC" });
+}
+
+export function LensUptimeBars({ days, height = 260, locale = "en" }: { days: TDay[]; height?: number; locale?: string }) {
+  const span = CEIL - FLOOR;
+  const yPct = (v: number) => ((CEIL - v) / span) * 100;
   return (
-    <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size} role="img" aria-label={segments.map((s) => `${s.label} ${s.value}`).join(", ")}>
-        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="var(--border)" strokeWidth={12} />
-        {total > 0
-          ? segments.filter((s) => s.value > 0).map((s) => {
-              const length = (s.value / total) * circumference;
-              const dash = `${length} ${circumference - length}`;
-              const node = (
-                <circle key={s.label} cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={s.color} strokeWidth={12}
-                  strokeDasharray={dash} strokeDashoffset={-offset} transform={`rotate(-90 ${size / 2} ${size / 2})`} />
+    <div className="flex flex-col gap-4">
+      <div className="flex gap-3">
+        <div className="relative w-10 shrink-0 text-[11px] tabular-nums text-text-muted" style={{ height }} aria-hidden>
+          {LEVELS.map((level) => (
+            <span key={level} className="absolute right-0 -translate-y-1/2" style={{ top: `${yPct(level)}%` }}>
+              {level.toFixed(level % 1 === 0 ? 0 : 1)}%
+            </span>
+          ))}
+        </div>
+        <div className="relative min-w-0 flex-1" style={{ height }} role="img" aria-label="Daily uptime, last 30 days">
+          {LEVELS.map((level) => (
+            <div
+              key={level}
+              className={cn("absolute inset-x-0 border-t", level === CEIL ? "border-border" : "border-dashed border-border/60")}
+              style={{ top: `${yPct(level)}%` }}
+            />
+          ))}
+          <div className="absolute inset-0 flex items-end gap-[5px]">
+            {days.map((d) => {
+              const pct = d.uptimePct;
+              const top = pct == null ? 96 : Math.max(0, Math.min(100, yPct(pct)));
+              return (
+                <div key={d.day} className="relative h-full flex-1" title={`${d.day}: ${pct == null ? "no checks" : `${pct.toFixed(2)}%`}`}>
+                  <div
+                    className="absolute inset-x-0 bottom-0 rounded-t-md transition-[opacity] duration-200 hover:opacity-80"
+                    style={{ top: `${top}%`, background: barColor(pct) }}
+                  />
+                </div>
               );
-              offset += length;
-              return node;
-            })
-          : null}
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-semibold text-text-primary">{centerValue}</span>
-        <span className="text-[11px] text-muted-foreground">{centerLabel}</span>
+            })}
+          </div>
+        </div>
+      </div>
+      <div className="flex gap-3">
+        <div className="w-10 shrink-0" aria-hidden />
+        <div className="flex min-w-0 flex-1 gap-[5px]">
+          {days.map((d, i) => (
+            <span key={d.day} className="relative flex-1">
+              {i % 5 === 0 ? (
+                <span className="absolute left-0 whitespace-nowrap text-[11px] tabular-nums text-text-muted">{formatUptimeDay(d.day, locale)}</span>
+              ) : null}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-export function BarList({ items, max }: { items: { label: string; value: number; color?: string }[]; max?: number }) {
-  const top = max ?? Math.max(1, ...items.map((i) => i.value));
+/** Legend for the bar colors, shown under the chart. */
+export function LensUptimeLegend({ items }: { items: { label: string; color: string }[] }) {
   return (
-    <ul className="flex flex-col gap-2.5">
+    <ul className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-text-secondary">
       {items.map((item) => (
-        <li key={item.label} className="flex flex-col gap-1">
-          <div className="flex items-center justify-between gap-3 text-sm">
-            <span className="text-text-primary">{item.label}</span>
-            <span className="tabular-nums text-muted-foreground">{item.value}</span>
-          </div>
-          <div className="h-2 overflow-hidden rounded-full bg-bg-hover">
-            <div className="h-full rounded-full" style={{ width: `${Math.max(2, (item.value / top) * 100)}%`, background: item.color ?? "var(--chart-1)" }} />
-          </div>
+        <li key={item.label} className="flex items-center gap-2">
+          <span className="size-2.5 rounded-sm" style={{ background: item.color }} aria-hidden />
+          {item.label}
         </li>
       ))}
     </ul>
   );
 }
 
-/** Daily uptime columns. Null values (no probes that day) are drawn as an empty slot, never as zero. */
-export function UptimeColumns({ days }: { days: { day: string; uptimePct: number | null }[] }) {
-  const width = 560;
-  const height = 120;
-  const gap = 4;
-  const bar = days.length ? (width - gap * (days.length - 1)) / days.length : 0;
-  return (
-    <div className="flex flex-col gap-2">
-      <svg viewBox={`0 0 ${width} ${height}`} className="h-32 w-full" role="img" aria-label="Daily uptime">
-        <line x1="0" x2={width} y1={height - 1} y2={height - 1} stroke="var(--border)" />
-        {days.map((d, i) => {
-          const x = i * (bar + gap);
-          if (d.uptimePct == null) return <rect key={d.day} x={x} y={height - 4} width={bar} height={4} fill="var(--border)" />;
-          const h = Math.max(4, (d.uptimePct / 100) * (height - 8));
-          const color = d.uptimePct >= 99.5 ? "var(--color-success)" : d.uptimePct >= 98 ? "var(--color-warning)" : "var(--destructive)";
-          return <rect key={d.day} x={x} y={height - h} width={bar} height={h} rx={3} fill={color}><title>{`${d.day}: ${d.uptimePct}%`}</title></rect>;
-        })}
-      </svg>
-      <div className="flex justify-between text-[11px] text-muted-foreground tabular-nums">
-        <span>{days[0]?.day ?? ""}</span>
-        <span>{days[days.length - 1]?.day ?? ""}</span>
-      </div>
-    </div>
-  );
-}
-
-export function Sparkline({ values, width = 120, height = 36 }: { values: number[]; width?: number; height?: number }) {
-  if (values.length < 2) return <div className="h-9 w-[120px] rounded bg-bg-hover" aria-hidden="true" />;
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const span = max - min || 1;
-  const points = values.map((v, i) => `${(i / (values.length - 1)) * width},${height - ((v - min) / span) * (height - 4) - 2}`).join(" ");
-  return (
-    <svg viewBox={`0 0 ${width} ${height}`} width={width} height={height} role="img" aria-label="Trend">
-      <polyline points={points} fill="none" stroke="var(--chart-1)" strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-export function ChartCard({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {
-  return (
-    <section className="flex flex-col gap-4 rounded-xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm font-semibold text-text-primary">{title}</h3>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
+export const UPTIME_LEGEND_COLORS = {
+  good: "var(--color-success)",
+  degraded: "var(--color-warning)",
+  down: "var(--destructive)",
+  none: "var(--border)",
+};

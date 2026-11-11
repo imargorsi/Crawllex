@@ -1,0 +1,22 @@
+{
+  "run": "20261103-143045",
+  "passed": 2,
+  "total": 2,
+  "gate_fail": [],
+  "results": [
+    {
+      "id": "G02",
+      "category": "grounded",
+      "pass": true,
+      "fails": [],
+      "answer": "A Project Owner has full operational access to the project, including inviting and removing members.\n\nA Project User has mainly view-oriented access, such as viewing analytics, activities, and leads. They cannot invite or remove members by default."
+    },
+    {
+      "id": "H03",
+      "category": "hallucination",
+      "pass": true,
+      "fails": [],
+      "answer": "This is not covered in the Crawllex guides. Please contact your project owner or the Crawllex team."
+    }
+  ]
+}
