@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import { formatWhen, type TLensT } from "@/components/lens/lens-overview";
 import { TableListSort } from "@/components/table/table-list-sort";
-import { LENS_FLOAT_CARD, LensCardHeader, LensEmpty, LensPill, LensTabs, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
+import { LENS_FLOAT_CARD, LensCardHeader, LensEmpty, LensPill, LensTabs, LensWave, severityTone, type TLensSeverity } from "@/components/lens/lens-ui";
 import type { TLensDemoDashboard, TLensDemoIssue, TLensGroup, TLensRuleGroup } from "@/features/lens/lens.demo";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
@@ -30,17 +30,32 @@ const RULE_LABEL_KEY: Record<TLensRuleGroup, "ruleTitles" | "ruleDescriptions" |
 
 const RULE_ORDER: TLensRuleGroup[] = ["titles", "descriptions", "headings", "content", "images", "indexing", "robots", "urls", "links", "structured"];
 
-function StatTile({ icon: Icon, label, value, tone }: { icon: typeof Icons.alert; label: string; value: number; tone: "danger" | "warning" | "muted" | "brand" }) {
-  const iconClass = { danger: "text-destructive", warning: "text-warning", muted: "text-text-muted", brand: "text-brand" }[tone];
+const TILE_TONE = {
+  danger: { well: "bg-destructive/15", icon: "text-destructive", color: "var(--destructive)" },
+  warning: { well: "bg-warning/15", icon: "text-warning", color: "var(--warning)" },
+  muted: { well: "bg-bg-hover", icon: "text-text-secondary", color: "var(--text-muted)" },
+  brand: { well: "bg-brand/15", icon: "text-brand", color: "var(--brand)" },
+} as const;
+
+/** Severity stat tile: icon, label, figure, and a trend wave in the tile colour (decorative, dummy data). */
+function StatTile({ icon: Icon, label, value, tone, trend }: {
+  icon: typeof Icons.alert;
+  label: string;
+  value: number;
+  tone: keyof typeof TILE_TONE;
+  trend: number[];
+}) {
+  const c = TILE_TONE[tone];
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3.5">
-      <span className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-bg-hover/60">
-        <Icon className={cn("size-4", iconClass)} aria-hidden />
-      </span>
-      <div className="flex min-w-0 flex-col">
-        <span className="text-xs text-text-muted">{label}</span>
-        <span className="text-2xl font-semibold tabular-nums leading-tight text-text-primary">{value}</span>
+    <div className="relative flex min-h-[8.5rem] flex-col justify-between overflow-hidden rounded-2xl border border-border bg-text-primary/[0.03] p-4 shadow-sm dark:border-text-primary/35">
+      <div className="flex items-center gap-3">
+        <span className={cn("inline-flex size-9 shrink-0 items-center justify-center rounded-xl", c.well)}>
+          <Icon className={cn("size-4", c.icon)} aria-hidden />
+        </span>
+        <span className="text-sm font-medium text-text-secondary">{label}</span>
       </div>
+      <span className="relative text-3xl font-semibold tabular-nums leading-none text-text-primary">{value}</span>
+      <LensWave values={trend} color={c.color} />
     </div>
   );
 }
@@ -101,10 +116,10 @@ export function LensIssues({ data, t, locale, presetType }: {
       />
 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <StatTile icon={Icons.alert} label={t("severityHigh")} value={counts.high} tone="danger" />
-        <StatTile icon={Icons.alert} label={t("severityMedium")} value={counts.medium} tone="warning" />
-        <StatTile icon={Icons.sparkles} label={t("severityAdvisory")} value={counts.advisory} tone="muted" />
-        <StatTile icon={Icons.grid} label={t("pageIssues")} value={counts.pageIssues} tone="brand" />
+        <StatTile icon={Icons.alert} label={t("tileHigh")} value={counts.high} tone="danger" trend={[2, 3, 2, 4, 3, 5, counts.high]} />
+        <StatTile icon={Icons.alert} label={t("tileMedium")} value={counts.medium} tone="warning" trend={[4, 6, 5, 7, 6, 8, counts.medium]} />
+        <StatTile icon={Icons.sparkles} label={t("tileAdvisory")} value={counts.advisory} tone="muted" trend={[3, 2, 4, 3, 3, 4, counts.advisory]} />
+        <StatTile icon={Icons.grid} label={t("pageIssues")} value={counts.pageIssues} tone="brand" trend={[20, 24, 22, 28, 26, 30, counts.pageIssues]} />
       </div>
 
       <div className="flex flex-col gap-4 rounded-2xl border border-border p-4 sm:p-5">
@@ -194,8 +209,8 @@ function IssueCard({ issue, t, locale, lastCheckAt }: { issue: TLensDemoIssue; t
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Panel icon={Icons.search} label={t("issueFound")}>{issue.found}</Panel>
-        <Panel icon={Icons.alert} label={t("issueWhy")}>{issue.why}</Panel>
+        <Panel icon={Icons.search} label={t("issueFound")} tone="info">{issue.found}</Panel>
+        <Panel icon={Icons.alert} label={t("issueWhy")} tone="warn">{issue.why}</Panel>
         <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">{issue.fix}</Panel>
         <Panel icon={Icons.sparkles} label={t("aiSuggestion")}>{issue.aiSuggestion}</Panel>
       </div>
@@ -232,26 +247,27 @@ function Tag({ children }: { children: string }) {
 }
 
 /** Equal-size panel used for the four blocks of an issue. */
+const PANEL_TONE = {
+  neutral: { box: "border-border bg-text-primary/[0.03] dark:border-text-primary/35", well: "bg-bg-hover", icon: "text-text-secondary", label: "text-text-primary" },
+  info: { box: "border-status-invited/40 bg-status-invited/[0.06]", well: "bg-status-invited/15", icon: "text-status-invited", label: "text-status-invited" },
+  warn: { box: "border-warning/40 bg-warning/[0.06]", well: "bg-warning/15", icon: "text-warning", label: "text-warning" },
+  brand: { box: "border-brand/50 bg-brand/[0.07]", well: "bg-brand/20", icon: "text-brand", label: "text-brand" },
+} as const;
+
 function Panel({ icon: Icon, label, children, tone = "neutral" }: {
   icon: typeof Icons.alert;
   label: string;
   children: React.ReactNode;
-  tone?: "neutral" | "brand";
+  tone?: keyof typeof PANEL_TONE;
 }) {
+  const c = PANEL_TONE[tone];
   return (
-    <div
-      className={cn(
-        "flex min-h-[9.5rem] flex-col gap-3 rounded-2xl border p-4 shadow-sm backdrop-blur-sm sm:p-5",
-        tone === "brand"
-          ? "border-brand/50 bg-brand/[0.07]"
-          : "border-border bg-text-primary/[0.03] dark:border-text-primary/35",
-      )}
-    >
+    <div className={cn("flex min-h-[9.5rem] flex-col gap-3 rounded-2xl border p-4 shadow-sm backdrop-blur-sm sm:p-5", c.box)}>
       <div className="flex items-center gap-3">
-        <span className={cn("inline-flex size-9 shrink-0 items-center justify-center rounded-xl", tone === "brand" ? "bg-brand/20" : "bg-bg-hover")}>
-          <Icon className={cn("size-4", tone === "brand" ? "text-brand" : "text-text-secondary")} aria-hidden />
+        <span className={cn("inline-flex size-9 shrink-0 items-center justify-center rounded-xl", c.well)}>
+          <Icon className={cn("size-4", c.icon)} aria-hidden />
         </span>
-        <span className={cn("text-sm font-semibold", tone === "brand" ? "text-brand" : "text-text-primary")}>{label}</span>
+        <span className={cn("text-sm font-semibold", c.label)}>{label}</span>
       </div>
       <p className="text-sm leading-relaxed text-text-secondary">{children}</p>
     </div>

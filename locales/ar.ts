@@ -427,6 +427,9 @@ const translation: Translation = {
     severityImpact: "الشدة تؤثر على درجة SEO",
     advisoryNoImpact: "استشاري. لا يغير الدرجة.",
     openIssueDetails: "فتح تفاصيل المشكلة",
+    tileHigh: "فشل (عالٍ)",
+    tileMedium: "تحذيرات (متوسط)",
+    tileAdvisory: "ملاحظات (استشاري)",
   },
   oriel: {
     conversations: "المحادثات",

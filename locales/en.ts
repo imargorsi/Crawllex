@@ -425,6 +425,9 @@ export interface Translation {
     severityImpact: string;
     advisoryNoImpact: string;
     openIssueDetails: string;
+    tileHigh: string;
+    tileMedium: string;
+    tileAdvisory: string;
   };
   oriel: {
     conversations: string;
@@ -2335,6 +2338,9 @@ const translation: Translation = {
     severityImpact: "Severity Impacts SEO Health Score",
     advisoryNoImpact: "Advisory. Does not change the score.",
     openIssueDetails: "Open Issue Details",
+    tileHigh: "Failed (High)",
+    tileMedium: "Warnings (Medium)",
+    tileAdvisory: "Notices (Advisory)",
   },
   oriel: {
     conversations: "Conversations",

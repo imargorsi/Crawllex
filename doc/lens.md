@@ -24,7 +24,7 @@ Strings: `lens` block in `locales/en.ts` and `locales/ar.ts`. Arabic values are 
 ## Layout (top to bottom)
 
 1. **Header:** title and subtitle, Last check block, Start check button (no action yet).
-2. **Tab row:** Overview · SEO Health · Pages · Uptime Monitoring, then View History (opens scan history). Demo notice is removed from the UI.
+2. **Top nav:** one glass bar with icons and counts: Overview · SEO Health (open issues) · Pages (checked) · Uptime Monitoring. View History sits beside it (opens scan history). No search. Demo notice is removed from the UI.
 3. **Overview**
    - SEO health score card: ring (3 band segments, marker at score), band legend, points to Healthy, Failed / Warnings / Notices tiles, rule-based summary bullets (two columns), uptime block under the ring, partial/complete scan pill and band pill in the card header.
    - Pages affected (severity bars) and Priority issues (top 4 by severity).
@@ -34,7 +34,7 @@ Strings: `lens` block in `locales/en.ts` and `locales/ar.ts`. Arabic values are 
    - Summary tiles: High, Medium, Advisory, Page Issues.
    - Type tabs (All, On-Page, Technical) with counts. Severity uses the shared `TableListSort` dropdown. Issues are ordered by severity, then affected pages.
    - Rule tabs with counts (Meta Title, Meta Description, Headings, Content, Images, Indexing and Canonicals, Robots and Sitemap, Page URL).
-   - Each issue card (reference layout): severity, type and rule chips; title with the one-line finding; page count on the right. Affected Pages strip with page chips and View All Pages. Four equal panels: What We Found, Why It Matters, How To Fix (highlighted), AI Suggestion (dummy data, source to be decided). Footer: score impact (advisory items say they do not change the score), last check, Open Issue Details.
+   - Each issue card (reference layout): severity, type and rule chips; title with the one-line finding; page count on the right. Affected Pages strip with page chips and View All Pages. Four equal panels: What We Found (cyan), Why It Matters (amber), How To Fix (coral, highlighted), AI Suggestion (neutral). Dummy data for AI, source to be decided. Footer: score impact (advisory items say they do not change the score), last check, Open Issue Details.
 5. **Pages tab:** every checked page with status (Checked, Check Failed, Not Evaluated) and issue counts, sorted by priority, with URL search. Detailed per-page SEO report comes later.
 6. **View History:** scan history table (date, status, coverage, score, pages checked, new, resolved, open). Failed runs show error code, no score.
 6. **Uptime monitoring tab:** current status, availability, response time, daily timeline, incident history with detail panel.

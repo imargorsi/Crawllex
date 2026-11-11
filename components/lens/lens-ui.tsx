@@ -247,3 +247,55 @@ export type TLensSeverity = "high" | "medium" | "advisory";
 export function severityTone(severity: TLensSeverity): TLensTone {
   return severity === "high" ? "danger" : severity === "medium" ? "warning" : "muted";
 }
+
+/** Trend wave along the bottom of a stat tile. Decorative: the tint comes from the tile's tone. */
+export function LensWave({ values, color }: { values: number[]; color: string }) {
+  const w = 100;
+  const h = 40;
+  const max = Math.max(...values, 1);
+  const pts = values.map((v, i) => [(i / (values.length - 1)) * w, h - (v / max) * (h - 8) - 4] as const);
+  const line = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
+  const area = `${line} L${w},${h} L0,${h} Z`;
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className="absolute inset-x-0 bottom-0 h-16 w-full" aria-hidden>
+      <path d={area} fill={color} fillOpacity={0.16} />
+      <path d={line} fill="none" stroke={color} strokeWidth={2} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+    </svg>
+  );
+}
+
+/** Top navigation: icon tabs in one glass bar, with counts. Used for the page-level tabs. */
+export function LensNavBar<T extends string>({ items, value, onChange, label }: {
+  items: { id: T; label: string; icon: ComponentType<{ className?: string; "aria-hidden"?: boolean }>; count?: number }[];
+  value: T | null;
+  onChange: (id: T) => void;
+  label: string;
+}) {
+  return (
+    <div role="tablist" aria-label={label} className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-border bg-text-primary/[0.03] p-1.5 shadow-sm backdrop-blur-md dark:border-text-primary/35">
+      {items.map((item) => {
+        const active = value === item.id;
+        const Icon = item.icon;
+        return (
+          <button
+            key={item.id}
+            role="tab"
+            type="button"
+            aria-selected={active}
+            onClick={() => onChange(item.id)}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-colors duration-200",
+              active ? "bg-brand text-text-on-brand shadow-sm" : "text-text-secondary hover:bg-bg-hover hover:text-text-primary",
+            )}
+          >
+            <Icon className="size-4" aria-hidden />
+            {item.label}
+            {item.count != null ? (
+              <span className={cn("rounded-full px-1.5 text-xs tabular-nums", active ? "bg-white/20" : "bg-bg-hover text-text-muted")}>{item.count}</span>
+            ) : null}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

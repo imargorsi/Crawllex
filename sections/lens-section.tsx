@@ -12,7 +12,7 @@ import { LensHistory } from "@/components/lens/lens-history";
 import { LensIssues } from "@/components/lens/lens-issues";
 import { LensPages } from "@/components/lens/lens-pages";
 import { LensUptime } from "@/components/lens/lens-uptime";
-import { LensTabs } from "@/components/lens/lens-ui";
+import { LensNavBar } from "@/components/lens/lens-ui";
 import { useLensDashboard } from "@/features/lens/use-lens-dashboard";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
@@ -79,15 +79,15 @@ export function LensSection() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <LensTabs<TLensTab | "pages">
+          <LensNavBar<TLensTab | "pages">
             label={t("seoTitle")}
             value={view === "history" ? null : view}
             onChange={(id) => setView(id)}
             items={[
-              { id: "overview", label: t("tabOverview") },
-              { id: "seo", label: t("tabSeo") },
-              { id: "pages", label: t("pagesTitle") },
-              { id: "uptime", label: t("tabUptime") },
+              { id: "overview", label: t("tabOverview"), icon: Icons.dashboard },
+              { id: "seo", label: t("tabSeo"), icon: Icons.search, count: data.issues.filter((i) => i.status === "open").length },
+              { id: "pages", label: t("pagesTitle"), icon: Icons.grid, count: data.seo.checked },
+              { id: "uptime", label: t("tabUptime"), icon: Icons.analytics },
             ]}
           />
           <Button variant="outlined" size="lg" onClick={() => go("seo", "history")} className={cn("h-11 rounded-full", view === "history" && "border-brand/60 bg-brand/15")}>
