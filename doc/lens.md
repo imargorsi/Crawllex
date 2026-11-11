@@ -85,14 +85,14 @@ Evaluation per rule and page: Pass, Finding, Not applicable, Not evaluated. Not 
 
 Failed run: listed as failed with its error code, no score. Current view = latest completed run. Partial run: scored with a partial label, never resolves issues.
 
-Score formula (proposed): per scored rule, weight (high 10, medium 4, advisory 0) × (0.5 + 0.5 × affected/checked). Site-wide findings count as full weight. Total capped at 60, so the floor is 40. Advisory rules never score. Numbers to be tuned on Gate 1 data.
+Score formula (decided): per scored rule, weight (high 10, medium 4, advisory 0) × (0.5 + 0.5 × affected/checked). Site-wide findings count as full weight. Total capped at 60, so the floor is 40. Advisory rules never score. Numbers to be tuned on Gate 1 data.
 
 ## Not done yet (tracked, not hidden)
 
 - Recent activity and Coverage & trends: removed from Overview. Owner decides whether they return and where.
 - Live data and API states (not connected, load failed, empty). Their strings were removed as unused and return with the API.
-- Scoring formula change and per-run score snapshot (see Data contract; crawllex-lens `docs/DECISIONS.md`, pending owner approval).
-- Advisory tier and severity changes (crawllex-lens `docs/SEO-RULES.md`, pending owner approval and a re-audit).
+- Scoring formula and per-run score snapshot: decided (crawllex-lens `docs/DECISIONS.md`, 2026-11-11). Not implemented yet; numbers tuned on Gate 1 data before release.
+- Tier and severity changes: decided (crawllex-lens `docs/SEO-RULES.md`). Re-audit of the Gate 1 site required before the change ships.
 - Penalty breakdown view on scan history (stored in the snapshot once the snapshot change lands).
 - Arabic translations are first drafts. Need a native review.
 - Uptime retention job (30 days) and default enrolment of active sites: decided, not built (see Uptime rules).
