@@ -216,6 +216,7 @@ A separate **Onboarding workspace** (sidebar workspace toggle, `lib/frontend/lay
 - Engine and storage: separate service at `/mnt/projects/crawllex-lens` (Node, SQLite). Its rules and decisions: `docs/SEO-RULES.md`, `docs/DECISIONS.md`.
 - Uptime: rolling 30 days, all active sites monitored by default, independent of SEO scans (rules in `doc/lens.md`).
 - Theme: Lens cards are no-fill glass with a soft shadow; colors from theme tokens only.
+- Enrollment: Settings > Agents & AI (category `agents`, super admin only, `components/settings/settings-agents-panel.tsx`). The switch enrolls the selected project in Lens (`POST /api/v1/projects/[id]/lens/enroll`). `lensEnrolled` on the project controls the Lens nav item and `/lens` route (`lib/frontend/layout/route-access.ts`, `build-sidebar-nav.ts`). Details: `doc/lens.md`.
 
 ## Frontend Shell
 
