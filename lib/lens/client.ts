@@ -28,6 +28,14 @@ export async function lensPost<T>(path: string, body: Record<string, unknown>): 
   return readJson<T>(await lensRequest(path, { method: "POST", body }));
 }
 
+/** Cloudflare Access service token headers. Empty when not configured (local loopback). Never logged. */
+function accessServiceHeaders(): Record<string, string> {
+  const id = process.env.CF_ACCESS_CLIENT_ID?.trim();
+  const secret = process.env.CF_ACCESS_CLIENT_SECRET?.trim();
+  if (!id || !secret) return {};
+  return { "CF-Access-Client-Id": id, "CF-Access-Client-Secret": secret };
+}
+
 async function readJson<T>(response: Response): Promise<T> {
   const data: unknown = await response.json().catch(() => null);
   if (data == null || typeof data !== "object") throw new LensError("invalid_response");
@@ -45,6 +53,8 @@ async function lensRequest(path: string, init: { method?: "POST"; body?: Record<
       headers: {
         Authorization: `Bearer ${config.token}`,
         ...(init.body ? { "Content-Type": "application/json" } : {}),
+        // Cloudflare Access service token, when Lens is behind Access (lens.logicalcreations.cloud).
+        ...accessServiceHeaders(),
       },
       body: init.body ? JSON.stringify(init.body) : undefined,
       redirect: "error",
