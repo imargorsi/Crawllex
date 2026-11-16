@@ -100,6 +100,14 @@ export interface Translation {
       pagesLimitLabel: string;
       daysUnit: string;
       fixedNote: string;
+      frequencyLabel: string;
+      frequencyWeekly: string;
+      frequencyTwiceMonthly: string;
+      frequencyMonthly: string;
+      frequencyNote: string;
+      frequencyNext: string;
+      frequencySaved: string;
+      frequencyFailed: string;
     };
     categories: {
       theme: string;
@@ -2080,6 +2088,14 @@ const translation: Translation = {
       pagesLimitLabel: "Pages per check",
       daysUnit: "days",
       fixedNote: "Fixed for now. Not editable yet.",
+      frequencyLabel: "Audit frequency",
+      frequencyWeekly: "Weekly",
+      frequencyTwiceMonthly: "Twice a month",
+      frequencyMonthly: "Monthly",
+      frequencyNote: "How often Lens runs a full SEO audit. Monthly by default.",
+      frequencyNext: "Next audit: {{date}}",
+      frequencySaved: "Audit frequency saved.",
+      frequencyFailed: "Could not save the audit frequency. Try again shortly.",
     },
     categories: {
       theme: "Theme",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { TLensFrequency, TLensSchedule } from "@/lib/lens/schedule";
 
 import { baseQuery } from "@/lib/frontend/api/base";
 import type { ProjectStatus, TSeoGoal } from "@/lib/projects/constants";
@@ -232,6 +233,26 @@ export function useDeleteProjectMutation() {
 }
 
 export type { TProjectStatusAction } from "@/lib/projects/project-card-actions.utils";
+
+/** Super admin only. Lens audit frequency for an enrolled project. */
+export function useLensScheduleQuery(projectId: string | null, enabled: boolean) {
+  return useQuery({
+    queryKey: [...projectKeys.all, "lens-schedule", projectId ?? ""] as const,
+    enabled: enabled && Boolean(projectId),
+    queryFn: async () => (await baseQuery.get<TLensSchedule>(`projects/${projectId}/lens/schedule`)).data,
+  });
+}
+
+export function useSetLensFrequencyMutation(projectId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (frequency: TLensFrequency) =>
+      (await baseQuery.put<TLensSchedule>(`projects/${projectId}/lens/schedule`, { frequency })).data,
+    onSuccess: (data) => {
+      queryClient.setQueryData([...projectKeys.all, "lens-schedule", projectId] as const, data);
+    },
+  });
+}
 
 export type TEnrollProjectInLensResponse = {
   lensEnrolled: boolean;

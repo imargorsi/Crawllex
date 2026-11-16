@@ -28,6 +28,11 @@ export async function lensPost<T>(path: string, body: Record<string, unknown>): 
   return readJson<T>(await lensRequest(path, { method: "POST", body }));
 }
 
+/** PUT a JSON body to the Lens local API and read the JSON reply. Used for the audit schedule. */
+export async function lensPut<T>(path: string, body: Record<string, unknown>): Promise<T> {
+  return readJson<T>(await lensRequest(path, { method: "PUT", body }));
+}
+
 /** Cloudflare Access service token headers. Empty when not configured (local loopback). Never logged. */
 function accessServiceHeaders(): Record<string, string> {
   const id = process.env.CF_ACCESS_CLIENT_ID?.trim();
@@ -42,7 +47,7 @@ async function readJson<T>(response: Response): Promise<T> {
   return data as T;
 }
 
-async function lensRequest(path: string, init: { method?: "POST"; body?: Record<string, unknown> } = {}): Promise<Response> {
+async function lensRequest(path: string, init: { method?: "POST" | "PUT"; body?: Record<string, unknown> } = {}): Promise<Response> {
   const config = lensConfig();
   if (!config) throw new LensError("disabled");
 
