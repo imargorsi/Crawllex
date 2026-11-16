@@ -223,6 +223,9 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
   const [open, setOpen] = useState(false);
   const scored = issue.severity !== "advisory";
   const tracking = issue.tracking;
+  const tips = issue.pageSuggestions ?? [];
+  const firstSteps = issue.pageFixSteps?.find((p) => p.steps.length > 0);
+  const multiPage = issue.pages.length > 1;
 
   return (
     <li id={`issue-${issue.id}`} className="flex scroll-mt-24 flex-col gap-6 rounded-3xl border border-border p-5 shadow-(--shadow) sm:p-7 dark:border-text-primary/40">
@@ -275,8 +278,36 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
       <div className={cn("grid gap-4 sm:grid-cols-2", !compact && "xl:grid-cols-4")}>
         <Panel icon={Icons.search} label={t("issueFound")} tone="info">{issue.found}</Panel>
         <Panel icon={Icons.alert} label={t("issueWhy")} tone="warn">{issue.why}</Panel>
-        <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">{issue.fix}</Panel>
-        <Panel icon={Icons.sparkles} label={t("aiSuggestion")} note={t("aiSuggestionNote")}>{issue.aiSuggestion ?? t("aiSuggestionPending")}</Panel>
+        <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">
+          {firstSteps ? (
+            <>
+              {multiPage ? <span className="mb-1.5 block font-mono text-xs text-text-muted">{pathOf(firstSteps.url)}</span> : null}
+              <ol className="flex list-decimal flex-col gap-1.5 ps-4">
+                {firstSteps.steps.map((step, index) => <li key={index}>{step}</li>)}
+              </ol>
+            </>
+          ) : issue.fix}
+        </Panel>
+        <Panel icon={Icons.sparkles} label={t("aiSuggestion")} note={t("aiSuggestionNote")}>
+          {tips.length > 0 ? (
+            <>
+              <ul className="flex flex-col gap-3">
+                {tips.slice(0, 3).map((tip) => (
+                  <li key={tip.url} className="flex flex-col gap-1">
+                    {multiPage ? <span className="font-mono text-xs text-text-muted">{pathOf(tip.url)}</span> : null}
+                    <span>{tip.text}</span>
+                  </li>
+                ))}
+              </ul>
+              {tips.length > 3 ? (
+                <button type="button" onClick={() => onNavigate("pages", { issue: issue.id })} className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline">
+                  {t("viewAllPages")}
+                  <Icons.arrowRight className="size-3.5" aria-hidden />
+                </button>
+              ) : null}
+            </>
+          ) : issue.aiSuggestion ?? t("aiSuggestionPending")}
+        </Panel>
       </div>
 
       <footer className="flex flex-col gap-4 border-t border-border/70 pt-5">
@@ -380,7 +411,7 @@ function Panel({ icon: Icon, label, children, tone = "neutral", note }: {
         </span>
         <span className={cn("text-sm font-semibold", c.label)}>{label}</span>
       </div>
-      <p className="text-sm leading-relaxed text-text-secondary">{children}</p>
+      <div className="text-sm leading-relaxed text-text-secondary">{children}</div>
       {note ? <p className="mt-auto text-xs text-text-muted">{note}</p> : null}
     </div>
   );
@@ -390,3 +421,12 @@ export function severityLabel(severity: TLensSeverity) {
   return severity === "high" ? "severityHigh" : severity === "medium" ? "severityMedium" : "severityAdvisory";
 }
 
+/** Path part of a page URL for compact labels; the full URL when it cannot be parsed. */
+function pathOf(url: string): string {
+  try {
+    const u = new URL(url);
+    return `${u.pathname}${u.search}` || "/";
+  } catch {
+    return url;
+  }
+}
