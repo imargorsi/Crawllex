@@ -13,7 +13,7 @@ Sidebar: **Agents & AI** group (`lib/frontend/layout/sidebar-nav.ts`), with Orie
 - **Approval** no longer enrolls a project. Approval and enrollment are separate steps.
 - **Lens page:** shown only when the project is enrolled (`lensEnrolled` on the project; sidebar and route guard). Also needs `lens.view`.
 - **Later checks:** `lens.run` (restricted, super admin assigns). The Start check button and `POST /api/v1/projects/[id]/lens/runs` require enrollment and `lens.run`.
-- **Scheduled checks** are off by default. Lens schedules still exist in the engine.
+- **Scheduled checks (2026-11-18):** Lens sets a monthly schedule (30 days) on enrollment; the first scheduled audit runs a month after enrollment. Super admins change it in the Agents & AI card ("Audit frequency": Weekly, Twice a month, Monthly; shows the next audit date). Route `GET/PUT /api/v1/projects/[id]/lens/schedule` (super admin, enrolled projects only) calls Lens `GET/PUT /v1/projects/:id/schedule`; mapping in `lib/lens/schedule.ts` (10080 / 21600 / 43200 minutes). Changing it keeps the cadence: last slot plus the new interval.
 
 ## Route and files
 
@@ -98,14 +98,14 @@ The Lens API returns the whole SEO dashboard from `GET /v1/projects/:id/seo` (Le
 - **Score:** model v1 (Lens `src/seo/score.ts`). Per scored rule, weight (high 10, medium 4) x (0.5 + 0.5 x affected/checked) for page rules; full weight for site rules. Total penalty capped at 60, so the floor is 40. Advisory rules never score. No checked pages means no score (shown as "No score yet").
 - **Bands:** below 60 needs attention, 60 to 84 needs work, 85 and above healthy (`scoreBandOf` in `lens-overview.tsx`).
 - **Event labels:** Lens returns event codes (opened, seen, reopened, resolved, fix_failed, verified, not_seen_partial, verification_inconclusive). The UI translates them (`EVENT_LABEL_KEY` in `lens-issues.tsx`).
-- **AI suggestion:** no source yet. Lens returns `aiSuggestion: null`; the panel says "Not generated yet."
+- **AI suggestion (2026-11-16):** written by the local model (`llama-qwen` on logibox) during each audit, before the run is marked complete, for judgment rules only (titles, descriptions, headings, thin content, image alt). Each issue also has `pageSuggestions` `{url, text}[]` and `pageFixSteps` `{url, steps}[]` (rule steps filled with page values, no AI). How To Fix shows the first page's numbered steps; AI Suggestion shows up to 3 page tips. AI down or over its 10-minute budget: audit still completes, panel says "Not generated yet." Design: Lens `docs/superpowers/specs/2026-11-16-ai-suggestions-design.md`.
 - **Removed (no source):** effort and the old action text. Priority table shows the catalog fix text.
 
 ## Not done yet (tracked, not hidden)
 
 - Recent activity and Coverage & trends: removed from Overview. Owner decides whether they return and where.
 - Uptime and incidents: demo data (`lens.demo.ts`) until the uptime phase.
-- AI suggestion source: not decided. Panel shows "Not generated yet."
+- AI suggestion source: local model on logibox (see above).
 - Score numbers: formula implemented in Lens (model v1). Tune on Gate 1 data before release.
 - Tier and severity changes: decided (crawllex-lens `docs/SEO-RULES.md`). Re-audit of the Gate 1 site required before the change ships.
 - Penalty breakdown view on scan history (stored in the snapshot once the snapshot change lands).
