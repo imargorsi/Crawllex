@@ -79,7 +79,7 @@ Example: `/lens?view=seo&type=technical&severity=high` opens SEO Health, Technic
 - Uptime is a separate monitor event stream. Running or re-running an SEO check does not change uptime figures, incidents, or the daily bars.
 - Uptime figures never come from SEO scan results.
 
-Implementation status: rules are decided. Retention job and default enrolment are not built yet (the Lens worker probes only projects with a schedule today).
+Implementation status: rules are decided. The Lens worker probes the homepage of every enrolled project every 5 minutes (real data in Lens since 2026-10-28). Not built: 30-day retention job, Crawllex uptime screen on real data (still `lens.demo.ts`), monitoring of active sites that are not enrolled.
 
 ## Rules the UI follows
 
