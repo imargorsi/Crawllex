@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Scan History: every check with its saved score and counts, then the issue log built from each
- * issue's events. Same structure as All Issues, Pages and Uptime. Demo data only.
+ * issue's events. Same structure as All Issues, Pages and Uptime.
  */
 export function LensHistory({ data, t, locale }: { data: TLensDashboard; t: TLensT; locale: string }) {
   const completed = data.runs.filter((r) => r.status === "completed");

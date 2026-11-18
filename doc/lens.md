@@ -1,6 +1,6 @@
 # Lens (SEO health and uptime) — UI reference
 
-Status: SEO data is live from the Lens API (`/v1/projects/:id/seo`). Uptime and incidents are still demo data until the uptime phase.
+Status: SEO data is live from the Lens API (`/v1/projects/:id/seo`). Uptime and incidents are live too (2026-11-18) from `/v1/projects/:id/uptime-dashboard`: rolling 30 days, real homepage checks every 5 minutes, example rows excluded. Lens skips a failed check when its own internet check also fails (monitor offline), so logibox outages are not counted as site downtime; those periods show as days without data.
 Lens service itself: `/mnt/projects/crawllex-lens` (see its `docs/STATUS.md`).
 
 Sidebar: **Agents & AI** group (`lib/frontend/layout/sidebar-nav.ts`), with Oriel. Label key `lens`.
@@ -27,9 +27,9 @@ Sidebar: **Agents & AI** group (`lib/frontend/layout/sidebar-nav.ts`), with Orie
 | Summary bullets | `components/lens/lens-seo-summary.tsx`, `lib/lens/seo-summary.ts` |
 | Uptime bars and legend | `components/lens/lens-charts.tsx` |
 | Contract (Lens to UI) | `features/lens/lens.types.ts` |
-| Data hook | `features/lens/use-lens-dashboard.ts` (SEO from API; uptime from demo) |
+| Data hook | `features/lens/use-lens-dashboard.ts` (SEO and uptime from the Lens API; uptime refreshes every 5 minutes) |
 | Live API | `features/lens/lens.api.ts`, `app/api/v1/projects/[id]/lens/seo/route.ts`, `lib/lens/client.ts`, `lib/lens/config.ts` |
-| Uptime demo (temporary) | `features/lens/lens.demo.ts` |
+| Uptime display helpers | `features/lens/uptime-format.ts` (`EMPTY_UPTIME`, null-safe percent and ms) |
 | Entrance motion | `app/globals.css` (`.lens-rise`, honours reduced motion) |
 | Page wash | `components/ui/page-backdrop.tsx` (shared with Reports detail) |
 
@@ -79,7 +79,7 @@ Example: `/lens?view=seo&type=technical&severity=high` opens SEO Health, Technic
 - Uptime is a separate monitor event stream. Running or re-running an SEO check does not change uptime figures, incidents, or the daily bars.
 - Uptime figures never come from SEO scan results.
 
-Implementation status: rules are decided. The Lens worker probes the homepage of every enrolled project every 5 minutes (real data in Lens since 2026-10-28). Not built: 30-day retention job, Crawllex uptime screen on real data (still `lens.demo.ts`), monitoring of active sites that are not enrolled.
+Implementation status: rules are decided. The Lens worker probes the homepage of every enrolled project every 5 minutes (real data in Lens since 2026-10-28). Not built: 30-day retention job, monitoring of active sites that are not enrolled, alerts (webhook exists but is off; email not built), a second check location.
 
 ## Rules the UI follows
 
@@ -104,7 +104,7 @@ The Lens API returns the whole SEO dashboard from `GET /v1/projects/:id/seo` (Le
 ## Not done yet (tracked, not hidden)
 
 - Recent activity and Coverage & trends: removed from Overview. Owner decides whether they return and where.
-- Uptime and incidents: demo data (`lens.demo.ts`) until the uptime phase.
+- Uptime and incidents: live from Lens. Figures are null (shown as "—") when a project has no checks in the window; status `unknown` when the last check is older than 15 minutes.
 - AI suggestion source: local model on logibox (see above).
 - Score numbers: formula implemented in Lens (model v1). Tune on Gate 1 data before release.
 - Tier and severity changes: decided (crawllex-lens `docs/SEO-RULES.md`). Re-audit of the Gate 1 site required before the change ships.

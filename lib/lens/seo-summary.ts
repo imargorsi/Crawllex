@@ -64,7 +64,7 @@ export function buildSeoSummary(input: {
   checked: number;
   known: number;
   partial: boolean;
-  uptimePercent: number;
+  uptimePercent: number | null;
 }): TSummaryBullet[] {
   const open = input.issues.filter((i) => i.affected > 0);
   const high = open.filter((i) => i.severity === "high");
@@ -84,10 +84,12 @@ export function buildSeoSummary(input: {
 
   if (input.partial) bullets.push({ key: "bullet_partial", vars: { checked: input.checked, known: input.known }, tone: "info" });
 
-  bullets.push(
-    input.uptimePercent >= 99.9
-      ? { key: "bullet_uptime_good", vars: { percent: input.uptimePercent.toFixed(2) }, tone: "good" }
-      : { key: "bullet_uptime_low", vars: { percent: input.uptimePercent.toFixed(2) }, tone: "attention" },
-  );
+  if (input.uptimePercent !== null) {
+    bullets.push(
+      input.uptimePercent >= 99.9
+        ? { key: "bullet_uptime_good", vars: { percent: input.uptimePercent.toFixed(2) }, tone: "good" }
+        : { key: "bullet_uptime_low", vars: { percent: input.uptimePercent.toFixed(2) }, tone: "attention" },
+    );
+  }
   return bullets;
 }

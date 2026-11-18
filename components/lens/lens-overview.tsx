@@ -20,6 +20,7 @@ import type { TLensDashboard, TLensIssue } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { buildSeoSummary } from "@/lib/lens/seo-summary";
 import { cn } from "@/lib/utils";
+import { formatMs, formatPercent } from "@/features/lens/uptime-format";
 
 export type TLensT = TFunction<"translation", "lens">;
 export type TLensTab = "overview" | "seo" | "uptime";
@@ -95,7 +96,7 @@ function UptimeBlock({ data, t }: { data: TLensDashboard; t: TLensT }) {
           {operational ? t("statusOperational") : t("statusDown")}
         </LensPill>
       </div>
-      <span className="text-5xl font-semibold tabular-nums leading-none text-text-primary">{data.uptime.percent.toFixed(2)}%</span>
+      <span className="text-5xl font-semibold tabular-nums leading-none text-text-primary">{formatPercent(data.uptime.percent)}</span>
       <div className="flex h-10 items-end gap-[3px]" aria-hidden>
         {data.uptime.daily.map((d) => {
           const pct = d.uptimePct;
@@ -441,10 +442,10 @@ function UptimeChartCard({ data, t, locale, go }: { data: TLensDashboard; t: TLe
     null,
   );
   const headline = [
-    { label: t("uptimeLabel"), value: `${uptime.percent.toFixed(2)}%`, strong: true },
+    { label: t("uptimeLabel"), value: formatPercent(uptime.percent), strong: true },
     { label: t("totalDowntime"), value: formatMinutes(uptime.totalDowntimeMin, t) },
     { label: t("incidents"), value: String(uptime.incidents) },
-    { label: t("avgResponse"), value: `${uptime.avgResponseMs} ms` },
+    { label: t("avgResponse"), value: formatMs(uptime.avgResponseMs) },
     { label: t("lowestDay"), value: lowest ? t("lowestDayValue", { percent: lowest.uptimePct.toFixed(2), date: formatUptimeDay(lowest.day, locale) }) : "—" },
   ];
   return (

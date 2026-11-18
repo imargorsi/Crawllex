@@ -8,10 +8,11 @@ import { LENS_FLOAT_CARD, LensCardHeader, LensEmpty, LensPill, LensStatTile } fr
 import type { TLensDashboard, TLensIncident } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
+import { formatMs, formatPercent } from "@/features/lens/uptime-format";
 
 /**
  * Uptime Monitoring: same structure as All Issues and Pages. Header, status strip, four figures,
- * the daily chart, then incident history and the selected incident. Demo data only.
+ * the daily chart, then incident history and the selected incident. Real checks from Lens.
  */
 export function LensUptime({ data, t, locale }: { data: TLensDashboard; t: TLensT; locale: string }) {
   const { uptime, incidents } = data;
@@ -49,14 +50,14 @@ export function LensUptime({ data, t, locale }: { data: TLensDashboard; t: TLens
         <LensStatTile
           icon={Icons.checkCircle}
           label={t("uptimeLabel")}
-          value={`${uptime.percent.toFixed(2)}%`}
+          value={formatPercent(uptime.percent)}
           tone="success"
-          trend={uptime.daily.map((d) => d.uptimePct ?? 100)}
+          trend={uptime.daily.flatMap((d) => (d.uptimePct === null ? [] : [d.uptimePct]))}
           caption={t("dailyCaption")}
         />
         <LensStatTile icon={Icons.clock} label={t("totalDowntime")} value={formatMinutes(uptime.totalDowntimeMin, t)} tone="warning" caption={t("last30Days")} />
         <LensStatTile icon={Icons.alert} label={t("incidents")} value={uptime.incidents} tone="danger" caption={t("last30Days")} />
-        <LensStatTile icon={Icons.refresh} label={t("avgResponse")} value={`${uptime.avgResponseMs} ms`} tone="muted" caption={`${t("p95Label")}: ${uptime.p95ResponseMs} ms`} />
+        <LensStatTile icon={Icons.refresh} label={t("avgResponse")} value={formatMs(uptime.avgResponseMs)} tone="muted" caption={`${t("p95Label")}: ${formatMs(uptime.p95ResponseMs)}`} />
       </div>
 
       <div className={cn(LENS_FLOAT_CARD, "gap-5 p-5 sm:p-7")}>

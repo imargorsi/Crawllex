@@ -2,7 +2,7 @@
  * Lens dashboard contract as Crawllex uses it. The SEO part is served by the Lens API
  * (`GET /v1/projects/:id/seo`, crawllex-lens `src/api/lens-view.ts`). Rule text, grouping and
  * severity come from the Lens rule catalog (crawllex-lens `src/seo/catalog.ts`); do not add rule text here.
- * Uptime and incidents are still demo data (see lens.demo.ts) until the uptime phase.
+ * Uptime and incidents come from Lens GET /v1/projects/:id/uptime-dashboard (rolling 30 days, real probes only).
  */
 
 export type TLensSeverity = "high" | "medium" | "advisory";
@@ -131,13 +131,14 @@ export type TLensUptimeDay = { day: string; uptimePct: number | null };
 
 export type TLensUptime = {
   status: "operational" | "down" | "unknown";
-  percent: number;
+  /** Null when there are no checks in the window. */
+  percent: number | null;
   totalDowntimeMin: number;
   incidents: number;
-  avgResponseMs: number;
-  p95ResponseMs: number;
-  lastCheckedAt: string;
-  lastSuccessAt: string;
+  avgResponseMs: number | null;
+  p95ResponseMs: number | null;
+  lastCheckedAt: string | null;
+  lastSuccessAt: string | null;
   daily: TLensUptimeDay[];
   checks: number;
 };

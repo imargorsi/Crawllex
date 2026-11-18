@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useAccessToken } from "@/hooks/use-access-token.hook";
 import { baseQuery } from "@/lib/frontend/api/base";
-import type { TLensSeoDashboard } from "@/features/lens/lens.types";
+import type { TLensIncident, TLensSeoDashboard, TLensUptime } from "@/features/lens/lens.types";
 
 /** Start a manual check. Needs lens.run on the project (restricted: super admin assigns it). The server enforces it. */
 export function useStartLensRunMutation(projectId: string | null | undefined) {
@@ -24,7 +24,24 @@ export function useStartLensRunMutation(projectId: string | null | undefined) {
 export const lensKeys = {
   all: ["lens-api"] as const,
   seo: (projectId: string) => [...lensKeys.all, "seo", projectId] as const,
+  uptime: (projectId: string) => [...lensKeys.all, "uptime", projectId] as const,
 };
+
+/** Uptime screen data from Lens (rolling 30 days, real checks). Refreshes every 5 minutes, the probe interval. */
+export function useLensUptimeQuery(projectId: string | null | undefined) {
+  const token = useAccessToken();
+  return useQuery({
+    queryKey: lensKeys.uptime(projectId ?? ""),
+    queryFn: async () => {
+      const envelope = await baseQuery.get<{ uptime: TLensUptime; incidents: TLensIncident[] }>(`projects/${projectId}/lens/uptime-dashboard`);
+      if (!envelope.data) throw new Error("Lens returned no uptime data.");
+      return envelope.data;
+    },
+    enabled: Boolean(projectId) && Boolean(token),
+    retry: false,
+    refetchInterval: 5 * 60_000,
+  });
+}
 
 /** The SEO dashboard for a project, from the latest Lens data. Read-only. */
 export function useLensSeoQuery(projectId: string | null | undefined) {
