@@ -166,6 +166,7 @@ describe("GET /projects — listProjects", () => {
       websiteUrl: "https://list.example.com",
       status: "pending",
       imageUrl: null,
+      lensEnrolled: false,
       createdByUserId: user._id.toString(),
       owner: {
         id: user._id.toString(),
