@@ -8,6 +8,7 @@ import { TableListSort } from "@/components/table/table-list-sort";
 import type { TLensDashboard, TLensEventCode, TLensIssue, TLensGroup, TLensRuleGroup } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
+import { readablePath, readableUrl, visibleItems } from "@/features/lens/url-display";
 
 export type TSeverityFilter = "all" | TLensSeverity;
 export type TTypeFilter = "all" | TLensGroup;
@@ -227,6 +228,7 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
   const firstSteps = issue.pageFixSteps?.find((p) => p.steps.length > 0);
   const multiPage = issue.pages.length > 1;
   const patterns = issue.patterns ?? [];
+  const pageChips = visibleItems(issue.pages, 8);
 
   return (
     <li id={`issue-${issue.id}`} className="flex scroll-mt-24 flex-col gap-6 rounded-3xl border border-border p-5 shadow-(--shadow) sm:p-7 dark:border-text-primary/40">
@@ -254,17 +256,30 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
           <span className="text-sm font-semibold text-text-primary">{t("issuePages")}</span>
         </div>
         <ul className="flex min-w-0 flex-1 flex-wrap gap-1.5">
-          {issue.pages.map((url) => (
-            <li key={url}>
+          {pageChips.shown.map((url) => (
+            <li key={url} className="min-w-0 max-w-full">
               <button
                 type="button"
+                dir="ltr"
+                title={readableUrl(url)}
                 onClick={() => onNavigate("pages", { page: url, issue: issue.id })}
-                className="rounded-full border border-border px-3 py-1 font-mono text-xs text-text-secondary transition-colors hover:border-brand/50 hover:text-text-primary"
+                className="block max-w-full truncate rounded-full border border-border px-3 py-1 font-mono text-xs text-text-secondary transition-colors hover:border-brand/50 hover:text-text-primary sm:max-w-[22rem]"
               >
-                {url}
+                {readablePath(url)}
               </button>
             </li>
           ))}
+          {pageChips.more > 0 ? (
+            <li>
+              <button
+                type="button"
+                onClick={() => onNavigate("pages", { issue: issue.id })}
+                className="rounded-full border border-border px-3 py-1 text-xs text-text-muted transition-colors hover:border-brand/50 hover:text-text-primary"
+              >
+                +{pageChips.more}
+              </button>
+            </li>
+          ) : null}
         </ul>
         <button
           type="button"
@@ -290,7 +305,7 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
           ) : null}
           <ul className="mt-3 flex flex-wrap gap-1.5">
             {pattern.urls.slice(0, 6).map((url) => (
-              <li key={url} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-text-muted">{pathOf(url)}</li>
+              <li key={url} dir="ltr" title={readableUrl(url)} className="max-w-full truncate rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-text-muted sm:max-w-[22rem]">{readablePath(url)}</li>
             ))}
             {pattern.urls.length > 6 ? <li className="px-1 py-0.5 text-xs text-text-muted">+{pattern.urls.length - 6}</li> : null}
           </ul>
@@ -303,7 +318,7 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
         <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">
           {firstSteps ? (
             <>
-              {multiPage ? <span className="mb-1.5 block font-mono text-xs text-text-muted">{pathOf(firstSteps.url)}</span> : null}
+              {multiPage ? <span dir="ltr" title={readableUrl(firstSteps.url)} className="mb-1.5 block truncate font-mono text-xs text-text-muted">{readablePath(firstSteps.url)}</span> : null}
               <ol className="flex list-decimal flex-col gap-1.5 ps-4">
                 {firstSteps.steps.map((step, index) => <li key={index}>{step}</li>)}
               </ol>
@@ -316,7 +331,7 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
               <ul className="flex flex-col gap-3">
                 {tips.slice(0, 3).map((tip) => (
                   <li key={tip.url} className="flex flex-col gap-1">
-                    {multiPage ? <span className="font-mono text-xs text-text-muted">{pathOf(tip.url)}</span> : null}
+                    {multiPage ? <span dir="ltr" title={readableUrl(tip.url)} className="block truncate font-mono text-xs text-text-muted">{readablePath(tip.url)}</span> : null}
                     <span>{tip.text}</span>
                   </li>
                 ))}
@@ -443,12 +458,3 @@ export function severityLabel(severity: TLensSeverity) {
   return severity === "high" ? "severityHigh" : severity === "medium" ? "severityMedium" : "severityAdvisory";
 }
 
-/** Path part of a page URL for compact labels; the full URL when it cannot be parsed. */
-function pathOf(url: string): string {
-  try {
-    const u = new URL(url);
-    return `${u.pathname}${u.search}` || "/";
-  } catch {
-    return url;
-  }
-}

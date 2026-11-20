@@ -9,6 +9,7 @@ import { TableListSort } from "@/components/table/table-list-sort";
 import type { TLensDashboard, TLensPage } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
+import { readablePath, readableUrl } from "@/features/lens/url-display";
 
 /**
  * Pages: every page with its meta title, status and open-issue counts, sorted by priority.
@@ -80,8 +81,8 @@ export function LensPages({ data, t, locale, issueId, onIssueChange, onOpenPage 
             {rows.map(({ page, counts }) => (
               <tr key={page.url} className="border-b border-border/40 last:border-0 transition-colors hover:bg-bg-hover/40">
                 <td className="px-5 py-3">
-                  <button type="button" onClick={() => onOpenPage(page.url)} className="flex flex-col items-start gap-0.5 text-start">
-                    <span className="font-mono text-xs text-text-muted group-hover:text-brand">{page.url}</span>
+                  <button type="button" onClick={() => onOpenPage(page.url)} className="flex min-w-0 max-w-full flex-col items-start gap-0.5 text-start">
+                    <span dir="ltr" title={readableUrl(page.url)} className="block max-w-[16rem] truncate font-mono text-xs text-text-muted group-hover:text-brand sm:max-w-[28rem]">{readablePath(page.url)}</span>
                     {page.metaTitle ? (
                       <span className="text-sm font-medium text-text-primary hover:text-brand">{page.metaTitle}</span>
                     ) : (

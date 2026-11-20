@@ -7,6 +7,7 @@ import { formatWhen, type TLensT } from "@/components/lens/lens-overview";
 import { LensPill } from "@/components/lens/lens-ui";
 import type { TLensDashboard, TLensPage, TLensRuleResult } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
+import { readableUrl } from "@/features/lens/url-display";
 
 const CHECK_STATE: Record<TLensRuleResult, { tone: "success" | "danger" | "muted"; key: "rsPass" | "rsFinding" | "rsNotEvaluated" }> = {
   pass: { tone: "success", key: "rsPass" },
@@ -55,7 +56,7 @@ export function LensPageSheet({ page, data, t, locale, onClose, onNavigate }: {
         <header className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-3">
             <span className="text-xs font-medium text-text-muted">{t("pageDetailTitle")}</span>
-            <h2 className="break-all font-mono text-lg font-semibold text-text-primary">{page.url}</h2>
+            <h2 dir="ltr" title={readableUrl(page.url)} className="line-clamp-2 break-all font-mono text-lg font-semibold text-text-primary">{readableUrl(page.url)}</h2>
             <div className="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
               <LensPill tone={scanTone}>{scanLabel}</LensPill>
               <span>{t("lastCheckedShort", { time: formatWhen(data.lastCheckAt, locale) })}</span>
