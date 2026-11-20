@@ -328,6 +328,7 @@ export interface Translation {
     colAffected: string;
     colAction: string;
     pagesCount: string;
+    pagesCount_one: string;
     viewUptimeDetails: string;
     colDate: string;
     colDuration: string;
@@ -377,20 +378,31 @@ export interface Translation {
     reason: string;
     summaryHeading: string;
     bullet_high_count: string;
+    bullet_high_count_one: string;
     bullet_clean: string;
     bullet_partial: string;
     bullet_uptime_good: string;
     bullet_uptime_low: string;
     bullet_missing_title: string;
+    bullet_missing_title_one: string;
     bullet_sitemap_noindex: string;
+    bullet_sitemap_noindex_one: string;
     bullet_missing_meta_description: string;
+    bullet_missing_meta_description_one: string;
     bullet_missing_h1: string;
+    bullet_missing_h1_one: string;
     bullet_title_length: string;
+    bullet_title_length_one: string;
     bullet_canonical_conflict: string;
+    bullet_canonical_conflict_one: string;
     bullet_url_readable: string;
+    bullet_url_readable_one: string;
     bullet_generic_high: string;
+    bullet_generic_high_one: string;
     bullet_generic_medium: string;
+    bullet_generic_medium_one: string;
     bullet_generic_advisory: string;
+    bullet_generic_advisory_one: string;
     uptimeLabel: string;
     pointsToHealthy: string;
     stayHealthy: string;
@@ -412,10 +424,14 @@ export interface Translation {
     lastCheckedShort: string;
     coverageBreakdown: string;
     crawlLimitReached: string;
+    someNotChecked: string;
+    coverageCompleteNote: string;
     sortedByPriority: string;
     notEvaluated: string;
     bullet_robots_sitemap_page: string;
+    bullet_robots_sitemap_page_one: string;
     bullet_thin_content: string;
+    bullet_thin_content_one: string;
     filterRule: string;
     filterAll: string;
     typeOnpage: string;
@@ -2332,6 +2348,7 @@ const translation: Translation = {
     colAffected: "Affected Pages",
     colAction: "Recommended Action",
     pagesCount: "{{count}} pages",
+    pagesCount_one: "{{count}} page",
     viewUptimeDetails: "View Uptime Details",
     colDate: "Date",
     colDuration: "Duration",
@@ -2381,20 +2398,31 @@ const translation: Translation = {
     reason: "Reason",
     summaryHeading: "How Your SEO Is Going",
     bullet_high_count: "{{count}} high-impact issues to fix first.",
+    bullet_high_count_one: "{{count}} high-impact issue to fix first.",
     bullet_clean: "No high-impact issues found. Keep monitoring.",
     bullet_partial: "Only {{checked}} of {{known}} pages were checked. This score covers part of the site.",
     bullet_uptime_good: "Site was online {{percent}}% of the last 30 days.",
     bullet_uptime_low: "Uptime was {{percent}}% over 30 days. Check the incidents below.",
     bullet_missing_title: "{{pages}} pages have no title. Search results cannot show what they are about.",
+    bullet_missing_title_one: "{{pages}} page has no title. Search results cannot show what it is about.",
     bullet_sitemap_noindex: "{{pages}} sitemap pages are set to noindex. Search engines are told to skip them.",
+    bullet_sitemap_noindex_one: "{{pages}} sitemap page is set to noindex. Search engines are told to skip it.",
     bullet_missing_meta_description: "{{pages}} pages have no meta description, so search results pick a random snippet.",
+    bullet_missing_meta_description_one: "{{pages}} page has no meta description, so search results pick a random snippet.",
     bullet_missing_h1: "{{pages}} pages have no main heading.",
+    bullet_missing_h1_one: "{{pages}} page has no main heading.",
     bullet_title_length: "{{pages}} titles could be clearer. Advisory only, no score impact.",
+    bullet_title_length_one: "{{pages}} title could be clearer. Advisory only, no score impact.",
     bullet_canonical_conflict: "{{pages}} pages point their canonical tag to another address.",
+    bullet_canonical_conflict_one: "{{pages}} page points its canonical tag to another address.",
     bullet_url_readable: "{{pages}} page addresses are hard to read. Advisory only.",
+    bullet_url_readable_one: "{{pages}} page address is hard to read. Advisory only.",
     bullet_generic_high: "{{pages}} pages affected: {{title}}.",
+    bullet_generic_high_one: "{{pages}} page affected: {{title}}.",
     bullet_generic_medium: "{{pages}} pages affected: {{title}}.",
+    bullet_generic_medium_one: "{{pages}} page affected: {{title}}.",
     bullet_generic_advisory: "{{pages}} pages affected: {{title}}. Advisory only.",
+    bullet_generic_advisory_one: "{{pages}} page affected: {{title}}. Advisory only.",
     uptimeLabel: "Uptime, Last 30 Days",
     pointsToHealthy: "{{points}} points to reach Healthy",
     stayHealthy: "Score is in the Healthy band. Keep it above 85.",
@@ -2416,10 +2444,14 @@ const translation: Translation = {
     lastCheckedShort: "Last checked {{time}}",
     coverageBreakdown: "{{checked}} checked · {{notChecked}} not checked · {{reason}}",
     crawlLimitReached: "Crawl Limit Reached",
+    someNotChecked: "Some pages could not be checked",
+    coverageCompleteNote: "All {{checked}} pages checked. Coverage complete.",
     sortedByPriority: "Sorted by priority: failed pages first.",
     notEvaluated: "Not Evaluated",
     bullet_robots_sitemap_page: "Sitemap pages blocked by robots.txt: {{pages}}. Search engines cannot read them.",
+    bullet_robots_sitemap_page_one: "Sitemap page blocked by robots.txt: {{pages}}. Search engines cannot read it.",
     bullet_thin_content: "{{pages}} pages have very little content. Advisory only.",
+    bullet_thin_content_one: "{{pages}} page has very little content. Advisory only.",
     filterRule: "Rule",
     filterAll: "All",
     typeOnpage: "On-Page",

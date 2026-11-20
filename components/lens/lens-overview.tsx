@@ -41,47 +41,42 @@ const HEALTH_BANDS: TLensBand[] = [
   { from: 85, to: 100, color: "var(--color-success)" },
 ];
 
-const BAND_CHIP: Record<"attention" | "work" | "good", { on: string; off: string }> = {
-  attention: {
-    on: "border-destructive/70 bg-destructive/20 text-destructive",
-    off: "border-destructive/25 bg-destructive/5 text-text-muted",
-  },
-  work: {
-    on: "border-brand/70 bg-brand/20 text-brand",
-    off: "border-brand/25 bg-brand/5 text-text-muted",
-  },
-  good: {
-    on: "border-success/70 bg-success/20 text-success",
-    off: "border-success/25 bg-success/5 text-text-muted",
-  },
-};
 
-/** Band legend under the ring. The active band is strong; the next-target note sits inside its chip. */
+/**
+ * Band scale under the ring: one slim bar split at 60 and 85, a marker at the score, band names under it.
+ * The current band is bold; the others are muted.
+ */
 function HealthLegend({ score, t }: { score: number; t: TLensT }) {
   const band = scoreBandOf(score);
   const items = [
-    { id: "attention", name: t("band_attention"), range: t("bandLegendAttention") },
-    { id: "work", name: t("band_work"), range: t("bandLegendWork") },
-    { id: "good", name: t("band_good"), range: t("bandLegendGood") },
+    { id: "attention", name: t("band_attention"), range: t("bandLegendAttention"), width: 60, color: "bg-destructive/70" },
+    { id: "work", name: t("band_work"), range: t("bandLegendWork"), width: 25, color: "bg-warning/70" },
+    { id: "good", name: t("band_good"), range: t("bandLegendGood"), width: 15, color: "bg-success/80" },
   ] as const;
+  const marker = Math.min(100, Math.max(0, score));
   return (
-    <ul className="grid w-full grid-cols-3 gap-2">
-      {items.map((item) => {
-        const active = band === item.id;
-        return (
-          <li
-            key={item.id}
-            className={cn(
-              "flex flex-col items-center justify-center gap-0.5 rounded-xl border px-2 py-2.5 text-center transition-colors duration-200",
-              active ? BAND_CHIP[item.id].on : BAND_CHIP[item.id].off,
-            )}
-          >
-            <span className="text-sm font-semibold">{item.name}</span>
-            <span className="text-[11px] text-text-secondary">{item.range}</span>
+    <div className="flex w-full flex-col gap-2">
+      <div className="relative h-2 w-full">
+        <div className="flex h-2 w-full overflow-hidden rounded-full">
+          {items.map((item) => (
+            <span key={item.id} className={cn(item.color, band === item.id ? "opacity-100" : "opacity-35")} style={{ width: `${item.width}%` }} />
+          ))}
+        </div>
+        <span
+          className="absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-bg-main bg-text-primary shadow-sm rtl:translate-x-1/2"
+          style={{ insetInlineStart: `${marker}%` }}
+          aria-hidden
+        />
+      </div>
+      <ul className="flex w-full text-[11px] leading-tight">
+        {items.map((item) => (
+          <li key={item.id} className="flex flex-col gap-0.5 text-start" style={{ width: `${item.width}%` }}>
+            <span className={cn("font-semibold", band === item.id ? "text-text-primary" : "text-text-muted")}>{item.name}</span>
+            <span className="text-text-muted">{item.range}</span>
           </li>
-        );
-      })}
-    </ul>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -89,7 +84,7 @@ function HealthLegend({ score, t }: { score: number; t: TLensT }) {
 function UptimeBlock({ data, t }: { data: TLensDashboard; t: TLensT }) {
   const operational = data.uptime.status === "operational";
   return (
-    <div className="flex w-full flex-col gap-4 rounded-2xl border border-border bg-text-primary/[0.04] p-5 shadow-(--shadow) dark:border-text-primary/40 dark:bg-text-primary/[0.06]">
+    <div className="flex w-full flex-col gap-4 rounded-2xl border border-border bg-text-primary/[0.04] p-5 shadow-(--shadow) dark:border-text-primary/25 dark:bg-text-primary/[0.06]">
       <div className="flex items-center justify-between gap-3">
         <span className="text-xs font-medium text-text-secondary">{t("uptimeLabel")}</span>
         <LensPill tone={operational ? "success" : "danger"}>
@@ -172,11 +167,15 @@ export function LensOverview({ data, t, locale, go }: TProps) {
           value={data.seo.checked}
           unit={t("unitKnown", { known: data.seo.known })}
           description={t("linkPagesDesc")}
-          footnote={t("coverageBreakdown", {
-            checked: data.seo.checked,
-            notChecked: Math.max(0, data.seo.known - data.seo.checked),
-            reason: t("crawlLimitReached"),
-          })}
+          footnote={
+            data.seo.partial
+              ? t("coverageBreakdown", {
+                  checked: data.seo.checked,
+                  notChecked: Math.max(0, data.seo.known - data.seo.checked),
+                  reason: data.seo.coverageReason === "cap_reached" ? t("crawlLimitReached") : t("someNotChecked"),
+                })
+              : t("coverageCompleteNote", { checked: data.seo.checked })
+          }
           segments={[
             { value: data.seo.checked, tone: "brand" },
             { value: Math.max(0, data.seo.known - data.seo.checked), tone: "muted" },
@@ -259,12 +258,12 @@ function SeoScoreCard({ data, t }: { data: TLensDashboard; t: TLensT }) {
   );
 }
 
-const TILE_CLASS: Record<TLensTone, string> = {
-  brand: "border-brand/40 bg-brand/10",
-  success: "border-success/40 bg-success/10",
-  warning: "border-warning/40 bg-warning/10",
-  danger: "border-destructive/40 bg-destructive/10",
-  muted: "border-border/70 bg-bg-hover/60",
+const TILE_BAR: Record<TLensTone, string> = {
+  brand: "bg-brand",
+  success: "bg-success",
+  warning: "bg-warning",
+  danger: "bg-destructive",
+  muted: "bg-text-muted",
 };
 const TILE_TEXT: Record<TLensTone, string> = {
   brand: "text-brand",
@@ -275,10 +274,15 @@ const TILE_TEXT: Record<TLensTone, string> = {
 };
 
 function CountTile({ tone, label, value, help }: { tone: TLensTone; label: string; value: number; help: string }) {
+  const zero = value === 0;
   return (
-    <div className={cn("flex flex-col gap-2 rounded-2xl border p-4", TILE_CLASS[tone])}>
-      <span className={cn("text-sm font-semibold", TILE_TEXT[tone])}>{label}</span>
-      <span className="text-4xl font-semibold tabular-nums text-text-primary">{value}</span>
+    <div className="relative flex flex-col gap-2 overflow-hidden rounded-2xl border border-border/70 bg-text-primary/[0.025] p-4 dark:border-text-primary/20">
+      <span className={cn("absolute inset-x-0 top-0 h-0.5", zero ? "bg-border" : TILE_BAR[tone])} aria-hidden />
+      <span className={cn("inline-flex items-center gap-2 text-sm font-semibold", zero ? "text-text-muted" : TILE_TEXT[tone])}>
+        <span className={cn("size-2 rounded-full", zero ? "bg-border" : TILE_BAR[tone])} aria-hidden />
+        {label}
+      </span>
+      <span className={cn("text-4xl font-semibold tabular-nums", zero ? "text-text-muted" : "text-text-primary")}>{value}</span>
       <span className="text-xs leading-relaxed text-text-secondary">{help}</span>
     </div>
   );
@@ -463,7 +467,7 @@ function UptimeChartCard({ data, t, locale, go }: { data: TLensDashboard; t: TLe
         />
       </div>
 
-      <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-border md:grid-cols-5 dark:border-text-primary/40">
+      <div className="grid grid-cols-2 overflow-hidden rounded-2xl border border-border md:grid-cols-5 dark:border-text-primary/25">
         {headline.map((item, i) => (
           <div
             key={item.label}

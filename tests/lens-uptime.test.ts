@@ -29,3 +29,18 @@ describe("Lens uptime display", () => {
     expect(buildSeoSummary({ ...base, uptimePercent: 97 }).some((b) => b.key === "bullet_uptime_low")).toBe(true);
   });
 });
+
+describe("Lens overview wording", () => {
+  it("summary bullets pass count so English can use singular forms", () => {
+    const bullets = buildSeoSummary({ ...base, issues: [{ id: "thin_content_candidate", title: "Thin content", severity: "advisory", affected: 1 }], uptimePercent: null });
+    const thin = bullets.find((b) => (b.vars as { pages?: number }).pages === 1)!;
+    expect(thin.vars).toMatchObject({ pages: 1, count: 1 });
+  });
+
+  it("English has singular forms for every per-page bullet", async () => {
+    const lens = ((await import("@/locales/en")).default as unknown as { lens: Record<string, string> }).lens;
+    for (const key of Object.keys(lens).filter((k) => /^bullet_/.test(k) && !k.endsWith("_one") && /\{\{(pages|count)\}\}/.test(lens[k]!))) {
+      expect(lens[`${key}_one`], key).toBeTruthy();
+    }
+  });
+});

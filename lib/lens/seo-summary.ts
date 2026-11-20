@@ -77,7 +77,7 @@ export function buildSeoSummary(input: {
   for (const issue of sorted) {
     bullets.push({
       key: RULE_KEY[issue.id] ?? GENERIC_KEY[issue.severity],
-      vars: { pages: issue.affected, title: issue.title },
+      vars: { pages: issue.affected, count: issue.affected, title: issue.title },
       tone: SEVERITY_TONE[issue.severity],
     });
   }
