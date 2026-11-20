@@ -5,8 +5,8 @@
 | Item | State |
 |------|-------|
 | `main` | `ef572a1` (2026-11-10): Reports v1 + Next steps, Oriel module, assistant period and greeting fixes. Hostinger deploy of this commit not confirmed. |
-| `dev` | `0614e46`: `main` + 145 dev-only commits, 0 behind `main`. Staging `crawllex-dev` (Vercel). |
-| Dev-only on `dev` | Service tokens; dev plugin zip (`crawllex-dev`); Lens module: `/lens` dashboard on live Lens data, enrollment in Settings > Agents & AI (super admin), restricted `lens.*` / `oriel.*` permissions, page fix steps + AI suggestions (2026-11-16), audit frequency Weekly / Twice a month / Monthly (2026-11-17). Lens uptime screen live from real checks (2026-11-18). |
+| `dev` | `d71f33b` (2026-11-20; checks below were on `0614e46`): `main` + 145 dev-only commits, 0 behind `main`. Staging `crawllex-dev` (Vercel). |
+| Dev-only on `dev` | Service tokens; dev plugin zip (`crawllex-dev`); Lens module: `/lens` dashboard on live Lens data, enrollment in Settings > Agents & AI (super admin), restricted `lens.*` / `oriel.*` permissions, page fix steps + AI suggestions (2026-11-16), audit frequency Weekly / Twice a month / Monthly (2026-11-17). Lens uptime screen live from real checks (2026-11-18). Shared-cause panel and 100 pages per audit (2026-11-20). |
 | Lens service | `/mnt/projects/crawllex-lens` `main`, runs on logibox, reached at `lens.logicalcreations.cloud` (Cloudflare Access). Staging only: production (Hostinger) has no Lens. See `doc/lens.md`. |
 | Checks (dev, 2026-11-18) | `tsc` clean. Tests: full suite 1229/1230 on `718197b`; the one failure (`projects-list` expected object missing `lensEnrolled`) fixed in `0614e46`. Lint: 62 problems (20 errors, 42 warnings), mostly React-compiler rules (`set-state-in-effect`). |
 | Not in `dev` | `client-onboarding` (parked), `feature/oriel-retrieval`, `feature/logibox-llm`, `feature/service-tokens` (cherry-picked earlier), `feature/report-next-steps-dashboard`, `fix/patch-vulnerabilities-*`. |
