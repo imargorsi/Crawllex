@@ -28,7 +28,7 @@ be revoked at any time.
 | Environment | `crawllex-dev` Vercel project, Production target (crawllex-dev.vercel.app). Not Preview |
 | Flag | `CRAWLEX_SERVICE_TOKENS_ENABLED=true` (Vercel Production, `.env.local`) |
 | Service user | `crawllex-lens@logicalcreations.net` (no password, email verified, `accountSource: admin`) |
-| Project access | AR GORSI, id `6a901ebe9b0f0864d8c1e763`, role `project_user` (`analytics.view`, `leads.view`, `leads.export`) |
+| Project access | AR GORSI `6a901ebe9b0f0864d8c1e763` and Wafaiyah Contractor (test site) `6afffe5883921d8222198e1e` (added 2026-11-20), role `project_user` (`analytics.view`, `leads.view`, `leads.export`). Lens enrollment does not add this membership yet: add it for every newly enrolled project |
 | Token | Issued 2026-10-19, token id `6ad61112d38e0c470618a847`. Plaintext lives only in `~/.config/crawllex/lens-service-token` (0600) and in Lens's server env |
 | Verified | 200 on `/projects`, `/projects/<id>`, `analytics/overview`, `leads`. 401 without a token and 401 on crawllex.com |
 
