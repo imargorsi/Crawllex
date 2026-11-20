@@ -12,7 +12,7 @@
 | Not in `dev` | `client-onboarding` (parked), `feature/oriel-retrieval`, `feature/logibox-llm`, `feature/service-tokens` (cherry-picked earlier), `feature/report-next-steps-dashboard`, `fix/patch-vulnerabilities-*`. |
 | Checkouts | Main repo `/mnt/projects/Crawllex` on `feature/lens-schedule` (same tree as `dev`); `dev` in worktree `/mnt/projects/Crawllex-client-reports`. |
 
-Lens open work: uptime alerts and a second check location, production rollout decision, Arabic review of Lens strings, reader-focused AI tips for article/book pages (owner: later).
+Lens next plan (owner 2026-11-20, not started): one-click fixes through the WordPress plugin, Rank Math first; see Lens repo `docs/NEXT-ONE-CLICK-FIXES.md` (needs a decision on AGENTS.md rule 13, drafts only). Lens open work: uptime alerts and a second check location, production rollout decision, Arabic review of Lens strings, reader-focused AI tips for article/book pages (owner: later).
 
 ## Earlier notes
 
