@@ -466,6 +466,9 @@ export interface Translation {
     otherPages: string;
     copy: string;
     copied: string;
+    sharedCauseTitle: string;
+    sharedCauseSub: string;
+    homepage: string;
     aiSuggestionPending: string;
     verifyLabel: string;
     noScore: string;
@@ -2467,6 +2470,9 @@ const translation: Translation = {
     otherPages: "Other pages",
     copy: "Copy",
     copied: "Copied",
+    sharedCauseTitle: "pages share one cause: {{label}}",
+    sharedCauseSub: "One change fixes all of them.",
+    homepage: "Homepage",
     aiSuggestionPending: "Not generated yet.",
     verifyLabel: "How To Verify",
     noScore: "No score yet. Run a check to get a score.",

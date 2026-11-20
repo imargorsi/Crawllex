@@ -52,6 +52,23 @@ const RULE_LABEL_KEY: Record<TLensRuleGroup, "ruleTitles" | "ruleDescriptions" |
 const RULE_ORDER: TLensRuleGroup[] = ["titles", "descriptions", "headings", "content", "images", "indexing", "robots", "urls", "links", "structured"];
 
 
+const SEVERITY_TILE: Record<TLensSeverity, string> = {
+  high: "bg-destructive/12 text-destructive ring-1 ring-destructive/25",
+  medium: "bg-warning/12 text-warning ring-1 ring-warning/25",
+  advisory: "bg-status-invited/12 text-status-invited ring-1 ring-status-invited/25",
+};
+
+/** Monospace only for real paths; words such as "Homepage" use the body font. */
+function labelFont(label: string | null): string {
+  return label?.startsWith("/") ? "font-mono" : "font-sans font-medium";
+}
+
+/** Short page label: "Homepage" for the site root, otherwise the decoded path. */
+function pageLabel(url: string, t: TLensT): string {
+  const path = readablePath(url);
+  return path === "/" ? t("homepage") : path;
+}
+
 function formatDay(iso: string, locale: string) {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
 }
@@ -230,19 +247,22 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
         ? [{ key: p.key, label: t("patternPages", { count: p.count, label: p.kind === "section" ? readablePath(p.label) : p.label.trim() }), text: p.aiSuggestion }]
         : [],
     ),
-    ...tips.map((tip) => ({ key: tip.url, label: multiPage ? readablePath(tip.url) : null, title: readableUrl(tip.url), text: tip.text })),
+    ...tips.map((tip) => ({ key: tip.url, label: multiPage ? pageLabel(tip.url, t) : null, title: readableUrl(tip.url), text: tip.text })),
   ];
 
   return (
-    <li id={`issue-${issue.id}`} className="flex scroll-mt-24 flex-col gap-6 rounded-3xl border border-border p-5 shadow-(--shadow) sm:p-7 dark:border-text-primary/40">
+    <li id={`issue-${issue.id}`} className="flex scroll-mt-24 flex-col gap-6 rounded-3xl border border-border/80 bg-bg-card/40 p-5 shadow-(--shadow) sm:p-7 dark:border-text-primary/25">
       <header className="flex flex-wrap items-start justify-between gap-4">
+        <span className={cn("inline-flex size-12 shrink-0 items-center justify-center rounded-2xl", SEVERITY_TILE[issue.severity])} aria-hidden>
+          {issue.severity === "advisory" ? <Icons.bulb className="size-5" /> : <Icons.alert className="size-5" />}
+        </span>
         <div className="flex min-w-0 flex-1 flex-col gap-2.5">
           <div className="flex flex-wrap items-center gap-2">
             <LensPill tone={severityTone(issue.severity)}>{t(severityLabel(issue.severity))}</LensPill>
             <Tag>{issue.group === "onpage" ? t("typeOnpage") : t("typeTechnical")}</Tag>
             <Tag>{t(RULE_LABEL_KEY[issue.ruleGroup])}</Tag>
           </div>
-          <h3 className="text-xl font-semibold leading-snug text-text-primary">{issue.title}</h3>
+          <h3 className="text-xl font-semibold leading-snug tracking-tight text-text-primary sm:text-2xl">{issue.title}</h3>
           <p className="max-w-3xl text-sm leading-relaxed text-text-secondary">{issue.found}</p>
           <p className="flex max-w-3xl items-start gap-2 text-xs leading-relaxed text-text-muted">
             <Icons.alert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
@@ -260,16 +280,23 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
 
       <section
         aria-label={t("recommendedFix")}
-        className={cn("grid overflow-hidden rounded-2xl border border-brand/40 dark:border-brand/50", !compact && "lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]")}
+        className={cn("grid overflow-hidden rounded-2xl border border-border/70 bg-text-primary/[0.02] dark:border-text-primary/20", !compact && "lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]")}
       >
         <div className="flex min-w-0 flex-col gap-5 p-5 sm:p-6">
           <SectionLabel icon={Icons.bulb} tone="text-brand">{t("recommendedFix")}</SectionLabel>
           {patterns.map((pattern) => (
             <div key={pattern.key} className="flex flex-col gap-3">
-              <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-text-primary">
-                <span className="text-3xl font-semibold tabular-nums leading-none">{pattern.count}</span>
-                <span className="text-sm font-medium">{t("oneChangeFixes", { label: pattern.kind === "section" ? readablePath(pattern.label) : pattern.label.trim() })}</span>
-              </p>
+              <div className="flex items-center gap-4 rounded-xl bg-brand/[0.08] p-3.5 ring-1 ring-brand/25">
+                <span className="inline-flex h-14 min-w-14 shrink-0 items-center justify-center rounded-xl bg-brand px-2 text-2xl font-semibold tabular-nums text-white shadow-sm">
+                  {pattern.count}
+                </span>
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <span className="text-sm font-semibold text-text-primary">
+                    {t("sharedCauseTitle", { label: pattern.kind === "section" ? readablePath(pattern.label) : pattern.label.trim() })}
+                  </span>
+                  <span className="text-xs text-text-secondary">{t("sharedCauseSub")}</span>
+                </div>
+              </div>
               <Steps steps={pattern.fixSteps.slice(1)} />
             </div>
           ))}
@@ -277,8 +304,8 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
             <div className="flex min-w-0 flex-col gap-3">
               {patterns.length > 0 ? <span className="text-xs font-medium text-text-muted">{t("otherPages")}</span> : null}
               {multiPage ? (
-                <span dir="ltr" title={readableUrl(ownSteps.url)} className="block truncate font-mono text-xs text-text-muted">
-                  {readablePath(ownSteps.url)}
+                <span dir="ltr" title={readableUrl(ownSteps.url)} className={cn("inline-flex w-fit max-w-full items-center gap-1.5 truncate rounded-md bg-bg-hover px-2 py-0.5 text-xs text-text-secondary", labelFont(pageLabel(ownSteps.url, t)))}>
+                  {pageLabel(ownSteps.url, t)}
                 </span>
               ) : null}
               <Steps steps={ownSteps.steps} />
@@ -287,7 +314,7 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
           {!ownSteps && patterns.length === 0 ? <p className="text-sm leading-relaxed text-text-secondary">{issue.fix}</p> : null}
         </div>
 
-        <aside className={cn("flex min-w-0 flex-col gap-3 border-t border-border/70 bg-text-primary/[0.03] p-5 sm:p-6 dark:border-text-primary/25", !compact && "lg:border-s lg:border-t-0")}>
+        <aside className={cn("flex min-w-0 flex-col gap-3 border-t border-border/70 bg-text-primary/[0.035] p-5 sm:p-6 dark:border-text-primary/20", !compact && "lg:border-s lg:border-t-0")}>
           <SectionLabel icon={Icons.sparkles} tone="text-text-secondary">{t("aiSuggestion")}</SectionLabel>
           {aiItems.length > 0 ? (
             <ul className="flex flex-col gap-3">
@@ -318,9 +345,9 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
                 dir="ltr"
                 title={readableUrl(url)}
                 onClick={() => onNavigate("pages", { page: url, issue: issue.id })}
-                className="block max-w-full truncate rounded-full border border-border px-3 py-1 font-mono text-xs text-text-secondary transition-colors hover:border-brand/50 hover:text-text-primary sm:max-w-[22rem]"
+                className={cn("block max-w-full truncate rounded-full border border-border px-3 py-1 text-xs text-text-secondary transition-colors hover:border-brand/50 hover:text-text-primary sm:max-w-[22rem]", labelFont(pageLabel(url, t)))}
               >
-                {readablePath(url)}
+                {pageLabel(url, t)}
               </button>
             </li>
           ))}
@@ -445,13 +472,14 @@ function SectionLabel({ icon: Icon, tone, children }: { icon: typeof Icons.alert
 function Steps({ steps }: { steps: string[] }) {
   if (steps.length === 0) return null;
   return (
-    <ol className="flex flex-col gap-2.5">
+    <ol className="flex flex-col">
       {steps.map((step, index) => (
-        <li key={index} className="flex items-start gap-3 text-sm leading-relaxed text-text-secondary">
-          <span className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-brand/15 text-[11px] font-semibold tabular-nums text-brand">
+        <li key={index} className="relative flex items-start gap-3 pb-3.5 text-sm leading-relaxed text-text-secondary last:pb-0">
+          {index < steps.length - 1 ? <span className="absolute start-[11px] top-7 bottom-0 w-px bg-border" aria-hidden /> : null}
+          <span className="relative mt-0.5 inline-flex size-6 shrink-0 items-center justify-center rounded-full border border-brand/40 bg-brand/10 text-[11px] font-semibold tabular-nums text-brand">
             {index + 1}
           </span>
-          <span className="min-w-0">{step}</span>
+          <span className="min-w-0 pt-0.5">{step}</span>
         </li>
       ))}
     </ol>
@@ -470,11 +498,11 @@ function AiTip({ label, title, text, t }: { label: string | null; title?: string
   return (
     <li className="flex min-w-0 flex-col gap-1.5">
       {label ? (
-        <span dir="ltr" title={title} className="block truncate font-mono text-xs text-text-muted">
+        <span dir="ltr" title={title} className={cn("block truncate text-xs text-text-muted", labelFont(label))}>
           {label}
         </span>
       ) : null}
-      <div className="group relative rounded-xl border border-border bg-bg-card/60 p-3 pe-10 text-sm leading-relaxed text-text-primary dark:border-text-primary/25">
+      <div className="group relative rounded-xl border-s-2 border-brand/70 bg-bg-card/80 p-3.5 pe-11 text-sm leading-relaxed text-text-primary shadow-sm ring-1 ring-border/60">
         {text}
         <button
           type="button"

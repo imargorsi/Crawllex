@@ -29,7 +29,8 @@ describe("Lens issue card", () => {
       pageSuggestions: [{ url: "https://x.example/about", text: "Expand the about page." }],
     });
     expect(html).toContain("recommendedFix");
-    expect(html).toContain("oneChangeFixes:/books/");
+    expect(html).toContain("sharedCauseTitle:/books/");
+    expect(html).toContain("sharedCauseSub");
     expect(html).toContain("Expand the template.");
     expect(html).toContain("Add a summary block.");
     expect(html).toContain("otherPages");
