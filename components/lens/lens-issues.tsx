@@ -51,12 +51,6 @@ const RULE_LABEL_KEY: Record<TLensRuleGroup, "ruleTitles" | "ruleDescriptions" |
 
 const RULE_ORDER: TLensRuleGroup[] = ["titles", "descriptions", "headings", "content", "images", "indexing", "robots", "urls", "links", "structured"];
 
-const PANEL_TONE = {
-  neutral: { box: "border-border bg-text-primary/[0.03] dark:border-text-primary/35", well: "bg-bg-hover", icon: "text-text-secondary", label: "text-text-primary" },
-  info: { box: "border-status-invited/40 bg-status-invited/[0.06]", well: "bg-status-invited/15", icon: "text-status-invited", label: "text-status-invited" },
-  warn: { box: "border-warning/40 bg-warning/[0.06]", well: "bg-warning/15", icon: "text-warning", label: "text-warning" },
-  brand: { box: "border-brand/50 bg-brand/[0.07]", well: "bg-brand/20", icon: "text-brand", label: "text-brand" },
-} as const;
 
 function formatDay(iso: string, locale: string) {
   return new Date(`${iso}T00:00:00Z`).toLocaleDateString(locale, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
@@ -225,21 +219,37 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
   const scored = issue.severity !== "advisory";
   const tracking = issue.tracking;
   const tips = issue.pageSuggestions ?? [];
-  const firstSteps = issue.pageFixSteps?.find((p) => p.steps.length > 0);
   const multiPage = issue.pages.length > 1;
   const patterns = issue.patterns ?? [];
   const pageChips = visibleItems(issue.pages, 8);
+  const inPattern = new Set(patterns.flatMap((p) => p.urls));
+  const ownSteps = issue.pageFixSteps?.find((p) => p.steps.length > 0 && !inPattern.has(p.url));
+  const aiItems: { key: string; label: string | null; title?: string; text: string }[] = [
+    ...patterns.flatMap((p) =>
+      p.aiSuggestion
+        ? [{ key: p.key, label: t("patternPages", { count: p.count, label: p.kind === "section" ? readablePath(p.label) : p.label.trim() }), text: p.aiSuggestion }]
+        : [],
+    ),
+    ...tips.map((tip) => ({ key: tip.url, label: multiPage ? readablePath(tip.url) : null, title: readableUrl(tip.url), text: tip.text })),
+  ];
 
   return (
     <li id={`issue-${issue.id}`} className="flex scroll-mt-24 flex-col gap-6 rounded-3xl border border-border p-5 shadow-(--shadow) sm:p-7 dark:border-text-primary/40">
       <header className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-3">
+        <div className="flex min-w-0 flex-1 flex-col gap-2.5">
           <div className="flex flex-wrap items-center gap-2">
             <LensPill tone={severityTone(issue.severity)}>{t(severityLabel(issue.severity))}</LensPill>
             <Tag>{issue.group === "onpage" ? t("typeOnpage") : t("typeTechnical")}</Tag>
             <Tag>{t(RULE_LABEL_KEY[issue.ruleGroup])}</Tag>
           </div>
           <h3 className="text-xl font-semibold leading-snug text-text-primary">{issue.title}</h3>
+          <p className="max-w-3xl text-sm leading-relaxed text-text-secondary">{issue.found}</p>
+          <p className="flex max-w-3xl items-start gap-2 text-xs leading-relaxed text-text-muted">
+            <Icons.alert className="mt-0.5 size-3.5 shrink-0" aria-hidden />
+            <span>
+              <span className="font-medium text-text-secondary">{t("issueWhy")}:</span> {issue.why}
+            </span>
+          </p>
         </div>
         <div className="flex shrink-0 items-center gap-2.5 rounded-full border border-border bg-text-primary/[0.03] px-4 py-2 shadow-sm dark:border-text-primary/35">
           <Icons.globe className="size-4 text-text-muted" aria-hidden />
@@ -248,13 +258,58 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
         </div>
       </header>
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-text-primary/[0.03] p-4 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center dark:border-text-primary/35">
-        <div className="flex min-w-0 shrink-0 items-center gap-3">
-          <span className="inline-flex size-9 items-center justify-center rounded-xl bg-brand/15">
-            <Icons.file className="size-4 text-brand" aria-hidden />
-          </span>
-          <span className="text-sm font-semibold text-text-primary">{t("issuePages")}</span>
+      <section
+        aria-label={t("recommendedFix")}
+        className={cn("grid overflow-hidden rounded-2xl border border-brand/40 dark:border-brand/50", !compact && "lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]")}
+      >
+        <div className="flex min-w-0 flex-col gap-5 p-5 sm:p-6">
+          <SectionLabel icon={Icons.bulb} tone="text-brand">{t("recommendedFix")}</SectionLabel>
+          {patterns.map((pattern) => (
+            <div key={pattern.key} className="flex flex-col gap-3">
+              <p className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-text-primary">
+                <span className="text-3xl font-semibold tabular-nums leading-none">{pattern.count}</span>
+                <span className="text-sm font-medium">{t("oneChangeFixes", { label: pattern.kind === "section" ? readablePath(pattern.label) : pattern.label.trim() })}</span>
+              </p>
+              <Steps steps={pattern.fixSteps.slice(1)} />
+            </div>
+          ))}
+          {ownSteps ? (
+            <div className="flex min-w-0 flex-col gap-3">
+              {patterns.length > 0 ? <span className="text-xs font-medium text-text-muted">{t("otherPages")}</span> : null}
+              {multiPage ? (
+                <span dir="ltr" title={readableUrl(ownSteps.url)} className="block truncate font-mono text-xs text-text-muted">
+                  {readablePath(ownSteps.url)}
+                </span>
+              ) : null}
+              <Steps steps={ownSteps.steps} />
+            </div>
+          ) : null}
+          {!ownSteps && patterns.length === 0 ? <p className="text-sm leading-relaxed text-text-secondary">{issue.fix}</p> : null}
         </div>
+
+        <aside className={cn("flex min-w-0 flex-col gap-3 border-t border-border/70 bg-text-primary/[0.03] p-5 sm:p-6 dark:border-text-primary/25", !compact && "lg:border-s lg:border-t-0")}>
+          <SectionLabel icon={Icons.sparkles} tone="text-text-secondary">{t("aiSuggestion")}</SectionLabel>
+          {aiItems.length > 0 ? (
+            <ul className="flex flex-col gap-3">
+              {aiItems.slice(0, 3).map((item) => (
+                <AiTip key={item.key} label={item.label} title={item.title} text={item.text} t={t} />
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-text-muted">{issue.aiSuggestion ?? t("aiSuggestionPending")}</p>
+          )}
+          {aiItems.length > 3 ? (
+            <button type="button" onClick={() => onNavigate("pages", { issue: issue.id })} className="inline-flex w-fit items-center gap-1 text-sm font-medium text-brand hover:underline">
+              {t("viewAllPages")}
+              <Icons.arrowRight className="size-3.5" aria-hidden />
+            </button>
+          ) : null}
+          <p className="mt-auto pt-1 text-xs text-text-muted">{t("aiSuggestionNote")}</p>
+        </aside>
+      </section>
+
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-3">
+        <span className="shrink-0 text-xs font-medium text-text-muted">{t("issuePages")}</span>
         <ul className="flex min-w-0 flex-1 flex-wrap gap-1.5">
           {pageChips.shown.map((url) => (
             <li key={url} className="min-w-0 max-w-full">
@@ -289,62 +344,6 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
           {t("viewAllPages")}
           <Icons.arrowRight className="size-3.5" aria-hidden />
         </button>
-      </div>
-
-      {patterns.map((pattern) => (
-        <Panel key={pattern.key} icon={Icons.grid} label={t("sharedCause")} tone="brand" note={t("sharedCauseNote")}>
-          <p className="font-medium text-text-primary">{pattern.fixSteps[0]}</p>
-          <ol className="mt-2 flex list-decimal flex-col gap-1.5 ps-4">
-            {pattern.fixSteps.slice(1).map((step, index) => <li key={index}>{step}</li>)}
-          </ol>
-          {pattern.aiSuggestion ? (
-            <p className="mt-3 flex gap-2">
-              <Icons.sparkles className="mt-0.5 size-4 shrink-0 text-text-muted" aria-hidden />
-              <span>{pattern.aiSuggestion}</span>
-            </p>
-          ) : null}
-          <ul className="mt-3 flex flex-wrap gap-1.5">
-            {pattern.urls.slice(0, 6).map((url) => (
-              <li key={url} dir="ltr" title={readableUrl(url)} className="max-w-full truncate rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-text-muted sm:max-w-[22rem]">{readablePath(url)}</li>
-            ))}
-            {pattern.urls.length > 6 ? <li className="px-1 py-0.5 text-xs text-text-muted">+{pattern.urls.length - 6}</li> : null}
-          </ul>
-        </Panel>
-      ))}
-
-      <div className={cn("grid gap-4 sm:grid-cols-2", !compact && "xl:grid-cols-4")}>
-        <Panel icon={Icons.search} label={t("issueFound")} tone="info">{issue.found}</Panel>
-        <Panel icon={Icons.alert} label={t("issueWhy")} tone="warn">{issue.why}</Panel>
-        <Panel icon={Icons.bulb} label={t("howToFix")} tone="brand">
-          {firstSteps ? (
-            <>
-              {multiPage ? <span dir="ltr" title={readableUrl(firstSteps.url)} className="mb-1.5 block truncate font-mono text-xs text-text-muted">{readablePath(firstSteps.url)}</span> : null}
-              <ol className="flex list-decimal flex-col gap-1.5 ps-4">
-                {firstSteps.steps.map((step, index) => <li key={index}>{step}</li>)}
-              </ol>
-            </>
-          ) : issue.fix}
-        </Panel>
-        <Panel icon={Icons.sparkles} label={t("aiSuggestion")} note={t("aiSuggestionNote")}>
-          {tips.length > 0 ? (
-            <>
-              <ul className="flex flex-col gap-3">
-                {tips.slice(0, 3).map((tip) => (
-                  <li key={tip.url} className="flex flex-col gap-1">
-                    {multiPage ? <span dir="ltr" title={readableUrl(tip.url)} className="block truncate font-mono text-xs text-text-muted">{readablePath(tip.url)}</span> : null}
-                    <span>{tip.text}</span>
-                  </li>
-                ))}
-              </ul>
-              {tips.length > 3 ? (
-                <button type="button" onClick={() => onNavigate("pages", { issue: issue.id })} className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline">
-                  {t("viewAllPages")}
-                  <Icons.arrowRight className="size-3.5" aria-hidden />
-                </button>
-              ) : null}
-            </>
-          ) : issue.aiSuggestion ?? t("aiSuggestionPending")}
-        </Panel>
       </div>
 
       <footer className="flex flex-col gap-4 border-t border-border/70 pt-5">
@@ -431,26 +430,63 @@ function Tag({ children }: { children: string }) {
   );
 }
 
-/** Equal-size panel used for the four blocks of an issue. */
-function Panel({ icon: Icon, label, children, tone = "neutral", note }: {
-  icon: typeof Icons.alert;
-  label: string;
-  children: React.ReactNode;
-  tone?: keyof typeof PANEL_TONE;
-  note?: string;
-}) {
-  const c = PANEL_TONE[tone];
+
+/** Small uppercase label that opens a section of the issue card. */
+function SectionLabel({ icon: Icon, tone, children }: { icon: typeof Icons.alert; tone: string; children: string }) {
   return (
-    <div className={cn("flex min-h-[10rem] flex-col gap-3 rounded-2xl border p-4 shadow-sm backdrop-blur-sm sm:p-5", c.box)}>
-      <div className="flex items-center gap-3">
-        <span className={cn("inline-flex size-9 shrink-0 items-center justify-center rounded-xl", c.well)}>
-          <Icon className={cn("size-4", c.icon)} aria-hidden />
+    <span className={cn("inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide", tone)}>
+      <Icon className="size-3.5" aria-hidden />
+      {children}
+    </span>
+  );
+}
+
+/** Numbered fix steps with round step markers. */
+function Steps({ steps }: { steps: string[] }) {
+  if (steps.length === 0) return null;
+  return (
+    <ol className="flex flex-col gap-2.5">
+      {steps.map((step, index) => (
+        <li key={index} className="flex items-start gap-3 text-sm leading-relaxed text-text-secondary">
+          <span className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-brand/15 text-[11px] font-semibold tabular-nums text-brand">
+            {index + 1}
+          </span>
+          <span className="min-w-0">{step}</span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/** One AI suggestion: optional page or pattern label, the text, and a copy button. */
+function AiTip({ label, title, text, t }: { label: string | null; title?: string; text: string; t: TLensT }) {
+  const [copied, setCopied] = useState(false);
+  const copy = () => {
+    void navigator.clipboard?.writeText(text).then(() => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    });
+  };
+  return (
+    <li className="flex min-w-0 flex-col gap-1.5">
+      {label ? (
+        <span dir="ltr" title={title} className="block truncate font-mono text-xs text-text-muted">
+          {label}
         </span>
-        <span className={cn("text-sm font-semibold", c.label)}>{label}</span>
+      ) : null}
+      <div className="group relative rounded-xl border border-border bg-bg-card/60 p-3 pe-10 text-sm leading-relaxed text-text-primary dark:border-text-primary/25">
+        {text}
+        <button
+          type="button"
+          onClick={copy}
+          aria-label={copied ? t("copied") : t("copy")}
+          title={copied ? t("copied") : t("copy")}
+          className="absolute end-2 top-2 inline-flex size-7 items-center justify-center rounded-lg text-text-muted transition-colors hover:bg-bg-hover hover:text-text-primary"
+        >
+          {copied ? <Icons.checkCircle className="size-4 text-success" aria-hidden /> : <Icons.copy className="size-4" aria-hidden />}
+        </button>
       </div>
-      <div className="text-sm leading-relaxed text-text-secondary">{children}</div>
-      {note ? <p className="mt-auto text-xs text-text-muted">{note}</p> : null}
-    </div>
+    </li>
   );
 }
 

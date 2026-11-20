@@ -460,6 +460,12 @@ export interface Translation {
     aiSuggestionNote: string;
     sharedCause: string;
     sharedCauseNote: string;
+    recommendedFix: string;
+    oneChangeFixes: string;
+    patternPages: string;
+    otherPages: string;
+    copy: string;
+    copied: string;
     aiSuggestionPending: string;
     verifyLabel: string;
     noScore: string;
@@ -2455,6 +2461,12 @@ const translation: Translation = {
     aiSuggestionNote: "Suggested by AI. Review before you apply it.",
     sharedCause: "Shared cause: fix once",
     sharedCauseNote: "These pages have the same cause. One change fixes all of them.",
+    recommendedFix: "Recommended fix",
+    oneChangeFixes: "pages share one cause ({{label}}). One change fixes all of them.",
+    patternPages: "{{count}} pages · {{label}}",
+    otherPages: "Other pages",
+    copy: "Copy",
+    copied: "Copied",
     aiSuggestionPending: "Not generated yet.",
     verifyLabel: "How To Verify",
     noScore: "No score yet. Run a check to get a score.",
