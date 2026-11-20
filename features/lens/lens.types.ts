@@ -58,9 +58,21 @@ export type TLensIssue = {
   pageSuggestions?: { url: string; text: string }[];
   /** Rule fix steps per affected page, filled with that page's values. Absent on older Lens APIs. */
   pageFixSteps?: { url: string; steps: string[] }[];
+  /** Shared causes (3+ pages, same section or same title suffix): fix once. Absent on older Lens APIs. */
+  patterns?: TLensPattern[];
   tracking: { firstSeen: string; events: { date: string; event: TLensEventCode }[] };
   /** Page URLs with this issue open. */
   pages: string[];
+};
+
+export type TLensPattern = {
+  kind: "section" | "title_suffix";
+  key: string;
+  label: string;
+  count: number;
+  urls: string[];
+  fixSteps: string[];
+  aiSuggestion: string | null;
 };
 
 export type TLensRuleCheck = {

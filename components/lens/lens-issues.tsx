@@ -226,6 +226,7 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
   const tips = issue.pageSuggestions ?? [];
   const firstSteps = issue.pageFixSteps?.find((p) => p.steps.length > 0);
   const multiPage = issue.pages.length > 1;
+  const patterns = issue.patterns ?? [];
 
   return (
     <li id={`issue-${issue.id}`} className="flex scroll-mt-24 flex-col gap-6 rounded-3xl border border-border p-5 shadow-(--shadow) sm:p-7 dark:border-text-primary/40">
@@ -274,6 +275,27 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
           <Icons.arrowRight className="size-3.5" aria-hidden />
         </button>
       </div>
+
+      {patterns.map((pattern) => (
+        <Panel key={pattern.key} icon={Icons.grid} label={t("sharedCause")} tone="brand" note={t("sharedCauseNote")}>
+          <p className="font-medium text-text-primary">{pattern.fixSteps[0]}</p>
+          <ol className="mt-2 flex list-decimal flex-col gap-1.5 ps-4">
+            {pattern.fixSteps.slice(1).map((step, index) => <li key={index}>{step}</li>)}
+          </ol>
+          {pattern.aiSuggestion ? (
+            <p className="mt-3 flex gap-2">
+              <Icons.sparkles className="mt-0.5 size-4 shrink-0 text-text-muted" aria-hidden />
+              <span>{pattern.aiSuggestion}</span>
+            </p>
+          ) : null}
+          <ul className="mt-3 flex flex-wrap gap-1.5">
+            {pattern.urls.slice(0, 6).map((url) => (
+              <li key={url} className="rounded-full border border-border px-2.5 py-0.5 font-mono text-xs text-text-muted">{pathOf(url)}</li>
+            ))}
+            {pattern.urls.length > 6 ? <li className="px-1 py-0.5 text-xs text-text-muted">+{pattern.urls.length - 6}</li> : null}
+          </ul>
+        </Panel>
+      ))}
 
       <div className={cn("grid gap-4 sm:grid-cols-2", !compact && "xl:grid-cols-4")}>
         <Panel icon={Icons.search} label={t("issueFound")} tone="info">{issue.found}</Panel>

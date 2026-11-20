@@ -101,7 +101,7 @@ function LensAgentCard({ project }: { project: TProjectListItem }) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <LensFixedField icon={Icons.analytics} label={t("uptimeWindowLabel")} value="30" suffix={t("daysUnit")} note={t("fixedNote")} />
-        <LensFixedField icon={Icons.grid} label={t("pagesLimitLabel")} value="30" note={t("fixedNote")} />
+        <LensFixedField icon={Icons.grid} label={t("pagesLimitLabel")} value="100" note={t("fixedNote")} />
       </div>
 
       {message ? <p className="mt-4 type-caption text-success">{message}</p> : null}

@@ -458,6 +458,8 @@ export interface Translation {
     sortSeverity: string;
     sortPages: string;
     aiSuggestionNote: string;
+    sharedCause: string;
+    sharedCauseNote: string;
     aiSuggestionPending: string;
     verifyLabel: string;
     noScore: string;
@@ -2451,6 +2453,8 @@ const translation: Translation = {
     sortSeverity: "Severity",
     sortPages: "Most pages",
     aiSuggestionNote: "Suggested by AI. Review before you apply it.",
+    sharedCause: "Shared cause: fix once",
+    sharedCauseNote: "These pages have the same cause. One change fixes all of them.",
     aiSuggestionPending: "Not generated yet.",
     verifyLabel: "How To Verify",
     noScore: "No score yet. Run a check to get a score.",

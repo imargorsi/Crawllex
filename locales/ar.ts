@@ -460,6 +460,8 @@ const translation: Translation = {
     sortSeverity: "الشدة",
     sortPages: "الأكثر صفحات",
     aiSuggestionNote: "مقترح من الذكاء الاصطناعي. راجعه قبل التطبيق.",
+    sharedCause: "سبب مشترك: إصلاح واحد",
+    sharedCauseNote: "لهذه الصفحات السبب نفسه. تغيير واحد يصلحها جميعًا.",
     aiSuggestionPending: "لم يتم إنشاؤه بعد.",
     verifyLabel: "التحقق",
     noScore: "لا توجد نتيجة بعد. شغّل فحصًا للحصول على نتيجة.",
