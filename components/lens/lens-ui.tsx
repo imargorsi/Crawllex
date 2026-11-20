@@ -334,14 +334,14 @@ export function LensStatTile({ icon: Icon, label, value, tone, trend, caption }:
   return (
     <div className="flex min-h-[9.5rem] flex-col gap-3 overflow-hidden rounded-2xl border border-border bg-text-primary/[0.03] p-4 shadow-sm dark:border-text-primary/35">
       <div className="flex items-center gap-3">
-        <span className={cn("inline-flex size-9 shrink-0 items-center justify-center rounded-xl", c.well)}>
-          <Icon className={cn("size-4", c.icon)} aria-hidden />
+        <span className={cn("inline-flex size-9 shrink-0 items-center justify-center rounded-xl", value === 0 ? "bg-bg-hover" : c.well)}>
+          <Icon className={cn("size-4", value === 0 ? "text-text-muted" : c.icon)} aria-hidden />
         </span>
         <span className="text-sm font-medium text-text-secondary">{label}</span>
       </div>
-      <span className="text-3xl font-semibold tabular-nums leading-none text-text-primary">{value}</span>
+      <span className={cn("text-3xl font-semibold tabular-nums leading-none", value === 0 ? "text-text-muted" : "text-text-primary")}>{value}</span>
       <div className="mt-auto flex flex-col gap-1">
-        {trend ? <LensWave values={trend} color={c.color} /> : null}
+        {trend && trend.length >= 2 ? <LensWave values={trend} color={c.color} /> : null}
         <span className="text-xs text-text-muted">{caption}</span>
       </div>
     </div>

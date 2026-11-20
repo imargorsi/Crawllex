@@ -18,6 +18,7 @@ export function LensUptime({ data, t, locale }: { data: TLensDashboard; t: TLens
   const { uptime, incidents } = data;
   const [selectedId, setSelectedId] = useState<string | null>(incidents[0]?.id ?? null);
   const selected = incidents.find((i) => i.id === selectedId) ?? null;
+  const slow = (uptime.avgResponseMs ?? 0) > 1000;
   const operational = uptime.status === "operational";
 
   return (
@@ -57,7 +58,7 @@ export function LensUptime({ data, t, locale }: { data: TLensDashboard; t: TLens
         />
         <LensStatTile icon={Icons.clock} label={t("totalDowntime")} value={formatMinutes(uptime.totalDowntimeMin, t)} tone="warning" caption={t("last30Days")} />
         <LensStatTile icon={Icons.alert} label={t("incidents")} value={uptime.incidents} tone="danger" caption={t("last30Days")} />
-        <LensStatTile icon={Icons.refresh} label={t("avgResponse")} value={formatMs(uptime.avgResponseMs)} tone="muted" caption={`${t("p95Label")}: ${formatMs(uptime.p95ResponseMs)}`} />
+        <LensStatTile icon={Icons.refresh} label={t("avgResponse")} value={formatMs(uptime.avgResponseMs)} tone={slow ? "warning" : "muted"} caption={slow ? `${t("responseSlowHint")} ${t("p95Label")}: ${formatMs(uptime.p95ResponseMs)}` : `${t("p95Label")}: ${formatMs(uptime.p95ResponseMs)}`} />
       </div>
 
       <div className={cn(LENS_FLOAT_CARD, "gap-5 p-5 sm:p-7")}>

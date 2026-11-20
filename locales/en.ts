@@ -485,6 +485,9 @@ export interface Translation {
     sharedCauseTitle: string;
     sharedCauseSub: string;
     homepage: string;
+    openNowCaption: string;
+    pageUnit: string;
+    responseSlowHint: string;
     aiSuggestionPending: string;
     verifyLabel: string;
     noScore: string;
@@ -2505,6 +2508,9 @@ const translation: Translation = {
     sharedCauseTitle: "pages share one cause: {{label}}",
     sharedCauseSub: "One change fixes all of them.",
     homepage: "Homepage",
+    openNowCaption: "Open now",
+    pageUnit: "page",
+    responseSlowHint: "Slow: aim for under 1,000 ms.",
     aiSuggestionPending: "Not generated yet.",
     verifyLabel: "How To Verify",
     noScore: "No score yet. Run a check to get a score.",

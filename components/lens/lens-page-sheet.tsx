@@ -8,6 +8,7 @@ import { LensPill } from "@/components/lens/lens-ui";
 import type { TLensDashboard, TLensPage, TLensRuleResult } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { readableUrl } from "@/features/lens/url-display";
+import { cn } from "@/lib/utils";
 
 const CHECK_STATE: Record<TLensRuleResult, { tone: "success" | "danger" | "muted"; key: "rsPass" | "rsFinding" | "rsNotEvaluated" }> = {
   pass: { tone: "success", key: "rsPass" },
@@ -19,6 +20,8 @@ const CHECK_STATE: Record<TLensRuleResult, { tone: "success" | "danger" | "muted
  * Page detail sheet: opens from a row in the Pages table (?page=<url>). Shows the page's scan status,
  * counts, every rule check with its result, and the issue cards for this page (the same cards as SEO Health).
  */
+const SHEET_BAR = { danger: "bg-destructive", warning: "bg-warning", muted: "bg-text-muted" } as const;
+
 export function LensPageSheet({ page, data, t, locale, onClose, onNavigate }: {
   page: TLensPage;
   data: TLensDashboard;
@@ -56,7 +59,8 @@ export function LensPageSheet({ page, data, t, locale, onClose, onNavigate }: {
         <header className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 flex-col gap-3">
             <span className="text-xs font-medium text-text-muted">{t("pageDetailTitle")}</span>
-            <h2 dir="ltr" title={readableUrl(page.url)} className="line-clamp-2 break-all font-mono text-lg font-semibold text-text-primary">{readableUrl(page.url)}</h2>
+            <h2 dir="auto" className="text-xl font-semibold leading-snug tracking-tight text-text-primary">{page.metaTitle ?? t("noTitle")}</h2>
+            <span dir="ltr" title={readableUrl(page.url)} className="line-clamp-2 break-all font-mono text-xs text-text-muted">{readableUrl(page.url)}</span>
             <div className="flex flex-wrap items-center gap-3 text-sm text-text-secondary">
               <LensPill tone={scanTone}>{scanLabel}</LensPill>
               <span>{t("lastCheckedShort", { time: formatWhen(data.lastCheckAt, locale) })}</span>
@@ -78,9 +82,13 @@ export function LensPageSheet({ page, data, t, locale, onClose, onNavigate }: {
             { id: "medium", label: t("shouldFixLabel"), value: counts.medium, tone: "warning" },
             { id: "advisory", label: t("worthLookLabel"), value: counts.advisory, tone: "muted" },
           ] as const).map((item) => (
-            <div key={item.id} className="flex flex-col gap-1 rounded-2xl border border-border bg-text-primary/[0.03] p-4 dark:border-text-primary/35">
-              <span className="text-xs text-text-muted">{item.label}</span>
-              <span className="text-2xl font-semibold tabular-nums text-text-primary">{item.value}</span>
+            <div key={item.id} className="relative flex flex-col gap-1 overflow-hidden rounded-2xl border border-border/70 bg-text-primary/[0.025] p-4 dark:border-text-primary/20">
+              <span className={cn("absolute inset-x-0 top-0 h-0.5", item.value ? SHEET_BAR[item.tone] : "bg-border")} aria-hidden />
+              <span className="inline-flex items-center gap-1.5 text-xs text-text-muted">
+                <span className={cn("size-1.5 rounded-full", item.value ? SHEET_BAR[item.tone] : "bg-border")} aria-hidden />
+                {item.label}
+              </span>
+              <span className={cn("text-2xl font-semibold tabular-nums", item.value ? "text-text-primary" : "text-text-muted")}>{item.value}</span>
             </div>
           ))}
         </div>

@@ -82,22 +82,29 @@ export function LensPages({ data, t, locale, issueId, onIssueChange, onOpenPage 
               <tr key={page.url} className="border-b border-border/40 last:border-0 transition-colors hover:bg-bg-hover/40">
                 <td className="px-5 py-3">
                   <button type="button" onClick={() => onOpenPage(page.url)} className="flex min-w-0 max-w-full flex-col items-start gap-0.5 text-start">
-                    <span dir="ltr" title={readableUrl(page.url)} className="block max-w-[16rem] truncate font-mono text-xs text-text-muted group-hover:text-brand sm:max-w-[28rem]">{readablePath(page.url)}</span>
+                    <span dir="ltr" title={readableUrl(page.url)} className={cn("block max-w-[16rem] truncate text-xs text-text-muted group-hover:text-brand sm:max-w-[28rem]", readablePath(page.url) === "/" ? "font-medium" : "font-mono")}>{readablePath(page.url) === "/" ? t("homepage") : readablePath(page.url)}</span>
                     {page.metaTitle ? (
-                      <span className="text-sm font-medium text-text-primary hover:text-brand">{page.metaTitle}</span>
+                      <span dir="auto" className="max-w-[40rem] text-sm font-medium text-text-primary hover:text-brand">{page.metaTitle}</span>
                     ) : (
                       <span className="text-sm font-medium text-destructive">{t("noTitle")}</span>
                     )}
                   </button>
                 </td>
                 <td className="px-3 py-3">
-                  <LensPill tone={page.state === "checked" ? "success" : page.state === "failed" ? "danger" : "muted"}>
-                    {page.state === "checked" ? t("stateChecked") : page.state === "failed" ? t("stateFailed") : t("notEvaluated")}
-                  </LensPill>
+                  {page.state === "checked" ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs text-text-muted">
+                      <span className="size-1.5 rounded-full bg-success" aria-hidden />
+                      {t("stateChecked")}
+                    </span>
+                  ) : (
+                    <LensPill tone={page.state === "failed" ? "danger" : "muted"}>
+                      {page.state === "failed" ? t("stateFailed") : t("notEvaluated")}
+                    </LensPill>
+                  )}
                 </td>
-                <td className="px-3 py-3 text-end tabular-nums text-text-primary">{counts ? counts.high : "—"}</td>
-                <td className="px-3 py-3 text-end tabular-nums text-text-secondary">{counts ? counts.medium : "—"}</td>
-                <td className="px-5 py-3 text-end tabular-nums text-text-secondary">{counts ? counts.advisory : "—"}</td>
+                <td className={cn("px-3 py-3 text-end tabular-nums", countClass(counts?.high, "text-destructive font-semibold"))}>{counts ? counts.high : "—"}</td>
+                <td className={cn("px-3 py-3 text-end tabular-nums", countClass(counts?.medium, "text-warning font-semibold"))}>{counts ? counts.medium : "—"}</td>
+                <td className={cn("px-5 py-3 text-end tabular-nums", countClass(counts?.advisory, "text-text-primary"))}>{counts ? counts.advisory : "—"}</td>
               </tr>
             ))}
           </tbody>
@@ -105,4 +112,9 @@ export function LensPages({ data, t, locale, issueId, onIssueChange, onOpenPage 
       </div>
     </section>
   );
+}
+
+/** Zero and missing counts recede; non-zero counts carry their severity colour. */
+function countClass(value: number | undefined, active: string): string {
+  return value ? active : "text-text-muted/60";
 }

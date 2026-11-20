@@ -8,6 +8,7 @@ import { LENS_FLOAT_CARD, LensEmpty, LensPill, LensStatTile, severityTone, type 
 import type { TLensDashboard, TLensRun } from "@/features/lens/lens.types";
 import { Icons } from "@/lib/frontend/icons/app-icons";
 import { cn } from "@/lib/utils";
+import type { TLensEventCode, TLensIssue } from "@/features/lens/lens.types";
 
 /**
  * Scan History: every check with its saved score and counts, then the issue log built from each
@@ -20,12 +21,21 @@ export function LensHistory({ data, t, locale }: { data: TLensDashboard; t: TLen
   const log = useMemo(
     () =>
       data.issues
-        .flatMap((issue) => issue.tracking.events.map((event) => ({ ...event, issue })))
+        // "Seen again" is recorded on every check for every open issue; the log shows changes only.
+        .flatMap((issue) => issue.tracking.events.filter((event) => event.event !== "seen").map((event) => ({ ...event, issue })))
+        // One row per day, event and issue, with how many pages it covered.
+        .reduce<{ date: string; event: TLensEventCode; issue: TLensIssue; pages: number }[]>((rows, entry) => {
+          const row = rows.find((r) => r.date === entry.date && r.event === entry.event && r.issue.id === entry.issue.id);
+          if (row) row.pages += 1;
+          else rows.push({ date: entry.date, event: entry.event, issue: entry.issue, pages: 1 });
+          return rows;
+        }, [])
         .sort((a, b) => b.date.localeCompare(a.date)),
     [data.issues],
   );
 
-  const fixed = data.issues.filter((i) => i.status === "resolved").length;
+  // Fixes confirmed by complete checks: resolved events across all issues (an issue type can stay open while pages are fixed).
+  const fixed = data.issues.reduce((sum, i) => sum + i.tracking.events.filter((e) => e.event === "resolved").length, 0);
   const open = data.issues.filter((i) => i.status === "open").length;
 
   return (
@@ -94,8 +104,11 @@ export function LensHistory({ data, t, locale }: { data: TLensDashboard; t: TLen
                 {log.map((entry) => (
                   <tr key={`${entry.issue.id}-${entry.date}-${entry.event}`} className="border-b border-border/40 last:border-0">
                     <td className="px-5 py-3 text-text-secondary">{new Date(`${entry.date}T00:00:00Z`).toLocaleDateString(locale, { dateStyle: "medium", timeZone: "UTC" })}</td>
-                    <td className="px-3 py-3 text-text-primary">{t(EVENT_LABEL_KEY[entry.event])}</td>
-                    <td className="px-3 py-3 font-medium text-text-primary">{entry.issue.title}</td>
+                    <td className={cn("px-3 py-3", entry.event === "resolved" || entry.event === "verified" ? "text-success" : entry.event === "reopened" || entry.event === "fix_failed" ? "text-destructive" : "text-text-primary")}>{t(EVENT_LABEL_KEY[entry.event])}</td>
+                    <td className="px-3 py-3 font-medium text-text-primary">
+                      {entry.issue.title}
+                      {entry.pages > 1 ? <span className="ms-2 text-xs font-normal text-text-muted">{t("pagesCount", { count: entry.pages })}</span> : null}
+                    </td>
                     <td className="px-5 py-3">
                       <LensPill tone={severityTone(entry.issue.severity as TLensSeverity)}>{t(severityKey(entry.issue.severity))}</LensPill>
                     </td>

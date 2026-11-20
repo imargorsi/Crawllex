@@ -89,6 +89,16 @@ export function LensIssues({ data, t, locale, filters, onFilterChange, onNavigat
   const { type, severity, rule, sort } = filters;
 
   const open = useMemo(() => data.issues.filter((i) => i.status === "open"), [data.issues]);
+  /** Real trend: open page issues per completed check, oldest first (last 7). */
+  const pageIssueTrend = useMemo(
+    () =>
+      data.runs
+        .filter((r) => r.status === "completed" && r.openIssues !== null)
+        .slice(0, 7)
+        .map((r) => r.openIssues as number)
+        .reverse(),
+    [data.runs],
+  );
 
   const counts = useMemo(
     () => ({
@@ -143,10 +153,10 @@ export function LensIssues({ data, t, locale, filters, onFilterChange, onNavigat
       </div>
 
       <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <LensStatTile icon={Icons.alert} label={t("tileHigh")} value={counts.high} tone="danger" trend={[2, 3, 2, 4, 3, 5, counts.high]} caption={t("trendCaption")} />
-        <LensStatTile icon={Icons.alert} label={t("tileMedium")} value={counts.medium} tone="warning" trend={[4, 6, 5, 7, 6, 8, counts.medium]} caption={t("trendCaption")} />
-        <LensStatTile icon={Icons.sparkles} label={t("tileAdvisory")} value={counts.advisory} tone="muted" trend={[3, 2, 4, 3, 3, 4, counts.advisory]} caption={t("trendCaption")} />
-        <LensStatTile icon={Icons.grid} label={t("pageIssues")} value={counts.pageIssues} tone="brand" trend={[20, 24, 22, 28, 26, 30, counts.pageIssues]} caption={t("trendCaption")} />
+        <LensStatTile icon={Icons.alert} label={t("tileHigh")} value={counts.high} tone="danger" caption={t("openNowCaption")} />
+        <LensStatTile icon={Icons.alert} label={t("tileMedium")} value={counts.medium} tone="warning" caption={t("openNowCaption")} />
+        <LensStatTile icon={Icons.sparkles} label={t("tileAdvisory")} value={counts.advisory} tone="muted" caption={t("openNowCaption")} />
+        <LensStatTile icon={Icons.grid} label={t("pageIssues")} value={counts.pageIssues} tone="brand" trend={pageIssueTrend} caption={pageIssueTrend.length >= 2 ? t("trendCaption") : t("openNowCaption")} />
       </div>
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
@@ -274,7 +284,7 @@ export function IssueCard({ issue, t, locale, onNavigate, compact = false }: { i
         <div className="flex shrink-0 items-center gap-2.5 rounded-full border border-border bg-text-primary/[0.03] px-4 py-2 shadow-sm dark:border-text-primary/35">
           <Icons.globe className="size-4 text-text-muted" aria-hidden />
           <span className="text-xl font-semibold tabular-nums text-text-primary">{issue.affected}</span>
-          <span className="text-sm text-text-muted">{t("pagesUnit")}</span>
+          <span className="text-sm text-text-muted">{issue.affected === 1 ? t("pageUnit") : t("pagesUnit")}</span>
         </div>
       </header>
 
